@@ -962,19 +962,48 @@ export default function RutaPage() {
                       </div>
                     )}
 
-                    <h4 className="font-semibold text-base mb-1">{place.name}</h4>
+                    <h4 className="font-semibold text-base mb-1 line-clamp-1">{place.name}</h4>
                     <div className="flex items-center gap-2 mb-2">
                       <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
                       <span className="font-bold text-sm">{place.rating}</span>
                       <span className="text-xs text-gray-500">{place.review_count} reseñas</span>
                     </div>
-                    <div className="flex flex-wrap gap-2">
-                      <span className="inline-flex items-center px-2 py-1 rounded-md bg-indigo-50 text-indigo-700 text-xs">
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      <span className="inline-flex items-center px-2 py-1 rounded-md bg-indigo-50 text-indigo-700 text-xs font-medium">
                         {place.category}
                       </span>
                       <span className="text-xs text-gray-600">
                         📍 {place.city}, {place.province}
                       </span>
+                    </div>
+
+                    {/* Botones - Igual que en /mapa */}
+                    <div className="flex gap-2 mt-3" onClick={(e) => e.stopPropagation()}>
+                      <Button
+                        onClick={() => {
+                          setSelectedPlace(place);
+                          setMobileView('map');
+                        }}
+                        variant="primary"
+                        size="sm"
+                        className="flex-1"
+                      >
+                        Ver en Mapa
+                      </Button>
+                      <a
+                        href={`https://www.google.com/maps/search/?api=1&query=${place.latitude},${place.longitude}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-1"
+                      >
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full"
+                        >
+                          Google Maps
+                        </Button>
+                      </a>
                     </div>
                   </div>
                 );

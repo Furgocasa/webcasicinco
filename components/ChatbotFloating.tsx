@@ -186,8 +186,8 @@ export default function ChatbotFloating() {
       {/* Panel del chat */}
       {isOpen && (
         <div className="fixed bottom-20 md:bottom-6 right-4 md:right-6 z-40 w-[calc(100vw-2rem)] md:w-96 h-[calc(100vh-10rem)] md:h-[600px] bg-white rounded-2xl shadow-2xl border-2 border-gray-200 flex flex-col overflow-hidden">
-          {/* Header */}
-          <div className="bg-gradient-to-r from-amber-600 to-orange-600 text-white p-4 flex items-center justify-between">
+          {/* Header - STICKY para siempre visible */}
+          <div className="sticky top-0 z-10 bg-gradient-to-r from-amber-600 to-orange-600 text-white p-3 md:p-4 flex items-center justify-between flex-shrink-0">
             <div className="flex items-center gap-3">
               {/* Avatar estilo Tío Viajero */}
               <div className="relative w-12 h-12 flex-shrink-0 rounded-full overflow-hidden bg-sky-100 border-2 border-white shadow-lg">
@@ -227,8 +227,8 @@ export default function ChatbotFloating() {
             </div>
           </div>
 
-          {/* Mensajes */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+          {/* Mensajes - Área con scroll independiente */}
+          <div className="flex-1 overflow-y-auto p-3 md:p-4 space-y-3 md:space-y-4 bg-gray-50">
             {/* Loading historial */}
             {loadingHistory && (
               <div className="flex justify-center py-8">
@@ -357,8 +357,8 @@ export default function ChatbotFloating() {
             )}
           </div>
 
-          {/* Input */}
-          <div className="p-4 bg-white border-t border-gray-200">
+          {/* Input - STICKY abajo, siempre visible */}
+          <div className="sticky bottom-0 p-3 md:p-4 bg-white border-t border-gray-200 flex-shrink-0">
             <div className="flex gap-2">
               <input
                 type="text"
