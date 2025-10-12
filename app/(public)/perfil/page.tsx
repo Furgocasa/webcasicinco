@@ -560,7 +560,7 @@ export default function PerfilPage() {
                                 <span>·</span>
                                 <span>{place.city}</span>
                                 <span>·</span>
-                                <Badge className="text-[10px]" variant="outline">
+                                <Badge className="text-[10px]" variant="default">
                                   {item.count} {item.count === 1 ? 'visita' : 'visitas'}
                                 </Badge>
                               </div>
