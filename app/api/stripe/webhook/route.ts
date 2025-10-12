@@ -3,16 +3,12 @@ import { createClient } from '@/lib/supabase/server';
 import { constructWebhookEvent } from '@/lib/stripe/client';
 import Stripe from 'stripe';
 
-// Disable body parsing para webhooks de Stripe
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
-
 /**
  * Webhook de Stripe
  * Procesa eventos de pago y actualiza la base de datos
+ * 
+ * Nota: El body parsing raw es necesario para verificar la firma de Stripe
+ * Next.js 14 maneja esto automáticamente con request.text()
  */
 export async function POST(request: NextRequest) {
   try {
