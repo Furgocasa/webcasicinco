@@ -1334,7 +1334,7 @@ export default function MapPage() {
           </div>
 
           {/* Mapa */}
-          <div className="relative w-full h-full">
+          <div className="relative w-full h-[90%] md:h-full">
             {/* Loader sobre el mapa mientras se carga Google Maps API */}
             {!isLoaded && (
               <div className="absolute inset-0 bg-gray-100 flex items-center justify-center z-50">
@@ -1427,7 +1427,7 @@ export default function MapPage() {
             )}
 
             {/* Leyenda de Tiers - Expandible en móvil - SOBRE EL MAPA */}
-            <div className="absolute bottom-20 md:bottom-4 left-2 md:left-4 z-10 bg-white/95 backdrop-blur-sm shadow-md rounded-lg border border-gray-200 transition-all duration-300">
+            <div className="absolute bottom-4 left-2 md:left-4 z-10 bg-white/95 backdrop-blur-sm shadow-md rounded-lg border border-gray-200 transition-all duration-300">
               {/* Header con botón expandir/colapsar */}
               <button
                 onClick={() => setIsLegendExpanded(!isLegendExpanded)}
@@ -1504,7 +1504,7 @@ export default function MapPage() {
             </div>
 
             {/* Botón de geolocalización - SOBRE EL MAPA */}
-            <div className="absolute bottom-20 md:bottom-6 left-1/2 transform -translate-x-1/2 z-10">
+            <div className="absolute bottom-4 md:bottom-6 left-1/2 transform -translate-x-1/2 z-10">
               <button
                 onClick={isGeolocationActive ? deactivateGeolocation : activateGeolocation}
                 className={`flex items-center gap-1 md:gap-1.5 px-2.5 py-1.5 md:px-4 md:py-2.5 rounded-full shadow-lg transition-all duration-300 font-medium text-[11px] md:text-sm border ${
