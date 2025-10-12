@@ -113,6 +113,9 @@ export default function MapPage() {
 
   // Ordenamiento de lista
   const [sortBy, setSortBy] = useState<'rating' | 'reviews' | 'proximity'>('reviews');
+  
+  // Control de leyenda expandida (solo móvil)
+  const [isLegendExpanded, setIsLegendExpanded] = useState(false);
 
   // Filtros
   const [filters, setFilters] = useState<PlaceFilters>({
@@ -1330,29 +1333,79 @@ export default function MapPage() {
             </div>
           </div>
 
-          {/* Leyenda de Tiers - Ultra compacta en móvil */}
-          <div className="absolute bottom-4 left-2 md:left-4 z-10 bg-white/95 backdrop-blur-sm shadow-md rounded-lg p-1.5 md:p-3 border border-gray-200 max-w-[100px] md:max-w-[160px]">
-            <h4 className="font-bold text-[9px] md:text-xs mb-1 md:mb-2 text-gray-900 text-center md:text-left">Calidad</h4>
-            <div className="space-y-0.5 md:space-y-1">
-              <div className="flex items-center gap-1 md:gap-1.5">
-                <span className="text-[10px] md:text-sm">💎</span>
-                <span className="font-medium text-gray-900 text-[9px] md:text-xs">Diamante</span>
-              </div>
-              <div className="flex items-center gap-1 md:gap-1.5">
-                <span className="text-[10px] md:text-sm">🏆</span>
-                <span className="font-medium text-gray-900 text-[9px] md:text-xs">Platino</span>
-              </div>
-              <div className="flex items-center gap-1 md:gap-1.5">
-                <span className="text-[10px] md:text-sm">🥇</span>
-                <span className="font-medium text-gray-900 text-[9px] md:text-xs">Oro</span>
-              </div>
-              <div className="flex items-center gap-1 md:gap-1.5">
-                <span className="text-[10px] md:text-sm">🥈</span>
-                <span className="font-medium text-gray-900 text-[9px] md:text-xs">Plata</span>
-              </div>
-              <div className="flex items-center gap-1 md:gap-1.5">
-                <span className="text-[10px] md:text-sm">🥉</span>
-                <span className="font-medium text-gray-900 text-[9px] md:text-xs">Bronce</span>
+          {/* Leyenda de Tiers - Expandible en móvil */}
+          <div className="absolute bottom-4 left-2 md:left-4 z-10 bg-white/95 backdrop-blur-sm shadow-md rounded-lg border border-gray-200 transition-all duration-300">
+            {/* Header con botón expandir/colapsar */}
+            <button
+              onClick={() => setIsLegendExpanded(!isLegendExpanded)}
+              className="w-full flex items-center justify-between p-1.5 md:p-3 hover:bg-gray-50 transition rounded-lg md:cursor-default"
+            >
+              <h4 className="font-bold text-[9px] md:text-xs text-gray-900">
+                {isLegendExpanded ? 'Calidad' : '💎 Calidad'}
+              </h4>
+              {/* Icono solo visible en móvil */}
+              <ChevronDown 
+                className={`h-3 w-3 text-gray-600 transition-transform md:hidden ${
+                  isLegendExpanded ? 'rotate-180' : ''
+                }`}
+              />
+            </button>
+            
+            {/* Contenido expandible */}
+            <div className={`overflow-hidden transition-all duration-300 ${
+              isLegendExpanded ? 'max-h-96 md:max-h-none' : 'max-h-0 md:max-h-none'
+            }`}>
+              <div className="px-1.5 pb-1.5 md:p-3 md:pt-0 space-y-1 md:space-y-1.5">
+                <div className="flex items-start gap-1.5">
+                  <span className="text-sm md:text-base shrink-0">💎</span>
+                  <div className="min-w-0">
+                    <p className="font-semibold text-[10px] md:text-xs text-gray-900 leading-tight">Diamante</p>
+                    <p className="text-[8px] md:text-[10px] text-gray-600 leading-tight mt-0.5">
+                      4.8★+ con 1,000+ reseñas
+                    </p>
+                    <p className="text-[7px] md:text-[9px] text-gray-500 leading-tight">El top 0.1%</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-1.5">
+                  <span className="text-sm md:text-base shrink-0">🏆</span>
+                  <div className="min-w-0">
+                    <p className="font-semibold text-[10px] md:text-xs text-gray-900 leading-tight">Platino</p>
+                    <p className="text-[8px] md:text-[10px] text-gray-600 leading-tight mt-0.5">
+                      4.8★+ con 500+ reseñas
+                    </p>
+                    <p className="text-[7px] md:text-[9px] text-gray-500 leading-tight">Excelencia probada</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-1.5">
+                  <span className="text-sm md:text-base shrink-0">🥇</span>
+                  <div className="min-w-0">
+                    <p className="font-semibold text-[10px] md:text-xs text-gray-900 leading-tight">Oro</p>
+                    <p className="text-[8px] md:text-[10px] text-gray-600 leading-tight mt-0.5">
+                      4.8★+ con 200+ reseñas
+                    </p>
+                    <p className="text-[7px] md:text-[9px] text-gray-500 leading-tight">Muy confiable</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-1.5">
+                  <span className="text-sm md:text-base shrink-0">🥈</span>
+                  <div className="min-w-0">
+                    <p className="font-semibold text-[10px] md:text-xs text-gray-900 leading-tight">Plata</p>
+                    <p className="text-[8px] md:text-[10px] text-gray-600 leading-tight mt-0.5">
+                      4.7★+ con 100+ reseñas
+                    </p>
+                    <p className="text-[7px] md:text-[9px] text-gray-500 leading-tight">Buena opción</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-1.5">
+                  <span className="text-sm md:text-base shrink-0">🥉</span>
+                  <div className="min-w-0">
+                    <p className="font-semibold text-[10px] md:text-xs text-gray-900 leading-tight">Bronce</p>
+                    <p className="text-[8px] md:text-[10px] text-gray-600 leading-tight mt-0.5">
+                      4.7★+ (menos de 100)
+                    </p>
+                    <p className="text-[7px] md:text-[9px] text-gray-500 leading-tight">Promesa emergente</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
