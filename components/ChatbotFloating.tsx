@@ -184,9 +184,9 @@ export default function ChatbotFloating() {
         </button>
       )}
 
-      {/* Panel del chat */}
+      {/* Panel del chat - Entre navbar (64px) y bottom nav (60px) en móvil */}
       {isOpen && (
-        <div className="fixed top-20 md:top-auto bottom-20 md:bottom-6 right-2 md:right-6 left-2 md:left-auto z-40 md:w-96 h-[calc(100vh-10rem)] md:h-[600px] bg-white rounded-2xl shadow-2xl border-2 border-gray-200 flex flex-col overflow-hidden">
+        <div className="fixed top-20 bottom-24 md:top-auto md:bottom-6 right-2 md:right-6 left-2 md:left-auto z-40 md:w-96 md:h-[600px] bg-white rounded-2xl shadow-2xl border-2 border-gray-200 flex flex-col overflow-hidden">
           {/* Header - STICKY para siempre visible */}
           <div className="sticky top-0 z-10 bg-gradient-to-r from-amber-600 to-orange-600 text-white p-3 md:p-4 flex items-center justify-between flex-shrink-0">
             <div className="flex items-center gap-3">
