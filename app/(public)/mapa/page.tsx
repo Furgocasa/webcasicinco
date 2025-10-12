@@ -1940,81 +1940,95 @@ export default function MapPage() {
             </div>
           ) : (
             sortedPlaces.slice(0, 50).map((place) => {
-              const tierInfo = place.quality_tier ? getTierInfo(place.quality_tier) : null;
+              const tier = calculateQualityTier(place.rating, place.review_count || 0);
+              const tierInfo = getTierInfo(tier);
+              
               return (
                 <div
                   key={place.id}
-                  className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm"
+                  className="border rounded-xl p-3 hover:shadow-md transition cursor-pointer bg-white"
+                  onClick={() => {
+                    setSelectedPlace(place);
+                    setMobileView('map');
+                    mapRef.current?.panTo({ lat: place.latitude, lng: place.longitude });
+                    mapRef.current?.setZoom(15);
+                  }}
                 >
-                  {/* Imagen */}
-                  <div className="relative h-40 bg-gray-200">
-                    {place.photos && place.photos.length > 0 ? (
+                  {/* Foto del lugar - Con Google Maps API */}
+                  {place.photos && place.photos.length > 0 && (
+                    <div className="mb-3 -mx-3 -mt-3 relative">
                       <img
-                        src={place.photos[0]}
+                        src={`https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference=${place.photos[0]}&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`}
                         alt={place.name}
-                        className="w-full h-full object-cover"
+                        className="w-full h-32 object-cover rounded-t-xl"
+                        loading="lazy"
                       />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
-                        <MapPin className="h-12 w-12 text-gray-400" />
-                      </div>
-                    )}
-                    {/* Tier badge */}
-                    {tierInfo && (
+                      {/* Tier badge en imagen */}
                       <div className="absolute top-2 right-2">
-                        <div className={`px-2 py-1 rounded-lg text-xs font-bold text-white bg-gradient-to-r ${tierInfo.color}`}>
+                        <div className={`px-2 py-1 rounded-lg text-xs font-bold text-white bg-gradient-to-r ${tierInfo.color} shadow-lg`}>
                           {tierInfo.icon} {tierInfo.name}
                         </div>
                       </div>
-                    )}
+                    </div>
+                  )}
+
+                  {/* Nombre y rating */}
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-base text-gray-900 leading-tight mb-1 line-clamp-1">
+                        {place.name}
+                      </h4>
+                      <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1">
+                          <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                          <span className="font-bold text-sm">{place.rating}</span>
+                        </div>
+                        <span className="text-xs text-gray-500">
+                          {place.review_count} reseñas
+                        </span>
+                      </div>
+                    </div>
                   </div>
 
-                  {/* Contenido */}
-                  <div className="p-3">
-                    <h3 className="font-bold text-base mb-2 line-clamp-1">{place.name}</h3>
-                    
-                    <div className="flex items-center gap-2 mb-2">
-                      <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-                      <span className="font-semibold text-gray-900">{place.rating}</span>
-                      <span className="text-gray-400">·</span>
-                      <span className="text-sm text-gray-600">{place.review_count} reseñas</span>
-                    </div>
-                    
-                    <p className="text-sm text-gray-600 mb-3 line-clamp-1">
-                      {place.city}, {place.province}
-                    </p>
+                  {/* Categoría y ubicación */}
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    <span className="inline-flex items-center px-2 py-1 rounded-md bg-indigo-50 text-indigo-700 text-xs font-medium">
+                      {place.category}
+                    </span>
+                    <span className="text-xs text-gray-600">
+                      📍 {place.city}, {place.province}
+                    </span>
+                  </div>
 
-                    {/* Botones */}
-                    <div className="flex gap-2">
+                  {/* Botones */}
+                  <div className="flex gap-2 mt-3" onClick={(e) => e.stopPropagation()}>
+                    <Button
+                      onClick={() => {
+                        setSelectedPlace(place);
+                        setMobileView('map');
+                        mapRef.current?.panTo({ lat: place.latitude, lng: place.longitude });
+                        mapRef.current?.setZoom(15);
+                      }}
+                      variant="primary"
+                      size="sm"
+                      className="flex-1"
+                    >
+                      Ver en Mapa
+                    </Button>
+                    <a
+                      href={place.google_maps_url || `https://www.google.com/maps/search/?api=1&query=${place.latitude},${place.longitude}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1"
+                    >
                       <Button
-                        onClick={() => {
-                          setSelectedPlace(place);
-                          setMobileView('map');
-                          mapRef.current?.panTo({ lat: place.latitude, lng: place.longitude });
-                          mapRef.current?.setZoom(15);
-                        }}
-                        variant="primary"
+                        variant="outline"
                         size="sm"
-                        className="flex-1"
+                        className="w-full"
                       >
-                        Ver en Mapa
+                        Google Maps
                       </Button>
-                      <a
-                        href={place.google_maps_url || `https://www.google.com/maps/search/?api=1&query=${place.latitude},${place.longitude}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex-1"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="w-full"
-                        >
-                          Google Maps
-                        </Button>
-                      </a>
-                    </div>
+                    </a>
                   </div>
                 </div>
               );

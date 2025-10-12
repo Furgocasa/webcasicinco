@@ -15,6 +15,8 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import BottomNavigation from '@/components/mobile/BottomNavigation';
+import BottomSheet from '@/components/mobile/BottomSheet';
 import { calculateQualityTier, getTierInfo } from '@/lib/utils/tier-calculator';
 import { toast } from 'sonner';
 
@@ -71,6 +73,9 @@ export default function RutaPage() {
   const [placesNearRoute, setPlacesNearRoute] = useState<Place[]>([]);
   const [loadingPlaces, setLoadingPlaces] = useState(false);
   const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
+  
+  // Vista móvil: 'form', 'map', 'list'
+  const [mobileView, setMobileView] = useState<'form' | 'map' | 'list'>('form');
 
   // Info de la ruta
   const [routeInfo, setRouteInfo] = useState<{
@@ -217,10 +222,15 @@ export default function RutaPage() {
     );
   }
 
+  // Handler móvil
+  const handleMobileViewChange = (view: 'form' | 'map' | 'list') => {
+    setMobileView(view);
+  };
+
   return (
-    <div className="flex flex-col" style={{ height: 'calc(100vh - 64px)' }}>
-      {/* HEADER */}
-      <div className="bg-white border-b border-gray-200 p-4">
+    <div className="flex flex-col h-[calc(100vh-64px)]">
+      {/* HEADER - Solo desktop */}
+      <div className="hidden md:block bg-white border-b border-gray-200 p-4">
         <div className="container mx-auto">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">

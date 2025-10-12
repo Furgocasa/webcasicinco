@@ -168,29 +168,33 @@ export default function Header() {
           </button>
         </div>
 
-        {/* Mobile Menu - Slide down animation */}
+        {/* Mobile Menu Overlay */}
         {isMenuOpen && (
-          <div className="md:hidden py-4 border-t animate-slide-down">
-            <div className="flex flex-col space-y-3">
-              <Link 
-                href="/mapa" 
-                className="text-gray-700 hover:text-indigo-600 transition"
-              >
-                Mapa
-              </Link>
-              <Link 
-                href="/ruta" 
-                className="text-gray-700 hover:text-indigo-600 transition"
-              >
-                Planificar Ruta
-              </Link>
-              <Link 
-                href="/listas" 
-                className="text-gray-700 hover:text-indigo-600 transition"
-              >
-                Listas
-              </Link>
-              <div className="pt-4 border-t flex flex-col space-y-2">
+          <>
+            {/* Fondo oscuro */}
+            <div 
+              className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+              onClick={() => setIsMenuOpen(false)}
+            />
+            
+            {/* Menú deslizable */}
+            <div className="fixed top-16 left-0 right-0 bottom-0 bg-white z-50 md:hidden overflow-y-auto animate-slide-down shadow-2xl">
+              <div className="p-6 space-y-4">
+                <Link 
+                  href="/mapa" 
+                  className="block text-lg font-medium text-gray-700 hover:text-indigo-600 transition py-3 border-b"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  🗺️ Mapa
+                </Link>
+                <Link 
+                  href="/ruta" 
+                  className="block text-lg font-medium text-gray-700 hover:text-indigo-600 transition py-3 border-b"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  🧭 Planificar Ruta
+                </Link>
+              <div className="pt-4 mt-4 border-t flex flex-col space-y-3">
                 {loading ? (
                   <div className="flex justify-center">
                     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600"></div>
@@ -199,7 +203,7 @@ export default function Header() {
                   <>
                     {/* Admin link - Solo para admins */}
                     {isAdmin && (
-                      <Link href="/admin/dashboard">
+                      <Link href="/admin/dashboard" onClick={() => setIsMenuOpen(false)}>
                         <Button variant="outline" className="w-full">
                           Panel Admin
                         </Button>
@@ -207,7 +211,7 @@ export default function Header() {
                     )}
 
                     {/* Perfil link - Para TODOS los usuarios */}
-                    <Link href="/perfil">
+                    <Link href="/perfil" onClick={() => setIsMenuOpen(false)}>
                       <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
                         Mi Perfil
                       </Button>
@@ -262,19 +266,20 @@ export default function Header() {
                   </>
                 ) : (
                   <>
-                    <Link href="/login">
+                    <Link href="/login" onClick={() => setIsMenuOpen(false)}>
                       <Button variant="ghost" className="w-full">
                         Iniciar Sesión
                       </Button>
                     </Link>
-                    <Link href="/registro">
+                    <Link href="/registro" onClick={() => setIsMenuOpen(false)}>
                       <Button className="w-full">Registrarse</Button>
                     </Link>
                   </>
                 )}
               </div>
+              </div>
             </div>
-          </div>
+          </>
         )}
       </nav>
     </header>
