@@ -550,6 +550,14 @@ export default function MapPage() {
   useEffect(() => {
     if (isGeolocationActive && !userLocation && typeof window !== 'undefined' && navigator.geolocation) {
       // Si el flag está activo pero no tenemos ubicación, obtenerla automáticamente
+      
+      // Opciones optimizadas para todos los dispositivos
+      const options = {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      };
+      
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const location = {
@@ -557,13 +565,24 @@ export default function MapPage() {
             lng: position.coords.longitude,
           };
           setUserLocation(location);
+          console.log('✅ Ubicación reactivada correctamente');
         },
         (error) => {
           console.error('Error reactivando geolocalización:', error);
-          setGeolocationError('No pudimos obtener tu ubicación');
+          
+          // Mensaje específico según el error
+          let errorMsg = 'No pudimos obtener tu ubicación';
+          if (error.code === error.PERMISSION_DENIED) {
+            errorMsg = 'Permiso de ubicación denegado';
+          } else if (error.code === error.TIMEOUT) {
+            errorMsg = 'Tiempo agotado al obtener ubicación';
+          }
+          
+          setGeolocationError(errorMsg);
           localStorage.setItem('geolocationActive', 'false');
           setIsGeolocationActive(false);
-        }
+        },
+        options
       );
     }
   }, []); // Solo ejecutar una vez al montar el componente
@@ -616,12 +635,29 @@ export default function MapPage() {
 
   // Activar geolocalización
   const activateGeolocation = () => {
+    // Verificar soporte del navegador
     if (!navigator.geolocation) {
       setGeolocationError('Tu navegador no soporta geolocalización');
+      toast.error('Tu navegador no soporta geolocalización');
+      return;
+    }
+
+    // Verificar que estamos en HTTPS (requerido en iOS)
+    if (typeof window !== 'undefined' && window.location.protocol === 'http:' && !window.location.hostname.includes('localhost')) {
+      setGeolocationError('La geolocalización requiere HTTPS');
+      toast.error('La geolocalización requiere una conexión segura (HTTPS)');
       return;
     }
 
     setGeolocationError(null);
+    toast.info('📍 Solicitando tu ubicación...');
+    
+    // Opciones optimizadas para todos los dispositivos, especialmente iOS
+    const options = {
+      enableHighAccuracy: true,  // Máxima precisión (GPS)
+      timeout: 10000,            // 10 segundos timeout (iOS puede ser lento)
+      maximumAge: 0              // No usar caché vieja
+    };
     
     navigator.geolocation.getCurrentPosition(
       (position) => {
@@ -635,17 +671,46 @@ export default function MapPage() {
         // Guardar en localStorage para persistir entre recargas
         localStorage.setItem('geolocationActive', 'true');
         
+        toast.success('✅ Ubicación activada correctamente');
+        
         // NO cambiamos el zoom ni el centro del mapa
         // Solo mostramos el marcador de ubicación
         // La lista se reordenará automáticamente si está ordenada por proximidad
       },
       (error) => {
-        setGeolocationError('No pudimos obtener tu ubicación');
-        console.error('Error de geolocalización:', error);
+        // Mensajes de error específicos según el código
+        let errorMessage = 'No pudimos obtener tu ubicación';
+        
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            errorMessage = 'Permiso denegado. Permite el acceso a tu ubicación en la configuración.';
+            toast.error('❌ Permiso de ubicación denegado');
+            break;
+          case error.POSITION_UNAVAILABLE:
+            errorMessage = 'Ubicación no disponible. Verifica tu conexión GPS.';
+            toast.error('❌ No se pudo determinar tu ubicación');
+            break;
+          case error.TIMEOUT:
+            errorMessage = 'Tiempo agotado. Intenta de nuevo.';
+            toast.error('❌ La solicitud de ubicación tardó demasiado');
+            break;
+          default:
+            errorMessage = 'Error desconocido al obtener ubicación';
+            toast.error('❌ Error al obtener ubicación');
+        }
+        
+        setGeolocationError(errorMessage);
+        console.error('Error de geolocalización:', {
+          code: error.code,
+          message: error.message,
+          userAgent: navigator.userAgent
+        });
+        
         // Si falla, limpiar el flag
         localStorage.setItem('geolocationActive', 'false');
         setIsGeolocationActive(false);
-      }
+      },
+      options // ✅ Pasar opciones optimizadas
     );
   };
 

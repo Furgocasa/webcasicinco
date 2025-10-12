@@ -106,16 +106,26 @@ export default function RutaPage() {
   // Obtener ubicación del usuario al montar el componente
   useEffect(() => {
     if (navigator.geolocation) {
+      // Opciones optimizadas para todos los dispositivos, especialmente iOS
+      const options = {
+        enableHighAccuracy: true,  // Máxima precisión (GPS)
+        timeout: 10000,            // 10 segundos timeout (iOS puede ser lento)
+        maximumAge: 300000         // Aceptar caché de hasta 5 minutos (más rápido)
+      };
+      
       navigator.geolocation.getCurrentPosition(
         (position) => {
           setUserLocation({
             lat: position.coords.latitude,
             lng: position.coords.longitude,
           });
+          console.log('✅ Ubicación obtenida para cálculo de distancias');
         },
         (error) => {
-          console.log('Geolocalización no disponible:', error);
-        }
+          console.log('Geolocalización no disponible:', error.code, error.message);
+          // No mostrar error al usuario aquí (es opcional, no crítico)
+        },
+        options
       );
     }
   }, []);
