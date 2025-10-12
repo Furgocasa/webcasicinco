@@ -1932,7 +1932,7 @@ export default function MapPage() {
             </div>
           ) : (
             sortedPlaces.slice(0, 50).map((place) => {
-              const tierInfo = getTierInfo(place.quality_tier);
+              const tierInfo = place.quality_tier ? getTierInfo(place.quality_tier) : null;
               return (
                 <div
                   key={place.id}
@@ -1952,11 +1952,13 @@ export default function MapPage() {
                       </div>
                     )}
                     {/* Tier badge */}
-                    <div className="absolute top-2 right-2">
-                      <div className={`px-2 py-1 rounded-lg text-xs font-bold text-white ${tierInfo.color}`}>
-                        {tierInfo.icon} {tierInfo.name}
+                    {tierInfo && (
+                      <div className="absolute top-2 right-2">
+                        <div className={`px-2 py-1 rounded-lg text-xs font-bold text-white bg-gradient-to-r ${tierInfo.color}`}>
+                          {tierInfo.icon} {tierInfo.name}
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </div>
 
                   {/* Contenido */}
