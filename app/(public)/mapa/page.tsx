@@ -1333,114 +1333,8 @@ export default function MapPage() {
             </div>
           </div>
 
-          {/* Leyenda de Tiers - Expandible en móvil */}
-          <div className="absolute bottom-4 left-2 md:left-4 z-10 bg-white/95 backdrop-blur-sm shadow-md rounded-lg border border-gray-200 transition-all duration-300">
-            {/* Header con botón expandir/colapsar */}
-            <button
-              onClick={() => setIsLegendExpanded(!isLegendExpanded)}
-              className="w-full flex items-center justify-between p-1.5 md:p-3 hover:bg-gray-50 transition rounded-lg md:cursor-default"
-            >
-              <h4 className="font-bold text-[9px] md:text-xs text-gray-900">
-                {isLegendExpanded ? 'Calidad' : '💎 Calidad'}
-              </h4>
-              {/* Icono solo visible en móvil */}
-              <ChevronDown 
-                className={`h-3 w-3 text-gray-600 transition-transform md:hidden ${
-                  isLegendExpanded ? 'rotate-180' : ''
-                }`}
-              />
-            </button>
-            
-            {/* Contenido expandible */}
-            <div className={`overflow-hidden transition-all duration-300 ${
-              isLegendExpanded ? 'max-h-96 md:max-h-none' : 'max-h-0 md:max-h-none'
-            }`}>
-              <div className="px-1.5 pb-1.5 md:p-3 md:pt-0 space-y-1 md:space-y-1.5">
-                <div className="flex items-start gap-1.5">
-                  <span className="text-sm md:text-base shrink-0">💎</span>
-                  <div className="min-w-0">
-                    <p className="font-semibold text-[10px] md:text-xs text-gray-900 leading-tight">Diamante</p>
-                    <p className="text-[8px] md:text-[10px] text-gray-600 leading-tight mt-0.5">
-                      4.8★+ con 1,000+ reseñas
-                    </p>
-                    <p className="text-[7px] md:text-[9px] text-gray-500 leading-tight">El top 0.1%</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-1.5">
-                  <span className="text-sm md:text-base shrink-0">🏆</span>
-                  <div className="min-w-0">
-                    <p className="font-semibold text-[10px] md:text-xs text-gray-900 leading-tight">Platino</p>
-                    <p className="text-[8px] md:text-[10px] text-gray-600 leading-tight mt-0.5">
-                      4.8★+ con 500+ reseñas
-                    </p>
-                    <p className="text-[7px] md:text-[9px] text-gray-500 leading-tight">Excelencia probada</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-1.5">
-                  <span className="text-sm md:text-base shrink-0">🥇</span>
-                  <div className="min-w-0">
-                    <p className="font-semibold text-[10px] md:text-xs text-gray-900 leading-tight">Oro</p>
-                    <p className="text-[8px] md:text-[10px] text-gray-600 leading-tight mt-0.5">
-                      4.8★+ con 200+ reseñas
-                    </p>
-                    <p className="text-[7px] md:text-[9px] text-gray-500 leading-tight">Muy confiable</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-1.5">
-                  <span className="text-sm md:text-base shrink-0">🥈</span>
-                  <div className="min-w-0">
-                    <p className="font-semibold text-[10px] md:text-xs text-gray-900 leading-tight">Plata</p>
-                    <p className="text-[8px] md:text-[10px] text-gray-600 leading-tight mt-0.5">
-                      4.7★+ con 100+ reseñas
-                    </p>
-                    <p className="text-[7px] md:text-[9px] text-gray-500 leading-tight">Buena opción</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-1.5">
-                  <span className="text-sm md:text-base shrink-0">🥉</span>
-                  <div className="min-w-0">
-                    <p className="font-semibold text-[10px] md:text-xs text-gray-900 leading-tight">Bronce</p>
-                    <p className="text-[8px] md:text-[10px] text-gray-600 leading-tight mt-0.5">
-                      4.7★+ (menos de 100)
-                    </p>
-                    <p className="text-[7px] md:text-[9px] text-gray-500 leading-tight">Promesa emergente</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Botón de geolocalización - Compacto y proporcional */}
-          <div className="absolute bottom-4 md:bottom-6 left-1/2 transform -translate-x-1/2 z-10">
-            <button
-              onClick={isGeolocationActive ? deactivateGeolocation : activateGeolocation}
-              className={`flex items-center gap-1 md:gap-1.5 px-2.5 py-1.5 md:px-4 md:py-2.5 rounded-full shadow-lg transition-all duration-300 font-medium text-[11px] md:text-sm border ${
-                isGeolocationActive
-                  ? 'bg-green-500 text-white border-green-600 hover:bg-green-600'
-                  : 'bg-white/95 backdrop-blur-sm text-gray-700 hover:bg-gray-50 border-gray-300'
-              }`}
-              title={isGeolocationActive ? 'Desactivar ubicación' : 'Activar mi ubicación'}
-            >
-              <MapPin className={`h-3 w-3 md:h-4 md:w-4 ${isGeolocationActive ? 'animate-pulse' : ''}`} />
-              <span className="hidden sm:inline">
-                {isGeolocationActive ? 'Ubicación Activa' : 'Usar mi Ubicación'}
-              </span>
-              <span className="sm:hidden whitespace-nowrap">
-                {isGeolocationActive ? 'GPS ON' : 'GPS'}
-              </span>
-              {isGeolocationActive && (
-                <X className="h-2.5 w-2.5 md:h-3 md:w-3" />
-              )}
-            </button>
-            {geolocationError && (
-              <div className="absolute top-full mt-1 left-1/2 transform -translate-x-1/2 bg-red-50 text-red-600 px-2 py-1 rounded-md shadow-md text-[9px] md:text-xs max-w-[180px] md:max-w-none text-center leading-tight">
-                {geolocationError.split(' - ')[0]}
-              </div>
-            )}
-          </div>
-
           {/* Mapa */}
-          <div className="relative w-full h-[calc(100%-8rem)] md:h-full">
+          <div className="relative w-full h-full">
             {/* Loader sobre el mapa mientras se carga Google Maps API */}
             {!isLoaded && (
               <div className="absolute inset-0 bg-gray-100 flex items-center justify-center z-50">
@@ -1531,6 +1425,112 @@ export default function MapPage() {
 
               </GoogleMap>
             )}
+
+            {/* Leyenda de Tiers - Expandible en móvil - SOBRE EL MAPA */}
+            <div className="absolute bottom-20 md:bottom-4 left-2 md:left-4 z-10 bg-white/95 backdrop-blur-sm shadow-md rounded-lg border border-gray-200 transition-all duration-300">
+              {/* Header con botón expandir/colapsar */}
+              <button
+                onClick={() => setIsLegendExpanded(!isLegendExpanded)}
+                className="w-full flex items-center justify-between p-1.5 md:p-3 hover:bg-gray-50 transition rounded-lg md:cursor-default"
+              >
+                <h4 className="font-bold text-[9px] md:text-xs text-gray-900">
+                  {isLegendExpanded ? 'Calidad' : '💎 Calidad'}
+                </h4>
+                {/* Icono solo visible en móvil */}
+                <ChevronDown 
+                  className={`h-3 w-3 text-gray-600 transition-transform md:hidden ${
+                    isLegendExpanded ? 'rotate-180' : ''
+                  }`}
+                />
+              </button>
+              
+              {/* Contenido expandible */}
+              <div className={`overflow-hidden transition-all duration-300 ${
+                isLegendExpanded ? 'max-h-96 md:max-h-none' : 'max-h-0 md:max-h-none'
+              }`}>
+                <div className="px-1.5 pb-1.5 md:p-3 md:pt-0 space-y-1 md:space-y-1.5">
+                  <div className="flex items-start gap-1.5">
+                    <span className="text-sm md:text-base shrink-0">💎</span>
+                    <div className="min-w-0">
+                      <p className="font-semibold text-[10px] md:text-xs text-gray-900 leading-tight">Diamante</p>
+                      <p className="text-[8px] md:text-[10px] text-gray-600 leading-tight mt-0.5">
+                        4.8★+ con 1,000+ reseñas
+                      </p>
+                      <p className="text-[7px] md:text-[9px] text-gray-500 leading-tight">El top 0.1%</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-1.5">
+                    <span className="text-sm md:text-base shrink-0">🏆</span>
+                    <div className="min-w-0">
+                      <p className="font-semibold text-[10px] md:text-xs text-gray-900 leading-tight">Platino</p>
+                      <p className="text-[8px] md:text-[10px] text-gray-600 leading-tight mt-0.5">
+                        4.8★+ con 500+ reseñas
+                      </p>
+                      <p className="text-[7px] md:text-[9px] text-gray-500 leading-tight">Excelencia probada</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-1.5">
+                    <span className="text-sm md:text-base shrink-0">🥇</span>
+                    <div className="min-w-0">
+                      <p className="font-semibold text-[10px] md:text-xs text-gray-900 leading-tight">Oro</p>
+                      <p className="text-[8px] md:text-[10px] text-gray-600 leading-tight mt-0.5">
+                        4.8★+ con 200+ reseñas
+                      </p>
+                      <p className="text-[7px] md:text-[9px] text-gray-500 leading-tight">Muy confiable</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-1.5">
+                    <span className="text-sm md:text-base shrink-0">🥈</span>
+                    <div className="min-w-0">
+                      <p className="font-semibold text-[10px] md:text-xs text-gray-900 leading-tight">Plata</p>
+                      <p className="text-[8px] md:text-[10px] text-gray-600 leading-tight mt-0.5">
+                        4.7★+ con 100+ reseñas
+                      </p>
+                      <p className="text-[7px] md:text-[9px] text-gray-500 leading-tight">Buena opción</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-1.5">
+                    <span className="text-sm md:text-base shrink-0">🥉</span>
+                    <div className="min-w-0">
+                      <p className="font-semibold text-[10px] md:text-xs text-gray-900 leading-tight">Bronce</p>
+                      <p className="text-[8px] md:text-[10px] text-gray-600 leading-tight mt-0.5">
+                        4.7★+ (menos de 100)
+                      </p>
+                      <p className="text-[7px] md:text-[9px] text-gray-500 leading-tight">Promesa emergente</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Botón de geolocalización - SOBRE EL MAPA */}
+            <div className="absolute bottom-20 md:bottom-6 left-1/2 transform -translate-x-1/2 z-10">
+              <button
+                onClick={isGeolocationActive ? deactivateGeolocation : activateGeolocation}
+                className={`flex items-center gap-1 md:gap-1.5 px-2.5 py-1.5 md:px-4 md:py-2.5 rounded-full shadow-lg transition-all duration-300 font-medium text-[11px] md:text-sm border ${
+                  isGeolocationActive
+                    ? 'bg-green-500 text-white border-green-600 hover:bg-green-600'
+                    : 'bg-white/95 backdrop-blur-sm text-gray-700 hover:bg-gray-50 border-gray-300'
+                }`}
+                title={isGeolocationActive ? 'Desactivar ubicación' : 'Activar mi ubicación'}
+              >
+                <MapPin className={`h-3 w-3 md:h-4 md:w-4 ${isGeolocationActive ? 'animate-pulse' : ''}`} />
+                <span className="hidden sm:inline">
+                  {isGeolocationActive ? 'Ubicación Activa' : 'Usar mi Ubicación'}
+                </span>
+                <span className="sm:hidden whitespace-nowrap">
+                  {isGeolocationActive ? 'GPS ON' : 'GPS'}
+                </span>
+                {isGeolocationActive && (
+                  <X className="h-2.5 w-2.5 md:h-3 md:w-3" />
+                )}
+              </button>
+              {geolocationError && (
+                <div className="absolute top-full mt-1 left-1/2 transform -translate-x-1/2 bg-red-50 text-red-600 px-2 py-1 rounded-md shadow-md text-[9px] md:text-xs max-w-[180px] md:max-w-none text-center leading-tight">
+                  {geolocationError.split(' - ')[0]}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Card flotante FUERA del GoogleMap - Siempre centrada */}
