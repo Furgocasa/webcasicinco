@@ -607,8 +607,8 @@ export default function RutaPage() {
           })()}
         </div>
 
-        {/* SIDEBAR DE LUGARES */}
-        <div className="w-96 bg-white border-l border-gray-200 overflow-y-auto">
+        {/* SIDEBAR DE LUGARES - OCULTO, usar bottom nav "Lista" */}
+        <div className="hidden w-96 bg-white border-l border-gray-200 overflow-y-auto">
           <div className="p-6">
             <div className="flex items-center justify-between mb-6">
               <div>
