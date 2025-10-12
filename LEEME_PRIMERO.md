@@ -1,7 +1,8 @@
 # 👋 ¡Bienvenido a Casi Cinco!
 
 **Última actualización:** 12 de Octubre de 2025  
-**Versión:** 2.0.0 - BETA 2.0
+**Versión:** 2.0.0 - BETA 2.0  
+**Repositorio:** [GitHub - Casi Cinco](https://github.com/ActtaxIA/Casi_cinco_app)
 
 ---
 
