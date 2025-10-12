@@ -1,9 +1,10 @@
 # 🏆 Casi Cinco - Los Mejores Lugares de España
 
-![Estado](https://img.shields.io/badge/Estado-BETA%202.0-success)
-![Version](https://img.shields.io/badge/Versión-2.0.0-blue)
+![Estado](https://img.shields.io/badge/Estado-BETA%203.0%20Mobile--First-success)
+![Version](https://img.shields.io/badge/Versión-3.0.0-blue)
 ![Tech](https://img.shields.io/badge/Tech-Next.js%2014%20%7C%20TypeScript%20%7C%20Supabase-blue)
-![Lugares](https://img.shields.io/badge/Lugares-3547-orange)
+![Lugares](https://img.shields.io/badge/Lugares-3528-orange)
+![Deploy](https://img.shields.io/badge/Deploy-AWS%20Amplify-orange)
 
 **La plataforma definitiva que filtra el 95% de lugares para mostrarte solo el top 5% de España.**
 
@@ -71,17 +72,19 @@ Casi Cinco es la plataforma definitiva para encontrar lugares excepcionales en E
 ✅ Lazy loading de imágenes  
 ✅ Categoría visible en páginas de detalle  
 
-### 🎯 BETA 2.0 - Lista para Testing
+### 🎯 BETA 3.0 - Mobile-First Experience 📱
 
-El proyecto está **funcionalmente completo** con:
-- ✅ Home optimizada para conversión
-- ✅ Página de metodología (identidad del proyecto)
-- ✅ Planificador de rutas único
-- ✅ Chatbot IA maduro
-- ✅ Protección de base de datos
-- ✅ Middleware de seguridad
+El proyecto está **completamente optimizado para móvil** con:
+- ✅ Bottom Navigation (Mapa/Filtros/Lista)
+- ✅ Bottom Sheets deslizables
+- ✅ Cards con imágenes y botones touch-friendly
+- ✅ Dashboard con scroll horizontal
+- ✅ Inputs 48px+ altura (iOS optimized)
+- ✅ Desplegado en AWS Amplify
+- ✅ Todas las variables de entorno configuradas
+- ✅ Chatbot, Rutas, Indexación funcionando al 100%
 
-**Siguiente paso:** Testing extensivo antes de producción.  
+**Siguiente paso:** Beta testing en dispositivos reales.  
 
 ---
 
@@ -94,7 +97,7 @@ El proyecto está **funcionalmente completo** con:
 - **Pagos**: Stripe
 - **Mapas**: Google Maps API
 - **IA**: OpenAI GPT-4
-- **Deployment**: Vercel (recomendado)
+- **Deployment**: AWS Amplify (WEB_COMPUTE)
 
 ---
 
@@ -377,5 +380,6 @@ Proyecto: InfluencersTrust
 
 **Made with ❤️ in Spain 🇪🇸**
 
-*Última actualización: 12 de Octubre de 2025*
-*Versión: 2.0.0 - BETA 2.0*
+*Última actualización: 12 de Octubre de 2025*  
+*Versión: 3.0.0 - BETA 3.0 Mobile-First*  
+*Deploy: [AWS Amplify](https://main.d2nzzzmoajf631.amplifyapp.com)*

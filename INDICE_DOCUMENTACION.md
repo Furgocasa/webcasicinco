@@ -1,7 +1,8 @@
 # 📚 Índice Maestro de Documentación - Casi Cinco
 
 **Última actualización:** 12 de Octubre de 2025  
-**Versión Actual:** 2.0.0 - BETA 2.0
+**Versión Actual:** 3.0.0 - BETA 3.0 📱 Mobile-First  
+**Deploy:** [AWS Amplify](https://main.d2nzzzmoajf631.amplifyapp.com)
 
 ---
 
@@ -10,11 +11,12 @@
 | Documento | Descripción | Cuándo Leer |
 |-----------|-------------|-------------|
 | **[LEEME_PRIMERO.md](./LEEME_PRIMERO.md)** | Inicio rápido, setup básico | 🚀 **START HERE** |
-| **[VERSION_BETA_2.0.md](./VERSION_BETA_2.0.md)** | Resumen completo de BETA 2.0 | 🎉 **Novedades principales** |
-| **[README.md](./README.md)** | Descripción general del proyecto, instalación, tecnologías | 📖 **Documentación técnica** |
-| **[ESTADO_ACTUAL_PROYECTO.md](./ESTADO_ACTUAL_PROYECTO.md)** | Estado completo, estadísticas, próximos pasos | 🎯 **Visión general** |
-| **[CHANGELOG.md](./CHANGELOG.md)** | Historial de cambios y versiones | 📝 **Qué hay de nuevo** |
-| **[BETA_2.0_RESUMEN.md](./BETA_2.0_RESUMEN.md)** | Resumen ejecutivo de BETA 2.0 | 📊 **Para stakeholders** |
+| **[RESUMEN_FINAL_BETA_3.0.md](./RESUMEN_FINAL_BETA_3.0.md)** | Resumen completo BETA 3.0 | 🎉 **LO MÁS NUEVO** |
+| **[BETA_3.0_PLAN.md](./BETA_3.0_PLAN.md)** | Plan mobile-first | 📱 **Mobile Strategy** |
+| **[CHANGELOG_BETA_3.0.md](./CHANGELOG_BETA_3.0.md)** | Changelog BETA 3.0 | 📝 **Cambios v3.0** |
+| **[README.md](./README.md)** | Descripción general del proyecto | 📖 **Docs principales** |
+| **[DEPLOY_AWS.md](./DEPLOY_AWS.md)** | Guía deploy AWS Amplify | 🚀 **Deploy Production** |
+| **[VERIFICAR_VARIABLES_AWS.md](./VERIFICAR_VARIABLES_AWS.md)** | Verificación variables | 🔧 **Troubleshooting** |
 
 ---
 

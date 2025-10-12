@@ -1,8 +1,9 @@
 # 👋 ¡Bienvenido a Casi Cinco!
 
 **Última actualización:** 12 de Octubre de 2025  
-**Versión:** 2.0.0 - BETA 2.0  
-**Repositorio:** [GitHub - Casi Cinco](https://github.com/ActtaxIA/Casi_cinco_app)
+**Versión:** 3.0.0 - BETA 3.0 📱 Mobile-First  
+**Repositorio:** [GitHub - Casi Cinco](https://github.com/ActtaxIA/Casi_cinco_app)  
+**Producción:** [AWS Amplify](https://main.d2nzzzmoajf631.amplifyapp.com)
 
 ---
 
@@ -75,14 +76,16 @@ http://localhost:3000
 
 ---
 
-## 🎉 ¡Acabas de Llegar a BETA 2.0!
+## 🎉 ¡BETA 3.0 - Mobile-First! 📱
 
 **Novedades principales:**
-- 🏠 Home con stats reales desde la BD
-- 📖 Página `/metodologia` que explica tu algoritmo objetivo
-- 🧭 Planificador de rutas `/ruta` completamente funcional
-- 🛡️ Sección listas eliminada (protección de BD)
-- 🔒 Rutas protegidas con middleware (requieren login)
+- 📱 **Diseño Mobile-First** - Bottom navigation, bottom sheets
+- 🗺️ **Mapa optimizado móvil** - Pantalla completa con botones inferiores
+- 💳 **Cards con imágenes** - Lista móvil igual que desktop
+- 📊 **Dashboard responsive** - Scroll horizontal en stats
+- ✅ **Todas las funcionalidades** - Chatbot, rutas, indexación funcionando
+- 🚀 **Desplegado en AWS** - Producción en la nube
+- 🔧 **Variables de entorno** - Todas configuradas correctamente
 
 ---
 
