@@ -1414,9 +1414,9 @@ export default function MapPage() {
                         className="w-full h-32 object-cover rounded-t-xl"
                         loading="lazy"
                       />
-                      {/* Badge de distancia */}
+                      {/* Badge de distancia en esquina superior derecha */}
                       {distance !== null && (
-                        <div className="absolute top-2 left-2 bg-blue-600 text-white px-2 py-1 rounded-full text-xs font-semibold shadow-lg flex items-center gap-1">
+                        <div className="absolute top-2 right-2 bg-blue-600 text-white px-2 py-1 rounded-full text-xs font-semibold shadow-lg flex items-center gap-1">
                           <MapPin className="h-3 w-3" />
                           {distance < 1 
                             ? `${Math.round(distance * 1000)}m`
@@ -1961,6 +1961,11 @@ export default function MapPage() {
               const tier = calculateQualityTier(place.rating, place.review_count || 0);
               const tierInfo = getTierInfo(tier);
               
+              // Calcular distancia si hay geolocalización
+              const distance = userLocation 
+                ? calculateDistance(userLocation.lat, userLocation.lng, place.latitude, place.longitude)
+                : null;
+              
               return (
                 <div
                   key={place.id}
@@ -1981,12 +1986,16 @@ export default function MapPage() {
                         className="w-full h-32 object-cover rounded-t-xl"
                         loading="lazy"
                       />
-                      {/* Tier badge en imagen */}
-                      <div className="absolute top-2 right-2">
-                        <div className={`px-2 py-1 rounded-lg text-xs font-bold text-white bg-gradient-to-r ${tierInfo.color} shadow-lg`}>
-                          {tierInfo.icon} {tierInfo.name}
+                      {/* Badge de distancia en esquina superior derecha */}
+                      {distance !== null && (
+                        <div className="absolute top-2 right-2 bg-blue-600 text-white px-2 py-1 rounded-full text-xs font-semibold shadow-lg flex items-center gap-1">
+                          <MapPin className="h-3 w-3" />
+                          {distance < 1 
+                            ? `${Math.round(distance * 1000)}m`
+                            : `${distance.toFixed(1)}km`
+                          }
                         </div>
-                      </div>
+                      )}
                     </div>
                   )}
 
@@ -2006,47 +2015,62 @@ export default function MapPage() {
                         </span>
                       </div>
                     </div>
+                    {/* Icono grande de tier al lado del nombre */}
+                    <span className="text-2xl">{tierInfo.icon}</span>
                   </div>
 
-                  {/* Categoría y ubicación */}
-                  <div className="flex flex-wrap gap-2 mb-3">
-                    <span className="inline-flex items-center px-2 py-1 rounded-md bg-indigo-50 text-indigo-700 text-xs font-medium">
-                      {place.category}
+                  {/* Dirección y distancia */}
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-xs text-gray-600 line-clamp-1 flex-1">
+                      {place.city}, {place.province}
+                    </p>
+                    {/* Mostrar distancia solo si no hay foto */}
+                    {distance !== null && !place.photos?.length && (
+                      <span className="text-xs font-semibold text-blue-600 flex items-center gap-1 ml-2">
+                        <MapPin className="h-3 w-3" />
+                        {distance < 1 
+                          ? `${Math.round(distance * 1000)}m`
+                          : `${distance.toFixed(1)}km`
+                        }
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Categoría y tier */}
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 text-xs font-medium">
+                      {CATEGORIES[place.category as keyof typeof CATEGORIES] || place.category}
                     </span>
-                    <span className="text-xs text-gray-600">
-                      📍 {place.city}, {place.province}
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium bg-gradient-to-r ${tierInfo.color} text-white`}>
+                      {tierInfo.name}
                     </span>
                   </div>
 
                   {/* Botones */}
                   <div className="flex gap-2 mt-3" onClick={(e) => e.stopPropagation()}>
                     <Button
-                      onClick={() => {
-                        setSelectedPlace(place);
-                        setMobileView('map');
-                        mapRef.current?.panTo({ lat: place.latitude, lng: place.longitude });
-                        mapRef.current?.setZoom(15);
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        router.push(`/${place.category}/${place.province}/${place.slug}`);
                       }}
-                      variant="primary"
                       size="sm"
                       className="flex-1"
                     >
-                      Ver en Mapa
+                      Ver Detalles
                     </Button>
-                    <a
-                      href={place.google_maps_url || `https://www.google.com/maps/search/?api=1&query=${place.latitude},${place.longitude}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex-1"
-                    >
+                    {place.google_maps_url && (
                       <Button
-                        variant="outline"
                         size="sm"
-                        className="w-full"
+                        variant="outline"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          window.open(place.google_maps_url, '_blank');
+                        }}
+                        className="flex-1"
                       >
                         Google Maps
                       </Button>
-                    </a>
+                    )}
                   </div>
                 </div>
               );

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { GoogleMap, useLoadScript, DirectionsRenderer, Marker, Autocomplete } from '@react-google-maps/api';
 import { 
   Navigation, 
@@ -77,11 +77,69 @@ export default function RutaPage() {
   // Vista móvil: 'form', 'map', 'list' - Empieza en 'map' como experiencia por defecto
   const [mobileView, setMobileView] = useState<'form' | 'map' | 'list'>('map');
 
+  // Ordenamiento de lista
+  const [sortBy, setSortBy] = useState<'rating' | 'reviews' | 'proximity'>('reviews');
+
+  // Geolocalización para cálculo de distancia
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+
   // Info de la ruta
   const [routeInfo, setRouteInfo] = useState<{
     distance: string;
     duration: string;
   } | null>(null);
+
+  // Calcular distancia entre dos puntos (en km)
+  const calculateDistance = useCallback((lat1: number, lon1: number, lat2: number, lon2: number): number => {
+    const R = 6371; // Radio de la Tierra en km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+  }, []);
+
+  // Obtener ubicación del usuario al montar el componente
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+        },
+        (error) => {
+          console.log('Geolocalización no disponible:', error);
+        }
+      );
+    }
+  }, []);
+
+  // Ordenar lugares según el criterio seleccionado
+  const sortedPlaces = useMemo(() => {
+    return [...placesNearRoute].sort((a, b) => {
+      if (sortBy === 'rating') {
+        // Primero por rating, luego por reseñas
+        if (b.rating !== a.rating) return b.rating - a.rating;
+        return (b.review_count || 0) - (a.review_count || 0);
+      } else if (sortBy === 'reviews') {
+        // Primero por reseñas, luego por rating
+        if ((b.review_count || 0) !== (a.review_count || 0)) {
+          return (b.review_count || 0) - (a.review_count || 0);
+        }
+        return b.rating - a.rating;
+      } else if (sortBy === 'proximity' && userLocation) {
+        const distA = calculateDistance(userLocation.lat, userLocation.lng, a.latitude, a.longitude);
+        const distB = calculateDistance(userLocation.lat, userLocation.lng, b.latitude, b.longitude);
+        return distA - distB;
+      }
+      return 0;
+    });
+  }, [placesNearRoute, sortBy, userLocation, calculateDistance]);
 
   const calculateRoute = async () => {
     if (!origin || !destination) {
@@ -133,17 +191,27 @@ export default function RutaPage() {
     setLoadingPlaces(true);
     
     try {
+      console.log('🔍 Iniciando búsqueda de lugares cerca de la ruta...');
+      
       // 1. Obtener solo lugares de categoría seleccionada (optimización)
       let queryParams = 'limit=2000'; // Límite razonable (más rápido que 5000)
       if (categoryFilter) {
         queryParams += `&category=${categoryFilter}`;
       }
       
+      console.log(`📡 Llamando a API: /api/places?${queryParams}`);
       const response = await fetch(`/api/places?${queryParams}`);
       const data = await response.json();
       
+      console.log('📦 Respuesta de API:', {
+        success: data.success,
+        placesCount: data.places?.length || 0,
+        hasPlaces: !!data.places
+      });
+      
       if (!data.success || !data.places || data.places.length === 0) {
-        toast.error('No hay lugares disponibles');
+        console.warn('⚠️ No hay lugares disponibles en la base de datos');
+        toast.warning('⚠️ No hay lugares indexados todavía. Indexa lugares desde el panel de administración.');
         setLoadingPlaces(false);
         return;
       }
@@ -196,12 +264,20 @@ export default function RutaPage() {
         return b.review_count - a.review_count;
       });
 
+      console.log(`🎯 Lugares encontrados: ${nearbyPlaces.length} cerca de ruta, ${filtered.length} después de filtros`);
       setPlacesNearRoute(filtered);
-      toast.success(`🎯 Encontrados ${filtered.length} lugares cerca de tu ruta`);
+      
+      if (filtered.length > 0) {
+        toast.success(`🎯 Encontrados ${filtered.length} lugares cerca de tu ruta`);
+      } else if (nearbyPlaces.length > 0) {
+        toast.warning(`⚠️ ${nearbyPlaces.length} lugares encontrados pero ninguno cumple los filtros seleccionados`);
+      } else {
+        toast.warning(`⚠️ No hay lugares cerca de esta ruta. Intenta aumentar el radio de búsqueda.`);
+      }
       
     } catch (error) {
-      console.error('Error buscando lugares:', error);
-      toast.error('Error al buscar lugares cercanos');
+      console.error('❌ Error buscando lugares:', error);
+      toast.error('Error al buscar lugares cercanos. Revisa la consola para más detalles.');
     } finally {
       setLoadingPlaces(false);
     }
@@ -547,6 +623,9 @@ export default function RutaPage() {
           {selectedPlace && (() => {
             const tier = calculateQualityTier(selectedPlace.rating, selectedPlace.review_count || 0);
             const tierInfo = getTierInfo(tier);
+            const distance = userLocation 
+              ? calculateDistance(userLocation.lat, userLocation.lng, selectedPlace.latitude, selectedPlace.longitude)
+              : null;
 
             return (
               <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none">
@@ -571,6 +650,16 @@ export default function RutaPage() {
                         className="w-full h-32 object-cover rounded-t-xl"
                         loading="lazy"
                       />
+                      {/* Badge de distancia en esquina superior derecha */}
+                      {distance !== null && (
+                        <div className="absolute top-2 right-2 bg-blue-600 text-white px-2 py-1 rounded-full text-xs font-semibold shadow-lg flex items-center gap-1">
+                          <MapPin className="h-3 w-3" />
+                          {distance < 1 
+                            ? `${Math.round(distance * 1000)}m`
+                            : `${distance.toFixed(1)}km`
+                          }
+                        </div>
+                      )}
                     </div>
                   )}
 
@@ -633,8 +722,178 @@ export default function RutaPage() {
             );
           })()}
         </div>
+        {/* FIN del contenedor del mapa */}
 
-        {/* SIDEBAR ELIMINADO - Usar bottom nav "Lista" en móvil y desktop */}
+        {/* SIDEBAR DERECHO - Lista de Lugares - Desktop */}
+        <div 
+          className={`hidden md:block ${
+            placesNearRoute.length > 0 ? 'w-96' : 'w-0'
+          } transition-all duration-300 bg-white border-l border-gray-200 overflow-y-auto`}
+        >
+          {placesNearRoute.length > 0 && (
+            <div className="p-4 space-y-4">
+              {/* Header */}
+              <div className="mb-4 sticky top-0 bg-white pb-2 border-b z-10">
+                <div className="flex items-center justify-between mb-3">
+                  <div>
+                    <h3 className="font-bold text-lg">Lugares en la Ruta</h3>
+                    <p className="text-sm text-gray-600">{placesNearRoute.length} resultados</p>
+                  </div>
+                </div>
+
+                {/* Selector de ordenamiento */}
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-2">
+                    Ordenar por:
+                  </label>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value as 'rating' | 'reviews' | 'proximity')}
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                  >
+                    <option value="reviews">📊 Más Reseñas</option>
+                    <option value="rating">⭐ Mayor Valoración</option>
+                    <option value="proximity" disabled={!userLocation}>
+                      📍 Proximidad {!userLocation && '(requiere ubicación)'}
+                    </option>
+                  </select>
+                  {sortBy === 'proximity' && !userLocation && (
+                    <p className="text-xs text-amber-600 mt-1">
+                      ⚠️ Activa tu ubicación para ordenar por proximidad
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Lista de lugares */}
+              {loadingPlaces ? (
+                <div className="flex flex-col items-center justify-center py-12 gap-3">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  <p className="text-sm text-gray-600">Cargando lugares...</p>
+                </div>
+              ) : sortedPlaces.length > 0 ? (
+                sortedPlaces.map((place) => {
+                  const tier = calculateQualityTier(place.rating, place.review_count);
+                  const tierInfo = getTierInfo(tier);
+                  
+                  // Calcular distancia si hay geolocalización
+                  const distance = userLocation 
+                    ? calculateDistance(userLocation.lat, userLocation.lng, place.latitude, place.longitude)
+                    : null;
+                  
+                  return (
+                    <div
+                      key={place.id}
+                      className="border rounded-lg p-4 hover:shadow-md transition cursor-pointer bg-white"
+                      onClick={() => {
+                        setSelectedPlace(place);
+                        mapRef.current?.panTo({ lat: place.latitude, lng: place.longitude });
+                        mapRef.current?.setZoom(15);
+                      }}
+                    >
+                      {/* Foto del lugar */}
+                      {place.photos && place.photos.length > 0 && (
+                        <div className="mb-3 -mx-4 -mt-4 relative">
+                          <img
+                            src={`https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference=${place.photos[0]}&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`}
+                            alt={place.name}
+                            className="w-full h-32 object-cover rounded-t-lg"
+                            loading="lazy"
+                          />
+                          {/* Badge de distancia */}
+                          {distance !== null && (
+                            <div className="absolute top-2 right-2 bg-blue-600 text-white px-2 py-1 rounded-full text-xs font-semibold shadow-lg flex items-center gap-1">
+                              <MapPin className="h-3 w-3" />
+                              {distance < 1 
+                                ? `${Math.round(distance * 1000)}m`
+                                : `${distance.toFixed(1)}km`
+                              }
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Nombre y rating */}
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-base text-gray-900 leading-tight mb-1">
+                            {place.name}
+                          </h4>
+                          <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1">
+                              <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                              <span className="font-bold text-sm">{place.rating}</span>
+                            </div>
+                            <span className="text-xs text-gray-500">
+                              {place.review_count} reseñas
+                            </span>
+                          </div>
+                        </div>
+                        <span className="text-2xl">{tierInfo.icon}</span>
+                      </div>
+
+                      {/* Dirección y distancia */}
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="text-xs text-gray-600 line-clamp-1 flex-1">
+                          {place.city}, {place.province}
+                        </p>
+                        {distance !== null && !place.photos?.length && (
+                          <span className="text-xs font-semibold text-blue-600 flex items-center gap-1 ml-2">
+                            <MapPin className="h-3 w-3" />
+                            {distance < 1 
+                              ? `${Math.round(distance * 1000)}m`
+                              : `${distance.toFixed(1)}km`
+                            }
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Categoría y tier */}
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 text-xs font-medium">
+                          {place.category}
+                        </span>
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium bg-gradient-to-r ${tierInfo.color} text-white`}>
+                          {tierInfo.name}
+                        </span>
+                      </div>
+
+                      {/* Botones de acción */}
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            window.location.href = `/${place.category}/${place.province}/${place.slug}`;
+                          }}
+                          className="flex-1"
+                        >
+                          Ver Detalles
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            window.open(place.google_maps_url || `https://www.google.com/maps/search/?api=1&query=${place.latitude},${place.longitude}`, '_blank');
+                          }}
+                          className="flex-1"
+                        >
+                          Google Maps
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="text-center py-12 text-gray-500">
+                  <MapPin className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                  <p className="text-sm">Calcula una ruta para ver lugares</p>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* BOTTOM NAVIGATION - Solo móvil */}
@@ -837,13 +1096,21 @@ export default function RutaPage() {
                   Ordenar por:
                 </label>
                 <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as 'rating' | 'reviews' | 'proximity')}
                   className="w-full px-3 py-3 text-base border border-gray-300 rounded-lg"
-                  defaultValue="reviews"
                 >
                   <option value="reviews">📊 Más Reseñas</option>
                   <option value="rating">⭐ Mayor Valoración</option>
-                  <option value="distance">📍 Más Cercano</option>
+                  <option value="proximity" disabled={!userLocation}>
+                    📍 Más Cercano {!userLocation && '(requiere ubicación)'}
+                  </option>
                 </select>
+                {sortBy === 'proximity' && !userLocation && (
+                  <p className="text-xs text-amber-600 mt-1">
+                    ⚠️ Permite el acceso a tu ubicación para ordenar por proximidad
+                  </p>
+                )}
               </div>
             )}
 
@@ -851,14 +1118,19 @@ export default function RutaPage() {
               <div className="flex justify-center py-8">
                 <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
               </div>
-            ) : placesNearRoute.length === 0 ? (
+            ) : sortedPlaces.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
                 Calcula una ruta para ver lugares
               </div>
             ) : (
-              placesNearRoute.map((place) => {
+              sortedPlaces.map((place) => {
                 const tier = calculateQualityTier(place.rating, place.review_count);
                 const tierInfo = getTierInfo(tier);
+                
+                // Calcular distancia si hay geolocalización
+                const distance = userLocation 
+                  ? calculateDistance(userLocation.lat, userLocation.lng, place.latitude, place.longitude)
+                  : null;
                 
                 return (
                   <div
@@ -878,56 +1150,89 @@ export default function RutaPage() {
                           className="w-full h-32 object-cover rounded-t-xl"
                           loading="lazy"
                         />
-                        <div className="absolute top-2 right-2">
-                          <div className={`px-2 py-1 rounded-lg text-xs font-bold text-white bg-gradient-to-r ${tierInfo.color} shadow-lg`}>
-                            {tierInfo.icon} {tierInfo.name}
+                        {/* Badge de distancia en esquina superior derecha */}
+                        {distance !== null && (
+                          <div className="absolute top-2 right-2 bg-blue-600 text-white px-2 py-1 rounded-full text-xs font-semibold shadow-lg flex items-center gap-1">
+                            <MapPin className="h-3 w-3" />
+                            {distance < 1 
+                              ? `${Math.round(distance * 1000)}m`
+                              : `${distance.toFixed(1)}km`
+                            }
                           </div>
-                        </div>
+                        )}
                       </div>
                     )}
 
-                    <h4 className="font-semibold text-base mb-1 line-clamp-1">{place.name}</h4>
-                    <div className="flex items-center gap-2 mb-2">
-                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                      <span className="font-bold text-sm">{place.rating}</span>
-                      <span className="text-xs text-gray-500">{place.review_count} reseñas</span>
+                    {/* Nombre y rating */}
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-base text-gray-900 leading-tight mb-1 line-clamp-1">
+                          {place.name}
+                        </h4>
+                        <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-1">
+                            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                            <span className="font-bold text-sm">{place.rating}</span>
+                          </div>
+                          <span className="text-xs text-gray-500">
+                            {place.review_count} reseñas
+                          </span>
+                        </div>
+                      </div>
+                      {/* Icono grande de tier al lado del nombre */}
+                      <span className="text-2xl">{tierInfo.icon}</span>
                     </div>
-                    <div className="flex flex-wrap gap-2 mb-3">
-                      <span className="inline-flex items-center px-2 py-1 rounded-md bg-indigo-50 text-indigo-700 text-xs font-medium">
+
+                    {/* Dirección y distancia */}
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-xs text-gray-600 line-clamp-1 flex-1">
+                        {place.city}, {place.province}
+                      </p>
+                      {/* Mostrar distancia solo si no hay foto */}
+                      {distance !== null && !place.photos?.length && (
+                        <span className="text-xs font-semibold text-blue-600 flex items-center gap-1 ml-2">
+                          <MapPin className="h-3 w-3" />
+                          {distance < 1 
+                            ? `${Math.round(distance * 1000)}m`
+                            : `${distance.toFixed(1)}km`
+                          }
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Categoría y tier */}
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 text-xs font-medium">
                         {place.category}
                       </span>
-                      <span className="text-xs text-gray-600">
-                        📍 {place.city}, {place.province}
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium bg-gradient-to-r ${tierInfo.color} text-white`}>
+                        {tierInfo.name}
                       </span>
                     </div>
 
-                    {/* Botones - Igual que en /mapa */}
+                    {/* Botones */}
                     <div className="flex gap-2 mt-3" onClick={(e) => e.stopPropagation()}>
                       <Button
-                        onClick={() => {
-                          setSelectedPlace(place);
-                          setMobileView('map');
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          window.location.href = `/${place.category}/${place.province}/${place.slug}`;
                         }}
-                        variant="primary"
                         size="sm"
                         className="flex-1"
                       >
-                        Ver en Mapa
+                        Ver Detalles
                       </Button>
-                      <a
-                        href={`https://www.google.com/maps/search/?api=1&query=${place.latitude},${place.longitude}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          window.open(place.google_maps_url || `https://www.google.com/maps/search/?api=1&query=${place.latitude},${place.longitude}`, '_blank');
+                        }}
                         className="flex-1"
                       >
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="w-full"
-                        >
-                          Google Maps
-                        </Button>
-                      </a>
+                        Google Maps
+                      </Button>
                     </div>
                   </div>
                 );

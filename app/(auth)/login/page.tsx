@@ -76,14 +76,17 @@ export default function LoginPage() {
 
     try {
       const supabase = createClient();
+      
+      // Obtener la URL base de la aplicación
+      // En producción, usar NEXT_PUBLIC_APP_URL; en desarrollo, usar origin
+      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
+      
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
-          queryParams: {
-            // Solo pide seleccionar cuenta, no volver a autorizar
-            prompt: 'select_account',
-          },
+          redirectTo: `${baseUrl}/auth/callback`,
+          // No especificar queryParams.prompt permite a Google decidir automáticamente
+          // Si el usuario ya autorizó, no pedirá confirmación de nuevo
         },
       });
 

@@ -76,14 +76,8 @@ export function useAuth() {
 
         // Manejar eventos específicos
         if (event === 'SIGNED_OUT') {
-          // Solo redirigir si el usuario cerró sesión manualmente
-          setAuthState({
-            user: null,
-            session: null,
-            loading: false,
-            isAdmin: false,
-          });
-          router.push('/login');
+          // La función signOut() ya maneja la limpieza y redirección
+          console.log('🔓 Evento SIGNED_OUT recibido');
         }
         // NO redirigir en SIGNED_IN - dejar al usuario donde está
       }
@@ -96,12 +90,46 @@ export function useAuth() {
 
   const signOut = async () => {
     try {
+      console.log('🚪 Cerrando sesión...');
+      
+      // 1. Limpiar estado inmediatamente (antes de llamar a signOut)
+      setAuthState({
+        user: null,
+        session: null,
+        loading: false,
+        isAdmin: false,
+      });
+      
+      // 2. Cerrar sesión en Supabase
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       
-      // El onAuthStateChange se encargará de limpiar el estado
+      console.log('✅ Sesión cerrada correctamente');
+      
+      // 3. Limpiar localStorage por si acaso
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('supabase.auth.token');
+        localStorage.removeItem('geolocationActive');
+      }
+      
+      // 4. Forzar refresh completo del router
+      router.refresh();
+      
+      // 5. Redirigir al home
+      router.push('/');
+      
     } catch (error) {
-      console.error('Error signing out:', error);
+      console.error('❌ Error al cerrar sesión:', error);
+      
+      // Aun si falla, limpiar estado y redirigir
+      setAuthState({
+        user: null,
+        session: null,
+        loading: false,
+        isAdmin: false,
+      });
+      
+      router.push('/');
     }
   };
 

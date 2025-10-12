@@ -5,6 +5,10 @@ export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get('code');
 
+  // Obtener la URL base de la aplicación
+  // En producción, usar NEXT_PUBLIC_APP_URL; en desarrollo, usar requestUrl.origin
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || requestUrl.origin;
+
   if (code) {
     const supabase = await createClient();
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
@@ -12,7 +16,7 @@ export async function GET(request: Request) {
     if (error) {
       console.error('Error en OAuth callback:', error);
       // Redirigir a login con error
-      return NextResponse.redirect(new URL('/login?error=oauth_error', requestUrl.origin));
+      return NextResponse.redirect(new URL('/login?error=oauth_error', baseUrl));
     }
 
     // Usuario autenticado, verificar si es admin
@@ -20,11 +24,11 @@ export async function GET(request: Request) {
     
     // Redirigir según rol
     if (isAdmin) {
-      return NextResponse.redirect(new URL('/admin/dashboard', requestUrl.origin));
+      return NextResponse.redirect(new URL('/admin/dashboard', baseUrl));
     }
   }
 
   // Redirigir al home
-  return NextResponse.redirect(new URL('/', requestUrl.origin));
+  return NextResponse.redirect(new URL('/', baseUrl));
 }
 
