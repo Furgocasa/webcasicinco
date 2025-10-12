@@ -339,7 +339,7 @@ export default function MapPage() {
           }
         });
         
-        if (validPlaces > 0) {
+        if (validPlaces > 0 && mapRef.current) {
           // Calcular padding dinámico según paneles
           const leftPadding = showFilters ? 400 : 20;
           const rightPadding = showPlacesList ? 400 : 20;
@@ -354,10 +354,10 @@ export default function MapPage() {
           
           console.log(`🔍 Zoom centrado en ${validPlaces} lugares válidos de ${filteredPlaces.length} total`);
         }
-      } else if (!hasActiveFilters && filteredPlaces.length === allPlaces.length) {
+      } else if (!hasActiveFilters && filteredPlaces.length === allPlaces.length && mapRef.current) {
         // SIN FILTROS: Restaurar vista de España
         mapRef.current.setCenter(defaultCenter);
-        mapRef.current.setZoom(6);
+        mapRef.current?.setZoom(6);
         console.log(`🗺️ Zoom restaurado a vista de España`);
       }
     }, 300);
@@ -395,11 +395,11 @@ export default function MapPage() {
       setSelectedPlace(placeToOpen);
       
       // Centrar y hacer zoom INMEDIATAMENTE (el auto-zoom está desactivado para ?place=ID)
-      mapRef.current.setCenter({
+      mapRef.current?.setCenter({
         lat: placeToOpen.latitude,
         lng: placeToOpen.longitude
       });
-      mapRef.current.setZoom(15);
+      mapRef.current?.setZoom(15);
     }
   }, [allPlaces, isLoaded]); // NO incluir searchParams ni selectedPlace para evitar loops
 
@@ -522,7 +522,7 @@ export default function MapPage() {
             markers.forEach((marker: any) => {
               bounds.extend(marker.getPosition()!);
             });
-            mapRef.current.fitBounds(bounds);
+            mapRef.current?.fitBounds(bounds);
             
             // Limitar zoom máximo para no acercarse demasiado
             const listener = google.maps.event.addListenerOnce(mapRef.current, 'idle', () => {
