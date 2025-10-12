@@ -7,38 +7,37 @@
 
 ---
 
-## 🚀 Inicio Rápido (5 minutos)
+## 🚀 Acceso a la Aplicación
 
-### **Opción A: Setup Automático (Recomendado) 🎯**
+### **🌐 Producción (Recomendado)**
+La app está **desplegada y funcionando** en AWS Amplify:
+
+**URL:** https://main.d2nzzzmoajf631.amplifyapp.com
+
+**Características:**
+- ✅ Siempre actualizada (auto-deploy desde GitHub)
+- ✅ Mobile-First optimizada
+- ✅ Google OAuth habilitado
+- ✅ 3,600+ lugares disponibles
+- ✅ Todas las funcionalidades activas
+
+### **💻 Desarrollo Local (Solo Desarrolladores)**
+
+Si necesitas ejecutar en local:
+
 ```powershell
-.\setup.ps1
-npm run dev
-```
+# 1. Clonar repositorio
+git clone https://github.com/ActtaxIA/Casi_cinco_app.git
+cd Casi_cinco_app
 
-### **Opción B: Setup Manual**
-
-### **1. Verifica que Node.js esté instalado**
-```powershell
-node --version  # Debería mostrar v18 o superior
-```
-
-### **2. Instala dependencias**
-```powershell
+# 2. Instalar dependencias
 npm install
-```
-**Nota:** Si hay errores de dependencias, el archivo `.npmrc` automáticamente resolverá los conflictos.
 
-### **3. Configura variables de entorno**
-El archivo `.env.local` YA está creado con todas las API keys. Verifica que estén completas.
+# 3. Configurar .env.local (contactar al admin)
 
-### **4. Inicia el servidor**
-```powershell
+# 4. Ejecutar
 npm run dev
-```
-
-### **5. Abre la aplicación**
-```
-http://localhost:3000
+# Abre: http://localhost:3000
 ```
 
 ### **⚠️ Solución de Problemas Comunes**
@@ -89,26 +88,20 @@ http://localhost:3000
 
 ---
 
-## ⚡ Acciones Pendientes
+## 🎯 Próximos Pasos
 
-### **IMPORTANTE: Actualizar Prompt del Chatbot**
-El chatbot tiene mejoras implementadas en el código pero **necesitas actualizar la base de datos**:
+### **Para Usuarios:**
+1. **Accede a la app:** https://main.d2nzzzmoajf631.amplifyapp.com
+2. **Regístrate** con email o Google
+3. **Explora** el mapa con 3,600+ lugares
+4. **Usa el chatbot** "Tío Viajero"
+5. **Planifica rutas** con lugares en el camino
 
-```bash
-# 1. Abre Supabase SQL Editor
-https://supabase.com/dashboard/project/[tu-proyecto]/sql
-
-# 2. Copia y pega el contenido de:
-supabase/23-prompt-completo-final.sql
-
-# 3. Ejecuta (Run)
-
-# 4. Verifica que aparezca:
-✓ PROMPT ACTUALIZADO CORRECTAMENTE
-✓ check_enlaces_mapa: OK
-✓ check_sinonimos: OK
-✓ check_plural: OK
-```
+### **Para Administradores:**
+1. **Panel Admin:** /admin/dashboard
+2. **Indexar lugares:** /admin/indexar
+3. **Gestionar lugares:** /admin/lugares
+4. **Configuración:** /admin/configuracion
 
 ---
 

@@ -124,28 +124,33 @@ El proyecto está **completamente optimizado para móvil** con:
 
 ---
 
-## ⚙️ Instalación Rápida
+## 🌐 Acceso a la Aplicación
 
-### Requisitos Previos
+### **Producción (Para Usuarios)**
 
+**URL:** https://main.d2nzzzmoajf631.amplifyapp.com
+
+La app está **desplegada y funcionando** en AWS Amplify con:
+- ✅ 3,600+ lugares verificados
+- ✅ Experiencia Mobile-First
+- ✅ Login con Google OAuth
+- ✅ Chatbot IA "Tío Viajero"
+- ✅ Planificador de rutas
+- ✅ Dashboard analytics completo
+
+### **Desarrollo Local (Solo para Desarrollo)**
+
+**Requisitos:**
 - Node.js 18+
-- npm
-- Cuenta en Supabase
-- Cuenta en Google Cloud (Maps API + Places API)
-- Cuenta en OpenAI
-- Cuenta en Stripe
-
-### 1. Clonar e Instalar
+- Variables de entorno configuradas
+- Acceso a Supabase, Google APIs, OpenAI, Stripe
 
 ```bash
 git clone https://github.com/ActtaxIA/Casi_cinco_app.git
 cd Casi_cinco_app
 npm install
-```
-
-**Opción rápida con PowerShell:**
-```powershell
-.\setup.ps1
+# Configurar .env.local (contactar admin)
+npm run dev
 ```
 
 ### 2. Configurar Variables de Entorno
@@ -192,22 +197,24 @@ En Supabase SQL Editor, ejecuta en orden:
 -- Pega y ejecuta: stripe_setup.sql
 ```
 
-### 4. Ejecutar en Local
+### 4. Deploy
+
+**La app se despliega automáticamente en AWS Amplify** cuando se hace push a la rama `main` de GitHub.
+
+**URL de Producción:** https://main.d2nzzzmoajf631.amplifyapp.com
+
+**Monitoreo:**
+- AWS Amplify Console: https://console.aws.amazon.com/amplify
+- GitHub Actions: Automático en cada commit
+
+### 5. Para Desarrollo Local
 
 ```bash
 npm run dev
+# http://localhost:3000
 ```
 
-**O con PowerShell:**
-```powershell
-.\start.ps1
-```
-
-Abre [http://localhost:3000](http://localhost:3000)
-
-### 5. Solución de Problemas
-
-Si encuentras errores durante la instalación, consulta la sección **"Solución de Problemas Comunes"** en [LEEME_PRIMERO.md](./LEEME_PRIMERO.md)
+Ver [DEPLOY_AWS.md](./DEPLOY_AWS.md) para más detalles.
 
 ---
 
