@@ -1,9 +1,9 @@
 # 🏆 Casi Cinco - Los Mejores Lugares de España
 
-![Estado](https://img.shields.io/badge/Estado-BETA%203.0%20Mobile--First-success)
-![Version](https://img.shields.io/badge/Versión-3.0.0-blue)
+![Estado](https://img.shields.io/badge/Estado-BETA%204.0%20Mobile%20Perfection-success)
+![Version](https://img.shields.io/badge/Versión-4.0.0-blue)
 ![Tech](https://img.shields.io/badge/Tech-Next.js%2014%20%7C%20TypeScript%20%7C%20Supabase-blue)
-![Lugares](https://img.shields.io/badge/Lugares-3528-orange)
+![Lugares](https://img.shields.io/badge/Lugares-3628-orange)
 ![Deploy](https://img.shields.io/badge/Deploy-AWS%20Amplify-orange)
 
 **La plataforma definitiva que filtra el 95% de lugares para mostrarte solo el top 5% de España.**
@@ -84,7 +84,19 @@ El proyecto está **completamente optimizado para móvil** con:
 - ✅ Todas las variables de entorno configuradas
 - ✅ Chatbot, Rutas, Indexación funcionando al 100%
 
-**Siguiente paso:** Beta testing en dispositivos reales.  
+### 📱 BETA 4.0 - Mobile UX Perfection ✨
+
+Perfeccionamiento de la experiencia móvil con:
+- ✅ **Altura perfecta del mapa** sin scroll (100vh exacto)
+- ✅ **Leyenda expandible** con información detallada de tiers
+- ✅ **Controles flotantes** siempre visibles sobre el mapa
+- ✅ **pb-16** correcto para navegación inferior
+- ✅ **absolute inset-0** para ocupar todo el espacio
+- ✅ Estructura idéntica a `/ruta` (que funcionaba perfectamente)
+
+**Resultado:** UX móvil impecable sin scroll, controles visibles, información contextual.
+
+Ver: [`BETA_4.0_PLAN.md`](./BETA_4.0_PLAN.md) | [`VERSION_BETA_4.0.md`](./VERSION_BETA_4.0.md) | [`CHANGELOG_BETA_4.0.md`](./CHANGELOG_BETA_4.0.md)
 
 ---
 
@@ -111,6 +123,10 @@ El proyecto está **completamente optimizado para móvil** con:
 
 ### 📖 Documentación Estratégica
 
+- **[BETA_4.0_PLAN.md](./BETA_4.0_PLAN.md)** - ✨ Plan y objetivos BETA 4.0 (ACTUAL)
+- **[VERSION_BETA_4.0.md](./VERSION_BETA_4.0.md)** - ✨ Resumen completo BETA 4.0
+- **[CHANGELOG_BETA_4.0.md](./CHANGELOG_BETA_4.0.md)** - ✨ Changelog detallado BETA 4.0
+- **[VERSION_BETA_3.0.md](./VERSION_BETA_3.0.md)** - Novedades BETA 3.0
 - **[VERSION_BETA_2.0.md](./VERSION_BETA_2.0.md)** - Novedades BETA 2.0
 - **[LANZAMIENTO_BETA_2.0.md](./LANZAMIENTO_BETA_2.0.md)** - Plan de lanzamiento
 - **[SISTEMA_FILTRADO.md](./SISTEMA_FILTRADO.md)** - Sistema de tiers y filtro por reseñas
