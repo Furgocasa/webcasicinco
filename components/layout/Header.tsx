@@ -33,26 +33,8 @@ export default function Header() {
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
             <span className="text-2xl font-bold text-indigo-600">⭐</span>
-            <span className="text-xl md:text-xl font-bold text-gray-900">Casi Cinco</span>
+            <span className="text-base sm:text-xl font-bold text-gray-900">Casi Cinco</span>
           </Link>
-
-          {/* Mobile Quick Nav - Iconos directos */}
-          <div className="flex md:hidden items-center gap-2">
-            <Link 
-              href="/mapa"
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-              aria-label="Mapa"
-            >
-              <Map className="h-5 w-5 text-gray-700" />
-            </Link>
-            <Link 
-              href="/ruta"
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-              aria-label="Planificar Ruta"
-            >
-              <Navigation className="h-5 w-5 text-gray-700" />
-            </Link>
-          </div>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
@@ -70,7 +52,27 @@ export default function Header() {
             </Link>
           </div>
 
-          {/* Auth Buttons */}
+          {/* Mobile Quick Nav + Menu - Iconos permanentes en navbar */}
+          <div className="flex md:hidden items-center gap-1">
+            <Link 
+              href="/mapa"
+              className="p-2.5 hover:bg-indigo-50 rounded-lg transition-colors"
+              aria-label="Mapa"
+            >
+              <Map className="h-5 w-5 text-indigo-600" />
+            </Link>
+            <Link 
+              href="/ruta"
+              className="p-2.5 hover:bg-indigo-50 rounded-lg transition-colors"
+              aria-label="Rutas"
+            >
+              <Navigation className="h-5 w-5 text-indigo-600" />
+            </Link>
+            {/* Separador visual */}
+            <div className="w-px h-6 bg-gray-300 mx-1" />
+          </div>
+
+          {/* Auth Buttons - Desktop */}
           <div className="hidden md:flex items-center space-x-4">
             {loading ? (
               <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600"></div>
