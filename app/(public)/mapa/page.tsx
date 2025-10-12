@@ -140,32 +140,9 @@ export default function MapPage() {
     let loadedPlaces: PlaceWithTier[] = [];
     
     try {
-      // Revisar caché primero (TTL 5 minutos)
-      const cacheKey = 'places_cache_v7'; // 🔄 v7: fix renderizado markdown
-      const cacheTimeKey = 'places_cache_time_v7';
-      
-      const now = Date.now();
-      const CACHE_TTL = 5 * 60 * 1000; // 5 minutos
-      
-      try {
-        const cached = localStorage.getItem(cacheKey);
-        const cacheTime = localStorage.getItem(cacheTimeKey);
-        
-        if (cached && cacheTime && (now - parseInt(cacheTime)) < CACHE_TTL) {
-          const parsedCache = JSON.parse(cached);
-          if (Array.isArray(parsedCache) && parsedCache.length > 0) {
-            console.log(`✅ Caché encontrado: ${parsedCache.length} lugares`);
-            setAllPlaces(parsedCache);
-            setLoading(false);
-            return;
-          }
-        }
-      } catch (cacheError) {
-        console.warn('⚠️ Error leyendo caché, limpiando...', cacheError);
-        // Limpiar caché corrupto
-        localStorage.removeItem(cacheKey);
-        localStorage.removeItem(cacheTimeKey);
-      }
+      // CACHÉ DESHABILITADO: 3500+ lugares exceden quota de localStorage
+      // Siempre cargar desde API
+      console.log('🔄 Cargando lugares desde API...');
       
       // Cargar en lotes automáticamente (sin timeout)
       console.log('🔄 Cargando lugares...');
@@ -196,12 +173,13 @@ export default function MapPage() {
         }
       }
       
-      // Actualizar estado y caché SOLO si hay datos
+      // Actualizar estado SOLO (NO guardar en localStorage - demasiado grande)
       if (loadedPlaces.length > 0) {
         setAllPlaces(loadedPlaces);
-        localStorage.setItem(cacheKey, JSON.stringify(loadedPlaces));
-        localStorage.setItem(cacheTimeKey, now.toString());
-        console.log(`✅ ${loadedPlaces.length} lugares cargados correctamente`);
+        // CACHE DESHABILITADO: 3500+ lugares exceden quota de localStorage
+        // localStorage.setItem(cacheKey, JSON.stringify(loadedPlaces));
+        // localStorage.setItem(cacheTimeKey, now.toString());
+        console.log(`✅ ${loadedPlaces.length} lugares cargados correctamente (sin caché)`);
       } else {
         console.warn('⚠️ No se encontraron lugares');
       }

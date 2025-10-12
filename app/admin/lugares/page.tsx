@@ -83,30 +83,42 @@ export default function LugaresPage() {
   const loadPlaces = async () => {
     setLoading(true);
     try {
-      // Cargar primera página solamente (100 lugares)
-      console.log('🔄 Cargando lugares...');
-      const response = await fetch(`/api/admin/places?page=1&limit=100`);
+      // Cargar TODOS los lugares en lotes progresivos
+      let allPlaces: any[] = [];
+      let page = 1;
+      const maxPages = 40; // Máximo 4000 lugares
       
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      while (page <= maxPages) {
+        const response = await fetch(`/api/admin/places?page=${page}&limit=100`);
+        
+        if (!response.ok) {
+          console.warn(`Error cargando página ${page}`);
+          break;
+        }
+        
+        const data = await response.json();
+        
+        if (data.success && data.places && data.places.length > 0) {
+          allPlaces = [...allPlaces, ...data.places];
+          console.log(`📍 Lugares: Página ${page} - Total: ${allPlaces.length}`);
+          page++;
+          
+          if (data.places.length < 100) {
+            break;
+          }
+        } else {
+          break;
+        }
       }
       
-      const data = await response.json();
+      console.log(`✅ Cargados ${allPlaces.length} lugares total`);
+      setPlaces(allPlaces);
       
-      console.log('Respuesta API:', data);
-      
-      if (data.success && data.places) {
-        setPlaces(data.places);
-        console.log(`✅ Cargados ${data.places.length} lugares de ${data.total} total`);
-        
-        if (data.places.length > 0) {
-          setMapCenter({
-            lat: data.places[0].latitude,
-            lng: data.places[0].longitude,
-          });
-        }
-      } else {
-        toast.error('No se encontraron lugares');
+      if (allPlaces.length > 0) {
+        setMapCenter({
+          lat: allPlaces[0].latitude,
+          lng: allPlaces[0].longitude,
+        });
       }
     } catch (error) {
       console.error('Error cargando lugares:', error);

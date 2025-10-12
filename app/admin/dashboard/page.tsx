@@ -115,19 +115,39 @@ export default function DashboardPage() {
 
   const loadDashboardData = async () => {
     try {
-      // Cargar primera página de lugares (100) - Suficiente para stats aproximadas
-      const placesResponse = await fetch(`/api/admin/places?page=1&limit=100`);
+      // Cargar TODOS los lugares en lotes progresivos
+      let allPlaces: any[] = [];
+      let page = 1;
+      const maxPages = 40; // Máximo 4000 lugares (40 páginas × 100)
       
-      if (!placesResponse.ok) {
-        throw new Error(`HTTP error! status: ${placesResponse.status}`);
+      while (page <= maxPages) {
+        const placesResponse = await fetch(`/api/admin/places?page=${page}&limit=100`);
+        
+        if (!placesResponse.ok) {
+          console.warn(`Error cargando página ${page}`);
+          break;
+        }
+        
+        const placesData = await placesResponse.json();
+        
+        if (placesData.success && placesData.places && placesData.places.length > 0) {
+          allPlaces = [...allPlaces, ...placesData.places];
+          console.log(`📊 Dashboard: Página ${page} - Total acumulado: ${allPlaces.length}`);
+          page++;
+          
+          // Si recibimos menos de 100, no hay más páginas
+          if (placesData.places.length < 100) {
+            break;
+          }
+        } else {
+          break;
+        }
       }
       
-      const placesData = await placesResponse.json();
+      console.log(`✅ Dashboard: Cargados ${allPlaces.length} lugares total`);
       
-      console.log('Dashboard - Respuesta API:', placesData);
-      
-      if (placesData.success && placesData.places && placesData.places.length > 0) {
-        const places = placesData.places;
+      if (allPlaces.length > 0) {
+        const places = allPlaces;
         
         // === ESTADÍSTICAS GENERALES ===
         const published = places.filter((p: any) => p.published).length;
