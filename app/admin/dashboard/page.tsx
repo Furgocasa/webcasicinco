@@ -337,30 +337,31 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+      {/* Header - Mobile Responsive */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 flex items-center gap-2 md:gap-3">
             📊 Dashboard Analytics
-            <Badge className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+            <Badge className="hidden md:inline-flex bg-gradient-to-r from-blue-500 to-blue-600 text-white text-xs">
               Power BI
             </Badge>
           </h1>
-          <p className="mt-1 text-gray-600">
+          <p className="mt-1 text-sm md:text-base text-gray-600">
             {stats.totalPlaces === 0 
-              ? "Empieza indexando lugares para ver estadísticas"
-              : `Análisis completo de ${stats.totalPlaces.toLocaleString()} lugares`
+              ? "Empieza indexando lugares"
+              : `${stats.totalPlaces.toLocaleString()} lugares`
             }
           </p>
         </div>
         <div className="flex gap-2">
-          <Button onClick={loadDashboardData} variant="outline" size="sm">
-            🔄 Actualizar
+          <Button onClick={loadDashboardData} variant="outline" size="sm" className="flex-1 md:flex-none">
+            🔄 <span className="hidden md:inline ml-1">Actualizar</span>
           </Button>
-          <Link href="/admin/indexar">
-            <Button size="lg">
-              <Plus className="mr-2 h-5 w-5" />
-              Nueva indexación
+          <Link href="/admin/indexar" className="flex-1 md:flex-none">
+            <Button size="sm" className="w-full md:w-auto">
+              <Plus className="h-4 w-4 md:mr-2" />
+              <span className="hidden md:inline">Nueva indexación</span>
+              <span className="md:hidden">Nuevo</span>
             </Button>
           </Link>
         </div>

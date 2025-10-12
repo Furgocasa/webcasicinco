@@ -813,8 +813,8 @@ export default function MapPage() {
   ].filter(Boolean).length;
 
   return (
-    <div className="flex flex-col" style={{ height: 'calc(100vh - 64px)' }}>
-      <div className="flex-1 flex overflow-hidden relative">
+    <div className="flex flex-col h-screen md:h-[calc(100vh-64px)]">
+      <div className="flex-1 flex overflow-hidden relative pb-16 md:pb-0">
         {/* SIDEBAR DE FILTROS - Desktop */}
         <div 
           className={`hidden md:block ${
@@ -1953,27 +1953,84 @@ export default function MapPage() {
               No se encontraron lugares
             </div>
           ) : (
-            sortedPlaces.slice(0, 50).map((place) => (
-              <div
-                key={place.id}
-                onClick={() => {
-                  setSelectedPlace(place);
-                  setMobileView('map');
-                  mapRef.current?.panTo({ lat: place.latitude, lng: place.longitude });
-                  mapRef.current?.setZoom(15);
-                }}
-                className="bg-white border border-gray-200 rounded-lg p-3 active:bg-gray-50 cursor-pointer"
-              >
-                <h3 className="font-semibold text-base mb-1">{place.name}</h3>
-                <div className="flex items-center gap-2 text-sm text-gray-600 mb-1">
-                  <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-                  <span>{place.rating}</span>
-                  <span>·</span>
-                  <span>{place.review_count} reseñas</span>
+            sortedPlaces.slice(0, 50).map((place) => {
+              const tierInfo = getTierInfo(place.quality_tier);
+              return (
+                <div
+                  key={place.id}
+                  className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm"
+                >
+                  {/* Imagen */}
+                  <div className="relative h-40 bg-gray-200">
+                    {place.photos && place.photos.length > 0 ? (
+                      <img
+                        src={place.photos[0]}
+                        alt={place.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+                        <MapPin className="h-12 w-12 text-gray-400" />
+                      </div>
+                    )}
+                    {/* Tier badge */}
+                    <div className="absolute top-2 right-2">
+                      <div className={`px-2 py-1 rounded-lg text-xs font-bold text-white ${tierInfo.color}`}>
+                        {tierInfo.icon} {tierInfo.name}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Contenido */}
+                  <div className="p-3">
+                    <h3 className="font-bold text-base mb-2 line-clamp-1">{place.name}</h3>
+                    
+                    <div className="flex items-center gap-2 mb-2">
+                      <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
+                      <span className="font-semibold text-gray-900">{place.rating}</span>
+                      <span className="text-gray-400">·</span>
+                      <span className="text-sm text-gray-600">{place.review_count} reseñas</span>
+                    </div>
+                    
+                    <p className="text-sm text-gray-600 mb-3 line-clamp-1">
+                      {place.city}, {place.province}
+                    </p>
+
+                    {/* Botones */}
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={() => {
+                          setSelectedPlace(place);
+                          setMobileView('map');
+                          mapRef.current?.panTo({ lat: place.latitude, lng: place.longitude });
+                          mapRef.current?.setZoom(15);
+                        }}
+                        variant="primary"
+                        size="sm"
+                        className="flex-1"
+                      >
+                        Ver en Mapa
+                      </Button>
+                      <a
+                        href={place.google_maps_url || `https://www.google.com/maps/search/?api=1&query=${place.latitude},${place.longitude}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-1"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full"
+                        >
+                          Google Maps
+                        </Button>
+                      </a>
+                    </div>
+                  </div>
                 </div>
-                <p className="text-sm text-gray-500">{place.city}, {place.province}</p>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
       </BottomSheet>

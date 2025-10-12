@@ -128,16 +128,33 @@ export default function RutaPage() {
     setLoadingPlaces(true);
     
     try {
-      // 1. Obtener TODOS los lugares publicados
-      const response = await fetch('/api/places?limit=5000');
-      const data = await response.json();
+      // 1. Obtener TODOS los lugares publicados en lotes
+      let allPlaces: Place[] = [];
+      let page = 1;
+      let hasMore = true;
       
-      if (!data.success || !data.places) {
-        toast.error('Error cargando lugares');
+      while (hasMore) {
+        const response = await fetch(`/api/places?page=${page}&limit=1000`);
+        const data = await response.json();
+        
+        if (data.success && data.places && data.places.length > 0) {
+          allPlaces = [...allPlaces, ...data.places];
+          page++;
+          
+          if (data.places.length < 1000) {
+            hasMore = false;
+          }
+        } else {
+          hasMore = false;
+        }
+      }
+      
+      if (allPlaces.length === 0) {
+        toast.error('No hay lugares disponibles');
         return;
       }
-
-      const allPlaces: Place[] = data.places;
+      
+      console.log(`✅ Cargados ${allPlaces.length} lugares para buscar en ruta`);
       
       // 2. Obtener el path de la ruta (conjunto de puntos)
       const route = directions.routes[0];
