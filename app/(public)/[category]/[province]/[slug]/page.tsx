@@ -1,0 +1,632 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import { GoogleMap, useLoadScript, Marker } from '@react-google-maps/api';
+import { 
+  Star, 
+  MapPin, 
+  Phone, 
+  Globe, 
+  ExternalLink,
+  Heart,
+  Share2,
+  Navigation,
+  Clock,
+  Euro,
+  Award,
+  TrendingUp,
+  Users,
+  Copy,
+  MessageCircle,
+  Mail,
+  Facebook,
+  Twitter,
+  Linkedin,
+  Check,
+  X
+} from 'lucide-react';
+import { Button } from '@/components/ui/Button';
+import { Badge } from '@/components/ui/Badge';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
+import { calculateQualityTier, getTierInfo } from '@/lib/utils/tier-calculator';
+import { toast } from 'sonner';
+
+const libraries: ("places")[] = ["places"];
+
+const mapContainerStyle = {
+  width: '100%',
+  height: '300px',
+};
+
+export default function PlaceDetailPage() {
+  const router = useRouter();
+  const params = useParams();
+  const { category, province, slug } = params;
+  const [place, setPlace] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [showShareMenu, setShowShareMenu] = useState(false);
+  const [showVisitModal, setShowVisitModal] = useState(false);
+  const [visitNotes, setVisitNotes] = useState('');
+  const [visitRating, setVisitRating] = useState(0);
+
+  const { isLoaded } = useLoadScript({
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '',
+    libraries,
+  });
+
+  useEffect(() => {
+    const fetchPlace = async () => {
+      try {
+        const response = await fetch(`/api/places/by-slug/${slug}`);
+        const data = await response.json();
+        
+        if (data.success) {
+          setPlace(data.place);
+        }
+      } catch (error) {
+        console.error('Error cargando lugar:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPlace();
+  }, [slug]);
+
+  // Cerrar menú al hacer click fuera
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (showShareMenu && !target.closest('.share-menu-container')) {
+        setShowShareMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showShareMenu]);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="text-lg">Cargando...</div>
+      </div>
+    );
+  }
+
+  if (!place) {
+    return (
+      <div className="flex flex-col justify-center items-center min-h-screen">
+        <h1 className="text-2xl font-bold mb-4">Lugar no encontrado</h1>
+        <Button onClick={() => router.push('/mapa')}>
+          Volver al Mapa
+        </Button>
+      </div>
+    );
+  }
+
+  const tier = calculateQualityTier(place.rating, place.review_count);
+  const tierInfo = getTierInfo(tier);
+  const photoUrl = place.photos && place.photos.length > 0 
+    ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1200&photo_reference=${place.photos[0]}&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`
+    : null;
+
+  const priceLevel = place.price_level ? '€'.repeat(place.price_level) : null;
+
+  const handleRegisterVisit = async () => {
+    try {
+      const response = await fetch('/api/visits', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          place_id: place.id,
+          notes: visitNotes,
+          rating: visitRating > 0 ? visitRating : null,
+        }),
+      });
+
+      if (response.ok) {
+        toast.success('✅ Visita registrada');
+        setShowVisitModal(false);
+        setVisitNotes('');
+        setVisitRating(0);
+      } else {
+        const data = await response.json();
+        if (response.status === 401) {
+          toast.error('Debes iniciar sesión para registrar visitas');
+          router.push('/login');
+        } else {
+          toast.error(data.error || 'Error al registrar visita');
+        }
+      }
+    } catch (error) {
+      toast.error('Error al registrar visita');
+    }
+  };
+
+  const handleToggleFavorite = async () => {
+    try {
+      const response = await fetch('/api/favorites', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ place_id: place.id }),
+      });
+
+      if (response.ok) {
+        toast.success('❤️ Guardado en favoritos');
+      } else if (response.status === 401) {
+        toast.error('Debes iniciar sesión para guardar favoritos');
+        router.push('/login');
+      }
+    } catch (error) {
+      toast.error('Error al guardar favorito');
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Hero Section con Foto */}
+      <div className="relative h-[400px] bg-gradient-to-br from-indigo-600 to-purple-700">
+        {photoUrl ? (
+          <img 
+            src={photoUrl} 
+            alt={place.name}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-indigo-600 to-purple-700">
+            <span className="text-8xl">{tierInfo.icon}</span>
+          </div>
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+        
+        {/* Contenido sobre la imagen */}
+        <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-3">
+                  <span className="text-4xl">{tierInfo.icon}</span>
+                  <span className={`px-3 py-1 rounded-full text-sm font-bold bg-gradient-to-r ${tierInfo.color}`}>
+                    {tierInfo.name}
+                  </span>
+                </div>
+                <h1 className="text-5xl font-bold mb-3 drop-shadow-lg">{place.name}</h1>
+                <div className="flex items-center gap-4 mb-2">
+                  <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full">
+                    <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                    <span className="font-bold text-xl">{place.rating}</span>
+                    <span className="text-sm">({place.review_count} reseñas)</span>
+                  </div>
+                  {priceLevel && (
+                    <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full">
+                      <Euro className="h-4 w-4" />
+                      <span className="font-semibold">{priceLevel}</span>
+                    </div>
+                  )}
+                </div>
+                <div className="flex flex-col gap-2">
+                  {/* Categoría del lugar */}
+                  {place.category && (
+                    <div className="flex items-center gap-2 text-white/90 bg-white/10 backdrop-blur-sm px-3 py-1 rounded-full w-fit">
+                      <span className="text-lg">🏷️</span>
+                      <span className="font-medium capitalize">{place.category}</span>
+                    </div>
+                  )}
+                  {/* Ubicación */}
+                  <div className="flex items-center gap-2 text-white/90">
+                    <MapPin className="h-4 w-4" />
+                    <span>{place.city}, {place.province}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Contenido Principal */}
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="grid lg:grid-cols-3 gap-8">
+          {/* Columna Principal */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* Descripción */}
+            {place.ai_description && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Award className="h-5 w-5 text-indigo-600" />
+                    Sobre {place.name}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-700 leading-relaxed whitespace-pre-line text-lg">
+                    {place.ai_description}
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Resumen de Reseñas */}
+            {place.ai_review_summary && (
+              <Card className="bg-blue-50 border-blue-200">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-blue-900">
+                    <Users className="h-5 w-5" />
+                    Lo que dicen los clientes
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-blue-900 italic leading-relaxed">
+                    "{place.ai_review_summary}"
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Highlights */}
+            {place.ai_highlights?.highlights && place.ai_highlights.highlights.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <TrendingUp className="h-5 w-5 text-green-600" />
+                    Destacados
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid md:grid-cols-2 gap-3">
+                    {place.ai_highlights.highlights.map((highlight: string, index: number) => (
+                      <div key={index} className="flex items-start gap-2 bg-green-50 p-3 rounded-lg">
+                        <span className="text-green-600 mt-0.5">✓</span>
+                        <span className="text-sm text-gray-800">{highlight}</span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Galería de Fotos */}
+            {place.photos && place.photos.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Galería</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {place.photos.slice(0, 6).map((photoRef: string, index: number) => (
+                      <div key={index} className="aspect-square rounded-lg overflow-hidden">
+                        <img
+                          src={`https://maps.googleapis.com/maps/api/place/photo?maxwidth=600&photo_reference=${photoRef}&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`}
+                          alt={`${place.name} - Foto ${index + 1}`}
+                          className="w-full h-full object-cover hover:scale-110 transition-transform duration-300 cursor-pointer"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+
+          {/* Columna Lateral */}
+          <div className="space-y-6">
+            {/* Información de Contacto */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Información</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {place.phone && (
+                  <a 
+                    href={`tel:${place.phone}`}
+                    className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg transition group"
+                  >
+                    <Phone className="h-5 w-5 text-indigo-600" />
+                    <span className="text-gray-700 group-hover:text-indigo-600">{place.phone}</span>
+                  </a>
+                )}
+
+                {place.website && (
+                  <a 
+                    href={place.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg transition group"
+                  >
+                    <Globe className="h-5 w-5 text-indigo-600" />
+                    <span className="text-gray-700 group-hover:text-indigo-600">Visitar sitio web</span>
+                    <ExternalLink className="h-4 w-4 ml-auto opacity-0 group-hover:opacity-100 transition" />
+                  </a>
+                )}
+
+                <div className="flex items-start gap-3 p-3">
+                  <MapPin className="h-5 w-5 text-indigo-600 flex-shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-gray-900">Dirección</p>
+                    <p className="text-sm text-gray-600 mt-1">{place.address}</p>
+                  </div>
+                </div>
+
+                {priceLevel && (
+                  <div className="flex items-center gap-3 p-3">
+                    <Euro className="h-5 w-5 text-indigo-600" />
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">Rango de precio</p>
+                      <p className="text-sm text-gray-600 mt-1">{priceLevel}</p>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Mapa */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Ubicación</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {isLoaded && place.latitude && place.longitude ? (
+                  <div className="rounded-lg overflow-hidden mb-4">
+                    <GoogleMap
+                      mapContainerStyle={mapContainerStyle}
+                      center={{ lat: place.latitude, lng: place.longitude }}
+                      zoom={15}
+                      options={{
+                        disableDefaultUI: true,
+                        zoomControl: true,
+                      }}
+                    >
+                      <Marker
+                        position={{ lat: place.latitude, lng: place.longitude }}
+                      />
+                    </GoogleMap>
+                  </div>
+                ) : (
+                  <div className="bg-gray-100 rounded-lg h-[300px] flex items-center justify-center">
+                    <MapPin className="h-12 w-12 text-gray-400" />
+                  </div>
+                )}
+                
+                {place.google_maps_url && (
+                  <Button
+                    onClick={() => window.open(place.google_maps_url, '_blank')}
+                    variant="outline"
+                    className="w-full"
+                  >
+                    <Navigation className="h-4 w-4 mr-2" />
+                    Ver en Google Maps
+                  </Button>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Acciones */}
+            <Card>
+              <CardContent className="pt-6 space-y-3">
+                <Button
+                  onClick={handleToggleFavorite}
+                  variant="outline"
+                  className="w-full hover:bg-pink-50 hover:border-pink-500"
+                >
+                  <Heart className="h-4 w-4 mr-2" />
+                  Guardar en Favoritos
+                </Button>
+
+                <Button
+                  onClick={() => setShowVisitModal(true)}
+                  className="w-full bg-green-600 hover:bg-green-700 text-white"
+                >
+                  <Check className="h-4 w-4 mr-2" />
+                  Registrar Visita
+                </Button>
+                
+                <div className="relative share-menu-container">
+                  <Button
+                    onClick={() => setShowShareMenu(!showShareMenu)}
+                    variant="outline"
+                    className="w-full"
+                  >
+                    <Share2 className="h-4 w-4 mr-2" />
+                    Compartir
+                  </Button>
+
+                  {/* Menú desplegable de compartir */}
+                  {showShareMenu && (
+                    <div className="absolute bottom-full left-0 right-0 mb-2 bg-white rounded-lg shadow-2xl border-2 border-gray-200 p-2 z-50">
+                      <div className="space-y-1">
+                        {/* Copiar URL */}
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText(window.location.href);
+                            toast.success('✅ Enlace copiado al portapapeles');
+                            setShowShareMenu(false);
+                          }}
+                          className="w-full flex items-center gap-3 px-3 py-2 hover:bg-gray-100 rounded-lg transition text-left"
+                        >
+                          <Copy className="h-4 w-4 text-gray-600" />
+                          <span className="text-sm font-medium text-gray-900">Copiar enlace</span>
+                        </button>
+
+                        {/* WhatsApp */}
+                        <button
+                          onClick={() => {
+                            const text = `¡Mira este lugar increíble! ${place.name} - ⭐ ${place.rating} (${place.review_count} reseñas)`;
+                            const url = `https://wa.me/?text=${encodeURIComponent(text + ' ' + window.location.href)}`;
+                            window.open(url, '_blank');
+                            setShowShareMenu(false);
+                          }}
+                          className="w-full flex items-center gap-3 px-3 py-2 hover:bg-green-50 rounded-lg transition text-left"
+                        >
+                          <MessageCircle className="h-4 w-4 text-green-600" />
+                          <span className="text-sm font-medium text-gray-900">WhatsApp</span>
+                        </button>
+
+                        {/* Facebook */}
+                        <button
+                          onClick={() => {
+                            const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`;
+                            window.open(url, '_blank', 'width=600,height=400');
+                            setShowShareMenu(false);
+                          }}
+                          className="w-full flex items-center gap-3 px-3 py-2 hover:bg-blue-50 rounded-lg transition text-left"
+                        >
+                          <Facebook className="h-4 w-4 text-blue-600" />
+                          <span className="text-sm font-medium text-gray-900">Facebook</span>
+                        </button>
+
+                        {/* Twitter/X */}
+                        <button
+                          onClick={() => {
+                            const text = `${place.name} - ⭐ ${place.rating} (${place.review_count} reseñas) en ${place.city}`;
+                            const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(window.location.href)}`;
+                            window.open(url, '_blank', 'width=600,height=400');
+                            setShowShareMenu(false);
+                          }}
+                          className="w-full flex items-center gap-3 px-3 py-2 hover:bg-gray-100 rounded-lg transition text-left"
+                        >
+                          <Twitter className="h-4 w-4 text-gray-900" />
+                          <span className="text-sm font-medium text-gray-900">Twitter / X</span>
+                        </button>
+
+                        {/* LinkedIn */}
+                        <button
+                          onClick={() => {
+                            const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.href)}`;
+                            window.open(url, '_blank', 'width=600,height=400');
+                            setShowShareMenu(false);
+                          }}
+                          className="w-full flex items-center gap-3 px-3 py-2 hover:bg-blue-50 rounded-lg transition text-left"
+                        >
+                          <Linkedin className="h-4 w-4 text-blue-700" />
+                          <span className="text-sm font-medium text-gray-900">LinkedIn</span>
+                        </button>
+
+                        {/* Email */}
+                        <button
+                          onClick={() => {
+                            const subject = `Te recomiendo: ${place.name}`;
+                            const body = `Encontré este lugar increíble:\n\n${place.name}\n⭐ ${place.rating} (${place.review_count} reseñas)\n📍 ${place.city}, ${place.province}\n\n${window.location.href}`;
+                            window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+                            setShowShareMenu(false);
+                          }}
+                          className="w-full flex items-center gap-3 px-3 py-2 hover:bg-gray-100 rounded-lg transition text-left"
+                        >
+                          <Mail className="h-4 w-4 text-gray-600" />
+                          <span className="text-sm font-medium text-gray-900">Email</span>
+                        </button>
+                      </div>
+
+                      {/* Botón cerrar */}
+                      <div className="border-t border-gray-200 mt-2 pt-2">
+                        <button
+                          onClick={() => setShowShareMenu(false)}
+                          className="w-full text-xs text-gray-500 hover:text-gray-700 py-1"
+                        >
+                          Cerrar
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+
+      {/* Modal Registrar Visita */}
+      {showVisitModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold text-gray-900">Registrar Visita</h3>
+              <button
+                onClick={() => {
+                  setShowVisitModal(false);
+                  setVisitNotes('');
+                  setVisitRating(0);
+                }}
+                className="p-2 hover:bg-gray-100 rounded-lg transition"
+              >
+                <X className="h-5 w-5 text-gray-600" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {/* Nombre del lugar */}
+              <div className="bg-gray-50 p-3 rounded-lg">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-2xl">{tierInfo.icon}</span>
+                  <h4 className="font-semibold text-gray-900">{place.name}</h4>
+                </div>
+                <p className="text-sm text-gray-600">{place.city}, {place.province}</p>
+              </div>
+
+              {/* Rating */}
+              <div>
+                <label className="block text-sm font-medium text-gray-900 mb-2">
+                  ¿Cómo fue tu experiencia? (Opcional)
+                </label>
+                <div className="flex gap-2">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      onClick={() => setVisitRating(star)}
+                      className="transition-transform hover:scale-110"
+                    >
+                      <Star
+                        className={`h-8 w-8 ${
+                          star <= visitRating
+                            ? 'fill-yellow-400 text-yellow-400'
+                            : 'text-gray-300 hover:text-yellow-400'
+                        }`}
+                      />
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Notas */}
+              <div>
+                <label className="block text-sm font-medium text-gray-900 mb-2">
+                  Notas personales (Opcional)
+                </label>
+                <textarea
+                  value={visitNotes}
+                  onChange={(e) => setVisitNotes(e.target.value)}
+                  placeholder="¿Qué tal fue? ¿Volverías? Tus impresiones..."
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none"
+                  rows={4}
+                />
+              </div>
+
+              {/* Botones */}
+              <div className="flex gap-3 pt-4">
+                <Button
+                  onClick={() => {
+                    setShowVisitModal(false);
+                    setVisitNotes('');
+                    setVisitRating(0);
+                  }}
+                  variant="outline"
+                  className="flex-1"
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  onClick={handleRegisterVisit}
+                  className="flex-1 bg-green-600 hover:bg-green-700"
+                >
+                  <Check className="h-4 w-4 mr-2" />
+                  Registrar
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

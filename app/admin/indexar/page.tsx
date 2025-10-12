@@ -1,0 +1,404 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
+import { PROVINCES, CATEGORIES } from '@/lib/utils/constants';
+import { toast } from 'sonner';
+
+export default function IndexarPage() {
+  const [selectedProvinces, setSelectedProvinces] = useState<string[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [minRating, setMinRating] = useState('4.7');
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [isIndexing, setIsIndexing] = useState(false);
+  const [jobId, setJobId] = useState<string | null>(null);
+  const [jobStatus, setJobStatus] = useState<any>(null);
+  const [pollingInterval, setPollingInterval] = useState<NodeJS.Timeout | null>(null);
+  const [showErrorDetails, setShowErrorDetails] = useState(false);
+
+  // Limpiar intervalo al desmontar
+  useEffect(() => {
+    return () => {
+      if (pollingInterval) {
+        clearInterval(pollingInterval);
+      }
+    };
+  }, [pollingInterval]);
+
+  const handleSearch = async () => {
+    setIsSearching(true);
+    toast.info('🔍 Buscando lugares...');
+    
+    try {
+      const response = await fetch('/api/admin/search-places', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          provinces: selectedProvinces,
+          categories: selectedCategories,
+          minRating: parseFloat(minRating),
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Error al buscar lugares');
+      }
+      
+      setSearchResults(data.places || []);
+      toast.success(`✅ ${data.places?.length || 0} lugares encontrados`);
+    } catch (error: any) {
+      console.error('Error buscando lugares:', error);
+      toast.error(error.message || 'Error al buscar lugares');
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const handleStartIndexation = async () => {
+    setIsIndexing(true);
+    toast.loading('🚀 Iniciando indexación...', { id: 'indexation-start' });
+    
+    try {
+      const response = await fetch('/api/admin/start-indexation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          provinces: selectedProvinces,
+          categories: selectedCategories,
+          minRating: parseFloat(minRating),
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Error al iniciar la indexación');
+      }
+      
+      if (data.job?.id) {
+        setJobId(data.job.id);
+        // Iniciar polling del estado
+        pollJobStatus(data.job.id);
+        toast.success('✅ Indexación iniciada correctamente', { id: 'indexation-start' });
+      }
+    } catch (error: any) {
+      console.error('Error iniciando indexación:', error);
+      toast.error(error.message || 'Error al iniciar la indexación', { id: 'indexation-start' });
+    } finally {
+      setIsIndexing(false);
+    }
+  };
+
+  const pollJobStatus = async (id: string) => {
+    // Limpiar intervalo previo si existe
+    if (pollingInterval) {
+      clearInterval(pollingInterval);
+    }
+
+    const interval = setInterval(async () => {
+      try {
+        const response = await fetch(`/api/admin/indexation-status?jobId=${id}`);
+        const data = await response.json();
+        
+        if (data.success && data.job) {
+          setJobStatus(data.job);
+          
+          // Detener polling si el trabajo terminó
+          if (['completed', 'failed'].includes(data.job.status)) {
+            clearInterval(interval);
+            setPollingInterval(null);
+            
+            if (data.job.status === 'completed') {
+              toast.success(`🎉 Indexación completada: ${data.job.successful_places} lugares guardados`);
+            } else {
+              toast.error(`❌ Indexación fallida`);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error obteniendo estado:', error);
+      }
+    }, 2000); // Cada 2 segundos
+
+    setPollingInterval(interval);
+  };
+
+  return (
+    <div className="max-w-6xl mx-auto">
+      <h1 className="text-3xl font-bold mb-8">Indexar Lugares</h1>
+
+      <div className="grid lg:grid-cols-3 gap-6">
+        {/* Formulario de configuración */}
+        <div className="lg:col-span-1">
+          <Card>
+            <CardHeader>
+              <CardTitle>Configuración</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Provincias */}
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Provincias
+                </label>
+                <select
+                  multiple
+                  value={selectedProvinces}
+                  onChange={(e) => {
+                    const options = Array.from(e.target.selectedOptions);
+                    setSelectedProvinces(options.map(opt => opt.value));
+                  }}
+                  className="flex h-32 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                >
+                  {PROVINCES.map((province) => (
+                    <option key={province} value={province}>
+                      {province}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-xs text-gray-500 mt-1">
+                  Mantén Ctrl/Cmd para seleccionar múltiples
+                </p>
+              </div>
+
+              {/* Categorías */}
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Categorías
+                </label>
+                <select
+                  multiple
+                  value={selectedCategories}
+                  onChange={(e) => {
+                    const options = Array.from(e.target.selectedOptions);
+                    setSelectedCategories(options.map(opt => opt.value));
+                  }}
+                  className="flex h-32 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                >
+                  {Object.entries(CATEGORIES).map(([key, value]) => (
+                    <option key={key} value={key}>
+                      {value}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Rating mínimo */}
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Rating Mínimo
+                </label>
+                <select
+                  value={minRating}
+                  onChange={(e) => setMinRating(e.target.value)}
+                  className="flex h-11 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                >
+                  <option value="4.7">4.7★ o más</option>
+                  <option value="4.8">4.8★ o más</option>
+                  <option value="4.9">4.9★ o más</option>
+                </select>
+              </div>
+
+              {/* Botón de indexación */}
+              <div className="pt-4">
+                <Button
+                  onClick={handleStartIndexation}
+                  disabled={isIndexing || selectedProvinces.length === 0 || selectedCategories.length === 0}
+                  className="w-full"
+                >
+                  {isIndexing ? 'Iniciando...' : '🚀 Iniciar Indexación'}
+                </Button>
+                
+                {(selectedProvinces.length === 0 || selectedCategories.length === 0) && (
+                  <p className="text-xs text-red-500 mt-2 text-center">
+                    Selecciona al menos una provincia y una categoría
+                  </p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Información del proceso */}
+        <div className="lg:col-span-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>📋 Cómo Funciona la Indexación</CardTitle>
+              <CardDescription>
+                Proceso automático en segundo plano
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4 text-sm text-gray-700">
+                <div className="flex items-start gap-3">
+                  <span className="text-2xl">1️⃣</span>
+                  <div>
+                    <p className="font-semibold mb-1">Búsqueda Exhaustiva</p>
+                    <p>Se buscan TODOS los lugares en Google Maps de las ciudades seleccionadas (sin filtro de rating).</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start gap-3">
+                  <span className="text-2xl">2️⃣</span>
+                  <div>
+                    <p className="font-semibold mb-1">Obtener Detalles</p>
+                    <p>Se descargan los detalles completos de cada lugar (rating exacto, reseñas, fotos, etc.).</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start gap-3">
+                  <span className="text-2xl">3️⃣</span>
+                  <div>
+                    <p className="font-semibold mb-1">Filtrado Inteligente</p>
+                    <p>Se descartan los que no cumplan: rating ≥4.7, reseñas ≥20, y duplicados.</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start gap-3">
+                  <span className="text-2xl">4️⃣</span>
+                  <div>
+                    <p className="font-semibold mb-1">Categorización con IA</p>
+                    <p>Cada lugar se categoriza automáticamente usando inteligencia artificial.</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start gap-3">
+                  <span className="text-2xl">5️⃣</span>
+                  <div>
+                    <p className="font-semibold mb-1">Guardado en Base de Datos</p>
+                    <p>Los lugares nuevos se guardan como borradores listos para enriquecer.</p>
+                  </div>
+                </div>
+
+                <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <p className="font-semibold text-blue-900 mb-2">⏱️ Tiempo Estimado</p>
+                  <p className="text-blue-800 text-sm">
+                    Murcia completa: ~10-15 minutos • Madrid: ~15-20 minutos • Barcelona: ~15-20 minutos
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Estado del Trabajo */}
+          {jobStatus && (
+            <Card className="mt-6">
+              <CardHeader>
+                <CardTitle>Estado de la Indexación</CardTitle>
+                <CardDescription>
+                  Job ID: {jobId}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {/* Barra de progreso */}
+                  <div>
+                    <div className="flex justify-between text-sm mb-2">
+                      <span className="font-medium">Progreso</span>
+                      <span>{jobStatus.progress || 0}%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2.5">
+                      <div 
+                        className="bg-indigo-600 h-2.5 rounded-full transition-all duration-300"
+                        style={{ width: `${jobStatus.progress || 0}%` }}
+                      ></div>
+                    </div>
+                  </div>
+
+                  {/* Estadísticas */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-blue-50 p-3 rounded-lg">
+                      <div className="text-xs text-blue-700">🔍 Encontrados</div>
+                      <div className="text-xl font-bold text-blue-700">{jobStatus.total_places || 0}</div>
+                    </div>
+                    <div className="bg-gray-50 p-3 rounded-lg">
+                      <div className="text-xs text-gray-500">🔄 Procesados</div>
+                      <div className="text-xl font-bold">{jobStatus.processed_places || 0}</div>
+                    </div>
+                    <div className="bg-green-50 p-3 rounded-lg">
+                      <div className="text-xs text-green-700">✅ Guardados</div>
+                      <div className="text-xl font-bold text-green-700">{jobStatus.successful_places || 0}</div>
+                    </div>
+                    <div className="bg-yellow-50 p-3 rounded-lg">
+                      <div className="text-xs text-yellow-700">⏭️ Descartados</div>
+                      <div className="text-xl font-bold text-yellow-700">
+                        {(jobStatus.processed_places || 0) - (jobStatus.successful_places || 0) - (jobStatus.failed_places || 0)}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {jobStatus.failed_places > 0 && (
+                    <div className="bg-red-50 p-3 rounded-lg mt-2">
+                      <div className="text-xs text-red-700">❌ Errores</div>
+                      <div className="text-xl font-bold text-red-700">{jobStatus.failed_places || 0}</div>
+                    </div>
+                  )}
+
+                  {/* Estado */}
+                  <div className="flex items-center justify-between pt-2 border-t">
+                    <span className="text-sm font-medium">Estado:</span>
+                    <span className={`px-3 py-1 rounded-full text-sm ${
+                      jobStatus.status === 'completed' ? 'bg-green-100 text-green-700' :
+                      jobStatus.status === 'running' ? 'bg-blue-100 text-blue-700' :
+                      jobStatus.status === 'failed' ? 'bg-red-100 text-red-700' :
+                      'bg-gray-100 text-gray-700'
+                    }`}>
+                      {jobStatus.status === 'pending' ? '⏳ Pendiente' :
+                       jobStatus.status === 'running' ? (jobStatus.total_places > 0 && jobStatus.processed_places === 0 ? '🔍 Buscando lugares...' : '🔄 Procesando lugares') :
+                       jobStatus.status === 'completed' ? '✅ Completado' :
+                       jobStatus.status === 'failed' ? '❌ Fallido' :
+                       jobStatus.status}
+                    </span>
+                  </div>
+
+                  {/* Mensaje durante búsqueda */}
+                  {jobStatus.status === 'running' && jobStatus.total_places > 0 && jobStatus.processed_places === 0 && (
+                    <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                      <p className="text-sm text-blue-800">
+                        🔍 <strong>Fase de búsqueda activa</strong>
+                      </p>
+                      <p className="text-xs text-blue-700 mt-1">
+                        Se encontraron <strong>{jobStatus.total_places} lugares únicos</strong> hasta ahora. 
+                        Cuando termine la búsqueda, comenzará el procesamiento y verás el progreso avanzar.
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Mensaje sobre lugares fallidos */}
+                  {jobStatus.failed_places > 0 && (
+                    <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                      <p className="text-sm text-yellow-800">
+                        ⚠️ <strong>{jobStatus.failed_places} lugares fallaron</strong>
+                      </p>
+                      <p className="text-xs text-yellow-700 mt-1">
+                        Posibles razones: slug duplicado, datos incompletos, categoría no válida, o ya existían en la BD.
+                      </p>
+                      <p className="text-xs text-yellow-700 mt-2">
+                        ✅ Los <strong>{jobStatus.successful_places} lugares exitosos</strong> están guardados y listos para publicar en "Gestión de Lugares".
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Mensaje de éxito completo */}
+                  {jobStatus.status === 'completed' && jobStatus.successful_places > 0 && (
+                    <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                      <p className="text-sm text-green-800">
+                        🎉 <strong>¡Indexación completada!</strong>
+                      </p>
+                      <p className="text-xs text-green-700 mt-1">
+                        Ve a <strong>"Gestión de Lugares"</strong> para revisar y publicar los {jobStatus.successful_places} lugares encontrados.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
