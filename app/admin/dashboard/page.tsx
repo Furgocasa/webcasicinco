@@ -387,9 +387,9 @@ export default function DashboardPage() {
 
       {/* KPIs Grid - 6 tarjetas principales */}
       {stats.totalPlaces > 0 && (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+        <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 md:overflow-x-visible scrollbar-hide">
           {/* Total Lugares */}
-          <Card className="bg-gradient-to-br from-indigo-500 to-indigo-600 text-white">
+          <Card className="min-w-[280px] md:min-w-0 snap-start bg-gradient-to-br from-indigo-500 to-indigo-600 text-white flex-shrink-0">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -404,7 +404,7 @@ export default function DashboardPage() {
           </Card>
 
           {/* Publicados */}
-          <Card className="bg-gradient-to-br from-green-500 to-green-600 text-white">
+          <Card className="min-w-[280px] md:min-w-0 snap-start bg-gradient-to-br from-green-500 to-green-600 text-white flex-shrink-0">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -422,7 +422,7 @@ export default function DashboardPage() {
           </Card>
 
           {/* Pendientes */}
-          <Card className="bg-gradient-to-br from-orange-500 to-orange-600 text-white">
+          <Card className="min-w-[280px] md:min-w-0 snap-start bg-gradient-to-br from-orange-500 to-orange-600 text-white flex-shrink-0">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -440,7 +440,7 @@ export default function DashboardPage() {
           </Card>
 
           {/* Rating Promedio */}
-          <Card className="bg-gradient-to-br from-yellow-500 to-yellow-600 text-white">
+          <Card className="min-w-[280px] md:min-w-0 snap-start bg-gradient-to-br from-yellow-500 to-yellow-600 text-white flex-shrink-0">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -458,7 +458,7 @@ export default function DashboardPage() {
           </Card>
 
           {/* Con IA */}
-          <Card className="bg-gradient-to-br from-purple-500 to-purple-600 text-white">
+          <Card className="min-w-[280px] md:min-w-0 snap-start bg-gradient-to-br from-purple-500 to-purple-600 text-white flex-shrink-0">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -476,7 +476,7 @@ export default function DashboardPage() {
           </Card>
 
           {/* Cobertura Geográfica */}
-          <Card className="bg-gradient-to-br from-cyan-500 to-cyan-600 text-white">
+          <Card className="min-w-[280px] md:min-w-0 snap-start bg-gradient-to-br from-cyan-500 to-cyan-600 text-white flex-shrink-0">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>

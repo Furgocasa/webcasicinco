@@ -2,9 +2,6 @@
 
 import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 
-// Marcar como ruta dinámica (usa useSearchParams)
-export const dynamic = 'force-dynamic';
-
 // 🚀 HOOK DE DEBOUNCE para optimizar búsquedas
 function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
@@ -39,6 +36,8 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import BottomNavigation from '@/components/mobile/BottomNavigation';
+import BottomSheet from '@/components/mobile/BottomSheet';
 import type { PlaceWithTier, PlaceFilters, QualityTier, ReviewsRange } from '@/types/filters';
 import { calculateQualityTier, getTierMarkerColor, getTierInfo } from '@/lib/utils/tier-calculator';
 import { 
@@ -92,6 +91,9 @@ export default function MapPage() {
   const [loading, setLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(true);
   const [showPlacesList, setShowPlacesList] = useState(true);
+  
+  // Vista móvil: 'map', 'filters', 'list'
+  const [mobileView, setMobileView] = useState<'map' | 'filters' | 'list'>('map');
   const [mapCenter, setMapCenter] = useState(defaultCenter);
   const [mapZoom, setMapZoom] = useState(6);
   const [showVisitModal, setShowVisitModal] = useState(false);
@@ -795,12 +797,27 @@ export default function MapPage() {
     );
   }
 
+  // Handlers para mobile view
+  const handleMobileViewChange = (view: 'map' | 'filters' | 'list') => {
+    setMobileView(view);
+  };
+
+  // Contar filtros activos
+  const activeFiltersCount = [
+    filters.community,
+    filters.province,
+    filters.city,
+    filters.category,
+    filters.qualityTier?.length,
+    filters.reviewsRange,
+  ].filter(Boolean).length;
+
   return (
     <div className="flex flex-col" style={{ height: 'calc(100vh - 64px)' }}>
-      <div className="flex-1 flex overflow-hidden">
-        {/* SIDEBAR DE FILTROS */}
+      <div className="flex-1 flex overflow-hidden relative">
+        {/* SIDEBAR DE FILTROS - Desktop */}
         <div 
-          className={`${
+          className={`hidden md:block ${
             showFilters ? 'w-96' : 'w-0'
           } transition-all duration-300 bg-white border-r border-gray-200 overflow-y-auto`}
         >
@@ -1516,9 +1533,9 @@ export default function MapPage() {
           })()}
         </div>
 
-        {/* PANEL LATERAL DERECHO - Lista de Lugares */}
+        {/* PANEL LATERAL DERECHO - Lista de Lugares - Desktop */}
         <div 
-          className={`${
+          className={`hidden md:block ${
             showPlacesList ? 'w-96' : 'w-0'
           } transition-all duration-300 bg-white border-l border-gray-200 overflow-y-auto`}
         >
@@ -1798,6 +1815,168 @@ export default function MapPage() {
           </div>
         );
       })()}
+
+      {/* BOTTOM NAVIGATION - Solo móvil */}
+      <BottomNavigation
+        activeView={mobileView}
+        onViewChange={handleMobileViewChange}
+        filtersCount={activeFiltersCount}
+        placesCount={filteredPlaces.length}
+      />
+
+      {/* BOTTOM SHEET - Filtros Mobile */}
+      <BottomSheet
+        isOpen={mobileView === 'filters'}
+        onClose={() => setMobileView('map')}
+        title="Filtros"
+        height="full"
+      >
+        <div className="space-y-4 py-4">
+          {/* Búsqueda */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Buscar
+            </label>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Nombre, ciudad..."
+                value={filters.searchTerm || ''}
+                onChange={(e) => setFilters({ ...filters, searchTerm: e.target.value })}
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg text-base"
+              />
+            </div>
+          </div>
+
+          {/* Provincia */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              📍 Provincia
+            </label>
+            <select
+              value={filters.province || ''}
+              onChange={(e) => setFilters({ ...filters, province: e.target.value || undefined })}
+              className="w-full px-3 py-3 border border-gray-300 rounded-lg text-base"
+            >
+              <option value="">Todas</option>
+              {PROVINCES.map(p => (
+                <option key={p} value={p}>{p}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Ciudad */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              🏙️ Ciudad
+            </label>
+            <input
+              type="text"
+              placeholder="Ej: Málaga, Marbella..."
+              value={filters.city || ''}
+              onChange={(e) => setFilters({ ...filters, city: e.target.value || undefined })}
+              className="w-full px-3 py-3 border border-gray-300 rounded-lg text-base"
+            />
+          </div>
+
+          {/* Categoría */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              🍽️ Categoría
+            </label>
+            <select
+              value={filters.category || ''}
+              onChange={(e) => setFilters({ ...filters, category: e.target.value as any || undefined })}
+              className="w-full px-3 py-3 border border-gray-300 rounded-lg text-base"
+            >
+              <option value="">Todas</option>
+              {Object.entries(CATEGORIES).map(([key, label]) => (
+                <option key={key} value={key}>{label}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Tier */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              💎 Tier de Calidad
+            </label>
+            <select
+              value={filters.qualityTier?.[0] || ''}
+              onChange={(e) => setFilters({ ...filters, qualityTier: e.target.value ? [e.target.value as QualityTier] : undefined })}
+              className="w-full px-3 py-3 border border-gray-300 rounded-lg text-base"
+            >
+              <option value="">Todos</option>
+              {Object.entries(QUALITY_TIERS).map(([key, tier]) => (
+                <option key={key} value={key}>
+                  {tier.icon} {tier.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Botones */}
+          <div className="flex gap-2 pt-4">
+            <Button
+              onClick={clearFilters}
+              variant="outline"
+              className="flex-1"
+            >
+              Limpiar
+            </Button>
+            <Button
+              onClick={() => setMobileView('map')}
+              variant="primary"
+              className="flex-1"
+            >
+              Ver Mapa
+            </Button>
+          </div>
+        </div>
+      </BottomSheet>
+
+      {/* BOTTOM SHEET - Lista de Lugares Mobile */}
+      <BottomSheet
+        isOpen={mobileView === 'list'}
+        onClose={() => setMobileView('map')}
+        title={`${filteredPlaces.length} Lugares`}
+        height="full"
+      >
+        <div className="space-y-3 py-2">
+          {loading ? (
+            <div className="flex justify-center py-8">
+              <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+            </div>
+          ) : sortedPlaces.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              No se encontraron lugares
+            </div>
+          ) : (
+            sortedPlaces.slice(0, 50).map((place) => (
+              <div
+                key={place.id}
+                onClick={() => {
+                  setSelectedPlace(place);
+                  setMobileView('map');
+                  mapRef.current?.panTo({ lat: place.latitude, lng: place.longitude });
+                  mapRef.current?.setZoom(15);
+                }}
+                className="bg-white border border-gray-200 rounded-lg p-3 active:bg-gray-50 cursor-pointer"
+              >
+                <h3 className="font-semibold text-base mb-1">{place.name}</h3>
+                <div className="flex items-center gap-2 text-sm text-gray-600 mb-1">
+                  <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
+                  <span>{place.rating}</span>
+                  <span>·</span>
+                  <span>{place.review_count} reseñas</span>
+                </div>
+                <p className="text-sm text-gray-500">{place.city}, {place.province}</p>
+              </div>
+            ))
+          )}
+        </div>
+      </BottomSheet>
     </div>
   );
 }

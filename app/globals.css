@@ -2,6 +2,40 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer utilities {
+  /* Ocultar scrollbar pero mantener scroll */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  /* Touch-friendly mobile styles */
+  @media (max-width: 768px) {
+    input, select, button {
+      font-size: 16px !important; /* Evita zoom en iOS */
+    }
+  }
+  
+  /* Animaciones móviles */
+  .animate-slide-down {
+    animation: slideDown 0.3s ease-out;
+  }
+  
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
 @layer base {
   :root {
     --font-inter: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',

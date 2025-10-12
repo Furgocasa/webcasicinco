@@ -144,10 +144,11 @@ export default function Header() {
             )}
           </div>
 
-          {/* Mobile Menu Button */}
+          {/* Mobile Menu Button - Touch optimized */}
           <button
-            className="md:hidden p-2"
+            className="md:hidden p-3 -mr-3 active:bg-gray-100 rounded-lg transition"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
+            aria-label="Menú"
           >
             <svg
               className="w-6 h-6"
@@ -167,10 +168,10 @@ export default function Header() {
           </button>
         </div>
 
-        {/* Mobile Menu */}
+        {/* Mobile Menu - Slide down animation */}
         {isMenuOpen && (
-          <div className="md:hidden py-4 border-t">
-            <div className="flex flex-col space-y-4">
+          <div className="md:hidden py-4 border-t animate-slide-down">
+            <div className="flex flex-col space-y-3">
               <Link 
                 href="/mapa" 
                 className="text-gray-700 hover:text-indigo-600 transition"

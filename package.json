@@ -1,7 +1,7 @@
 {
   "name": "casi5-app",
-  "version": "1.0.0",
-  "description": "Aplicación para viajeros que muestra lugares con 4.7+ estrellas en Google Maps",
+  "version": "3.0.0",
+  "description": "Aplicación mobile-first para viajeros que muestra lugares con 4.7+ estrellas en Google Maps",
   "private": true,
   "scripts": {
     "dev": "next dev",

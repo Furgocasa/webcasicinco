@@ -246,8 +246,8 @@ export default function RutaPage() {
             )}
           </div>
 
-          {/* CONFIGURACIÓN DE RUTA */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-4">
+          {/* CONFIGURACIÓN DE RUTA - Mobile Optimized */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4">
             {/* Origen con Autocomplete */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -277,7 +277,7 @@ export default function RutaPage() {
                     value={origin}
                     onChange={(e) => setOrigin(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && calculateRoute()}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-base"
                   />
                 </Autocomplete>
               )}
@@ -312,7 +312,7 @@ export default function RutaPage() {
                     value={destination}
                     onChange={(e) => setDestination(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && calculateRoute()}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-base"
                   />
                 </Autocomplete>
               )}
