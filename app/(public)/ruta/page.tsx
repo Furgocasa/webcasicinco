@@ -74,8 +74,8 @@ export default function RutaPage() {
   const [loadingPlaces, setLoadingPlaces] = useState(false);
   const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
   
-  // Vista móvil: 'form', 'map', 'list'
-  const [mobileView, setMobileView] = useState<'form' | 'map' | 'list'>('form');
+  // Vista móvil: 'form', 'map', 'list' - Empieza en 'map' como experiencia por defecto
+  const [mobileView, setMobileView] = useState<'form' | 'map' | 'list'>('map');
 
   // Info de la ruta
   const [routeInfo, setRouteInfo] = useState<{

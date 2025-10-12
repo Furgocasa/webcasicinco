@@ -164,21 +164,21 @@ export default function ChatbotFloating() {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-20 md:bottom-6 right-6 z-40 group"
+          className="fixed bottom-20 md:bottom-6 right-3 md:right-6 z-40 group"
           title="Abrir Tío Viajero IA"
         >
-          {/* Avatar flotante estilo Tío Viajero */}
+          {/* Avatar flotante estilo Tío Viajero - Más pequeño en móvil */}
           <div className="relative">
             {/* Imagen del Tío Viajero */}
-            <div className="w-20 h-20 rounded-full shadow-2xl transform transition-all duration-300 hover:scale-110 overflow-hidden bg-sky-100">
+            <div className="w-14 h-14 md:w-20 md:h-20 rounded-full shadow-xl md:shadow-2xl transform transition-all duration-300 hover:scale-110 overflow-hidden bg-sky-100">
               <img 
                 src="/images/tio-viajero.png" 
                 alt="Tío Viajero" 
                 className="w-full h-full object-cover"
               />
             </div>
-            {/* Indicador online */}
-            <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full animate-pulse border-3 border-white shadow-lg"></div>
+            {/* Indicador online - Más pequeño en móvil */}
+            <div className="absolute -bottom-1 -right-1 w-4 h-4 md:w-5 md:h-5 bg-green-500 rounded-full animate-pulse border-2 md:border-3 border-white shadow-lg"></div>
           </div>
         </button>
       )}
