@@ -20,6 +20,11 @@ const menuItems = [
     icon: '📍',
   },
   {
+    name: 'Gestión de Usuarios',
+    href: '/admin/usuarios',
+    icon: '👥',
+  },
+  {
     name: 'Historial de Trabajos',
     href: '/admin/trabajos',
     icon: '📋',

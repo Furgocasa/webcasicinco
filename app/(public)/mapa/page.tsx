@@ -650,13 +650,21 @@ export default function MapPage() {
     }
 
     setGeolocationError(null);
-    toast.info('📍 Solicitando tu ubicación...');
     
-    // Opciones optimizadas para todos los dispositivos, especialmente iOS
+    // Detectar si es móvil o desktop
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    
+    if (isMobile) {
+      toast.info('📍 Solicitando tu ubicación GPS...');
+    } else {
+      toast.info('📍 Obteniendo ubicación aproximada (WiFi/IP)...');
+    }
+    
+    // Opciones adaptativas: GPS en móvil, WiFi/IP en desktop
     const options = {
-      enableHighAccuracy: true,  // Máxima precisión (GPS)
-      timeout: 10000,            // 10 segundos timeout (iOS puede ser lento)
-      maximumAge: 0              // No usar caché vieja
+      enableHighAccuracy: isMobile,  // GPS solo en móviles (más preciso pero consume batería)
+      timeout: isMobile ? 10000 : 5000,  // Más tiempo en móvil
+      maximumAge: isMobile ? 0 : 60000   // Permitir caché de 1 min en desktop
     };
     
     navigator.geolocation.getCurrentPosition(
@@ -665,52 +673,82 @@ export default function MapPage() {
           lat: position.coords.latitude,
           lng: position.coords.longitude,
         };
+        
+        // Verificar precisión de la ubicación
+        const accuracy = position.coords.accuracy; // En metros
+        
         setUserLocation(location);
         setIsGeolocationActive(true);
         
         // Guardar en localStorage para persistir entre recargas
         localStorage.setItem('geolocationActive', 'true');
         
-        toast.success('✅ Ubicación activada correctamente');
+        // Mensaje según precisión
+        if (accuracy > 5000) {
+          // Muy impreciso (> 5km) - Típico de PC con WiFi/IP
+          toast.warning(`⚠️ Ubicación aproximada (±${Math.round(accuracy/1000)}km). Para mayor precisión, usa un dispositivo móvil.`);
+        } else if (accuracy > 1000) {
+          // Impreciso (1-5km)
+          toast.success(`✅ Ubicación obtenida (±${Math.round(accuracy/1000)}km de precisión)`);
+        } else {
+          // Preciso (< 1km) - GPS
+          toast.success('✅ Ubicación GPS activada correctamente');
+        }
         
-        // NO cambiamos el zoom ni el centro del mapa
-        // Solo mostramos el marcador de ubicación
-        // La lista se reordenará automáticamente si está ordenada por proximidad
+        console.log('📍 Ubicación obtenida:', {
+          lat: location.lat,
+          lng: location.lng,
+          accuracy: `±${Math.round(accuracy)}m`,
+          isMobile
+        });
       },
       (error) => {
         // Mensajes de error específicos según el código
         let errorMessage = 'No pudimos obtener tu ubicación';
+        let toastMessage = '';
+        let helpText = '';
         
         switch (error.code) {
           case error.PERMISSION_DENIED:
-            errorMessage = 'Permiso denegado. Permite el acceso a tu ubicación en la configuración.';
-            toast.error('❌ Permiso de ubicación denegado');
+            errorMessage = 'Permiso de ubicación denegado';
+            toastMessage = '❌ Permiso denegado';
+            if (isMobile) {
+              helpText = 'Safari/Chrome → Configuración del sitio → Permitir ubicación';
+            } else {
+              helpText = 'Click en el candado 🔒 → Permisos del sitio → Ubicación → Permitir';
+            }
             break;
           case error.POSITION_UNAVAILABLE:
-            errorMessage = 'Ubicación no disponible. Verifica tu conexión GPS.';
-            toast.error('❌ No se pudo determinar tu ubicación');
+            errorMessage = 'Ubicación no disponible';
+            toastMessage = '❌ Ubicación no disponible';
+            helpText = 'Verifica que GPS/WiFi estén activos';
             break;
           case error.TIMEOUT:
-            errorMessage = 'Tiempo agotado. Intenta de nuevo.';
-            toast.error('❌ La solicitud de ubicación tardó demasiado');
+            errorMessage = 'Tiempo agotado';
+            toastMessage = '❌ Tiempo agotado (tardó > 10s)';
+            helpText = 'Intenta de nuevo, asegúrate de tener buena señal';
             break;
           default:
-            errorMessage = 'Error desconocido al obtener ubicación';
-            toast.error('❌ Error al obtener ubicación');
+            errorMessage = 'Error al obtener ubicación';
+            toastMessage = '❌ Error desconocido';
         }
         
-        setGeolocationError(errorMessage);
-        console.error('Error de geolocalización:', {
+        setGeolocationError(errorMessage + (helpText ? ` - ${helpText}` : ''));
+        toast.error(toastMessage + (helpText ? `\n${helpText}` : ''));
+        
+        console.error('❌ Error de geolocalización:', {
           code: error.code,
           message: error.message,
-          userAgent: navigator.userAgent
+          userAgent: navigator.userAgent,
+          isMobile,
+          isHTTPS: window.location.protocol === 'https:'
         });
         
         // Si falla, limpiar el flag
         localStorage.setItem('geolocationActive', 'false');
         setIsGeolocationActive(false);
       },
-      options // ✅ Pasar opciones optimizadas
+      options // ✅ Opciones adaptativas según dispositivo
     );
   };
 
@@ -1267,84 +1305,77 @@ export default function MapPage() {
             </button>
           )}
 
-          {/* Stats flotantes */}
-          <div className="absolute top-4 right-4 z-10 bg-white shadow-lg rounded-lg p-4 max-w-sm">
-            <div className="flex items-center gap-2 mb-2">
-              <MapPin className="h-5 w-5 text-primary" />
-              <span className="font-semibold text-gray-900">
+          {/* Stats flotantes - Más compacto en móvil */}
+          <div className="absolute top-2 md:top-4 right-2 md:right-4 z-10 bg-white/95 backdrop-blur-sm shadow-lg rounded-lg px-2 py-1.5 md:p-3">
+            <div className="flex items-center gap-1.5 md:gap-2">
+              <MapPin className="h-3.5 w-3.5 md:h-4 md:w-4 text-primary flex-shrink-0" />
+              <span className="font-semibold text-gray-900 text-xs md:text-sm whitespace-nowrap">
                 {filteredPlaces.length} lugares
               </span>
             </div>
-            {filters.qualityTier && filters.qualityTier.length > 0 && (
-              <div className="text-sm text-gray-600">
-                Tier: {filters.qualityTier.map(t => QUALITY_TIERS[t].icon).join(' ')}
-              </div>
-            )}
-            {filters.reviewsRange && (
-              <div className="text-sm text-gray-600">
-                Reseñas: {REVIEWS_RANGES[filters.reviewsRange].name}
-              </div>
-            )}
           </div>
 
-          {/* Leyenda de Tiers */}
-          <div className="absolute bottom-20 md:bottom-4 left-4 z-10 bg-white shadow-xl rounded-lg p-3 md:p-4 border border-gray-200 max-w-[200px]">
-            <h4 className="font-bold text-xs md:text-sm mb-2 md:mb-3 text-gray-900">Calidad de Lugares</h4>
-            <div className="space-y-2 text-xs">
-              <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-full flex items-center justify-center border-2 border-gray-300" style={{ backgroundColor: '#93c5fd' }}>
-                  <span className="text-sm">💎</span>
+          {/* Leyenda de Tiers - Más compacta en móvil */}
+          <div className="absolute bottom-20 md:bottom-4 left-2 md:left-4 z-10 bg-white/95 backdrop-blur-sm shadow-lg rounded-lg p-2 md:p-3 border border-gray-200">
+            <h4 className="font-bold text-[10px] md:text-xs mb-1.5 md:mb-2 text-gray-900">Calidad</h4>
+            <div className="space-y-1 md:space-y-1.5">
+              <div className="flex items-center gap-1.5 md:gap-2">
+                <div className="w-4 h-4 md:w-5 md:h-5 rounded-full flex items-center justify-center border border-gray-300" style={{ backgroundColor: '#93c5fd' }}>
+                  <span className="text-[10px] md:text-xs">💎</span>
                 </div>
-                <span className="font-semibold text-gray-900">Diamante</span>
+                <span className="font-medium text-gray-900 text-[10px] md:text-xs">Diamante</span>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-full flex items-center justify-center border-2 border-gray-300" style={{ backgroundColor: '#e5e7eb' }}>
-                  <span className="text-sm">🏆</span>
+              <div className="flex items-center gap-1.5 md:gap-2">
+                <div className="w-4 h-4 md:w-5 md:h-5 rounded-full flex items-center justify-center border border-gray-300" style={{ backgroundColor: '#e5e7eb' }}>
+                  <span className="text-[10px] md:text-xs">🏆</span>
                 </div>
-                <span className="font-semibold text-gray-900">Platino</span>
+                <span className="font-medium text-gray-900 text-[10px] md:text-xs">Platino</span>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-full flex items-center justify-center border-2 border-gray-300" style={{ backgroundColor: '#fbbf24' }}>
-                  <span className="text-sm">🥇</span>
+              <div className="flex items-center gap-1.5 md:gap-2">
+                <div className="w-4 h-4 md:w-5 md:h-5 rounded-full flex items-center justify-center border border-gray-300" style={{ backgroundColor: '#fbbf24' }}>
+                  <span className="text-[10px] md:text-xs">🥇</span>
                 </div>
-                <span className="font-semibold text-gray-900">Oro</span>
+                <span className="font-medium text-gray-900 text-[10px] md:text-xs">Oro</span>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-full flex items-center justify-center border-2 border-gray-300" style={{ backgroundColor: '#d1d5db' }}>
-                  <span className="text-sm">🥈</span>
+              <div className="flex items-center gap-1.5 md:gap-2">
+                <div className="w-4 h-4 md:w-5 md:h-5 rounded-full flex items-center justify-center border border-gray-300" style={{ backgroundColor: '#d1d5db' }}>
+                  <span className="text-[10px] md:text-xs">🥈</span>
                 </div>
-                <span className="font-semibold text-gray-900">Plata</span>
+                <span className="font-medium text-gray-900 text-[10px] md:text-xs">Plata</span>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-full flex items-center justify-center border-2 border-gray-300" style={{ backgroundColor: '#fb923c' }}>
-                  <span className="text-sm">🥉</span>
+              <div className="flex items-center gap-1.5 md:gap-2">
+                <div className="w-4 h-4 md:w-5 md:h-5 rounded-full flex items-center justify-center border border-gray-300" style={{ backgroundColor: '#fb923c' }}>
+                  <span className="text-[10px] md:text-xs">🥉</span>
                 </div>
-                <span className="font-semibold text-gray-900">Bronce</span>
+                <span className="font-medium text-gray-900 text-[10px] md:text-xs">Bronce</span>
               </div>
             </div>
           </div>
 
-          {/* Botón de geolocalización (centro inferior) - Arriba del bottom nav en móvil */}
-          <div className="absolute bottom-24 md:bottom-8 left-1/2 transform -translate-x-1/2 z-10">
+          {/* Botón de geolocalización - Compacto y bien posicionado */}
+          <div className="absolute bottom-20 md:bottom-6 left-1/2 transform -translate-x-1/2 z-10">
             <button
               onClick={isGeolocationActive ? deactivateGeolocation : activateGeolocation}
-              className={`flex items-center gap-2 px-6 py-3 rounded-full shadow-2xl transition-all duration-300 font-semibold text-sm ${
+              className={`flex items-center gap-1.5 md:gap-2 px-3 py-2 md:px-4 md:py-2.5 rounded-full shadow-xl transition-all duration-300 font-medium text-xs md:text-sm ${
                 isGeolocationActive
                   ? 'bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700'
-                  : 'bg-white text-gray-700 hover:bg-gray-50 border-2 border-gray-300'
+                  : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
               }`}
               title={isGeolocationActive ? 'Desactivar ubicación' : 'Activar mi ubicación'}
             >
-              <MapPin className={`h-5 w-5 ${isGeolocationActive ? 'animate-pulse' : ''}`} />
-              <span>
+              <MapPin className={`h-3.5 w-3.5 md:h-4 md:w-4 ${isGeolocationActive ? 'animate-pulse' : ''}`} />
+              <span className="hidden sm:inline">
                 {isGeolocationActive ? 'Ubicación Activa' : 'Usar mi Ubicación'}
               </span>
+              <span className="sm:hidden">
+                {isGeolocationActive ? 'GPS' : 'Mi Ubicación'}
+              </span>
               {isGeolocationActive && (
-                <X className="h-4 w-4" />
+                <X className="h-3 w-3 md:h-3.5 md:w-3.5" />
               )}
             </button>
             {geolocationError && (
-              <div className="absolute top-full mt-2 left-1/2 transform -translate-x-1/2 bg-red-50 text-red-600 px-4 py-2 rounded-lg shadow-lg text-xs whitespace-nowrap">
+              <div className="absolute top-full mt-1 left-1/2 transform -translate-x-1/2 bg-red-50 text-red-600 px-2 py-1 md:px-3 md:py-1.5 rounded-lg shadow-lg text-[10px] md:text-xs max-w-[200px] md:max-w-none text-center">
                 {geolocationError}
               </div>
             )}

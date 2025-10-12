@@ -10,6 +10,7 @@ const adminSections = [
   { name: 'Dashboard', path: '/admin/dashboard', icon: '📊' },
   { name: 'Indexar Lugares', path: '/admin/indexar', icon: '🔍' },
   { name: 'Gestión de Lugares', path: '/admin/lugares', icon: '📍' },
+  { name: 'Gestión de Usuarios', path: '/admin/usuarios', icon: '👥' },
   { name: 'Historial de Trabajos', path: '/admin/trabajos', icon: '📋' },
   { name: 'Configuración', path: '/admin/configuracion', icon: '⚙️' },
 ];
