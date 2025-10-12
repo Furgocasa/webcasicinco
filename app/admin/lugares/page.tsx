@@ -345,25 +345,26 @@ export default function LugaresPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
+      {/* Header - Mobile Responsive */}
+      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-3 md:gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Gestión de Lugares</h1>
-          <p className="text-gray-600 mt-1">
+          <h1 className="text-xl md:text-3xl font-bold text-gray-900">Gestión de Lugares</h1>
+          <p className="text-sm md:text-base text-gray-600 mt-1">
             {filteredPlaces.length} de {places.length} lugares
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="grid grid-cols-3 md:flex gap-2">
           <Button onClick={loadPlaces} variant="outline" size="sm" disabled={enriching}>
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Recargar
+            <RefreshCw className="h-4 w-4 md:mr-2" />
+            <span className="hidden md:inline">Recargar</span>
           </Button>
           <Button onClick={handleEnrichPlaces} variant="primary" size="sm" disabled={enriching}>
-            {enriching ? '⏳ Procesando...' : '🎨 Enriquecer con IA'}
+            <span className="md:hidden">🎨</span>
+            <span className="hidden md:inline">{enriching ? '⏳ Procesando...' : '🎨 Enriquecer IA'}</span>
           </Button>
           <Button onClick={handlePublishAll} variant="outline" size="sm" disabled={enriching}>
-            <Eye className="h-4 w-4 mr-2" />
-            Publicar Todos
+            <Eye className="h-4 w-4 md:mr-2" />
+            <span className="hidden md:inline">Publicar</span>
           </Button>
         </div>
       </div>
