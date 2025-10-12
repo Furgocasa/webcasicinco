@@ -197,104 +197,76 @@ export default function Header() {
               onClick={() => setIsMenuOpen(false)}
             />
             
-            {/* Menú deslizable */}
+            {/* Menú deslizable - Limpio y Sin Duplicados */}
             <div className="fixed top-16 left-0 right-0 bottom-0 bg-white z-50 md:hidden overflow-y-auto animate-slide-down shadow-2xl">
-              <div className="p-6 space-y-4">
-                <Link 
-                  href="/mapa" 
-                  className="block text-lg font-medium text-gray-700 hover:text-indigo-600 transition py-3 border-b"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  🗺️ Mapa
-                </Link>
-                <Link 
-                  href="/ruta" 
-                  className="block text-lg font-medium text-gray-700 hover:text-indigo-600 transition py-3 border-b"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  🧭 Planificar Ruta
-                </Link>
-              <div className="pt-4 mt-4 border-t flex flex-col space-y-3">
+              <div className="p-6">
+              <div className="space-y-3">
                 {loading ? (
-                  <div className="flex justify-center">
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600"></div>
+                  <div className="flex justify-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
                   </div>
                 ) : user ? (
                   <>
-                    {/* Admin link - Solo para admins */}
-                    {isAdmin && (
-                      <Link href="/admin/dashboard" onClick={() => setIsMenuOpen(false)}>
-                        <Button variant="outline" className="w-full">
-                          Panel Admin
-                        </Button>
-                      </Link>
-                    )}
-
-                    {/* Perfil link - Para TODOS los usuarios */}
-                    <Link href="/perfil" onClick={() => setIsMenuOpen(false)}>
-                      <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
-                        Mi Perfil
-                      </Button>
-                    </Link>
-                    
-                    {/* User info */}
-                    <div className="px-4 py-3 bg-gray-50 rounded-lg">
-                      <div className="flex items-center space-x-3">
-                        <div className="flex items-center justify-center w-10 h-10 bg-indigo-100 rounded-full">
-                          <User className="h-5 w-5 text-indigo-600" />
+                    {/* User info card */}
+                    <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-4 mb-6">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center">
+                          <User className="h-6 w-6 text-white" />
                         </div>
-                        <div>
-                          <p className="text-sm font-medium text-gray-900">Mi cuenta</p>
-                          <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-gray-900">Mi Cuenta</p>
+                          <p className="text-sm text-gray-600 truncate">{user.email}</p>
                         </div>
                       </div>
                     </div>
 
-                    {/* Menu items */}
-                    <div className="space-y-1">
+                    {/* Admin - Destacado si es admin */}
+                    {isAdmin && (
                       <Link
-                        href="/perfil"
-                        className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-200"
+                        href="/admin/dashboard"
+                        className="flex items-center gap-3 px-4 py-4 rounded-xl bg-purple-600 text-white hover:bg-purple-700 transition shadow-lg"
                         onClick={() => setIsMenuOpen(false)}
                       >
-                        <User className="h-4 w-4 mr-3" />
-                        Mi Perfil
+                        <Settings className="h-5 w-5" />
+                        <span className="font-semibold">Panel Admin</span>
                       </Link>
+                    )}
 
-                      {isAdmin && (
-                        <Link
-                          href="/admin/configuracion"
-                          className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-200"
-                          onClick={() => setIsMenuOpen(false)}
-                        >
-                          <Settings className="h-4 w-4 mr-3" />
-                          Configuración
-                        </Link>
-                      )}
-                      
-                      <button
-                        onClick={() => {
-                          signOut();
-                          setIsMenuOpen(false);
-                        }}
-                        className="flex items-center w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-200"
-                      >
-                        <LogOut className="h-4 w-4 mr-3" />
-                        Cerrar Sesión
-                      </button>
-                    </div>
+                    {/* Perfil */}
+                    <Link
+                      href="/perfil"
+                      className="flex items-center gap-3 px-4 py-4 rounded-xl hover:bg-gray-50 transition border border-gray-200"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <User className="h-5 w-5 text-gray-600" />
+                      <span className="font-medium text-gray-900">Mi Perfil</span>
+                    </Link>
+
+                    {/* Cerrar sesión */}
+                    <button
+                      onClick={() => {
+                        signOut();
+                        setIsMenuOpen(false);
+                      }}
+                      className="flex items-center gap-3 px-4 py-4 rounded-xl hover:bg-red-50 transition w-full text-left border border-red-200"
+                    >
+                      <LogOut className="h-5 w-5 text-red-600" />
+                      <span className="font-medium text-red-600">Cerrar Sesión</span>
+                    </button>
                   </>
                 ) : (
-                  <>
+                  <div className="space-y-3">
                     <Link href="/login" onClick={() => setIsMenuOpen(false)}>
-                      <Button variant="ghost" className="w-full">
+                      <Button variant="outline" className="w-full h-12 text-base">
                         Iniciar Sesión
                       </Button>
                     </Link>
                     <Link href="/registro" onClick={() => setIsMenuOpen(false)}>
-                      <Button className="w-full">Registrarse</Button>
+                      <Button className="w-full h-12 text-base bg-gradient-to-r from-indigo-600 to-purple-600">
+                        Registrarse
+                      </Button>
                     </Link>
-                  </>
+                  </div>
                 )}
               </div>
               </div>
