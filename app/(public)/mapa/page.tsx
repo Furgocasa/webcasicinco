@@ -791,8 +791,8 @@ export default function MapPage() {
   ].filter(Boolean).length;
 
   return (
-    <div className="flex flex-col h-screen md:h-[calc(100vh-64px)]">
-      <div className="flex-1 flex overflow-hidden relative pb-16 md:pb-0">
+    <div className="flex flex-col h-[calc(100vh-64px)]">
+      <div className="flex-1 flex overflow-hidden relative pb-0 md:pb-0">
         {/* SIDEBAR DE FILTROS - Desktop */}
         <div 
           className={`hidden md:block ${
@@ -1191,7 +1191,7 @@ export default function MapPage() {
         </div>
 
         {/* MAPA */}
-        <div className="flex-1 relative">
+        <div className="flex-1 relative mb-16 md:mb-0">
           {/* Botón toggle filtros */}
           {!showFilters && (
             <button
@@ -1875,23 +1875,31 @@ export default function MapPage() {
             </select>
           </div>
 
-          {/* Tier */}
+          {/* Tier - Multi-selección como en PC */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-3">
               💎 Tier de Calidad
             </label>
-            <select
-              value={filters.qualityTier?.[0] || ''}
-              onChange={(e) => setFilters({ ...filters, qualityTier: e.target.value ? [e.target.value as QualityTier] : undefined })}
-              className="w-full px-3 py-3 border border-gray-300 rounded-lg text-base"
-            >
-              <option value="">Todos</option>
+            <div className="space-y-2">
               {Object.entries(QUALITY_TIERS).map(([key, tier]) => (
-                <option key={key} value={key}>
-                  {tier.icon} {tier.name}
-                </option>
+                <label key={key} className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={filters.qualityTier?.includes(key as QualityTier) || false}
+                    onChange={(e) => {
+                      const currentTiers = filters.qualityTier || [];
+                      if (e.target.checked) {
+                        setFilters({ ...filters, qualityTier: [...currentTiers, key as QualityTier] });
+                      } else {
+                        setFilters({ ...filters, qualityTier: currentTiers.filter(t => t !== key) });
+                      }
+                    }}
+                    className="w-5 h-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                  />
+                  <span className="text-base">{tier.icon} {tier.name}</span>
+                </label>
               ))}
-            </select>
+            </div>
           </div>
 
           {/* Botones */}
