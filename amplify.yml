@@ -2,6 +2,7 @@ version: 1
 applications:
   - appRoot: .
     platform: WEB_COMPUTE
+    framework: Next.js - SSR
     frontend:
       phases:
         preBuild:
@@ -9,6 +10,7 @@ applications:
             - npm ci --legacy-peer-deps
         build:
           commands:
+            - env | grep -E 'OPENAI|STRIPE|SUPABASE|GOOGLE' || true
             - npm run build
       artifacts:
         baseDirectory: .next
@@ -18,4 +20,7 @@ applications:
         paths:
           - node_modules/**/*
           - .next/cache/**/*
+    environment:
+      variables:
+        _LIVE_UPDATES: '[{"name":"Next.js version","pkg":"next","type":"internal"}]'
 
