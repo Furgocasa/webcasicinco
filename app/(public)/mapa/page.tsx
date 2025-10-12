@@ -1333,8 +1333,8 @@ export default function MapPage() {
             </div>
           </div>
 
-          {/* Mapa - Contenedor absoluto para todos los elementos */}
-          <div className="absolute inset-0">
+          {/* Contenedor del mapa y controles */}
+          <div className="h-full w-full relative">
             {/* Loader sobre el mapa mientras se carga Google Maps API */}
             {!isLoaded && (
               <div className="absolute inset-0 bg-gray-100 flex items-center justify-center z-50">
