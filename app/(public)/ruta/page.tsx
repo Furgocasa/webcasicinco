@@ -45,6 +45,7 @@ type Place = {
   province: string;
   address: string;
   photos?: string[];
+  google_maps_url?: string;
 };
 
 export default function RutaPage() {
