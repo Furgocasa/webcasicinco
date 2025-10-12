@@ -115,12 +115,31 @@ export default function DashboardPage() {
 
   const loadDashboardData = async () => {
     try {
-      // Cargar TODOS los lugares
-      const placesResponse = await fetch('/api/admin/places');
-      const placesData = await placesResponse.json();
+      // Cargar TODOS los lugares en lotes
+      let allPlaces: any[] = [];
+      let page = 1;
+      let hasMore = true;
       
-      if (placesData.success) {
-        const places = placesData.places || [];
+      while (hasMore) {
+        const placesResponse = await fetch(`/api/admin/places?page=${page}&limit=100`);
+        const placesData = await placesResponse.json();
+        
+        if (placesData.success && placesData.places && placesData.places.length > 0) {
+          allPlaces = [...allPlaces, ...placesData.places];
+          page++;
+          
+          if (placesData.places.length < 100) {
+            hasMore = false;
+          }
+        } else {
+          hasMore = false;
+        }
+      }
+      
+      console.log(`✅ Dashboard: Cargados ${allPlaces.length} lugares`);
+      
+      if (allPlaces.length > 0) {
+        const places = allPlaces;
         
         // === ESTADÍSTICAS GENERALES ===
         const published = places.filter((p: any) => p.published).length;
