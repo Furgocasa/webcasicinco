@@ -1930,6 +1930,24 @@ export default function MapPage() {
         height="full"
       >
         <div className="space-y-3 py-2">
+          {/* Selector de ordenamiento móvil */}
+          <div className="sticky top-0 bg-white pb-3 border-b z-10">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Ordenar por:
+            </label>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as 'rating' | 'reviews' | 'proximity')}
+              className="w-full px-3 py-3 text-base border border-gray-300 rounded-lg"
+            >
+              <option value="reviews">📊 Más Reseñas</option>
+              <option value="rating">⭐ Mayor Valoración</option>
+              <option value="proximity" disabled={!isGeolocationActive}>
+                📍 Proximidad {!isGeolocationActive && '(requiere ubicación)'}
+              </option>
+            </select>
+          </div>
+
           {loading ? (
             <div className="flex justify-center py-8">
               <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
