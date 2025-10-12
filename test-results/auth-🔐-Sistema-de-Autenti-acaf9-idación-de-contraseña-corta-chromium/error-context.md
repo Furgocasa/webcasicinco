@@ -1,0 +1,68 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - banner [ref=e2]:
+    - navigation [ref=e3]:
+      - generic [ref=e4]:
+        - link "Casi Cinco ⭐" [ref=e5] [cursor=pointer]:
+          - /url: /
+          - generic [ref=e6]: Casi Cinco
+          - generic [ref=e7]: ⭐
+        - generic [ref=e8]:
+          - link "Mapa" [ref=e9] [cursor=pointer]:
+            - /url: /mapa
+          - link "Planificar Ruta" [ref=e10] [cursor=pointer]:
+            - /url: /ruta
+        - generic [ref=e11]:
+          - link "Iniciar Sesión" [ref=e12] [cursor=pointer]:
+            - /url: /login
+            - button "Iniciar Sesión" [ref=e13]
+          - link "Registrarse" [ref=e14] [cursor=pointer]:
+            - /url: /registro
+            - button "Registrarse" [ref=e15]
+  - main [ref=e16]:
+    - generic [ref=e18]:
+      - link "5 Casi Cinco" [ref=e19] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e21]: "5"
+        - generic [ref=e22]: Casi Cinco
+      - generic [ref=e23]:
+        - generic [ref=e24]:
+          - heading "Crear cuenta" [level=3] [ref=e25]
+          - paragraph [ref=e26]: Regístrate para guardar tus lugares favoritos
+        - generic [ref=e28]:
+          - generic [ref=e29]:
+            - img [ref=e30]
+            - generic [ref=e32]: La contraseña debe tener al menos 6 caracteres
+          - generic [ref=e33]:
+            - generic [ref=e34]: Correo electrónico*
+            - textbox "tu@email.com" [ref=e35]: nuevo@test.com
+          - generic [ref=e36]:
+            - generic [ref=e37]: Contraseña*
+            - textbox "••••••••" [ref=e38]: "12345"
+            - paragraph [ref=e39]: Mínimo 6 caracteres
+          - generic [ref=e40]:
+            - generic [ref=e41]: Confirmar contraseña*
+            - textbox "••••••••" [ref=e42]: "12345"
+          - button "Crear cuenta" [active] [ref=e43] [cursor=pointer]
+          - generic [ref=e48]: O regístrate con
+          - button "Continuar con Google" [ref=e49] [cursor=pointer]:
+            - img [ref=e50]
+            - generic [ref=e55]: Continuar con Google
+          - generic [ref=e56]:
+            - text: ¿Ya tienes cuenta?
+            - link "Inicia sesión" [ref=e57] [cursor=pointer]:
+              - /url: /login
+          - paragraph [ref=e58]:
+            - text: Al registrarte, aceptas nuestros
+            - link "términos y condiciones" [ref=e59] [cursor=pointer]:
+              - /url: /terminos
+            - text: "y"
+            - link "política de privacidad" [ref=e60] [cursor=pointer]:
+              - /url: /privacidad
+  - button "Tío Viajero" [ref=e61] [cursor=pointer]:
+    - img "Tío Viajero" [ref=e64]
+  - region "Notifications alt+T"
+  - alert [ref=e66]
+```

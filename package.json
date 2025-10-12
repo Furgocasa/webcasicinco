@@ -8,7 +8,12 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "test": "playwright test",
+    "test:auth": "playwright test TESTERS/auth.test.ts",
+    "test:ui": "playwright test --ui",
+    "test:debug": "playwright test --debug",
+    "test:report": "playwright show-report TESTERS/reports"
   },
   "dependencies": {
     "@googlemaps/markerclusterer": "^2.6.2",
@@ -43,10 +48,12 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@playwright/test": "^1.56.0",
     "@typescript-eslint/eslint-plugin": "^6.19.1",
     "@typescript-eslint/parser": "^6.19.1",
     "eslint": "^8.56.0",
     "eslint-config-next": "14.1.0",
+    "playwright": "^1.56.0",
     "prettier": "^3.2.4",
     "prettier-plugin-tailwindcss": "^0.5.11"
   }

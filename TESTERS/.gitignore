@@ -1,0 +1,15 @@
+# Reportes de tests
+reports/
+test-results/
+
+# Screenshots y videos
+*.png
+*.webm
+*.mp4
+
+# Trazas de Playwright
+trace.zip
+
+# Caché de Playwright
+.cache/
+

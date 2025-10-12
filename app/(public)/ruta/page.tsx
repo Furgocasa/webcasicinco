@@ -163,6 +163,12 @@ export default function RutaPage() {
       return;
     }
 
+    // Limpiar ruta anterior automáticamente antes de calcular la nueva
+    setDirectionsResponse(null);
+    setRouteInfo(null);
+    setPlacesNearRoute([]);
+    setSelectedPlace(null);
+
     setCalculating(true);
     
     try {
@@ -294,12 +300,6 @@ export default function RutaPage() {
     }
   };
 
-  const clearRoute = () => {
-    setDirectionsResponse(null);
-    setRouteInfo(null);
-    setPlacesNearRoute([]);
-    setSelectedPlace(null);
-  };
 
   if (loadError) {
     return (
@@ -338,14 +338,10 @@ export default function RutaPage() {
                   <span className="text-gray-600">Tiempo:</span>
                   <span className="font-bold text-gray-900 ml-2">{routeInfo.duration}</span>
                 </div>
-                <Button 
-                  onClick={clearRoute}
-                  variant="outline"
-                  size="sm"
-                >
-                  <X className="h-4 w-4 mr-1" />
-                  Limpiar Ruta
-                </Button>
+                <div className="bg-purple-50 px-3 py-2 rounded-lg">
+                  <span className="text-gray-600">Lugares:</span>
+                  <span className="font-bold text-gray-900 ml-2">{placesNearRoute.length}</span>
+                </div>
               </div>
             )}
           </div>
@@ -1055,26 +1051,17 @@ export default function RutaPage() {
               </select>
             </div>
 
-            <div className="flex gap-2 pt-4">
+            <div className="pt-4">
               <Button
                 onClick={calculateRoute}
                 disabled={calculating || !origin || !destination}
-                className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white"
+                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white"
               >
                 {calculating ? '⏳ Calculando...' : '🚀 Calcular Ruta'}
               </Button>
-              {directionsResponse && (
-                <Button
-                  onClick={() => {
-                    clearRoute();
-                    setMobileView('map');
-                  }}
-                  variant="outline"
-                  className="flex-none"
-                >
-                  Limpiar
-                </Button>
-              )}
+              <p className="text-xs text-gray-500 mt-2 text-center">
+                💡 Calcula una nueva ruta para actualizar los resultados
+              </p>
             </div>
 
             {routeInfo && (
