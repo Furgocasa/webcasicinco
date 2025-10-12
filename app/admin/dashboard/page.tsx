@@ -115,31 +115,19 @@ export default function DashboardPage() {
 
   const loadDashboardData = async () => {
     try {
-      // Cargar TODOS los lugares en lotes
-      let allPlaces: any[] = [];
-      let page = 1;
-      let hasMore = true;
+      // Cargar primera página de lugares (100) - Suficiente para stats aproximadas
+      const placesResponse = await fetch(`/api/admin/places?page=1&limit=100`);
       
-      while (hasMore) {
-        const placesResponse = await fetch(`/api/admin/places?page=${page}&limit=100`);
-        const placesData = await placesResponse.json();
-        
-        if (placesData.success && placesData.places && placesData.places.length > 0) {
-          allPlaces = [...allPlaces, ...placesData.places];
-          page++;
-          
-          if (placesData.places.length < 100) {
-            hasMore = false;
-          }
-        } else {
-          hasMore = false;
-        }
+      if (!placesResponse.ok) {
+        throw new Error(`HTTP error! status: ${placesResponse.status}`);
       }
       
-      console.log(`✅ Dashboard: Cargados ${allPlaces.length} lugares`);
+      const placesData = await placesResponse.json();
       
-      if (allPlaces.length > 0) {
-        const places = allPlaces;
+      console.log('Dashboard - Respuesta API:', placesData);
+      
+      if (placesData.success && placesData.places && placesData.places.length > 0) {
+        const places = placesData.places;
         
         // === ESTADÍSTICAS GENERALES ===
         const published = places.filter((p: any) => p.published).length;
@@ -496,9 +484,9 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Grid de 3 columnas para gráficos principales */}
+      {/* Grid de 3 columnas para gráficos principales - Mobile: Stack vertical */}
       {stats.totalPlaces > 0 && (
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 md:gap-6 lg:grid-cols-3">
           {/* DISTRIBUCIÓN POR TIERS */}
           <Card className="border-2 border-indigo-200">
             <CardHeader>

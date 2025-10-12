@@ -82,45 +82,31 @@ export default function LugaresPage() {
 
   const loadPlaces = async () => {
     setLoading(true);
-    let loadedPlaces: any[] = [];
-    
     try {
-      // Cargar TODOS los lugares en lotes (igual que el mapa)
-      console.log('🔄 Cargando TODOS los lugares...');
-      const batchSize = 100;
-      let page = 1;
-      let hasMore = true;
+      // Cargar primera página solamente (100 lugares)
+      console.log('🔄 Cargando lugares...');
+      const response = await fetch(`/api/admin/places?page=1&limit=100`);
       
-      while (hasMore) {
-        try {
-          const response = await fetch(`/api/admin/places?page=${page}&limit=${batchSize}`);
-          const data = await response.json();
-          
-          if (data.success && data.places && data.places.length > 0) {
-            loadedPlaces = [...loadedPlaces, ...data.places];
-            page++;
-            
-            // Si recibimos menos del tamaño del lote, ya no hay más
-            if (data.places.length < batchSize) {
-              hasMore = false;
-            }
-          } else {
-            hasMore = false;
-          }
-        } catch (batchError) {
-          console.warn(`⚠️ Error en página ${page}, continuando con ${loadedPlaces.length} lugares`);
-          hasMore = false;
-        }
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
       
-      console.log(`✅ Cargados ${loadedPlaces.length} lugares en total`);
-      setPlaces(loadedPlaces);
+      const data = await response.json();
       
-      if (loadedPlaces.length > 0) {
-        setMapCenter({
-          lat: loadedPlaces[0].latitude,
-          lng: loadedPlaces[0].longitude,
-        });
+      console.log('Respuesta API:', data);
+      
+      if (data.success && data.places) {
+        setPlaces(data.places);
+        console.log(`✅ Cargados ${data.places.length} lugares de ${data.total} total`);
+        
+        if (data.places.length > 0) {
+          setMapCenter({
+            lat: data.places[0].latitude,
+            lng: data.places[0].longitude,
+          });
+        }
+      } else {
+        toast.error('No se encontraron lugares');
       }
     } catch (error) {
       console.error('Error cargando lugares:', error);
