@@ -423,14 +423,15 @@ export default function RutaPage() {
               </div>
             </div>
           ) : (
-            <GoogleMap
-              mapContainerStyle={mapContainerStyle}
-              center={defaultCenter}
-              zoom={6}
-              onLoad={(map) => {
-                mapRef.current = map;
-              }}
-              options={{
+            <>
+              <GoogleMap
+                mapContainerStyle={mapContainerStyle}
+                center={defaultCenter}
+                zoom={6}
+                onLoad={(map) => {
+                  mapRef.current = map;
+                }}
+                options={{
                 styles: [
                   {
                     featureType: 'poi',
@@ -514,6 +515,32 @@ export default function RutaPage() {
                 );
               })}
             </GoogleMap>
+
+            {/* Overlay central cuando no hay ruta - Guía al usuario */}
+            {!directionsResponse && (
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
+                <div className="bg-white rounded-2xl shadow-2xl p-6 md:p-8 max-w-sm pointer-events-auto border-2 border-purple-200">
+                  <div className="text-center">
+                    <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                      <Navigation className="h-8 w-8 text-white" />
+                    </div>
+                    <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-2">
+                      Planifica tu Ruta
+                    </h3>
+                    <p className="text-sm md:text-base text-gray-600 mb-4">
+                      Calcula una ruta para descubrir los mejores lugares en tu camino
+                    </p>
+                    <Button
+                      onClick={() => setMobileView('form')}
+                      className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                    >
+                      🚀 Calcular Ruta
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </>
           )}
 
           {/* Card flotante centrada (igual que en mapa) */}
@@ -657,31 +684,71 @@ export default function RutaPage() {
           height="full"
         >
           <div className="space-y-4 py-4">
-            {/* Formulario móvil simplificado */}
+            {/* Formulario móvil con Autocomplete */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 📍 Origen
               </label>
-              <input
-                type="text"
-                placeholder="Ej: Madrid, Puerta del Sol"
-                value={origin}
-                onChange={(e) => setOrigin(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base"
-              />
+              {isLoaded && (
+                <Autocomplete
+                  onLoad={(autocomplete) => {
+                    originAutocompleteRef.current = autocomplete;
+                  }}
+                  onPlaceChanged={() => {
+                    if (originAutocompleteRef.current) {
+                      const place = originAutocompleteRef.current.getPlace();
+                      if (place.formatted_address) {
+                        setOrigin(place.formatted_address);
+                      }
+                    }
+                  }}
+                  options={{
+                    componentRestrictions: { country: 'es' },
+                    fields: ['formatted_address', 'geometry'],
+                  }}
+                >
+                  <input
+                    type="text"
+                    placeholder="Ej: Madrid, Puerta del Sol"
+                    value={origin}
+                    onChange={(e) => setOrigin(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base"
+                  />
+                </Autocomplete>
+              )}
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 🎯 Destino
               </label>
-              <input
-                type="text"
-                placeholder="Ej: Barcelona, Sagrada Familia"
-                value={destination}
-                onChange={(e) => setDestination(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base"
-              />
+              {isLoaded && (
+                <Autocomplete
+                  onLoad={(autocomplete) => {
+                    destinationAutocompleteRef.current = autocomplete;
+                  }}
+                  onPlaceChanged={() => {
+                    if (destinationAutocompleteRef.current) {
+                      const place = destinationAutocompleteRef.current.getPlace();
+                      if (place.formatted_address) {
+                        setDestination(place.formatted_address);
+                      }
+                    }
+                  }}
+                  options={{
+                    componentRestrictions: { country: 'es' },
+                    fields: ['formatted_address', 'geometry'],
+                  }}
+                >
+                  <input
+                    type="text"
+                    placeholder="Ej: Barcelona, Sagrada Familia"
+                    value={destination}
+                    onChange={(e) => setDestination(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base"
+                  />
+                </Autocomplete>
+              )}
             </div>
 
             <div>
@@ -763,6 +830,23 @@ export default function RutaPage() {
           height="full"
         >
           <div className="space-y-3 py-2">
+            {/* Selector de ordenamiento - Igual que en mapa */}
+            {placesNearRoute.length > 0 && (
+              <div className="sticky top-0 bg-white pb-3 border-b z-10">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Ordenar por:
+                </label>
+                <select
+                  className="w-full px-3 py-3 text-base border border-gray-300 rounded-lg"
+                  defaultValue="reviews"
+                >
+                  <option value="reviews">📊 Más Reseñas</option>
+                  <option value="rating">⭐ Mayor Valoración</option>
+                  <option value="distance">📍 Más Cercano</option>
+                </select>
+              </div>
+            )}
+
             {loadingPlaces ? (
               <div className="flex justify-center py-8">
                 <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
