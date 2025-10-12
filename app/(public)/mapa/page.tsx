@@ -404,6 +404,12 @@ export default function MapPage() {
     const notFilteredPlaces = allPlaces.filter(p => !filteredIds.has(p.id));
     
     // 1️⃣ Crear marcadores FILTRADOS (van al cluster)
+    // Tamaño adaptativo según dispositivo
+    const isMobile = typeof window !== 'undefined' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    const markerSize = isMobile ? 28 : 36; // Más pequeños en móvil
+    const markerRadius = isMobile ? 12 : 16;
+    const fontSize = isMobile ? 16 : 20;
+    
     const filteredMarkers = filteredPlaces.map((place) => {
       const tier = calculateQualityTier(place.rating, place.review_count || 0);
       const tierInfo = getTierInfo(tier);
@@ -424,13 +430,13 @@ export default function MapPage() {
         position: { lat: place.latitude, lng: place.longitude },
         icon: {
           url: `data:image/svg+xml,${encodeURIComponent(`
-            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36">
-              <circle cx="18" cy="18" r="16" fill="${bgColor}" stroke="#d1d5db" stroke-width="2"/>
-              <text x="18" y="26" text-anchor="middle" font-size="20">${tierInfo.icon}</text>
+            <svg xmlns="http://www.w3.org/2000/svg" width="${markerSize}" height="${markerSize}" viewBox="0 0 ${markerSize} ${markerSize}">
+              <circle cx="${markerSize/2}" cy="${markerSize/2}" r="${markerRadius}" fill="${bgColor}" stroke="#d1d5db" stroke-width="2"/>
+              <text x="${markerSize/2}" y="${markerSize/2 + 7}" text-anchor="middle" font-size="${fontSize}">${tierInfo.icon}</text>
             </svg>
           `)}`,
-          scaledSize: new google.maps.Size(36, 36),
-          anchor: new google.maps.Point(18, 18),
+          scaledSize: new google.maps.Size(markerSize, markerSize),
+          anchor: new google.maps.Point(markerSize/2, markerSize/2),
         },
         title: `${place.name} - ${tierInfo.name}`,
         zIndex: 100,
@@ -444,6 +450,10 @@ export default function MapPage() {
     });
     
     // 2️⃣ Crear marcadores NO FILTRADOS (grises, individuales, SIN cluster)
+    const grayMarkerSize = isMobile ? 18 : 24; // Más pequeños en móvil
+    const grayMarkerRadius = isMobile ? 8 : 10;
+    const grayFontSize = isMobile ? 11 : 14;
+    
     const notFilteredMarkers = notFilteredPlaces.map((place) => {
       const tier = calculateQualityTier(place.rating, place.review_count || 0);
       const tierInfo = getTierInfo(tier);
@@ -452,13 +462,13 @@ export default function MapPage() {
         position: { lat: place.latitude, lng: place.longitude },
         icon: {
           url: `data:image/svg+xml,${encodeURIComponent(`
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-              <circle cx="12" cy="12" r="10" fill="#f3f4f6" stroke="#d1d5db" stroke-width="2" opacity="0.4"/>
-              <text x="12" y="17" text-anchor="middle" font-size="14" opacity="0.4">${tierInfo.icon}</text>
+            <svg xmlns="http://www.w3.org/2000/svg" width="${grayMarkerSize}" height="${grayMarkerSize}" viewBox="0 0 ${grayMarkerSize} ${grayMarkerSize}">
+              <circle cx="${grayMarkerSize/2}" cy="${grayMarkerSize/2}" r="${grayMarkerRadius}" fill="#f3f4f6" stroke="#d1d5db" stroke-width="1.5" opacity="0.4"/>
+              <text x="${grayMarkerSize/2}" y="${grayMarkerSize/2 + 4}" text-anchor="middle" font-size="${grayFontSize}" opacity="0.4">${tierInfo.icon}</text>
             </svg>
           `)}`,
-          scaledSize: new google.maps.Size(24, 24),
-          anchor: new google.maps.Point(12, 12),
+          scaledSize: new google.maps.Size(grayMarkerSize, grayMarkerSize),
+          anchor: new google.maps.Point(grayMarkerSize/2, grayMarkerSize/2),
         },
         title: `${place.name} - ${tierInfo.name}`,
         zIndex: 10,
@@ -475,6 +485,11 @@ export default function MapPage() {
     markersRef.current = [...filteredMarkers, ...notFilteredMarkers];
 
     // Crear o actualizar clusterer con estilo personalizado simple
+    // Tamaño adaptativo para clusters
+    const clusterSize = isMobile ? 32 : 40;
+    const clusterRadius = isMobile ? 14 : 18;
+    const clusterFontSize = isMobile ? 10 : 12;
+    
     const renderer = {
       render: ({ count, position, markers }: any) => {
         // Estilo simple y discreto
@@ -484,12 +499,12 @@ export default function MapPage() {
           position,
           icon: {
             url: `data:image/svg+xml,${encodeURIComponent(`
-              <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40">
-                <circle cx="20" cy="20" r="18" fill="${color}" opacity="0.8" stroke="white" stroke-width="2"/>
-                <text x="20" y="25" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">${count}</text>
+              <svg xmlns="http://www.w3.org/2000/svg" width="${clusterSize}" height="${clusterSize}" viewBox="0 0 ${clusterSize} ${clusterSize}">
+                <circle cx="${clusterSize/2}" cy="${clusterSize/2}" r="${clusterRadius}" fill="${color}" opacity="0.8" stroke="white" stroke-width="2"/>
+                <text x="${clusterSize/2}" y="${clusterSize/2 + 4}" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="${clusterFontSize}" font-weight="bold">${count}</text>
               </svg>
             `)}`,
-            scaledSize: new google.maps.Size(40, 40),
+            scaledSize: new google.maps.Size(clusterSize, clusterSize),
           },
           label: {
             text: " ",
@@ -1305,78 +1320,68 @@ export default function MapPage() {
             </button>
           )}
 
-          {/* Stats flotantes - Más compacto en móvil */}
-          <div className="absolute top-2 md:top-4 right-2 md:right-4 z-10 bg-white/95 backdrop-blur-sm shadow-lg rounded-lg px-2 py-1.5 md:p-3">
-            <div className="flex items-center gap-1.5 md:gap-2">
-              <MapPin className="h-3.5 w-3.5 md:h-4 md:w-4 text-primary flex-shrink-0" />
-              <span className="font-semibold text-gray-900 text-xs md:text-sm whitespace-nowrap">
-                {filteredPlaces.length} lugares
+          {/* Stats flotantes - Compacto y elegante */}
+          <div className="absolute top-2 md:top-4 right-2 md:right-4 z-10 bg-white/95 backdrop-blur-sm shadow-md rounded-full px-2.5 py-1.5 md:px-3 md:py-2 border border-gray-200">
+            <div className="flex items-center gap-1 md:gap-1.5">
+              <MapPin className="h-3 w-3 md:h-3.5 md:w-3.5 text-indigo-600 flex-shrink-0" />
+              <span className="font-semibold text-gray-900 text-[11px] md:text-sm whitespace-nowrap">
+                {filteredPlaces.length}
               </span>
             </div>
           </div>
 
-          {/* Leyenda de Tiers - Más compacta en móvil */}
-          <div className="absolute bottom-20 md:bottom-4 left-2 md:left-4 z-10 bg-white/95 backdrop-blur-sm shadow-lg rounded-lg p-2 md:p-3 border border-gray-200">
-            <h4 className="font-bold text-[10px] md:text-xs mb-1.5 md:mb-2 text-gray-900">Calidad</h4>
-            <div className="space-y-1 md:space-y-1.5">
-              <div className="flex items-center gap-1.5 md:gap-2">
-                <div className="w-4 h-4 md:w-5 md:h-5 rounded-full flex items-center justify-center border border-gray-300" style={{ backgroundColor: '#93c5fd' }}>
-                  <span className="text-[10px] md:text-xs">💎</span>
-                </div>
-                <span className="font-medium text-gray-900 text-[10px] md:text-xs">Diamante</span>
+          {/* Leyenda de Tiers - Ultra compacta en móvil */}
+          <div className="absolute bottom-20 md:bottom-4 left-2 md:left-4 z-10 bg-white/95 backdrop-blur-sm shadow-md rounded-lg p-1.5 md:p-3 border border-gray-200 max-w-[100px] md:max-w-[160px]">
+            <h4 className="font-bold text-[9px] md:text-xs mb-1 md:mb-2 text-gray-900 text-center md:text-left">Calidad</h4>
+            <div className="space-y-0.5 md:space-y-1">
+              <div className="flex items-center gap-1 md:gap-1.5">
+                <span className="text-[10px] md:text-sm">💎</span>
+                <span className="font-medium text-gray-900 text-[9px] md:text-xs">Diamante</span>
               </div>
-              <div className="flex items-center gap-1.5 md:gap-2">
-                <div className="w-4 h-4 md:w-5 md:h-5 rounded-full flex items-center justify-center border border-gray-300" style={{ backgroundColor: '#e5e7eb' }}>
-                  <span className="text-[10px] md:text-xs">🏆</span>
-                </div>
-                <span className="font-medium text-gray-900 text-[10px] md:text-xs">Platino</span>
+              <div className="flex items-center gap-1 md:gap-1.5">
+                <span className="text-[10px] md:text-sm">🏆</span>
+                <span className="font-medium text-gray-900 text-[9px] md:text-xs">Platino</span>
               </div>
-              <div className="flex items-center gap-1.5 md:gap-2">
-                <div className="w-4 h-4 md:w-5 md:h-5 rounded-full flex items-center justify-center border border-gray-300" style={{ backgroundColor: '#fbbf24' }}>
-                  <span className="text-[10px] md:text-xs">🥇</span>
-                </div>
-                <span className="font-medium text-gray-900 text-[10px] md:text-xs">Oro</span>
+              <div className="flex items-center gap-1 md:gap-1.5">
+                <span className="text-[10px] md:text-sm">🥇</span>
+                <span className="font-medium text-gray-900 text-[9px] md:text-xs">Oro</span>
               </div>
-              <div className="flex items-center gap-1.5 md:gap-2">
-                <div className="w-4 h-4 md:w-5 md:h-5 rounded-full flex items-center justify-center border border-gray-300" style={{ backgroundColor: '#d1d5db' }}>
-                  <span className="text-[10px] md:text-xs">🥈</span>
-                </div>
-                <span className="font-medium text-gray-900 text-[10px] md:text-xs">Plata</span>
+              <div className="flex items-center gap-1 md:gap-1.5">
+                <span className="text-[10px] md:text-sm">🥈</span>
+                <span className="font-medium text-gray-900 text-[9px] md:text-xs">Plata</span>
               </div>
-              <div className="flex items-center gap-1.5 md:gap-2">
-                <div className="w-4 h-4 md:w-5 md:h-5 rounded-full flex items-center justify-center border border-gray-300" style={{ backgroundColor: '#fb923c' }}>
-                  <span className="text-[10px] md:text-xs">🥉</span>
-                </div>
-                <span className="font-medium text-gray-900 text-[10px] md:text-xs">Bronce</span>
+              <div className="flex items-center gap-1 md:gap-1.5">
+                <span className="text-[10px] md:text-sm">🥉</span>
+                <span className="font-medium text-gray-900 text-[9px] md:text-xs">Bronce</span>
               </div>
             </div>
           </div>
 
-          {/* Botón de geolocalización - Compacto y bien posicionado */}
+          {/* Botón de geolocalización - Compacto y proporcional */}
           <div className="absolute bottom-20 md:bottom-6 left-1/2 transform -translate-x-1/2 z-10">
             <button
               onClick={isGeolocationActive ? deactivateGeolocation : activateGeolocation}
-              className={`flex items-center gap-1.5 md:gap-2 px-3 py-2 md:px-4 md:py-2.5 rounded-full shadow-xl transition-all duration-300 font-medium text-xs md:text-sm ${
+              className={`flex items-center gap-1 md:gap-1.5 px-2.5 py-1.5 md:px-4 md:py-2.5 rounded-full shadow-lg transition-all duration-300 font-medium text-[11px] md:text-sm border ${
                 isGeolocationActive
-                  ? 'bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700'
-                  : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+                  ? 'bg-green-500 text-white border-green-600 hover:bg-green-600'
+                  : 'bg-white/95 backdrop-blur-sm text-gray-700 hover:bg-gray-50 border-gray-300'
               }`}
               title={isGeolocationActive ? 'Desactivar ubicación' : 'Activar mi ubicación'}
             >
-              <MapPin className={`h-3.5 w-3.5 md:h-4 md:w-4 ${isGeolocationActive ? 'animate-pulse' : ''}`} />
+              <MapPin className={`h-3 w-3 md:h-4 md:w-4 ${isGeolocationActive ? 'animate-pulse' : ''}`} />
               <span className="hidden sm:inline">
                 {isGeolocationActive ? 'Ubicación Activa' : 'Usar mi Ubicación'}
               </span>
-              <span className="sm:hidden">
-                {isGeolocationActive ? 'GPS' : 'Mi Ubicación'}
+              <span className="sm:hidden whitespace-nowrap">
+                {isGeolocationActive ? 'GPS ON' : 'GPS'}
               </span>
               {isGeolocationActive && (
-                <X className="h-3 w-3 md:h-3.5 md:w-3.5" />
+                <X className="h-2.5 w-2.5 md:h-3 md:w-3" />
               )}
             </button>
             {geolocationError && (
-              <div className="absolute top-full mt-1 left-1/2 transform -translate-x-1/2 bg-red-50 text-red-600 px-2 py-1 md:px-3 md:py-1.5 rounded-lg shadow-lg text-[10px] md:text-xs max-w-[200px] md:max-w-none text-center">
-                {geolocationError}
+              <div className="absolute top-full mt-1 left-1/2 transform -translate-x-1/2 bg-red-50 text-red-600 px-2 py-1 rounded-md shadow-md text-[9px] md:text-xs max-w-[180px] md:max-w-none text-center leading-tight">
+                {geolocationError.split(' - ')[0]}
               </div>
             )}
           </div>
