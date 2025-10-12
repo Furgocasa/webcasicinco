@@ -1309,7 +1309,7 @@ export default function MapPage() {
         </div>
 
         {/* MAPA */}
-        <div className="flex-1 relative mb-16 md:mb-0">
+        <div className="flex-1 relative">
           {/* Botón toggle filtros */}
           {!showFilters && (
             <button
@@ -1331,7 +1331,7 @@ export default function MapPage() {
           </div>
 
           {/* Leyenda de Tiers - Ultra compacta en móvil */}
-          <div className="absolute bottom-20 md:bottom-4 left-2 md:left-4 z-10 bg-white/95 backdrop-blur-sm shadow-md rounded-lg p-1.5 md:p-3 border border-gray-200 max-w-[100px] md:max-w-[160px]">
+          <div className="absolute bottom-4 left-2 md:left-4 z-10 bg-white/95 backdrop-blur-sm shadow-md rounded-lg p-1.5 md:p-3 border border-gray-200 max-w-[100px] md:max-w-[160px]">
             <h4 className="font-bold text-[9px] md:text-xs mb-1 md:mb-2 text-gray-900 text-center md:text-left">Calidad</h4>
             <div className="space-y-0.5 md:space-y-1">
               <div className="flex items-center gap-1 md:gap-1.5">
@@ -1358,7 +1358,7 @@ export default function MapPage() {
           </div>
 
           {/* Botón de geolocalización - Compacto y proporcional */}
-          <div className="absolute bottom-20 md:bottom-6 left-1/2 transform -translate-x-1/2 z-10">
+          <div className="absolute bottom-4 md:bottom-6 left-1/2 transform -translate-x-1/2 z-10">
             <button
               onClick={isGeolocationActive ? deactivateGeolocation : activateGeolocation}
               className={`flex items-center gap-1 md:gap-1.5 px-2.5 py-1.5 md:px-4 md:py-2.5 rounded-full shadow-lg transition-all duration-300 font-medium text-[11px] md:text-sm border ${
@@ -1387,7 +1387,7 @@ export default function MapPage() {
           </div>
 
           {/* Mapa */}
-          <div className="relative w-full h-full">
+          <div className="relative w-full h-[calc(100%-8rem)] md:h-full">
             {/* Loader sobre el mapa mientras se carga Google Maps API */}
             {!isLoaded && (
               <div className="absolute inset-0 bg-gray-100 flex items-center justify-center z-50">
