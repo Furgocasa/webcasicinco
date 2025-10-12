@@ -63,3 +63,55 @@ export async function GET(request: NextRequest) {
   }
 }
 
+// DELETE - Borrar historial de conversación
+export async function DELETE(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const session_id = searchParams.get('session_id');
+
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    // Borrar historial
+    let query = supabase
+      .from('chat_history')
+      .delete();
+
+    if (user) {
+      query = query.eq('user_id', user.id);
+    } else if (session_id) {
+      query = query.eq('session_id', session_id);
+    } else {
+      return NextResponse.json({
+        success: false,
+        error: 'No session',
+      });
+    }
+
+    const { error } = await query;
+
+    if (error) {
+      console.error('Error borrando historial:', error);
+      return NextResponse.json({
+        success: false,
+        error: error.message,
+      }, { status: 500 });
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: 'Historial borrado correctamente',
+    });
+
+  } catch (error: any) {
+    console.error('Error en DELETE historial:', error);
+    return NextResponse.json({
+      success: false,
+      error: error.message,
+    }, { status: 500 });
+  }
+}
+
+
