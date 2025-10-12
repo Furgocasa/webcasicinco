@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { MessageCircle, X, Send, Loader2, Bot, RotateCcw } from 'lucide-react';
 import { Button } from './ui/Button';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -343,9 +344,21 @@ export default function ChatbotFloating() {
                       Cancelar
                     </button>
                     <button
-                      onClick={() => {
-                        setMessages([]);
-                        setShowClearConfirm(false);
+                      onClick={async () => {
+                        try {
+                          // Borrar de la BD
+                          await fetch(`/api/chatbot/history?session_id=${sessionId}`, {
+                            method: 'DELETE',
+                          });
+                          
+                          // Limpiar estado local
+                          setMessages([]);
+                          setShowClearConfirm(false);
+                          toast.success('Conversación limpiada');
+                        } catch (error) {
+                          console.error('Error limpiando historial:', error);
+                          toast.error('Error al limpiar conversación');
+                        }
                       }}
                       className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 rounded-lg transition shadow-lg"
                     >
