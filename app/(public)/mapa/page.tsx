@@ -2,6 +2,9 @@
 
 import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 
+// Marcar como ruta dinámica (usa useSearchParams)
+export const dynamic = 'force-dynamic';
+
 // 🚀 HOOK DE DEBOUNCE para optimizar búsquedas
 function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);

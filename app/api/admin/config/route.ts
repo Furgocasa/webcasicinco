@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createClient as createServiceClient } from '@supabase/supabase-js';
 
+export const dynamic = 'force-dynamic';
+
 // GET - Obtener configuración
 export async function GET(request: NextRequest) {
   try {

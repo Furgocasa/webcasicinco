@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * API para obtener estadísticas reales de la plataforma
  * Usado en la home para mostrar números actualizados
