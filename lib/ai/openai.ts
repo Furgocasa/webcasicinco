@@ -11,7 +11,7 @@ import OpenAI from 'openai';
 
 // Inicializar cliente de OpenAI
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: process.env.OPENAI_API_KEY || 'sk-dummy-key-for-build',
 });
 
 // Modelos a usar

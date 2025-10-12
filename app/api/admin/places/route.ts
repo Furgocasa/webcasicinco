@@ -30,78 +30,61 @@ export async function GET(request: NextRequest) {
     const province = searchParams.get('province');
     const search = searchParams.get('search');
     const published = searchParams.get('published'); // 'true', 'false', o null (todos)
+    
+    // PAGINACIÓN para evitar 413 Payload Too Large
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '100'); // Máximo 100 por página
+    const offset = (page - 1) * limit;
 
-    // SOLUCIÓN: Cargar TODOS los lugares en múltiples peticiones si es necesario
-    let allData: any[] = [];
-    let totalCount = 0;
-    let currentOffset = 0;
-    const batchSize = 1000;
-    let hasMore = true;
+    // Construir query
+    let query = supabase
+      .from('places')
+      .select('*', { count: 'exact' });
 
-    while (hasMore) {
-      // Construir query para este lote
-      let query = supabase
-        .from('places')
-        .select('*', { count: 'exact' });
-
-      // Filtros
-      if (category) {
-        query = query.eq('category', category);
-      }
-
-      if (province) {
-        query = query.eq('province', province);
-      }
-
-      if (published !== null) {
-        query = query.eq('published', published === 'true');
-      }
-
-      // Búsqueda por texto
-      if (search) {
-        query = query.or(
-          `name.ilike.%${search}%,address.ilike.%${search}%,city.ilike.%${search}%`
-        );
-      }
-
-      // Ordenar por fecha de creación (más recientes primero)
-      query = query
-        .order('created_at', { ascending: false })
-        .range(currentOffset, currentOffset + batchSize - 1);
-
-      const { data, error, count } = await query;
-
-      if (error) {
-        console.error('Error cargando lugares:', error);
-        return NextResponse.json(
-          { error: 'Error al cargar los lugares' },
-          { status: 500 }
-        );
-      }
-
-      if (currentOffset === 0) {
-        totalCount = count || 0;
-      }
-
-      if (data && data.length > 0) {
-        allData = [...allData, ...data];
-        currentOffset += batchSize;
-        
-        // Si obtuvimos menos de batchSize, no hay más datos
-        if (data.length < batchSize) {
-          hasMore = false;
-        }
-      } else {
-        hasMore = false;
-      }
+    // Filtros
+    if (category) {
+      query = query.eq('category', category);
     }
 
-    console.log(`✅ Cargados ${allData.length} lugares en total`);
+    if (province) {
+      query = query.eq('province', province);
+    }
+
+    if (published !== null) {
+      query = query.eq('published', published === 'true');
+    }
+
+    // Búsqueda por texto
+    if (search) {
+      query = query.or(
+        `name.ilike.%${search}%,address.ilike.%${search}%,city.ilike.%${search}%`
+      );
+    }
+
+    // Ordenar y paginar
+    query = query
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
+
+    const { data, error, count } = await query;
+
+    if (error) {
+      console.error('Error cargando lugares:', error);
+      return NextResponse.json(
+        { error: 'Error al cargar los lugares' },
+        { status: 500 }
+      );
+    }
+
+    console.log(`✅ Cargados ${data?.length || 0} lugares (página ${page} de ${Math.ceil((count || 0) / limit)})`);
 
     return NextResponse.json({
       success: true,
-      places: allData,
-      total: totalCount,
+      places: data || [],
+      total: count || 0,
+      page,
+      limit,
+      totalPages: Math.ceil((count || 0) / limit),
     });
 
   } catch (error: any) {
