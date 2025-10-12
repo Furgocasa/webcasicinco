@@ -913,7 +913,7 @@ export default function MapPage() {
 
   return (
     <div className="flex flex-col h-[calc(100vh-64px)]">
-      <div className="flex-1 flex overflow-hidden relative pb-0 md:pb-0">
+      <div className="flex-1 flex overflow-hidden relative pb-16 md:pb-0">
         {/* SIDEBAR DE FILTROS - Desktop */}
         <div 
           className={`hidden md:block ${
@@ -1334,7 +1334,7 @@ export default function MapPage() {
           </div>
 
           {/* Mapa */}
-          <div className="relative w-full h-[90%] md:h-full">
+          <div className="relative w-full h-full">
             {/* Loader sobre el mapa mientras se carga Google Maps API */}
             {!isLoaded && (
               <div className="absolute inset-0 bg-gray-100 flex items-center justify-center z-50">
