@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '../ui/Button';
 import { useAuth } from '@/lib/hooks/useAuth';
-import { User, LogOut, Settings, ChevronDown } from 'lucide-react';
+import { User, LogOut, Settings, ChevronDown, Map, Navigation } from 'lucide-react';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -33,8 +33,26 @@ export default function Header() {
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
             <span className="text-2xl font-bold text-indigo-600">⭐</span>
-            <span className="text-xl font-bold text-gray-900">Casi Cinco</span>
+            <span className="text-xl md:text-xl font-bold text-gray-900">Casi Cinco</span>
           </Link>
+
+          {/* Mobile Quick Nav - Iconos directos */}
+          <div className="flex md:hidden items-center gap-2">
+            <Link 
+              href="/mapa"
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              aria-label="Mapa"
+            >
+              <Map className="h-5 w-5 text-gray-700" />
+            </Link>
+            <Link 
+              href="/ruta"
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              aria-label="Planificar Ruta"
+            >
+              <Navigation className="h-5 w-5 text-gray-700" />
+            </Link>
+          </div>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">

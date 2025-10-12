@@ -409,12 +409,12 @@ export default function RutaPage() {
       </div>
 
       {/* CONTENIDO PRINCIPAL */}
-      <div className="flex-1 flex overflow-hidden relative bg-white">
-        {/* Margen izquierdo 8% */}
-        <div style={{ width: '8%' }} className="bg-white flex-shrink-0"></div>
+      <div className="flex-1 flex overflow-hidden relative bg-white pb-16 md:pb-0">
+        {/* Margen izquierdo 8% - Solo desktop */}
+        <div style={{ width: '8%' }} className="hidden md:block bg-white flex-shrink-0"></div>
         
-        {/* MAPA */}
-        <div className="flex-1 relative rounded-lg overflow-hidden shadow-lg my-4 mr-4">
+        {/* MAPA - Pantalla completa en móvil */}
+        <div className="flex-1 relative md:rounded-lg overflow-hidden md:shadow-lg md:my-4 md:mr-4">
           {!isLoaded ? (
             <div className="h-full flex items-center justify-center bg-gray-100">
               <div className="text-center">

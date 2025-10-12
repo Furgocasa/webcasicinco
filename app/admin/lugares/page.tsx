@@ -89,24 +89,35 @@ export default function LugaresPage() {
       const maxPages = 40; // Máximo 4000 lugares
       
       while (page <= maxPages) {
+        console.log(`🔄 Cargando página ${page}...`);
         const response = await fetch(`/api/admin/places?page=${page}&limit=100`);
         
         if (!response.ok) {
-          console.warn(`Error cargando página ${page}`);
+          console.error(`❌ Error HTTP ${response.status} en página ${page}`);
           break;
         }
         
         const data = await response.json();
+        console.log(`Página ${page} respuesta:`, { success: data.success, count: data.places?.length, total: data.total });
         
         if (data.success && data.places && data.places.length > 0) {
           allPlaces = [...allPlaces, ...data.places];
-          console.log(`📍 Lugares: Página ${page} - Total: ${allPlaces.length}`);
+          console.log(`📍 Lugares: Página ${page}/${Math.ceil(data.total / 100)} - Acumulado: ${allPlaces.length} de ${data.total} total`);
           page++;
           
+          // Si recibimos menos de 100, no hay más páginas
           if (data.places.length < 100) {
+            console.log(`✋ Última página alcanzada (${data.places.length} lugares)`);
+            break;
+          }
+          
+          // Si ya tenemos todos según el total, parar
+          if (allPlaces.length >= data.total) {
+            console.log(`✋ Total completo alcanzado (${allPlaces.length})`);
             break;
           }
         } else {
+          console.warn(`⚠️ Página ${page} sin datos o error`);
           break;
         }
       }
