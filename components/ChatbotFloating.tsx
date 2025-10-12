@@ -1,10 +1,12 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { MessageCircle, X, Send, Loader2, Bot, RotateCcw } from 'lucide-react';
+import { MessageCircle, X, Send, Loader2, Bot, RotateCcw, Lock } from 'lucide-react';
 import { Button } from './ui/Button';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/lib/hooks/useAuth';
 import { toast } from 'sonner';
+import Link from 'next/link';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -13,6 +15,7 @@ interface Message {
 
 export default function ChatbotFloating() {
   const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -230,6 +233,35 @@ export default function ChatbotFloating() {
 
           {/* Mensajes - Área con scroll independiente */}
           <div className="flex-1 overflow-y-auto p-3 md:p-4 space-y-3 md:space-y-4 bg-gray-50">
+            {/* BLOQUEO para usuarios no logueados */}
+            {!authLoading && !user && (
+              <div className="absolute inset-0 bg-gray-100/95 backdrop-blur-sm flex items-center justify-center z-20 p-6">
+                <div className="bg-white rounded-2xl p-6 max-w-sm shadow-2xl border-2 border-indigo-200 text-center">
+                  <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center">
+                    <Lock className="h-8 w-8 text-white" />
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">
+                    Inicia Sesión
+                  </h3>
+                  <p className="text-gray-600 mb-6">
+                    Es necesario registrarse para usar el Agente de Chat "Tío Viajero"
+                  </p>
+                  <div className="space-y-2">
+                    <Link href="/login" onClick={() => setIsOpen(false)}>
+                      <Button className="w-full bg-gradient-to-r from-indigo-600 to-purple-600">
+                        Iniciar Sesión
+                      </Button>
+                    </Link>
+                    <Link href="/registro" onClick={() => setIsOpen(false)}>
+                      <Button variant="outline" className="w-full">
+                        Crear Cuenta
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Loading historial */}
             {loadingHistory && (
               <div className="flex justify-center py-8">
