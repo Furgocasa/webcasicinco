@@ -322,7 +322,7 @@ export default function LugaresPage() {
             <RefreshCw className="h-4 w-4 mr-2" />
             Recargar
           </Button>
-          <Button onClick={handleEnrichPlaces} variant="default" size="sm" disabled={enriching}>
+          <Button onClick={handleEnrichPlaces} variant="primary" size="sm" disabled={enriching}>
             {enriching ? '⏳ Procesando...' : '🎨 Enriquecer con IA'}
           </Button>
           <Button onClick={handlePublishAll} variant="outline" size="sm" disabled={enriching}>
@@ -707,7 +707,7 @@ export default function LugaresPage() {
 
                         {/* Categoría */}
                         <td className="px-6 py-4">
-                          <Badge variant="outline" className="text-xs">
+                          <Badge variant="default" className="text-xs">
                             {categoryNames[place.category] || place.category}
                           </Badge>
                         </td>
@@ -746,7 +746,7 @@ export default function LugaresPage() {
                               Publicado
                             </Badge>
                           ) : (
-                            <Badge variant="outline" className="text-xs">
+                            <Badge variant="warning" className="text-xs">
                               <EyeOff className="h-3 w-3 mr-1" />
                               Borrador
                             </Badge>

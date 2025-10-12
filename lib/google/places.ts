@@ -43,7 +43,7 @@ export async function searchPlaces(params: SearchPlacesParams): Promise<string[]
           await new Promise(resolve => setTimeout(resolve, 2000));
         }
 
-        const response = await axios.get(`${PLACES_API_BASE}/textsearch/json`, {
+        const response: any = await axios.get(`${PLACES_API_BASE}/textsearch/json`, {
           params: {
             query,
             location: latitude && longitude ? `${latitude},${longitude}` : undefined,

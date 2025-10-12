@@ -5,7 +5,7 @@ import { createBillingPortalSession } from '@/lib/stripe/client';
 export async function POST(request: NextRequest) {
   try {
     // Obtener usuario autenticado
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
       error: authError,

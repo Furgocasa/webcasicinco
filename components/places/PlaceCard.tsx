@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { Place } from '@/types/place';
-import { Card } from '../ui/Card';
+import { Card, CardContent } from '../ui/Card';
 import { Badge } from '../ui/Badge';
 
 interface PlaceCardProps {
@@ -37,7 +37,7 @@ export default function PlaceCard({ place }: PlaceCardProps) {
           </div>
         </div>
 
-        <Card.Content className="pt-4">
+        <CardContent className="pt-4">
           {/* Título */}
           <h3 className="font-semibold text-lg mb-2 line-clamp-2">
             {place.name}
@@ -48,7 +48,7 @@ export default function PlaceCard({ place }: PlaceCardProps) {
             <Badge variant="secondary" className="text-xs">
               {place.category}
             </Badge>
-            <Badge variant="outline" className="text-xs">
+            <Badge variant="default" className="text-xs">
               {place.province}
             </Badge>
           </div>
@@ -59,16 +59,16 @@ export default function PlaceCard({ place }: PlaceCardProps) {
           </p>
 
           {/* Descripción corta */}
-          {place.description && (
+          {place.ai_description && (
             <p className="text-sm text-gray-700 line-clamp-2">
-              {place.description}
+              {place.ai_description}
             </p>
           )}
 
           {/* Highlights */}
-          {place.highlights && place.highlights.length > 0 && (
+          {place.ai_highlights && place.ai_highlights.length > 0 && (
             <div className="mt-3 flex flex-wrap gap-1">
-              {place.highlights.slice(0, 2).map((highlight, index) => (
+              {place.ai_highlights.slice(0, 2).map((highlight, index) => (
                 <span
                   key={index}
                   className="text-xs bg-indigo-50 text-indigo-700 px-2 py-1 rounded"
@@ -86,7 +86,7 @@ export default function PlaceCard({ place }: PlaceCardProps) {
               <span>{'€'.repeat(place.price_level)}</span>
             )}
           </div>
-        </Card.Content>
+        </CardContent>
       </Card>
     </Link>
   );

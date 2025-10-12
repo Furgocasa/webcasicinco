@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
         updated_at: new Date().toISOString(),
       })
       .eq('published', false) // Solo los que NO están publicados
-      .select('id', { count: 'exact' });
+      .select('id');
 
     if (error) {
       console.error('Error publicando lugares:', error);

@@ -68,36 +68,40 @@ export async function processPlace(
     const city = extractCityFromPlaceData(placeDetails);
 
     // Generar descripción
-    const description = await generatePlaceDescription(
-      {
-        name: placeDetails.name,
-        category,
-        city,
-        province,
-        rating: placeDetails.rating,
-        reviewCount: placeDetails.user_ratings_total,
-        priceLevel: placeDetails.price_level,
-      },
-      reviews
-    );
+    const description = await generatePlaceDescription({
+      name: placeDetails.name,
+      category,
+      city,
+      province,
+      rating: placeDetails.rating,
+      review_count: placeDetails.user_ratings_total,
+      price_level: placeDetails.price_level,
+      reviews: reviews.map(r => r.text || '').filter(Boolean),
+    });
     cost += 0.015; // Estimación OpenAI
 
     // Generar resumen de reseñas
-    const reviewSummary = await summarizeReviews(reviews);
+    const reviewSummary = await summarizeReviews(reviews.map(r => r.text || '').filter(Boolean));
     cost += 0.008; // Estimación OpenAI
 
     // Generar highlights
-    const highlights = await generateHighlights(reviews);
+    const highlights = await generateHighlights({
+      name: placeDetails.name,
+      category,
+      rating: placeDetails.rating,
+      reviews: reviews.map(r => r.text || '').filter(Boolean),
+      description: description,
+    });
     cost += 0.008; // Estimación OpenAI
 
     // 5. Preparar datos del lugar
-    const slug = generatePlaceSlug(placeDetails.name, category, city);
+    const slug = generatePlaceSlug(placeDetails.name, city);
     
     const placeData: Partial<Place> = {
       google_place_id: placeDetails.place_id,
       slug,
       name: placeDetails.name,
-      category,
+      category: category as any,
       rating: placeDetails.rating,
       review_count: placeDetails.user_ratings_total,
       country: 'España',

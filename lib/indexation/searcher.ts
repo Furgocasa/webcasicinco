@@ -22,21 +22,19 @@ export async function searchPlacesByParams(
     const allPlaceIds: Set<string> = new Set();
     const searchAreas: string[] = [];
 
-    // Si hay ciudades específicas, buscar en ellas
-    if (params.cities && params.cities.length > 0) {
-      for (const city of params.cities) {
-        const cityPlaces = await searchInLocation(
-          `${city}, ${params.country}`,
-          params.categories,
-          params.minRating,
-          params.minReviews,
-          params.radius
-        );
-        cityPlaces.forEach((id) => allPlaceIds.add(id));
-        searchAreas.push(city);
-      }
+    // Si hay ciudad específica, buscar en ella
+    if (params.city) {
+      const cityPlaces = await searchInLocation(
+        `${params.city}, ${params.country}`,
+        params.categories,
+        params.minRating,
+        params.minReviews,
+        params.radius
+      );
+      cityPlaces.forEach((id) => allPlaceIds.add(id));
+      searchAreas.push(params.city);
     }
-    // Si no hay ciudades pero hay provincias, buscar en ellas
+    // Si no hay ciudad pero hay provincias, buscar en ellas
     else if (params.provinces && params.provinces.length > 0) {
       for (const province of params.provinces) {
         const provincePlaces = await searchInLocation(

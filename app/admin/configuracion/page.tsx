@@ -153,6 +153,13 @@ Responde en 100-200 palabras.`,
           supabaseAnonKey: '⚠️ Verificando...',
           descriptionPrompt: '',
           reviewSummaryPrompt: '',
+          chatbotModel: 'gpt-4o-mini',
+          chatbotTemperature: 0.7,
+          chatbotMaxTokens: 400,
+          chatbotSystemPrompt: '',
+          chatbotUserPrompt: '',
+          chatbotMaxHistoryMessages: 20,
+          chatbotEnabled: true,
           minReviews: 20,
           minRating: 4.7,
           searchRadius: 50000,
@@ -271,7 +278,7 @@ Responde en 100-200 palabras.`,
             <RefreshCw className="h-4 w-4 mr-2" />
             Recargar
           </Button>
-          <Button onClick={handleSave} variant="default" size="sm" disabled={saving}>
+          <Button onClick={handleSave} variant="primary" size="sm" disabled={saving}>
             <Save className="h-4 w-4 mr-2" />
             {saving ? 'Guardando...' : 'Guardar'}
           </Button>
@@ -294,7 +301,7 @@ Responde en 100-200 palabras.`,
             <div className="p-4 border rounded-lg">
               <div className="flex items-center justify-between mb-2">
                 <span className="font-medium text-gray-900">Google Maps API</span>
-                <Badge variant={config.googleMapsApiKey.includes('✓') ? 'default' : 'outline'}>
+                <Badge variant={config.googleMapsApiKey.includes('✓') ? 'success' : 'warning'}>
                   {config.googleMapsApiKey}
                 </Badge>
               </div>
@@ -306,7 +313,7 @@ Responde en 100-200 palabras.`,
             <div className="p-4 border rounded-lg">
               <div className="flex items-center justify-between mb-2">
                 <span className="font-medium text-gray-900">OpenAI API</span>
-                <Badge variant={config.openaiApiKey.includes('✓') ? 'default' : 'outline'}>
+                <Badge variant={config.openaiApiKey.includes('✓') ? 'success' : 'warning'}>
                   {config.openaiApiKey}
                 </Badge>
               </div>
@@ -318,7 +325,7 @@ Responde en 100-200 palabras.`,
             <div className="p-4 border rounded-lg">
               <div className="flex items-center justify-between mb-2">
                 <span className="font-medium text-gray-900">Supabase URL</span>
-                <Badge variant={config.supabaseUrl ? 'default' : 'outline'}>
+                <Badge variant={config.supabaseUrl ? 'success' : 'warning'}>
                   {config.supabaseUrl ? '✓ Configurada' : '❌ No configurada'}
                 </Badge>
               </div>
@@ -330,7 +337,7 @@ Responde en 100-200 palabras.`,
             <div className="p-4 border rounded-lg">
               <div className="flex items-center justify-between mb-2">
                 <span className="font-medium text-gray-900">Supabase Anon Key</span>
-                <Badge variant={config.supabaseAnonKey.includes('✓') ? 'default' : 'outline'}>
+                <Badge variant={config.supabaseAnonKey.includes('✓') ? 'success' : 'warning'}>
                   {config.supabaseAnonKey}
                 </Badge>
               </div>

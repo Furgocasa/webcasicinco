@@ -5,7 +5,7 @@ import Stripe from 'stripe';
  * Usa la API key secreta del servidor
  */
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-10-28.acacia',
+  apiVersion: '2023-10-16',
   typescript: true,
   appInfo: {
     name: 'Casi Cinco',

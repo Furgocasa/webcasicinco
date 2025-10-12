@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const supabase = createClient();
+    const supabase = await createClient();
 
     // Procesar el evento según su tipo
     switch (event.type) {

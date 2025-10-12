@@ -56,7 +56,6 @@ export interface PlaceWithTier extends Place {
   quality_tier: QualityTier;
   tier_rank: number;
   community: string;
-  city?: string;
   reviews_count: number;
   price_level?: PriceLevel;
 }

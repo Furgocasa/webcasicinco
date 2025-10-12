@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { searchNearbyPlaces } from '@/lib/google/places';
+import { searchPlaces } from '@/lib/google/places';
 import { CATEGORIES } from '@/lib/utils/constants';
 
 export async function POST(request: NextRequest) {
@@ -48,22 +48,18 @@ export async function POST(request: NextRequest) {
     }
 
     // Buscar lugares en Google Maps
-    const places = await searchNearbyPlaces(
-      searchQuery,
-      lat,
-      lng,
-      10000 // Radio de 10km
-    );
-
-    // Filtrar por rating >= 4.7
-    const filteredPlaces = places.filter(place => 
-      place.rating && place.rating >= 4.7
-    );
+    const placeIds = await searchPlaces({
+      keyword: searchQuery,
+      latitude: lat,
+      longitude: lng,
+      radius: 10000, // Radio de 10km
+      minRating: 4.7
+    });
 
     return NextResponse.json({
       success: true,
-      count: filteredPlaces.length,
-      places: filteredPlaces,
+      count: placeIds.length,
+      places: placeIds,
     });
 
   } catch (error) {
