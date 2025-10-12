@@ -769,6 +769,220 @@ export default function RutaPage() {
           </div>
         </div>
       </div>
+
+      {/* BOTTOM NAVIGATION - Solo móvil */}
+      <div className="md:hidden">
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50">
+          <div className="flex">
+            <button
+              onClick={() => setMobileView('form')}
+              className={`flex-1 flex flex-col items-center justify-center py-3 ${
+                mobileView === 'form' ? 'text-purple-600 bg-purple-50' : 'text-gray-600'
+              }`}
+            >
+              <Navigation className="h-6 w-6 mb-1" />
+              <span className="text-xs font-medium">Ruta</span>
+            </button>
+            <button
+              onClick={() => setMobileView('map')}
+              className={`flex-1 flex flex-col items-center justify-center py-3 ${
+                mobileView === 'map' ? 'text-purple-600 bg-purple-50' : 'text-gray-600'
+              }`}
+            >
+              <MapPin className="h-6 w-6 mb-1" />
+              <span className="text-xs font-medium">Mapa</span>
+            </button>
+            <button
+              onClick={() => setMobileView('list')}
+              className={`flex-1 flex flex-col items-center justify-center py-3 ${
+                mobileView === 'list' ? 'text-purple-600 bg-purple-50' : 'text-gray-600'
+              }`}
+            >
+              <MapPin className="h-6 w-6 mb-1" />
+              <span className="text-xs font-medium">Lista</span>
+              {placesNearRoute.length > 0 && (
+                <span className="absolute top-1 text-[10px] text-purple-600 font-bold">
+                  {placesNearRoute.length}
+                </span>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* BOTTOM SHEET - Formulario de Ruta */}
+        <BottomSheet
+          isOpen={mobileView === 'form'}
+          onClose={() => setMobileView('map')}
+          title="Planificar Ruta"
+          height="full"
+        >
+          <div className="space-y-4 py-4">
+            {/* Formulario móvil simplificado */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                📍 Origen
+              </label>
+              <input
+                type="text"
+                placeholder="Ej: Madrid, Puerta del Sol"
+                value={origin}
+                onChange={(e) => setOrigin(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                🎯 Destino
+              </label>
+              <input
+                type="text"
+                placeholder="Ej: Barcelona, Sagrada Familia"
+                value={destination}
+                onChange={(e) => setDestination(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                📏 Radio de búsqueda
+              </label>
+              <select
+                value={searchRadius}
+                onChange={(e) => setSearchRadius(Number(e.target.value))}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base"
+              >
+                <option value={5}>5 km</option>
+                <option value={10}>10 km</option>
+                <option value={20}>20 km</option>
+                <option value={30}>30 km</option>
+                <option value={50}>50 km</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                🍽️ Categoría
+              </label>
+              <select
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base"
+              >
+                <option value="">Todas</option>
+                <option value="restaurante">Restaurantes</option>
+                <option value="hotel">Hoteles</option>
+                <option value="spa">Spas</option>
+                <option value="bar">Bares</option>
+              </select>
+            </div>
+
+            <div className="flex gap-2 pt-4">
+              <Button
+                onClick={calculateRoute}
+                disabled={calculating || !origin || !destination}
+                className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white"
+              >
+                {calculating ? '⏳ Calculando...' : '🚀 Calcular Ruta'}
+              </Button>
+              {directionsResponse && (
+                <Button
+                  onClick={() => {
+                    clearRoute();
+                    setMobileView('map');
+                  }}
+                  variant="outline"
+                  className="flex-none"
+                >
+                  Limpiar
+                </Button>
+              )}
+            </div>
+
+            {routeInfo && (
+              <div className="grid grid-cols-2 gap-3 pt-2">
+                <div className="bg-blue-50 px-3 py-2 rounded-lg text-center">
+                  <div className="text-xs text-gray-600">Distancia</div>
+                  <div className="font-bold text-gray-900">{routeInfo.distance}</div>
+                </div>
+                <div className="bg-green-50 px-3 py-2 rounded-lg text-center">
+                  <div className="text-xs text-gray-600">Tiempo</div>
+                  <div className="font-bold text-gray-900">{routeInfo.duration}</div>
+                </div>
+              </div>
+            )}
+          </div>
+        </BottomSheet>
+
+        {/* BOTTOM SHEET - Lista de Lugares */}
+        <BottomSheet
+          isOpen={mobileView === 'list'}
+          onClose={() => setMobileView('map')}
+          title={`${placesNearRoute.length} Lugares en la Ruta`}
+          height="full"
+        >
+          <div className="space-y-3 py-2">
+            {loadingPlaces ? (
+              <div className="flex justify-center py-8">
+                <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
+              </div>
+            ) : placesNearRoute.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                Calcula una ruta para ver lugares
+              </div>
+            ) : (
+              placesNearRoute.map((place) => {
+                const tier = calculateQualityTier(place.rating, place.review_count);
+                const tierInfo = getTierInfo(tier);
+                
+                return (
+                  <div
+                    key={place.id}
+                    onClick={() => {
+                      setSelectedPlace(place);
+                      setMobileView('map');
+                    }}
+                    className="border rounded-xl p-3 hover:shadow-md transition cursor-pointer bg-white"
+                  >
+                    {/* Foto */}
+                    {place.photos && place.photos.length > 0 && (
+                      <div className="mb-3 -mx-3 -mt-3 relative">
+                        <img
+                          src={`https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference=${place.photos[0]}&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`}
+                          alt={place.name}
+                          className="w-full h-32 object-cover rounded-t-xl"
+                          loading="lazy"
+                        />
+                        <div className="absolute top-2 right-2">
+                          <div className={`px-2 py-1 rounded-lg text-xs font-bold text-white bg-gradient-to-r ${tierInfo.color} shadow-lg`}>
+                            {tierInfo.icon} {tierInfo.name}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    <h4 className="font-semibold text-base mb-1">{place.name}</h4>
+                    <div className="flex items-center gap-2 mb-2">
+                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                      <span className="font-bold text-sm">{place.rating}</span>
+                      <span className="text-xs text-gray-500">{place.review_count} reseñas</span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <span className="inline-flex items-center px-2 py-1 rounded-md bg-indigo-50 text-indigo-700 text-xs">
+                        {place.category}
+                      </span>
+                      <span className="text-xs text-gray-600">
+                        📍 {place.city}, {place.province}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </BottomSheet>
+      </div>
     </div>
   );
 }

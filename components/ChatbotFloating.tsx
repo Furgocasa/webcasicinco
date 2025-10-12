@@ -164,7 +164,7 @@ export default function ChatbotFloating() {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 z-40 group"
+          className="fixed bottom-20 md:bottom-6 right-6 z-40 group"
           title="Abrir Tío Viajero IA"
         >
           {/* Avatar flotante estilo Tío Viajero */}
@@ -185,7 +185,7 @@ export default function ChatbotFloating() {
 
       {/* Panel del chat */}
       {isOpen && (
-        <div className="fixed bottom-6 right-6 z-40 w-96 h-[600px] bg-white rounded-2xl shadow-2xl border-2 border-gray-200 flex flex-col overflow-hidden">
+        <div className="fixed bottom-20 md:bottom-6 right-4 md:right-6 z-40 w-[calc(100vw-2rem)] md:w-96 h-[calc(100vh-10rem)] md:h-[600px] bg-white rounded-2xl shadow-2xl border-2 border-gray-200 flex flex-col overflow-hidden">
           {/* Header */}
           <div className="bg-gradient-to-r from-amber-600 to-orange-600 text-white p-4 flex items-center justify-between">
             <div className="flex items-center gap-3">

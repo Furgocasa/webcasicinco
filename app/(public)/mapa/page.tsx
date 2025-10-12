@@ -1223,8 +1223,8 @@ export default function MapPage() {
           </div>
 
           {/* Leyenda de Tiers */}
-          <div className="absolute bottom-4 left-4 z-10 bg-white shadow-xl rounded-lg p-4 border border-gray-200">
-            <h4 className="font-bold text-sm mb-3 text-gray-900">Calidad de Lugares</h4>
+          <div className="absolute bottom-20 md:bottom-4 left-4 z-10 bg-white shadow-xl rounded-lg p-3 md:p-4 border border-gray-200 max-w-[200px]">
+            <h4 className="font-bold text-xs md:text-sm mb-2 md:mb-3 text-gray-900">Calidad de Lugares</h4>
             <div className="space-y-2 text-xs">
               <div className="flex items-center gap-2">
                 <div className="w-6 h-6 rounded-full flex items-center justify-center border-2 border-gray-300" style={{ backgroundColor: '#93c5fd' }}>
@@ -1259,8 +1259,8 @@ export default function MapPage() {
             </div>
           </div>
 
-          {/* Botón de geolocalización (centro inferior) */}
-          <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-10">
+          {/* Botón de geolocalización (centro inferior) - Arriba del bottom nav en móvil */}
+          <div className="absolute bottom-24 md:bottom-8 left-1/2 transform -translate-x-1/2 z-10">
             <button
               onClick={isGeolocationActive ? deactivateGeolocation : activateGeolocation}
               className={`flex items-center gap-2 px-6 py-3 rounded-full shadow-2xl transition-all duration-300 font-semibold text-sm ${
