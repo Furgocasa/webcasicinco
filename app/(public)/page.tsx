@@ -73,16 +73,16 @@ export default function HomePage() {
           <div className="absolute inset-0 bg-black opacity-10"></div>
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
           
-          <div className="relative container mx-auto px-4 py-24 md:py-32">
+          <div className="relative container mx-auto px-4 py-16 md:py-32">
             <div className="max-w-4xl mx-auto text-center">
               {/* Badge */}
-              <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full mb-8 animate-fade-in">
-                <Star className="h-4 w-4 fill-yellow-300 text-yellow-300" />
-                <span className="text-sm font-medium">Solo lugares excepcionales +4.7★</span>
+              <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-3 md:px-4 py-1.5 md:py-2 rounded-full mb-6 md:mb-8 animate-fade-in">
+                <Star className="h-3 md:h-4 w-3 md:w-4 fill-yellow-300 text-yellow-300" />
+                <span className="text-xs md:text-sm font-medium">Solo lugares excepcionales +4.7★</span>
               </div>
 
               {/* Main Headline */}
-              <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight animate-slide-up">
+              <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold mb-4 md:mb-6 leading-tight animate-slide-up">
                 Acaba con las
                 <br />
                 <span className="bg-clip-text text-transparent bg-gradient-to-r from-yellow-300 to-orange-300">
@@ -91,26 +91,27 @@ export default function HomePage() {
               </h1>
 
               {/* Subheadline */}
-              <p className="text-xl md:text-2xl mb-8 text-white/90 animate-slide-up animation-delay-100">
+              <p className="text-lg md:text-xl lg:text-2xl mb-6 md:mb-8 text-white/90 animate-slide-up animation-delay-100 px-2">
                 La única app que filtra el <strong>95% de lugares</strong> para mostrarte solo los <strong>mejores de España</strong>
               </p>
 
-              {/* Search Bar */}
-              <div className="max-w-2xl mx-auto mb-8 animate-slide-up animation-delay-200">
-                <div className="bg-white rounded-2xl shadow-2xl p-2 flex items-center gap-2">
-                  <Search className="h-6 w-6 text-gray-400 ml-4" />
-                  <input
-                    type="text"
-                    placeholder="¿Qué estás buscando? Ej: Restaurantes en Málaga"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    className="flex-1 px-4 py-4 text-gray-900 text-lg outline-none bg-transparent"
-                  />
+              {/* Search Bar - Mobile Optimized */}
+              <div className="max-w-2xl mx-auto mb-6 md:mb-8 animate-slide-up animation-delay-200 px-2 md:px-0">
+                <div className="bg-white rounded-2xl shadow-2xl p-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                  <div className="flex items-center flex-1 px-2">
+                    <Search className="h-5 w-5 md:h-6 md:w-6 text-gray-400 ml-1 md:ml-2 flex-shrink-0" />
+                    <input
+                      type="text"
+                      placeholder="Ej: Restaurantes Málaga"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onKeyPress={handleKeyPress}
+                      className="flex-1 px-3 py-3 md:py-4 text-gray-900 text-base md:text-lg outline-none bg-transparent"
+                    />
+                  </div>
                   <Button 
                     onClick={handleSearch}
-                    size="lg"
-                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8"
+                    className="h-12 md:h-auto text-base md:text-lg bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 md:px-8 w-full sm:w-auto"
                   >
                     Buscar
                   </Button>
@@ -167,7 +168,7 @@ export default function HomePage() {
               </div>
 
               {/* Solution Grid */}
-              <div className="grid md:grid-cols-3 gap-8 mb-12">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mb-12">
                 {/* Card 1 */}
                 <Card className="p-8 text-center hover:shadow-xl transition-shadow border-2 border-gray-100 hover:border-purple-200">
                   <div className="bg-red-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -211,7 +212,7 @@ export default function HomePage() {
               </p>
             </div>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 max-w-7xl mx-auto">
               {/* Feature 1 */}
               <Card className="p-6 hover:shadow-lg transition-shadow">
                 <div className="bg-gradient-to-br from-purple-500 to-pink-500 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
@@ -468,7 +469,7 @@ export default function HomePage() {
                 </h2>
               </div>
 
-              <div className="grid md:grid-cols-4 gap-8 text-center">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 text-center">
                 <div>
                   <div className="text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-400 mb-2">
                     {stats.totalPlaces.toLocaleString('es-ES')}
