@@ -43,11 +43,33 @@ export async function processPlace(
     const placeDetails = await getPlaceDetails(placeId);
     cost += 0.017; // Place Details API cost
 
+    console.log(`   Nombre: ${placeDetails.name}`);
+    console.log(`   Rating: ${placeDetails.rating}`);
+    console.log(`   Reseñas: ${placeDetails.user_ratings_total}`);
+
     // Verificar si es cadena y debe excluirse
     if (shouldExcludeChain(placeDetails.name, excludeChains)) {
       return {
         success: false,
         error: 'Chain excluded',
+        cost,
+      };
+    }
+
+    // Verificar rating mínimo (4.7)
+    if (!placeDetails.rating || placeDetails.rating < 4.7) {
+      return {
+        success: false,
+        error: `Rating demasiado bajo: ${placeDetails.rating} (mínimo 4.7)`,
+        cost,
+      };
+    }
+
+    // Verificar número mínimo de reseñas (20)
+    if (!placeDetails.user_ratings_total || placeDetails.user_ratings_total < 20) {
+      return {
+        success: false,
+        error: `Pocas reseñas: ${placeDetails.user_ratings_total} (mínimo 20)`,
         cost,
       };
     }
@@ -130,32 +152,18 @@ export async function processPlace(
       featured: false,
     };
 
-    // 6. Guardar en Supabase
-    console.log(`[PROCESSOR] Saving ${placeDetails.name} to database`);
-    const supabase = createAdminClient();
+    // 6. RETORNAR datos procesados (el indexer los guardará)
+    console.log(`[PROCESSOR] ✅ Lugar procesado: ${placeDetails.name}`);
+    console.log(`   - Categoría: ${category}`);
+    console.log(`   - Provincia: ${province}`);
+    console.log(`   - Ciudad: ${city}`);
+    console.log(`   - Rating: ${placeDetails.rating} (${placeDetails.user_ratings_total} reseñas)`);
+    console.log(`   - Fotos: ${supabaseUrls.length} en Supabase`);
+    console.log(`   - IA: Descripción, resumen y highlights generados`);
     
-    const { data, error } = await supabase
-      .from('places')
-      .upsert(placeData, {
-        onConflict: 'google_place_id',
-        ignoreDuplicates: false,
-      })
-      .select()
-      .single();
-
-    if (error) {
-      console.error('[PROCESSOR] Error saving to database:', error);
-      return {
-        success: false,
-        error: error.message,
-        cost,
-      };
-    }
-
-    console.log(`[PROCESSOR] ✅ Successfully processed ${placeDetails.name}`);
     return {
       success: true,
-      place: data,
+      place: placeData,
       cost,
     };
   } catch (error: any) {

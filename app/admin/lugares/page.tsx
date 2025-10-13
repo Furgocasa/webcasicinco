@@ -23,7 +23,6 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { calculateQualityTier, getTierMarkerColor, getTierInfo } from '@/lib/utils/tier-calculator';
-import PhotoMigrationTool from '@/components/admin/PhotoMigrationTool';
 
 const libraries: ("places" | "drawing" | "geometry" | "visualization")[] = ["places"];
 
@@ -369,9 +368,6 @@ export default function LugaresPage() {
           </Button>
         </div>
       </div>
-
-      {/* Herramienta de Migración de Fotos */}
-      <PhotoMigrationTool />
 
       {/* Banner de progreso del enriquecimiento */}
       {enriching && enrichProgress.total > 0 && (

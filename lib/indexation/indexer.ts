@@ -142,9 +142,23 @@ export async function startIndexation(
               processedPlaceIds.add(placeId);
               totalProcessed++;
 
-              console.log(`📍 [${totalProcessed}/${allPlaceIds.size}] Procesando lugar ${placeId}...`);
+              console.log(`\n📍 [${totalProcessed}/${allPlaceIds.size}] Procesando lugar ${placeId}...`);
 
-              // ✅ USAR EL PROCESSOR COMPLETO (con fotos Supabase, IA, etc.)
+              // VERIFICAR SI YA EXISTE EN LA BD (ahorro de procesamiento)
+              const { data: existingPlace } = await supabase
+                .from('places')
+                .select('id, name')
+                .eq('google_place_id', placeId)
+                .single();
+
+              if (existingPlace) {
+                console.log(`⏭️  Ya existe en BD: "${existingPlace.name}"`);
+                totalSkipped++;
+                continue;
+              }
+
+              // ✅ PROCESAR LUGAR COMPLETO (fotos Supabase, IA, etc.)
+              console.log(`🔄 Procesando datos de Google + IA...`);
               const result = await processPlace(placeId, true); // true = excluir cadenas
 
               if (!result.success) {
@@ -157,9 +171,6 @@ export async function startIndexation(
                 } else if (result.error?.includes('reviews')) {
                   console.log(`⏭️  ${result.error}`);
                   totalLowReviews++;
-                } else if (result.error?.includes('exists')) {
-                  console.log(`⏭️  Ya existe en la BD`);
-                  totalSkipped++;
                 } else {
                   console.error(`❌ Error: ${result.error}`);
                   totalFailed++;
@@ -167,22 +178,22 @@ export async function startIndexation(
                 continue;
               }
 
-              // Guardar en BD
-              const { error: insertError } = await supabase
+              // GUARDAR EN BD con UPSERT (evita errores de duplicado)
+              console.log(`💾 Guardando en base de datos...`);
+              const { data: savedPlace, error: saveError } = await supabase
                 .from('places')
-                .insert(result.place);
+                .upsert(result.place, {
+                  onConflict: 'google_place_id',
+                  ignoreDuplicates: false,
+                })
+                .select('id, name')
+                .single();
 
-              if (insertError) {
-                // Si es error de duplicado, contar como skip
-                if (insertError.code === '23505') {
-                  console.log(`⏭️  Duplicado en BD`);
-                  totalSkipped++;
-                } else {
-                  console.error(`❌ Error insertando: ${insertError.message}`);
-                  totalFailed++;
-                }
+              if (saveError) {
+                console.error(`❌ Error guardando: ${saveError.message}`);
+                totalFailed++;
               } else {
-                console.log(`✅ "${result.place?.name}" guardado exitosamente`);
+                console.log(`✅ "${savedPlace?.name}" guardado con ID ${savedPlace?.id}`);
                 totalSuccessful++;
               }
 
@@ -198,10 +209,12 @@ export async function startIndexation(
                 .eq('id', jobId);
 
               // Pausa para no saturar APIs
-              await new Promise(resolve => setTimeout(resolve, 500));
+              console.log(`⏳ Pausa de 1 segundo...\n`);
+              await new Promise(resolve => setTimeout(resolve, 1000));
 
             } catch (error: any) {
               console.error(`❌ Error fatal procesando:`, error.message);
+              console.error(error.stack);
               totalFailed++;
             }
           }
