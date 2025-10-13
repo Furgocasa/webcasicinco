@@ -55,8 +55,8 @@ export default function IndexarPage() {
       }
       
       // Refrescar estado del job manualmente
-      const response = await fetch(`/api/admin/indexation-status?jobId=${jobId}`);
-      const statusData = await response.json();
+      const statusResponse = await fetch(`/api/admin/indexation-status?jobId=${jobId}`);
+      const statusData = await statusResponse.json();
       if (statusData.success && statusData.job) {
         setJobStatus(statusData.job);
       }
