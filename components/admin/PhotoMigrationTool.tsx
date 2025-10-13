@@ -42,14 +42,15 @@ export default function PhotoMigrationTool() {
     setProgress({ processed: 0, successful: 0, failed: 0, total: stats.needsMigration });
 
     let offset = 0;
-    const batchSize = 50;
+    const batchSize = 10; // ⚠️ REDUCIDO a 10 para evitar timeouts
     let totalProcessed = 0;
     let totalSuccessful = 0;
     let totalFailed = 0;
 
     try {
       while (totalProcessed < stats.needsMigration) {
-        console.log(`🔄 Migrando lote ${Math.floor(offset / batchSize) + 1}...`);
+        const loteNum = Math.floor(offset / batchSize) + 1;
+        console.log(`🔄 Migrando lote ${loteNum} (${offset}-${offset + batchSize})...`);
         
         const response = await fetch('/api/admin/migrate-photos', {
           method: 'POST',
@@ -57,9 +58,18 @@ export default function PhotoMigrationTool() {
           body: JSON.stringify({ batchSize, offset }),
         });
 
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error(`❌ Error HTTP ${response.status}:`, errorText);
+          toast.error(`Error HTTP ${response.status}: ${errorText.substring(0, 100)}`);
+          break;
+        }
+
         const data = await response.json();
+        console.log(`📊 Lote ${loteNum} resultado:`, data);
 
         if (!data.success) {
+          console.error('❌ Error en respuesta:', data.error);
           toast.error(data.error || 'Error en migración');
           break;
         }
@@ -67,6 +77,8 @@ export default function PhotoMigrationTool() {
         totalProcessed += data.processed;
         totalSuccessful += data.successful;
         totalFailed += data.failed;
+
+        console.log(`✅ Total: ${totalProcessed}/${stats.needsMigration} | Exitosos: ${totalSuccessful} | Fallidos: ${totalFailed}`);
 
         setProgress({
           processed: totalProcessed,
@@ -77,21 +89,22 @@ export default function PhotoMigrationTool() {
 
         // Si no procesó nada, terminar
         if (data.processed === 0) {
+          console.log('⚠️ No se procesó ningún lugar, terminando...');
           break;
         }
 
         offset += batchSize;
 
-        // Pausa entre lotes
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        // Pausa entre lotes (aumentada para evitar saturación)
+        await new Promise(resolve => setTimeout(resolve, 3000));
       }
 
       toast.success(`✅ Migración completada: ${totalSuccessful}/${totalProcessed} lugares`);
       loadStats(); // Recargar estadísticas
 
     } catch (error: any) {
-      console.error('Error en migración:', error);
-      toast.error('Error durante la migración');
+      console.error('💥 Error fatal en migración:', error);
+      toast.error(`Error fatal: ${error.message}`);
     } finally {
       setMigrating(false);
     }
@@ -190,50 +203,44 @@ export default function PhotoMigrationTool() {
         </div>
 
         {/* Botón de acción */}
-        {needsMigration > 0 ? (
-          <div className="space-y-4">
-            <Button
-              onClick={startMigration}
-              disabled={migrating}
-              className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
-              size="lg"
-            >
-              {migrating ? (
-                <>
-                  <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                  Migrando... {progress.processed}/{progress.total}
-                </>
-              ) : (
-                <>
-                  <Image className="h-5 w-5 mr-2" />
-                  Migrar {needsMigration} Lugares a Supabase
-                </>
-              )}
-            </Button>
-            
-            <p className="text-xs text-center text-gray-500">
-              Tiempo estimado: ~{Math.ceil(needsMigration / 50 * 5)} minutos. 
-              Puedes cerrar esta página, continuará en background.
+        <div className="text-center py-6">
+          <AlertTriangle className="h-16 w-16 text-amber-600 mx-auto mb-4" />
+          <p className="text-lg font-semibold text-gray-900 mb-2">
+            ⚠️ Migración Masiva Desactivada Temporalmente
+          </p>
+          <p className="text-sm text-gray-600 mb-4">
+            La migración masiva de 3,600+ lugares causa timeouts en el servidor.
+            <br />
+            <strong>Solución implementada:</strong> Las fotos se migran automáticamente al indexar nuevos lugares.
+          </p>
+          
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-left mb-4">
+            <p className="text-sm text-blue-900 mb-2">
+              <strong>📋 Estrategia de Migración Gradual:</strong>
             </p>
+            <ul className="text-sm text-blue-800 space-y-1 ml-4">
+              <li>✅ <strong>Lugares nuevos:</strong> Fotos en Supabase Storage automáticamente</li>
+              <li>✅ <strong>Lugares existentes:</strong> Usan Google Photos API (fallback compatible)</li>
+              <li>💡 <strong>Re-indexación:</strong> Puedes re-indexar lugares específicos para migrar sus fotos</li>
+              <li>💰 <strong>Ahorro gradual:</strong> Cada nuevo lugar = $0 en costos de fotos</li>
+            </ul>
           </div>
-        ) : (
-          <div className="text-center py-6">
-            <CheckCircle className="h-16 w-16 text-green-600 mx-auto mb-4" />
-            <p className="text-lg font-semibold text-gray-900 mb-2">
-              ✅ Migración Completada
-            </p>
-            <p className="text-sm text-gray-600">
-              Todas las fotos están en Supabase Storage. ¡Ahorro activado!
-            </p>
-          </div>
-        )}
+
+          <Button
+            onClick={() => window.open('/admin/indexar', '_blank')}
+            className="bg-indigo-600 hover:bg-indigo-700"
+          >
+            <Database className="h-5 w-5 mr-2" />
+            Ir a Indexar Lugares
+          </Button>
+        </div>
 
         {/* Advertencia */}
         {needsMigration > 0 && (
           <div className="mt-6 bg-amber-50 border border-amber-200 rounded-lg p-3">
             <p className="text-xs text-amber-800">
-              <strong>⚠️ Importante:</strong> Esta será la última vez que descargas fotos de Google. 
-              Después, TODO será gratis desde Supabase. El proceso puede tardar ~3 horas para 3,600 lugares.
+              <strong>💡 Nota técnica:</strong> La migración masiva requiere un proceso en background (workers).
+              Por ahora, la estrategia gradual es más eficiente y no genera timeouts.
             </p>
           </div>
         )}
