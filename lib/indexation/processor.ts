@@ -39,13 +39,8 @@ export async function processPlace(
 
   try {
     // 1. Obtener detalles del lugar de Google
-    console.log(`[PROCESSOR] Fetching details for place ${placeId}`);
     const placeDetails = await getPlaceDetails(placeId);
-    cost += 0.017; // Place Details API cost
-
-    console.log(`   Nombre: ${placeDetails.name}`);
-    console.log(`   Rating: ${placeDetails.rating}`);
-    console.log(`   Reseñas: ${placeDetails.user_ratings_total}`);
+    cost += 0.017;
 
     // Verificar si es cadena y debe excluirse
     if (shouldExcludeChain(placeDetails.name, excludeChains)) {
@@ -74,22 +69,19 @@ export async function processPlace(
       };
     }
 
-    // 2. Descargar fotos Y subirlas a Supabase Storage
-    console.log(`[PROCESSOR] Downloading photos for ${placeDetails.name}`);
+    // 2. Descargar fotos Y subirlas a Supabase Storage (SOLO 3 para velocidad)
     const { supabaseUrls, photoReferences } = await downloadAndUploadPhotosToSupabase(
       placeDetails.photos || [], 
       placeDetails.name,
       placeDetails.place_id,
-      5
+      3  // ✅ 3 fotos en lugar de 5 (2x más rápido)
     );
-    cost += supabaseUrls.length * 0.007; // Place Photos API cost (solo 1 vez al indexar)
+    cost += supabaseUrls.length * 0.007;
 
     // 3. Extraer reseñas
     const reviews = extractReviews(placeDetails);
-    console.log(`[PROCESSOR] Found ${reviews.length} reviews`);
 
     // 4. Generar contenido con IA
-    console.log(`[PROCESSOR] Generating AI content for ${placeDetails.name}`);
     
     const category = categorizePlaceByTypes(placeDetails.types);
     const province = extractProvinceFromPlaceData(placeDetails);
@@ -179,13 +171,6 @@ export async function processPlace(
     };
 
     // 6. RETORNAR datos procesados (el indexer los guardará)
-    console.log(`[PROCESSOR] ✅ Lugar procesado: ${placeDetails.name}`);
-    console.log(`   - Categoría: ${category}`);
-    console.log(`   - Provincia: ${province}`);
-    console.log(`   - Ciudad: ${city}`);
-    console.log(`   - Rating: ${placeDetails.rating} (${placeDetails.user_ratings_total} reseñas)`);
-    console.log(`   - Fotos: ${supabaseUrls.length} en Supabase`);
-    console.log(`   - IA: Descripción, resumen y highlights generados`);
     
     return {
       success: true,

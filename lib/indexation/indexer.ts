@@ -153,7 +153,10 @@ export async function startIndexation(
               processedPlaceIds.add(placeId);
               totalProcessed++;
 
-              console.log(`\n📍 [${totalProcessed}/${allPlaceIds.size}] Procesando lugar ${placeId}...`);
+              // Log cada 10 lugares para no saturar consola
+              if (totalProcessed % 10 === 0) {
+                console.log(`[INDEXACIÓN] 📍 Procesando ${totalProcessed}/${allPlaceIds.size} (${Math.round((totalProcessed/allPlaceIds.size)*100)}%)`);
+              }
 
               // VERIFICAR SI YA EXISTE EN LA BD (ahorro de procesamiento)
               const { data: existingPlace } = await supabase
@@ -163,56 +166,36 @@ export async function startIndexation(
                 .single();
 
               if (existingPlace) {
-                console.log(`⏭️  Ya existe en BD: "${existingPlace.name}"`);
                 totalSkipped++;
                 continue;
               }
 
               // ✅ PROCESAR LUGAR COMPLETO (fotos Supabase, IA, etc.)
-              console.log(`🔄 Procesando datos de Google + IA...`);
-              const result = await processPlace(placeId, true); // true = excluir cadenas
+              const result = await processPlace(placeId, true);
 
               if (!result.success) {
-                // DESCARTADOS (no cumplen requisitos de calidad)
+                // Clasificar sin logs individuales (solo cada 10)
                 if (result.error === 'Chain excluded') {
-                  console.log(`⏭️  DESCARTADO: Cadena excluida`);
                   totalSkipped++;
                 } else if (result.error?.includes('rating') || result.error?.includes('Rating')) {
-                  console.log(`⏭️  DESCARTADO: ${result.error}`);
                   totalLowRating++;
                 } else if (result.error?.includes('reviews') || result.error?.includes('reseñas') || result.error?.includes('Pocas')) {
-                  console.log(`⏭️  DESCARTADO: ${result.error}`);
                   totalLowReviews++;
-                }
-                // ERRORES TÉCNICOS (fallo de APIs o conexión)
-                else if (result.error?.includes('OpenAI') || result.error?.includes('timeout') || result.error?.includes('ETIMEDOUT')) {
-                  console.error(`❌ ERROR TÉCNICO: ${result.error}`);
+                } else if (result.error?.includes('OpenAI') || result.error?.includes('timeout') || result.error?.includes('Google') || result.error?.includes('quota') || result.error?.includes('network')) {
                   totalFailed++;
-                } else if (result.error?.includes('Google') || result.error?.includes('REQUEST_DENIED') || result.error?.includes('OVER_QUERY_LIMIT')) {
-                  console.error(`❌ ERROR TÉCNICO: Google API - ${result.error}`);
-                  totalFailed++;
-                } else if (result.error?.includes('quota') || result.error?.includes('limit') || result.error?.includes('rate')) {
-                  console.error(`❌ ERROR TÉCNICO: Límite de cuota - ${result.error}`);
-                  totalFailed++;
-                } else if (result.error?.includes('network') || result.error?.includes('ECONNREFUSED') || result.error?.includes('fetch')) {
-                  console.error(`❌ ERROR TÉCNICO: Error de red - ${result.error}`);
-                  totalFailed++;
-                }
-                // Si no es ninguno conocido, asumir que es DESCARTE (más seguro)
-                else {
-                  console.log(`⏭️  DESCARTADO: ${result.error} (razón desconocida)`);
+                  if (totalFailed % 5 === 0) {
+                    console.error(`[INDEXACIÓN] ❌ ${totalFailed} errores técnicos acumulados`);
+                  }
+                } else {
                   totalSkipped++;
                 }
                 continue;
               }
 
               // GUARDAR EN BD con UPSERT (evita errores de duplicado)
-              console.log(`💾 Guardando en base de datos...`);
-              
-              // ✅ MARCAR COMO PUBLICADO porque ya tiene IA y fotos
               const placeToSave = {
                 ...result.place,
-                published: true,  // ✅ AUTO-PUBLICAR después de procesar
+                published: true,
               };
               
               const { data: savedPlace, error: saveError } = await supabase
@@ -225,21 +208,19 @@ export async function startIndexation(
                 .single();
 
               if (saveError) {
-                // Distinguir entre descartados y errores reales
                 if (saveError.code === '23505' || saveError.message?.includes('duplicate') || saveError.message?.includes('unique')) {
-                  console.log(`⏭️  Descartado: ${saveError.message} (slug o ID duplicado)`);
                   totalSkipped++;
                 } else if (saveError.message?.includes('incomplete') || saveError.message?.includes('null value')) {
-                  console.log(`⏭️  Descartado: Datos incompletos`);
                   totalSkipped++;
                 } else {
-                  // Error técnico real
-                  console.error(`❌ ERROR TÉCNICO guardando: ${saveError.message} (código: ${saveError.code})`);
                   totalFailed++;
+                  console.error(`[INDEXACIÓN] ❌ Error guardando: ${saveError.message}`);
                 }
               } else {
-                console.log(`✅ "${savedPlace?.name}" guardado como PUBLICADO con ID ${savedPlace?.id}`);
                 totalSuccessful++;
+                if (totalSuccessful % 10 === 0) {
+                  console.log(`[INDEXACIÓN] ✅ ${totalSuccessful} lugares guardados`);
+                }
               }
 
               // Actualizar progreso en BD (TODOS los contadores en tiempo real)
@@ -259,9 +240,8 @@ export async function startIndexation(
                 })
                 .eq('id', jobId);
 
-              // Pausa para no saturar APIs
-              console.log(`⏳ Pausa de 1 segundo...\n`);
-              await new Promise(resolve => setTimeout(resolve, 1000));
+              // Pausa mínima para no saturar APIs
+              await new Promise(resolve => setTimeout(resolve, 100)); // 0.1 seg (10x más rápido)
 
             } catch (error: any) {
               console.error(`❌ Error fatal procesando:`, error.message);
