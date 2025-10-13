@@ -1,9 +1,9 @@
 # 📊 Estado Actual del Proyecto - Casi Cinco
 
-**Fecha:** 12 de Octubre de 2025  
-**Versión:** 3.0.0 - BETA 3.0 📱 Mobile-First  
-**Estado:** ✅ Optimizado para Móvil y en Producción  
-**Deploy:** [AWS Amplify](https://main.d2nzzzmoajf631.amplifyapp.com)
+**Fecha:** 13 de Octubre de 2025  
+**Versión:** 6.0.0 - PRODUCTION READY 🚀  
+**Estado:** ✅ Optimizado, Dominio Personalizado y Sistema de Fotos Migrado  
+**Deploy:** [www.casicinco.com](https://www.casicinco.com)
 
 ---
 
@@ -12,11 +12,14 @@
 Casi Cinco es una plataforma completa para descubrir los mejores lugares de España (restaurantes, hoteles, spas, bares) con un sistema de filtrado avanzado basado en calidad (rating + número de reseñas).
 
 **Datos clave:**
-- 📍 **3,547 lugares** indexados
-- 🌍 **Cobertura**: Toda España
+- 📍 **3,628+ lugares** indexados
+- 🌍 **Cobertura**: Toda España  
 - 💎 **Calidad**: Solo 4.7★ o superior
 - 🤖 **IA**: Chatbot inteligente + descripciones automáticas
 - 📱 **Responsive**: Web optimizada para móvil y desktop
+- 💰 **Monetización**: Trial 30 días + Stripe
+- 🌐 **Dominio**: www.casicinco.com (producción)
+- 📸 **Fotos**: Sistema migrado a Supabase Storage (ahorro $2,500/año)
 
 ---
 
@@ -69,7 +72,17 @@ Casi Cinco es una plataforma completa para descubrir los mejores lugares de Espa
 - Búsqueda por texto
 - Todos los filtros combinables
 
-### **6. Dashboard Analytics**
+### **6. Sistema de Fotos Optimizado** 📸 NUEVO  
+- **Migración masiva** de Google Photos API a Supabase Storage
+- **Herramienta admin** con dashboard de progreso en tiempo real
+- **Ahorro de costos**: ~$2,500/año (de $0.007 por foto a $0)
+- **Helper unificado**: `getPlacePhotoUrl()` con fallback automático
+- **Lazy loading**: Optimización de rendimiento
+- **Compatibilidad total**: Lugares nuevos y existentes
+- **Migración por lotes**: 50 lugares por vez
+- **URLs públicas**: Supabase Storage con CDN incluido
+
+### **7. Dashboard Analytics**
 - 6 KPIs principales
 - Distribución por Tiers
 - Distribución por Categorías
@@ -77,7 +90,7 @@ Casi Cinco es una plataforma completa para descubrir los mejores lugares de Espa
 - Top 10 Lugares (filtrable por categoría)
 - Estilo Power BI
 
-### **7. Planificador de Rutas** ⭐ NUEVO
+### **8. Planificador de Rutas** ⭐ NUEVO
 - Cálculo de rutas con Google Directions API
 - Autocompletado de Google Places (origen y destino)
 - Radio configurable (5-50km desde la ruta)
@@ -88,7 +101,7 @@ Casi Cinco es una plataforma completa para descubrir los mejores lugares de Espa
 - Información de distancia y tiempo
 - Protegido con login
 
-### **8. Página "Nuestra Metodología"** ⭐ NUEVO
+### **9. Página "Nuestra Metodología"** ⭐ NUEVO
 - Explicación del algoritmo (Rating + Reseñas + IA)
 - Problema vs Solución comparativo
 - Sistema de Tiers detallado con porcentajes
@@ -97,7 +110,7 @@ Casi Cinco es una plataforma completa para descubrir los mejores lugares de Espa
 - Identidad clara del proyecto
 - **Carta de presentación** para captar clientes
 
-### **9. Páginas de Detalle**
+### **10. Páginas de Detalle**
 - Información completa del lugar
 - Badge de tier de calidad
 - Rating y reseñas

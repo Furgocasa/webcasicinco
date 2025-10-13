@@ -39,6 +39,7 @@ Casi Cinco es la plataforma definitiva para encontrar lugares excepcionales en E
 ✅ **Sistema de pagos Stripe con trial 30 días CON tarjeta**  
 ✅ +3,600 lugares indexados  
 ✅ **Dominio personalizado: www.casicinco.com**
+✅ **Sistema de fotos optimizado** - Migración masiva a Supabase Storage (ahorro $2,500/año)
 
 #### **Mapa Interactivo Avanzado**
 ✅ Geolocalización con marcador personalizado  
