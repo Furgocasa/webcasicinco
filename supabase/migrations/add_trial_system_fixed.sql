@@ -3,14 +3,18 @@
 -- Descripción: Funciones para trial + asignar trial a usuarios existentes
 
 -- ============================================================================
--- 0. ELIMINAR FUNCIONES EXISTENTES (si existen)
+-- 0. ELIMINAR FUNCIONES EXISTENTES (si existen) + VISTAS DEPENDIENTES
 -- ============================================================================
 
-DROP FUNCTION IF EXISTS public.user_has_access(UUID);
-DROP FUNCTION IF EXISTS public.get_trial_days_remaining(UUID);
-DROP FUNCTION IF EXISTS public.set_user_as_free(UUID, BOOLEAN);
-DROP FUNCTION IF EXISTS public.assign_trial_to_user(UUID, INTEGER);
-DROP FUNCTION IF EXISTS public.assign_trial_to_user(UUID);
+-- Primero dropear vista que depende de user_has_access
+DROP VIEW IF EXISTS public.user_access_info CASCADE;
+
+-- Ahora dropear funciones con CASCADE por si hay otras dependencias
+DROP FUNCTION IF EXISTS public.user_has_access(UUID) CASCADE;
+DROP FUNCTION IF EXISTS public.get_trial_days_remaining(UUID) CASCADE;
+DROP FUNCTION IF EXISTS public.set_user_as_free(UUID, BOOLEAN) CASCADE;
+DROP FUNCTION IF EXISTS public.assign_trial_to_user(UUID, INTEGER) CASCADE;
+DROP FUNCTION IF EXISTS public.assign_trial_to_user(UUID) CASCADE;
 
 -- ============================================================================
 -- 1. FUNCIÓN: Verificar si usuario tiene acceso
