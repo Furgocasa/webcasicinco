@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createClient as createAdminClient } from '@supabase/supabase-js';
 
 /**
  * GET /api/admin/users
@@ -27,9 +28,20 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Crear cliente con SERVICE_ROLE para acceder a auth.admin
+    const supabaseAdmin = createAdminClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
+    );
+
     // Obtener todos los usuarios directamente de auth.users
-    // Usar service_role para acceso completo a auth.users
-    const { data: { users: authUsers }, error: usersError } = await supabase.auth.admin.listUsers();
+    const { data: { users: authUsers }, error: usersError } = await supabaseAdmin.auth.admin.listUsers();
 
     if (usersError) {
       console.error('Error obteniendo usuarios:', usersError);
@@ -40,7 +52,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Obtener info de suscripciones activas para cada usuario
-    const { data: subscriptions } = await supabase
+    const { data: subscriptions } = await supabaseAdmin
       .from('subscriptions')
       .select('user_id, plan, status')
       .eq('status', 'active');
