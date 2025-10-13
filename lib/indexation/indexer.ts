@@ -173,18 +173,32 @@ export async function startIndexation(
               const result = await processPlace(placeId, true); // true = excluir cadenas
 
               if (!result.success) {
+                // DESCARTADOS (no cumplen requisitos de calidad)
                 if (result.error === 'Chain excluded') {
-                  console.log(`⏭️  Cadena excluida`);
+                  console.log(`⏭️  DESCARTADO: Cadena excluida`);
                   totalSkipped++;
-                } else if (result.error?.includes('rating')) {
-                  console.log(`⏭️  ${result.error}`);
+                } else if (result.error?.includes('rating') || result.error?.includes('Rating')) {
+                  console.log(`⏭️  DESCARTADO: ${result.error}`);
                   totalLowRating++;
-                } else if (result.error?.includes('reviews')) {
-                  console.log(`⏭️  ${result.error}`);
+                } else if (result.error?.includes('reviews') || result.error?.includes('reseñas') || result.error?.includes('Pocas')) {
+                  console.log(`⏭️  DESCARTADO: ${result.error}`);
                   totalLowReviews++;
-                } else {
-                  console.error(`❌ Error: ${result.error}`);
+                }
+                // ERRORES TÉCNICOS (fallo de APIs o conexión)
+                else if (result.error?.includes('timeout') || result.error?.includes('ETIMEDOUT')) {
+                  console.error(`❌ ERROR TÉCNICO: Timeout - ${result.error}`);
                   totalFailed++;
+                } else if (result.error?.includes('API') || result.error?.includes('quota') || result.error?.includes('limit')) {
+                  console.error(`❌ ERROR TÉCNICO: Problema con API - ${result.error}`);
+                  totalFailed++;
+                } else if (result.error?.includes('network') || result.error?.includes('ECONNREFUSED')) {
+                  console.error(`❌ ERROR TÉCNICO: Error de red - ${result.error}`);
+                  totalFailed++;
+                }
+                // Si no es ninguno conocido, asumir que es DESCARTE (más seguro)
+                else {
+                  console.log(`⏭️  DESCARTADO: ${result.error} (razón desconocida)`);
+                  totalSkipped++;
                 }
                 continue;
               }

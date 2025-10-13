@@ -445,17 +445,17 @@ export default function IndexarPage() {
                     </div>
                   )}
 
-                  {/* Mensaje sobre lugares fallidos */}
+                  {/* Mensaje sobre errores técnicos */}
                   {jobStatus.failed_places > 0 && (
-                    <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                      <p className="text-sm text-yellow-800">
-                        ⚠️ <strong>{jobStatus.failed_places} lugares fallaron</strong>
+                    <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                      <p className="text-sm text-red-800">
+                        ⚠️ <strong>{jobStatus.failed_places} errores técnicos</strong>
                       </p>
-                      <p className="text-xs text-yellow-700 mt-1">
-                        Posibles razones: slug duplicado, datos incompletos, categoría no válida, o ya existían en la BD.
+                      <p className="text-xs text-red-700 mt-1">
+                        Posibles causas: timeout de Google API, timeout de OpenAI, límite de cuota alcanzado, error de red, o error al guardar en BD.
                       </p>
-                      <p className="text-xs text-yellow-700 mt-2">
-                        ✅ Los <strong>{jobStatus.successful_places} lugares exitosos</strong> están guardados y listos para publicar en "Gestión de Lugares".
+                      <p className="text-xs text-red-700 mt-2">
+                        💡 Si hay muchos errores, intenta de nuevo más tarde (puede ser límite temporal de API).
                       </p>
                     </div>
                   )}
