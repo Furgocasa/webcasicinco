@@ -27,6 +27,41 @@ export default function IndexarPage() {
     };
   }, [pollingInterval]);
 
+  const handleCancelJob = async () => {
+    if (!jobId) return;
+    
+    if (!confirm('¿Estás seguro de que quieres cancelar la indexación?')) {
+      return;
+    }
+    
+    try {
+      const response = await fetch(`/api/admin/cancel-indexation/${jobId}`, {
+        method: 'POST',
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Error al cancelar');
+      }
+      
+      toast.success('✅ Indexación cancelada');
+      
+      // Actualizar estado
+      setIsIndexing(false);
+      if (pollingInterval) {
+        clearInterval(pollingInterval);
+        setPollingInterval(null);
+      }
+      
+      // Refrescar estado del job
+      fetchJobStatus();
+      
+    } catch (error: any) {
+      toast.error(`Error: ${error.message}`);
+    }
+  };
+
   const handleSearch = async () => {
     setIsSearching(true);
     toast.info('🔍 Buscando lugares...');
@@ -340,18 +375,32 @@ export default function IndexarPage() {
                   {/* Estado */}
                   <div className="flex items-center justify-between pt-2 border-t">
                     <span className="text-sm font-medium">Estado:</span>
-                    <span className={`px-3 py-1 rounded-full text-sm ${
-                      jobStatus.status === 'completed' ? 'bg-green-100 text-green-700' :
-                      jobStatus.status === 'running' ? 'bg-blue-100 text-blue-700' :
-                      jobStatus.status === 'failed' ? 'bg-red-100 text-red-700' :
-                      'bg-gray-100 text-gray-700'
-                    }`}>
-                      {jobStatus.status === 'pending' ? '⏳ Pendiente' :
-                       jobStatus.status === 'running' ? (jobStatus.total_places > 0 && jobStatus.processed_places === 0 ? '🔍 Buscando lugares...' : '🔄 Procesando lugares') :
-                       jobStatus.status === 'completed' ? '✅ Completado' :
-                       jobStatus.status === 'failed' ? '❌ Fallido' :
-                       jobStatus.status}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className={`px-3 py-1 rounded-full text-sm ${
+                        jobStatus.status === 'completed' ? 'bg-green-100 text-green-700' :
+                        jobStatus.status === 'running' ? 'bg-blue-100 text-blue-700' :
+                        jobStatus.status === 'failed' ? 'bg-red-100 text-red-700' :
+                        jobStatus.status === 'cancelled' ? 'bg-gray-100 text-gray-700' :
+                        'bg-gray-100 text-gray-700'
+                      }`}>
+                        {jobStatus.status === 'pending' ? '⏳ Pendiente' :
+                         jobStatus.status === 'running' ? (jobStatus.total_places > 0 && jobStatus.processed_places === 0 ? '🔍 Buscando lugares...' : '🔄 Procesando lugares') :
+                         jobStatus.status === 'completed' ? '✅ Completado' :
+                         jobStatus.status === 'failed' ? '❌ Fallido' :
+                         jobStatus.status === 'cancelled' ? '🛑 Cancelado' :
+                         jobStatus.status}
+                      </span>
+                      {jobStatus.status === 'running' && (
+                        <Button
+                          onClick={handleCancelJob}
+                          variant="outline"
+                          size="sm"
+                          className="border-red-500 text-red-600 hover:bg-red-50"
+                        >
+                          🛑 Cancelar
+                        </Button>
+                      )}
+                    </div>
                   </div>
 
                   {/* Mensaje durante búsqueda */}
