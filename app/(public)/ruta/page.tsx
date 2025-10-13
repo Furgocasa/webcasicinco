@@ -163,7 +163,7 @@ export default function RutaPage() {
       return;
     }
 
-    // Limpiar ruta anterior automáticamente antes de calcular la nueva
+    // Limpiar solo ruta y lugares, NO los inputs de origen/destino
     setDirectionsResponse(null);
     setRouteInfo(null);
     setPlacesNearRoute([]);
@@ -361,7 +361,8 @@ export default function RutaPage() {
                   onPlaceChanged={() => {
                     if (originAutocompleteRef.current) {
                       const place = originAutocompleteRef.current.getPlace();
-                      if (place.formatted_address) {
+                      // Solo actualizar si hay dirección válida
+                      if (place && place.formatted_address) {
                         setOrigin(place.formatted_address);
                       }
                     }
@@ -396,7 +397,8 @@ export default function RutaPage() {
                   onPlaceChanged={() => {
                     if (destinationAutocompleteRef.current) {
                       const place = destinationAutocompleteRef.current.getPlace();
-                      if (place.formatted_address) {
+                      // Solo actualizar si hay dirección válida
+                      if (place && place.formatted_address) {
                         setDestination(place.formatted_address);
                       }
                     }
@@ -426,7 +428,7 @@ export default function RutaPage() {
               <select
                 value={searchRadius}
                 onChange={(e) => setSearchRadius(Number(e.target.value))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-base"
               >
                 <option value={5}>5 km</option>
                 <option value={10}>10 km</option>
@@ -443,7 +445,7 @@ export default function RutaPage() {
               <select
                 value={categoryFilter}
                 onChange={(e) => setCategoryFilter(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-base"
               >
                 <option value="">Todas</option>
                 <option value="restaurante">Restaurantes</option>
@@ -963,7 +965,8 @@ export default function RutaPage() {
                   onPlaceChanged={() => {
                     if (originAutocompleteRef.current) {
                       const place = originAutocompleteRef.current.getPlace();
-                      if (place.formatted_address) {
+                      // Solo actualizar si hay dirección válida
+                      if (place && place.formatted_address) {
                         setOrigin(place.formatted_address);
                       }
                     }
@@ -978,7 +981,7 @@ export default function RutaPage() {
                     placeholder="Ej: Madrid, Puerta del Sol"
                     value={origin}
                     onChange={(e) => setOrigin(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-base"
                   />
                 </Autocomplete>
               )}
@@ -996,7 +999,8 @@ export default function RutaPage() {
                   onPlaceChanged={() => {
                     if (destinationAutocompleteRef.current) {
                       const place = destinationAutocompleteRef.current.getPlace();
-                      if (place.formatted_address) {
+                      // Solo actualizar si hay dirección válida
+                      if (place && place.formatted_address) {
                         setDestination(place.formatted_address);
                       }
                     }
@@ -1011,7 +1015,7 @@ export default function RutaPage() {
                     placeholder="Ej: Barcelona, Sagrada Familia"
                     value={destination}
                     onChange={(e) => setDestination(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-base"
                   />
                 </Autocomplete>
               )}
