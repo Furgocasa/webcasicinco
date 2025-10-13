@@ -8,17 +8,17 @@ import { PlanConfig, SubscriptionPlan } from '@/types/stripe';
 export const PLANS: Record<SubscriptionPlan, PlanConfig> = {
   free: {
     id: 'free',
-    name: 'Prueba Gratis',
+    name: 'Trial 30 Días',
     price: 0,
     currency: 'EUR',
     interval: 'month',
     features: [
-      '30 días de prueba COMPLETA',
+      '30 días de prueba gratis',
       'Acceso total a mapa interactivo',
       'Chatbot IA ilimitado',
       'Planificador de rutas',
       'Favoritos y visitas',
-      'Filtros avanzados',
+      'Requiere tarjeta (no se cobra hasta día 31)',
     ],
     limits: {
       routes: 'unlimited',
@@ -35,15 +35,13 @@ export const PLANS: Record<SubscriptionPlan, PlanConfig> = {
     interval: 'month',
     stripePriceId: process.env.STRIPE_PREMIUM_MONTHLY_PRICE_ID,
     features: [
+      '30 días de prueba gratis',
+      'Luego solo 2,99€/mes',
       'Acceso total sin límites',
-      'Mapa interactivo completo',
-      'Chatbot IA ilimitado',
-      'Planificador de rutas',
+      'Mapa + Chatbot IA + Rutas',
       'Favoritos ilimitados',
-      'Filtros avanzados',
-      'Registrar visitas',
-      'Sin anuncios',
       'Nuevos lugares cada semana',
+      'Cancela cuando quieras',
     ],
     limits: {
       routes: 'unlimited',

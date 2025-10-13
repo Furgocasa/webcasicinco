@@ -24,7 +24,7 @@ export default function PricingPage() {
         },
         body: JSON.stringify({
           planId,
-          trialDays: 7, // 7 días de prueba gratis
+          trialDays: 30, // 30 días de prueba gratis
         }),
       });
 
@@ -180,11 +180,11 @@ export default function PricingPage() {
                 billingInterval === 'month' ? 'premium_monthly' : 'premium_yearly'
               )}
             >
-              Probar 7 Días Gratis
+              Probar 30 Días Gratis
             </Button>
 
             <p className="mt-4 text-center text-xs text-gray-500">
-              Sin compromisos. Cancela cuando quieras.
+              Requiere tarjeta. No se cobra hasta el día 31. Cancela cuando quieras.
             </p>
           </Card>
 
@@ -271,8 +271,8 @@ export default function PricingPage() {
                 ¿La prueba gratuita requiere tarjeta?
               </h3>
               <p className="text-gray-600">
-                Sí, necesitamos una tarjeta para comenzar tu prueba de 7 días, pero no te cobraremos
-                hasta que termine el periodo de prueba. Puedes cancelar antes sin ningún cargo.
+                Sí, necesitamos una tarjeta para comenzar tu prueba de 30 días, pero no te cobraremos
+                hasta el día 31. Puedes cancelar antes sin ningún cargo.
               </p>
             </div>
 

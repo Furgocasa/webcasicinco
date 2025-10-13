@@ -35,10 +35,24 @@ export default function PerfilPage() {
   const [activeTab, setActiveTab] = useState<'favorites' | 'visits' | 'stats' | 'subscription'>('favorites');
   const [subscriptionInfo, setSubscriptionInfo] = useState<any>(null);
   const [loadingSubscription, setLoadingSubscription] = useState(false);
+  const [accessInfo, setAccessInfo] = useState<any>(null);
 
   useEffect(() => {
     loadUserData();
+    loadAccessInfo();
   }, []);
+
+  const loadAccessInfo = async () => {
+    try {
+      const response = await fetch('/api/user/access');
+      const data = await response.json();
+      if (data.success) {
+        setAccessInfo(data);
+      }
+    } catch (error) {
+      console.error('Error cargando info de acceso:', error);
+    }
+  };
 
   const loadUserData = async () => {
     try {
@@ -663,19 +677,138 @@ export default function PerfilPage() {
                   <CardDescription>Gestiona tu plan y facturación</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-center py-8">
-                    <CreditCard className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">Gestión de Suscripción</h3>
-                    <p className="text-gray-600 mb-6">
-                      Próximamente podrás gestionar tu suscripción, cambiar de plan y ver tu historial de pagos aquí.
-                    </p>
-                    <Button
-                      onClick={() => router.push('/pricing')}
-                      className="bg-indigo-600 hover:bg-indigo-700"
-                    >
-                      Ver Planes Disponibles
-                    </Button>
-                  </div>
+                  {!accessInfo ? (
+                    <div className="text-center py-8">
+                      <div className="animate-spin h-8 w-8 border-4 border-indigo-600 border-t-transparent rounded-full mx-auto mb-4"></div>
+                      <p className="text-gray-600">Cargando información...</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-6">
+                      {/* Estado actual */}
+                      <div className={`p-6 rounded-xl border-2 ${
+                        accessInfo.isAdmin ? 'bg-gradient-to-r from-gray-900 to-gray-800 border-gray-700 text-white' :
+                        accessInfo.isFreeUser ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-300' :
+                        accessInfo.isInTrial ? 'bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-300' :
+                        accessInfo.subscriptionPlan ? 'bg-gradient-to-r from-purple-50 to-indigo-50 border-purple-300' :
+                        'bg-gradient-to-r from-orange-50 to-red-50 border-orange-300'
+                      }`}>
+                        <div className="flex items-start justify-between mb-4">
+                          <div>
+                            <h3 className={`text-2xl font-bold mb-2 ${
+                              accessInfo.isAdmin ? 'text-white' : 'text-gray-900'
+                            }`}>
+                              {accessInfo.isAdmin ? '👑 Admin' :
+                               accessInfo.isFreeUser ? '🎁 Usuario Gratis (Cortesía)' :
+                               accessInfo.isInTrial ? `⏰ Trial - ${accessInfo.trialDaysRemaining} días restantes` :
+                               accessInfo.subscriptionPlan === 'premium_monthly' ? '💎 Premium Mensual' :
+                               accessInfo.subscriptionPlan === 'premium_yearly' ? '👑 Premium Anual' :
+                               '❌ Sin Suscripción'}
+                            </h3>
+                            <p className={`text-sm ${
+                              accessInfo.isAdmin ? 'text-gray-300' : 'text-gray-600'
+                            }`}>
+                              {accessInfo.isAdmin ? 'Acceso total y perpetuo' :
+                               accessInfo.isFreeUser ? 'Acceso gratuito permanente' :
+                               accessInfo.isInTrial ? `Tu trial termina el ${new Date(accessInfo.trialEndsAt).toLocaleDateString('es-ES')}` :
+                               accessInfo.subscriptionPlan ? 'Suscripción activa' :
+                               'Suscríbete para continuar usando la app'}
+                            </p>
+                          </div>
+                          {!accessInfo.isAdmin && !accessInfo.isFreeUser && (
+                            <div className={`px-4 py-2 rounded-full font-bold text-sm ${
+                              accessInfo.isInTrial ? 'bg-blue-600 text-white' :
+                              accessInfo.subscriptionPlan ? 'bg-purple-600 text-white' :
+                              'bg-orange-600 text-white'
+                            }`}>
+                              {accessInfo.isInTrial ? 'TRIAL' :
+                               accessInfo.subscriptionPlan ? 'ACTIVO' :
+                               'INACTIVO'}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Información del plan */}
+                        {accessInfo.subscriptionPlan && !accessInfo.isAdmin && !accessInfo.isFreeUser && (
+                          <div className="grid md:grid-cols-2 gap-4 text-sm">
+                            <div className="bg-white/50 backdrop-blur-sm p-3 rounded-lg">
+                              <p className="text-gray-600 mb-1">Plan actual</p>
+                              <p className="font-bold text-gray-900">
+                                {accessInfo.subscriptionPlan === 'premium_monthly' ? '2,99€/mes' : '24,99€/año (2,08€/mes)'}
+                              </p>
+                            </div>
+                            <div className="bg-white/50 backdrop-blur-sm p-3 rounded-lg">
+                              <p className="text-gray-600 mb-1">Próximo cobro</p>
+                              <p className="font-bold text-gray-900">
+                                {accessInfo.subscriptionEndsAt ? new Date(accessInfo.subscriptionEndsAt).toLocaleDateString('es-ES') : 'N/A'}
+                              </p>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Trial warning */}
+                        {accessInfo.isInTrial && accessInfo.trialDaysRemaining <= 7 && (
+                          <div className="mt-4 bg-orange-100 border border-orange-300 rounded-lg p-3 flex items-start gap-2">
+                            <Award className="h-5 w-5 text-orange-600 flex-shrink-0 mt-0.5" />
+                            <div className="text-sm">
+                              <p className="font-semibold text-orange-900 mb-1">Tu trial termina pronto</p>
+                              <p className="text-orange-800">
+                                Quedan {accessInfo.trialDaysRemaining} días. Suscríbete ahora para no perder acceso.
+                              </p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Botones de acción */}
+                      <div className="flex flex-col sm:flex-row gap-3">
+                        {!accessInfo.isAdmin && !accessInfo.isFreeUser && accessInfo.subscriptionPlan && (
+                          <Button
+                            onClick={async () => {
+                              const response = await fetch('/api/subscription/manage');
+                              const data = await response.json();
+                              if (data.url) {
+                                window.location.href = data.url;
+                              }
+                            }}
+                            variant="outline"
+                            className="flex-1"
+                          >
+                            <CreditCard className="h-4 w-4 mr-2" />
+                            Gestionar en Stripe
+                          </Button>
+                        )}
+                        
+                        {(accessInfo.isInTrial || !accessInfo.hasAccess) && !accessInfo.isAdmin && !accessInfo.isFreeUser && (
+                          <Button
+                            onClick={() => router.push('/pricing')}
+                            className="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
+                          >
+                            <Crown className="h-4 w-4 mr-2" />
+                            {accessInfo.isInTrial ? 'Ver Planes' : 'Suscribirse Ahora'}
+                          </Button>
+                        )}
+                      </div>
+
+                      {/* Info adicional */}
+                      <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                        <h4 className="font-semibold text-gray-900 mb-3">💡 Información</h4>
+                        <ul className="space-y-2 text-sm text-gray-700">
+                          <li className="flex items-start gap-2">
+                            <Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                            <span>Cancela en cualquier momento desde el portal de Stripe</span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                            <span>Cambiar de plan mensual a anual (o viceversa) cuando quieras</span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                            <span>Si cancelas durante el trial (30 días), no se cobra nada</span>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>

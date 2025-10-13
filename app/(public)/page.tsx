@@ -308,7 +308,7 @@ export default function HomePage() {
                   </li>
                   <li className="flex items-start gap-2">
                     <Check className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
-                    <span className="text-sm text-gray-700">Sin tarjeta requerida</span>
+                    <span className="text-sm text-gray-700">No se cobra hasta día 31</span>
                   </li>
                 </ul>
                 <Button 
@@ -405,19 +405,19 @@ export default function HomePage() {
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="bg-white p-6 rounded-lg border border-gray-200">
                   <h4 className="font-semibold text-gray-900 mb-2">¿Necesito tarjeta para el trial?</h4>
-                  <p className="text-sm text-gray-600">No. El trial de 30 días es completamente gratis sin necesidad de tarjeta.</p>
+                  <p className="text-sm text-gray-600">Sí. Necesitas tarjeta para los 30 días de prueba, pero no cobramos hasta el día 31. Cancela antes sin cargos.</p>
                 </div>
                 <div className="bg-white p-6 rounded-lg border border-gray-200">
                   <h4 className="font-semibold text-gray-900 mb-2">¿Puedo cancelar cuando quiera?</h4>
-                  <p className="text-sm text-gray-600">Sí. Cancela en cualquier momento desde tu perfil sin preguntas ni penalizaciones.</p>
+                  <p className="text-sm text-gray-600">Sí. Cancela en cualquier momento desde tu perfil. Si es antes del día 31, no se cobra nada.</p>
                 </div>
                 <div className="bg-white p-6 rounded-lg border border-gray-200">
-                  <h4 className="font-semibold text-gray-900 mb-2">¿Qué pasa después del trial?</h4>
-                  <p className="text-sm text-gray-600">Elige suscribirte (2.99€/mes) o simplemente deja de usar las funciones premium.</p>
+                  <h4 className="font-semibold text-gray-900 mb-2">¿Cuándo se cobra?</h4>
+                  <p className="text-sm text-gray-600">Después de 30 días de prueba. Si no cancelas, se cobra automáticamente 2,99€/mes o 24,99€/año según tu plan.</p>
                 </div>
                 <div className="bg-white p-6 rounded-lg border border-gray-200">
                   <h4 className="font-semibold text-gray-900 mb-2">¿Por qué el plan anual es mejor?</h4>
-                  <p className="text-sm text-gray-600">Ahorras 30% (10.89€ al año) y obtienes soporte prioritario.</p>
+                  <p className="text-sm text-gray-600">Ahorras 10,89€ al año (casi 4 meses gratis) y obtienes soporte prioritario.</p>
                 </div>
               </div>
             </div>
@@ -635,7 +635,7 @@ export default function HomePage() {
               </div>
 
               <p className="text-sm text-white/80">
-                ✓ Sin tarjeta requerida · ✓ Acceso completo · ✓ Cancela en cualquier momento
+                ✓ 30 días de prueba · ✓ Acceso completo · ✓ Cancela antes del día 31 sin cargos
               </p>
             </div>
           </div>

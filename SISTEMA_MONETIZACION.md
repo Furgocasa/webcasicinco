@@ -37,13 +37,15 @@ Casi Cinco utiliza un modelo **freemium con trial de 30 días**.
 
 ### 3. 👤 **Usuarios Regulares**
 
-#### Fase 1: Trial de 30 días (GRATIS)
-- ✅ **Todos los nuevos usuarios** obtienen 30 días gratis automáticamente
+#### Fase 1: Trial de 30 días (REQUIERE TARJETA)
+- ✅ **Todos los nuevos usuarios** obtienen 30 días gratis
 - ✅ Acceso completo a todas las funciones
-- ✅ No requiere tarjeta de crédito
+- ⚠️ **Requiere tarjeta de crédito** para activar el trial
+- ✅ **No se cobra hasta el día 31** - puedes cancelar antes sin cargos
 - ✅ Banner informativo con días restantes
+- ✅ **Conversión automática** a plan seleccionado al terminar trial
 
-#### Fase 2: Después del Trial
+#### Fase 2: Después del Trial (Día 31)
 **Opción A - Premium Mensual:**
 - 💳 **2,99€/mes**
 - Cancela cuando quieras
@@ -61,12 +63,11 @@ Casi Cinco utiliza un modelo **freemium con trial de 30 días**.
 
 ## 💳 Precios
 
-| Plan | Precio | Ahorro | Características |
-|------|--------|--------|-----------------|
-| **Trial** | 0€ | - | 30 días con acceso total |
+| Plan | Precio | Trial | Características |
+|------|--------|-------|-----------------|
 | **Gratis** (admin) | 0€ | - | Acceso perpetuo (marcado por admin) |
-| **Mensual** | 2,99€/mes | - | Cancela cuando quieras |
-| **Anual** | 24,99€/año | 30% | 2.08€/mes, soporte prioritario |
+| **Mensual** | 2,99€/mes | 30 días | Requiere tarjeta, cobra desde día 31 |
+| **Anual** | 24,99€/año | 30 días | 2,08€/mes, ahorra 10,89€, soporte prioritario |
 
 ---
 
@@ -163,11 +164,14 @@ Marca un usuario como gratis (solo admin).
 
 ### Nuevo Usuario:
 ```
-1. Registro → Trial de 30 días automático
-2. Usa mapa/chatbot/rutas gratis por 30 días
-3. Banner muestra días restantes
-4. Día 7 → Advertencia "quedan 7 días"
-5. Día 30 → Paywall modal → Suscribirse
+1. Registro → Selecciona plan (Mensual o Anual)
+2. Introduce tarjeta en Stripe Checkout
+3. Trial de 30 días comienza (sin cobro)
+4. Usa mapa/chatbot/rutas gratis por 30 días
+5. Banner muestra días restantes
+6. Día 7 → Advertencia "quedan 23 días de trial"
+7. Día 31 → Stripe cobra automáticamente 2,99€ o 24,99€
+8. Si cancela antes del día 31 → No se cobra nada
 ```
 
 ### Usuario Existente (sin trial):
