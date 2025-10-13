@@ -4,9 +4,9 @@
  */
 
 import { createAdminClient } from '@/lib/supabase/server';
-import { searchPlaces, getPlaceDetails, extractProvinceFromPlaceData, extractCityFromPlaceData } from '../google/places';
+import { searchPlaces } from '../google/places';
+import { processPlace } from './processor'; // USAR EL PROCESSOR COMPLETO
 import { geocodeAddress } from '../google/geocoding';
-import { categorizePlace } from '../ai/categorizer';
 
 const GOOGLE_API_KEY = process.env.GOOGLE_MAPS_API_KEY || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
@@ -142,85 +142,47 @@ export async function startIndexation(
               processedPlaceIds.add(placeId);
               totalProcessed++;
 
-              console.log(`📍 [${totalProcessed}/${allPlaceIds.size}] Procesando lugar...`);
+              console.log(`📍 [${totalProcessed}/${allPlaceIds.size}] Procesando lugar ${placeId}...`);
 
-              // Obtener detalles completos del lugar
-              const placeDetails = await getPlaceDetails(placeId);
+              // ✅ USAR EL PROCESSOR COMPLETO (con fotos Supabase, IA, etc.)
+              const result = await processPlace(placeId, true); // true = excluir cadenas
 
-              // Verificar rating
-              if (!placeDetails.rating || placeDetails.rating < params.minRating) {
-                console.log(`⏭️  Rating bajo: ${placeDetails.rating || 'N/A'}`);
-                totalLowRating++;
+              if (!result.success) {
+                if (result.error === 'Chain excluded') {
+                  console.log(`⏭️  Cadena excluida`);
+                  totalSkipped++;
+                } else if (result.error?.includes('rating')) {
+                  console.log(`⏭️  ${result.error}`);
+                  totalLowRating++;
+                } else if (result.error?.includes('reviews')) {
+                  console.log(`⏭️  ${result.error}`);
+                  totalLowReviews++;
+                } else if (result.error?.includes('exists')) {
+                  console.log(`⏭️  Ya existe en la BD`);
+                  totalSkipped++;
+                } else {
+                  console.error(`❌ Error: ${result.error}`);
+                  totalFailed++;
+                }
                 continue;
               }
 
-              // Verificar reseñas
-              if (!placeDetails.user_ratings_total || placeDetails.user_ratings_total < 20) {
-                console.log(`⏭️  Pocas reseñas: ${placeDetails.user_ratings_total || 0}`);
-                totalLowReviews++;
-                continue;
-              }
-
-              // Extraer información de ubicación
-              const province = extractProvinceFromPlaceData(placeDetails);
-              const city = extractCityFromPlaceData(placeDetails);
-              
-              // Categorizar usando IA
-              const placeCategory = await categorizePlace(
-                placeDetails.name,
-                placeDetails.types || [],
-                placeDetails.formatted_address
-              );
-
-              // Verificar si ya existe
-              const { data: existingPlace } = await supabase
-                .from('places')
-                .select('id, name')
-                .eq('google_place_id', placeId)
-                .single();
-
-              if (existingPlace) {
-                console.log(`⏭️  "${existingPlace.name}" ya existe`);
-                totalSkipped++;
-                continue;
-              }
-
-              // Generar slug único
-              const slug = generateSlug(placeDetails.name, city, province);
-
-              // Preparar datos para insertar
-              const placeData = {
-                google_place_id: placeId,
-                slug,
-                name: placeDetails.name,
-                category: placeCategory,
-                country: 'España',
-                region: getCommunityFromProvince(province),
-                province,
-                city,
-                address: placeDetails.formatted_address || '',
-                latitude: placeDetails.geometry?.location?.lat,
-                longitude: placeDetails.geometry?.location?.lng,
-                rating: placeDetails.rating,
-                review_count: placeDetails.user_ratings_total,
-                price_level: placeDetails.price_level || null,
-                phone: placeDetails.formatted_phone_number || null,
-                website: placeDetails.website || null,
-                google_maps_url: placeDetails.url,
-                photos: placeDetails.photos?.slice(0, 5).map(p => p.photo_reference) || [],
-                published: false,
-              };
-
-              // Insertar en la base de datos
+              // Guardar en BD
               const { error: insertError } = await supabase
                 .from('places')
-                .insert(placeData);
+                .insert(result.place);
 
               if (insertError) {
-                console.error(`❌ Error: ${insertError.message}`);
-                totalFailed++;
+                // Si es error de duplicado, contar como skip
+                if (insertError.code === '23505') {
+                  console.log(`⏭️  Duplicado en BD`);
+                  totalSkipped++;
+                } else {
+                  console.error(`❌ Error insertando: ${insertError.message}`);
+                  totalFailed++;
+                }
               } else {
-                console.log(`✅ "${placeDetails.name}" guardado`);
+                console.log(`✅ "${result.place?.name}" guardado exitosamente`);
                 totalSuccessful++;
               }
 
@@ -236,10 +198,10 @@ export async function startIndexation(
                 .eq('id', jobId);
 
               // Pausa para no saturar APIs
-              await new Promise(resolve => setTimeout(resolve, 200));
+              await new Promise(resolve => setTimeout(resolve, 500));
 
             } catch (error: any) {
-              console.error(`❌ Error procesando:`, error.message);
+              console.error(`❌ Error fatal procesando:`, error.message);
               totalFailed++;
             }
           }
@@ -293,81 +255,4 @@ export async function startIndexation(
       .eq('id', jobId);
     throw error;
   }
-}
-
-// FUNCIONES AUXILIARES
-
-function generateSlug(name: string, city: string, province: string): string {
-  const sanitized = name
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '');
-  
-  const citySlug = city
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9]+/g, '-');
-  
-  return `${sanitized}-${citySlug}`;
-}
-
-function getCommunityFromProvince(province: string): string {
-  const provinceToRegion: Record<string, string> = {
-    Almería: 'Andalucía',
-    Cádiz: 'Andalucía',
-    Córdoba: 'Andalucía',
-    Granada: 'Andalucía',
-    Huelva: 'Andalucía',
-    Jaén: 'Andalucía',
-    Málaga: 'Andalucía',
-    Sevilla: 'Andalucía',
-    Huesca: 'Aragón',
-    Teruel: 'Aragón',
-    Zaragoza: 'Aragón',
-    Asturias: 'Asturias',
-    'Islas Baleares': 'Islas Baleares',
-    Baleares: 'Islas Baleares',
-    'Las Palmas': 'Canarias',
-    'Santa Cruz de Tenerife': 'Canarias',
-    Cantabria: 'Cantabria',
-    Ávila: 'Castilla y León',
-    Burgos: 'Castilla y León',
-    León: 'Castilla y León',
-    Palencia: 'Castilla y León',
-    Salamanca: 'Castilla y León',
-    Segovia: 'Castilla y León',
-    Soria: 'Castilla y León',
-    Valladolid: 'Castilla y León',
-    Zamora: 'Castilla y León',
-    Albacete: 'Castilla-La Mancha',
-    'Ciudad Real': 'Castilla-La Mancha',
-    Cuenca: 'Castilla-La Mancha',
-    Guadalajara: 'Castilla-La Mancha',
-    Toledo: 'Castilla-La Mancha',
-    Barcelona: 'Cataluña',
-    Girona: 'Cataluña',
-    Lleida: 'Cataluña',
-    Tarragona: 'Cataluña',
-    Alicante: 'Comunidad Valenciana',
-    Castellón: 'Comunidad Valenciana',
-    Valencia: 'Comunidad Valenciana',
-    Badajoz: 'Extremadura',
-    Cáceres: 'Extremadura',
-    'A Coruña': 'Galicia',
-    Lugo: 'Galicia',
-    Ourense: 'Galicia',
-    Pontevedra: 'Galicia',
-    'La Rioja': 'La Rioja',
-    Madrid: 'Madrid',
-    Murcia: 'Murcia',
-    Navarra: 'Navarra',
-    Álava: 'País Vasco',
-    Gipuzkoa: 'País Vasco',
-    Bizkaia: 'País Vasco',
-  };
-
-  return provinceToRegion[province] || 'España';
 }
