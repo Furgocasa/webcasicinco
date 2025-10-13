@@ -364,14 +364,39 @@ export default function IndexarPage() {
                     <div className="bg-yellow-50 p-3 rounded-lg">
                       <div className="text-xs text-yellow-700">⏭️ Descartados</div>
                       <div className="text-xl font-bold text-yellow-700">
-                        {(jobStatus.processed_places || 0) - (jobStatus.successful_places || 0) - (jobStatus.failed_places || 0)}
+                        {((jobStatus.error_log?.lowRating || 0) + (jobStatus.error_log?.lowReviews || 0) + (jobStatus.error_log?.skipped || 0))}
                       </div>
                     </div>
                   </div>
                   
+                  {/* Desglose de descartados */}
+                  {jobStatus.error_log && (jobStatus.error_log.lowRating > 0 || jobStatus.error_log.lowReviews > 0 || jobStatus.error_log.skipped > 0) && (
+                    <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                      <div className="text-xs font-semibold text-amber-900 mb-2">📋 Desglose de descartados:</div>
+                      <div className="grid grid-cols-3 gap-2 text-xs">
+                        {jobStatus.error_log.lowRating > 0 && (
+                          <div className="text-amber-800">
+                            📉 Rating bajo: <strong>{jobStatus.error_log.lowRating}</strong>
+                          </div>
+                        )}
+                        {jobStatus.error_log.lowReviews > 0 && (
+                          <div className="text-amber-800">
+                            📊 Pocas reseñas: <strong>{jobStatus.error_log.lowReviews}</strong>
+                          </div>
+                        )}
+                        {jobStatus.error_log.skipped > 0 && (
+                          <div className="text-amber-800">
+                            🔄 Duplicados: <strong>{jobStatus.error_log.skipped}</strong>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Errores reales */}
                   {jobStatus.failed_places > 0 && (
                     <div className="bg-red-50 p-3 rounded-lg mt-2">
-                      <div className="text-xs text-red-700">❌ Errores</div>
+                      <div className="text-xs text-red-700">❌ Errores técnicos (fallo de API)</div>
                       <div className="text-xl font-bold text-red-700">{jobStatus.failed_places || 0}</div>
                     </div>
                   )}

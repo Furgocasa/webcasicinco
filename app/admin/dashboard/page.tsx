@@ -14,7 +14,6 @@ import {
   EyeOff,
   BarChart3,
   PieChart,
-  Award,
   Target
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
@@ -798,7 +797,7 @@ export default function DashboardPage() {
             <CardTitle>Accesos Rápidos</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <Link href="/admin/indexar">
                 <Button variant="outline" className="h-auto w-full flex-col gap-2 py-6 hover:border-indigo-500 hover:bg-indigo-50 transition">
                   <Plus className="h-8 w-8 text-indigo-600" />
@@ -821,14 +820,6 @@ export default function DashboardPage() {
                   <Badge className="bg-cyan-500 text-white">{stats.totalPlaces}</Badge>
                 </Button>
               </Link>
-
-              <div className="flex flex-col gap-2">
-                <Button variant="outline" className="h-auto w-full flex-col gap-2 py-3 hover:border-purple-500 hover:bg-purple-50 transition">
-                  <Award className="h-6 w-6 text-purple-600" />
-                  <span className="font-semibold text-xs">Enriquecer con IA</span>
-                  <Badge className="bg-purple-500 text-white text-[10px]">{stats.withoutAI} pendientes</Badge>
-                </Button>
-              </div>
             </div>
           </CardContent>
         </Card>
