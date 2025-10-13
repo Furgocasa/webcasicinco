@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from './useAuth';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createClient } from '@/lib/supabase/client';
 
 export interface UserAccessInfo {
   hasAccess: boolean;
@@ -26,7 +26,7 @@ export interface UserAccessInfo {
  */
 export function useUserAccess(): UserAccessInfo {
   const { user } = useAuth();
-  const supabase = createClientComponentClient();
+  const supabase = createClient();
   
   const [accessInfo, setAccessInfo] = useState<UserAccessInfo>({
     hasAccess: false,

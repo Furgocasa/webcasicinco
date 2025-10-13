@@ -1344,15 +1344,15 @@ export default function MapPage() {
             {/* GPS - Centro */}
             <button
               onClick={isGeolocationActive ? deactivateGeolocation : activateGeolocation}
-              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-full shadow-md transition-all font-medium text-[11px] border ${
+              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-full shadow-md transition-all font-medium text-[10px] border whitespace-nowrap ${
                 isGeolocationActive
                   ? 'bg-green-500 text-white border-green-600'
                   : 'bg-white/95 backdrop-blur-sm text-gray-700 border-gray-300'
               }`}
             >
               <MapPin className={`h-3 w-3 ${isGeolocationActive ? 'animate-pulse' : ''}`} />
-              <span className="hidden sm:inline">
-                {isGeolocationActive ? 'GPS ON' : 'GPS'}
+              <span>
+                {isGeolocationActive ? 'GPS ON' : 'Activar Geolocalización'}
               </span>
             </button>
 
