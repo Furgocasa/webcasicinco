@@ -8,6 +8,8 @@ import { searchPlaces, getPlaceDetails, extractProvinceFromPlaceData, extractCit
 import { geocodeAddress } from '../google/geocoding';
 import { categorizePlace } from '../ai/categorizer';
 
+const GOOGLE_API_KEY = process.env.GOOGLE_MAPS_API_KEY || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+
 interface IndexationParams {
   provinces: string[];
   categories: string[];
@@ -100,6 +102,8 @@ export async function startIndexation(
           for (const city of cities) {
             try {
               console.log(`🔍 Buscando ${searchTerm} en ${city}, ${province}...`);
+              console.log(`   API Key presente: ${GOOGLE_API_KEY ? 'SÍ (' + GOOGLE_API_KEY.substring(0, 10) + '...)' : 'NO'}`);
+              console.log(`   Parámetros: location="${city}, ${province}, España", keyword="${searchTerm}", minRating=${params.minRating}`);
               
               const placeIds = await searchPlaces({
                 location: `${city}, ${province}, España`,
@@ -108,8 +112,10 @@ export async function startIndexation(
                 radius: 50000, // 50km por ciudad
               });
 
+              console.log(`   Respuesta de Google: ${placeIds.length} lugares`);
               placeIds.forEach(id => allPlaceIds.add(id));
               console.log(`✅ ${placeIds.length} lugares encontrados en ${city}`);
+              console.log(`   Total acumulado: ${allPlaceIds.size} lugares únicos\n`);
               
               // Actualizar total acumulado en tiempo real
               await supabase
