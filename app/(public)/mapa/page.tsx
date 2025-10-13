@@ -525,16 +525,32 @@ export default function MapPage() {
 
   // 🚀 CLUSTERING: Mostrar TODOS los lugares (filtrados en color, no filtrados en gris)
   useEffect(() => {
+    console.log('🔄 useEffect marcadores triggered:', {
+      mapRef: !!mapRef.current,
+      isLoaded,
+      allPlacesLength: allPlaces.length,
+      filteredPlacesLength: filteredPlaces.length,
+      markerIconsReady: !!markerIcons,
+      googleAvailable: typeof google !== 'undefined' && !!google.maps,
+    });
+
     // ✅ Verificar que Google Maps esté completamente listo
-    if (!mapRef.current || !isLoaded || allPlaces.length === 0 || !markerIcons) return;
+    if (!mapRef.current || !isLoaded || allPlaces.length === 0 || !markerIcons) {
+      console.log('⏭️ Marcadores no se crean aún (faltan requisitos)');
+      return;
+    }
+    
     if (typeof google === 'undefined' || !google.maps) {
       console.log('⚠️ Google Maps no disponible aún');
       return;
     }
 
+    console.log('✅ Todos los requisitos listos, creando marcadores...');
+
     // Debounce para evitar recrear constantemente mientras se ajustan filtros
     const timer = setTimeout(() => {
       console.time('⏱️ Creación de marcadores');
+      console.log(`📍 Creando ${allPlaces.length} marcadores (${filteredPlaces.length} filtrados)`);
       
       // Limpiar marcadores anteriores de forma eficiente
       if (clustererRef.current) {
