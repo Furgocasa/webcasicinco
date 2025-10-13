@@ -370,6 +370,9 @@ export default function LugaresPage() {
         </div>
       </div>
 
+      {/* Herramienta de Migración de Fotos */}
+      <PhotoMigrationTool />
+
       {/* Banner de progreso del enriquecimiento */}
       {enriching && enrichProgress.total > 0 && (
         <Card className="bg-blue-50 border-blue-200">
