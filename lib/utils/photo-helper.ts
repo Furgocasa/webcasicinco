@@ -14,7 +14,8 @@ export function getPlacePhotoUrl(
     photo_urls?: string[] | null;
     photos?: string[] | null;
   },
-  index: number = 0
+  index: number = 0,
+  maxwidth: number = 400
 ): string | null {
   // 1. Prioridad: URLs de Supabase (gratis, rápido, sin límites)
   if (place.photo_urls && place.photo_urls.length > index) {
@@ -24,8 +25,8 @@ export function getPlacePhotoUrl(
   // 2. Fallback: photo_reference de Google (lugares antiguos antes de migración)
   if (place.photos && place.photos.length > index) {
     const photoRef = place.photos[index];
-    // Construir URL de Google Photos API
-    return `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference=${photoRef}&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`;
+    // Construir URL de Google Photos API con tamaño configurable
+    return `https://maps.googleapis.com/maps/api/place/photo?maxwidth=${maxwidth}&photo_reference=${photoRef}&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`;
   }
 
   // 3. No hay fotos
@@ -70,7 +71,7 @@ export function hasPlacePhotos(
     photos?: string[] | null;
   }
 ): boolean {
-  return (
+  return Boolean(
     (place.photo_urls && place.photo_urls.length > 0) ||
     (place.photos && place.photos.length > 0)
   );

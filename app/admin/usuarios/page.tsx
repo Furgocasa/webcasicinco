@@ -14,7 +14,8 @@ import {
   UserX,
   Crown,
   Loader2,
-  RefreshCw
+  RefreshCw,
+  X
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -677,7 +678,7 @@ export default function UsuariosPage() {
                 onClick={() => setShowSubscriptionModal(false)}
                 className="p-2 hover:bg-gray-100 rounded-lg transition"
               >
-                <XIcon className="h-5 w-5 text-gray-600" />
+                <X className="h-5 w-5 text-gray-600" />
               </button>
             </div>
 

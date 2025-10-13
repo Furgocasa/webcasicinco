@@ -296,7 +296,7 @@ export default function PlaceDetailPage() {
               
               // Priorizar fotos de Supabase Storage
               if (place.photo_urls?.length) {
-                photos.push(...place.photo_urls.slice(0, maxPhotos).map((url, index) => ({
+                photos.push(...place.photo_urls.slice(0, maxPhotos).map((url: string, index: number) => ({
                   src: url,
                   index,
                   alt: `${place.name} - Foto ${index + 1}`

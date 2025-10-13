@@ -939,14 +939,6 @@ export default function MapPage() {
     });
   }, [filteredPlaces, sortBy, userLocation]);
 
-  if (loadError) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <p className="text-red-600">Error cargando el mapa</p>
-      </div>
-    );
-  }
-
   // Handlers para mobile view
   const handleMobileViewChange = (view: 'map' | 'filters' | 'list') => {
     setMobileView(view);
@@ -961,6 +953,14 @@ export default function MapPage() {
     filters.qualityTier?.length,
     filters.reviewsRange,
   ].filter(Boolean).length;
+
+  if (loadError) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <p className="text-red-600">Error cargando el mapa</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-[calc(100vh-64px)]">
@@ -2189,18 +2189,19 @@ export default function MapPage() {
                           className="w-full h-32 object-cover rounded-t-xl"
                           loading="lazy"
                         />
-                      {/* Badge de distancia en esquina superior derecha */}
-                      {distance !== null && (
-                        <div className="absolute top-2 right-2 bg-blue-600 text-white px-2 py-1 rounded-full text-xs font-semibold shadow-lg flex items-center gap-1">
-                          <MapPin className="h-3 w-3" />
-                          {distance < 1 
-                            ? `${Math.round(distance * 1000)}m`
-                            : `${distance.toFixed(1)}km`
-                          }
-                        </div>
-                      )}
-                    </div>
-                  )}
+                        {/* Badge de distancia en esquina superior derecha */}
+                        {distance !== null && (
+                          <div className="absolute top-2 right-2 bg-blue-600 text-white px-2 py-1 rounded-full text-xs font-semibold shadow-lg flex items-center gap-1">
+                            <MapPin className="h-3 w-3" />
+                            {distance < 1 
+                              ? `${Math.round(distance * 1000)}m`
+                              : `${distance.toFixed(1)}km`
+                            }
+                          </div>
+                        )}
+                      </div>
+                    ) : null;
+                  })()}
 
                   {/* Nombre y rating */}
                   <div className="flex items-start justify-between mb-2">
