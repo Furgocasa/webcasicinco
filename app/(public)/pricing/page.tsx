@@ -50,34 +50,43 @@ export default function PricingPage() {
       {/* Header */}
       <div className="container mx-auto px-4 py-16 text-center">
         <h1 className="text-4xl font-bold text-gray-900 sm:text-5xl">
-          Elige tu plan perfecto
+          Comienza con 30 Días Gratis
         </h1>
         <p className="mt-4 text-xl text-gray-600">
-          Descubre lugares excepcionales sin límites
+          Luego solo 2,99€/mes o ahorra con el plan anual
         </p>
+
+        {/* Info importante sobre trial */}
+        <div className="mt-6 max-w-2xl mx-auto bg-blue-50 border-2 border-blue-200 rounded-xl p-4">
+          <p className="text-center text-blue-900">
+            <strong>🎉 Todos los planes incluyen 30 días de prueba gratis</strong>
+            <br />
+            <span className="text-sm">Requiere tarjeta. No se cobra hasta el día 31. Cancela cuando quieras sin cargos.</span>
+          </p>
+        </div>
 
         {/* Toggle mensual/anual */}
         <div className="mt-8 flex items-center justify-center gap-4">
           <button
             onClick={() => setBillingInterval('month')}
-            className={`px-4 py-2 rounded-lg font-medium transition ${
+            className={`px-6 py-3 rounded-lg font-bold transition ${
               billingInterval === 'month'
-                ? 'bg-primary text-white'
-                : 'text-gray-600 hover:text-gray-900'
+                ? 'bg-primary text-white shadow-lg'
+                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
             }`}
           >
             Mensual
           </button>
           <button
             onClick={() => setBillingInterval('year')}
-            className={`px-4 py-2 rounded-lg font-medium transition relative ${
+            className={`px-6 py-3 rounded-lg font-bold transition relative ${
               billingInterval === 'year'
-                ? 'bg-primary text-white'
-                : 'text-gray-600 hover:text-gray-900'
+                ? 'bg-primary text-white shadow-lg'
+                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
             }`}
           >
             Anual
-            <span className="absolute -top-2 -right-2 bg-green-500 text-white text-xs px-2 py-0.5 rounded-full">
+            <span className="absolute -top-2 -right-2 bg-green-500 text-white text-xs px-2 py-0.5 rounded-full font-bold">
               Ahorra {formatPrice(yearlySavings)}
             </span>
           </button>
@@ -86,44 +95,8 @@ export default function PricingPage() {
 
       {/* Plans Grid */}
       <div className="container mx-auto px-4 pb-24">
-        <div className="grid gap-8 lg:grid-cols-3 max-w-6xl mx-auto">
-          {/* Plan Gratis */}
-          <Card className="relative p-8">
-            <div className="mb-6">
-              <div className="flex items-center gap-2 text-gray-600 mb-2">
-                <Sparkles className="h-5 w-5" />
-                <span className="text-sm font-medium">PARA EMPEZAR</span>
-              </div>
-              <h3 className="text-2xl font-bold text-gray-900">
-                {PLANS.free.name}
-              </h3>
-              <div className="mt-4 flex items-baseline gap-2">
-                <span className="text-4xl font-bold text-gray-900">Gratis</span>
-              </div>
-              <p className="mt-2 text-sm text-gray-600">
-                Perfecto para probar la app
-              </p>
-            </div>
-
-            <ul className="space-y-3 mb-8">
-              {PLANS.free.features.map((feature, index) => (
-                <li key={index} className="flex items-start gap-3">
-                  <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                  <span className="text-gray-700">{feature}</span>
-                </li>
-              ))}
-            </ul>
-
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={() => window.location.href = '/registro'}
-            >
-              Empezar Gratis
-            </Button>
-          </Card>
-
-          {/* Plan Premium */}
+        <div className="grid gap-8 lg:grid-cols-2 max-w-5xl mx-auto">
+          {/* Plan Premium Mensual/Anual */}
           <Card className="relative p-8 border-2 border-primary shadow-xl scale-105">
             {/* Badge */}
             <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-white px-4 py-1 rounded-full text-sm font-medium">
@@ -188,45 +161,6 @@ export default function PricingPage() {
             </p>
           </Card>
 
-          {/* Plan Admin */}
-          <Card className="relative p-8 bg-gradient-to-br from-gray-900 to-gray-800 text-white">
-            <div className="mb-6">
-              <div className="flex items-center gap-2 text-yellow-400 mb-2">
-                <Crown className="h-5 w-5" />
-                <span className="text-sm font-medium">PROFESIONAL</span>
-              </div>
-              <h3 className="text-2xl font-bold">
-                {PLANS.admin_monthly.name}
-              </h3>
-              <div className="mt-4 flex items-baseline gap-2">
-                <span className="text-4xl font-bold">
-                  {formatPrice(PLANS.admin_monthly.price)}
-                </span>
-                <span className="text-gray-300">/mes</span>
-              </div>
-              <p className="mt-2 text-sm text-gray-300">
-                Para creadores de contenido
-              </p>
-            </div>
-
-            <ul className="space-y-3 mb-8">
-              {PLANS.admin_monthly.features.map((feature, index) => (
-                <li key={index} className="flex items-start gap-3">
-                  <Check className="h-5 w-5 text-yellow-400 flex-shrink-0 mt-0.5" />
-                  <span className="text-gray-100">{feature}</span>
-                </li>
-              ))}
-            </ul>
-
-            <Button
-              variant="outline"
-              className="w-full bg-white text-gray-900 hover:bg-gray-100"
-              loading={loading === 'admin_monthly'}
-              onClick={() => handleSubscribe('admin_monthly')}
-            >
-              Empezar Ahora
-            </Button>
-          </Card>
         </div>
 
         {/* FAQ Section */}
