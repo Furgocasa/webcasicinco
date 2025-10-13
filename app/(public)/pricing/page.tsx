@@ -1,16 +1,33 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Check, Sparkles, Zap, Crown } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Check, Sparkles, Zap, Crown, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { PLANS, formatPrice, getIntervalText, getYearlySavings } from '@/lib/stripe/plans';
 import type { SubscriptionPlan } from '@/types/stripe';
 
 export default function PricingPage() {
-  const [billingInterval, setBillingInterval] = useState<'month' | 'year'>('month');
+  const router = useRouter();
   const [loading, setLoading] = useState<string | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  // Verificar si el usuario está logueado
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await fetch('/api/user/access');
+        if (response.ok) {
+          setIsLoggedIn(true);
+        }
+      } catch (error) {
+        setIsLoggedIn(false);
+      }
+    };
+    checkAuth();
+  }, []);
 
   const handleSubscribe = async (planId: SubscriptionPlan) => {
     try {
@@ -46,195 +63,162 @@ export default function PricingPage() {
   const yearlySavings = getYearlySavings();
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-      {/* Header */}
-      <div className="container mx-auto px-4 py-16 text-center">
-        <h1 className="text-4xl font-bold text-gray-900 sm:text-5xl">
-          Comienza con 30 Días Gratis
-        </h1>
-        <p className="mt-4 text-xl text-gray-600">
-          Luego solo 2,99€/mes o ahorra con el plan anual
-        </p>
-
-        {/* Info importante sobre trial */}
-        <div className="mt-6 max-w-2xl mx-auto bg-blue-50 border-2 border-blue-200 rounded-xl p-4">
-          <p className="text-center text-blue-900">
-            <strong>🎉 Todos los planes incluyen 30 días de prueba gratis</strong>
-            <br />
-            <span className="text-sm">Requiere tarjeta. No se cobra hasta el día 31. Cancela cuando quieras sin cargos.</span>
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-20">
+      <div className="container mx-auto px-4">
+        {/* Header - Igual que home */}
+        <div className="text-center mb-12">
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+            Comienza Gratis, Continúa por Menos de un Café
+          </h2>
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            30 días gratis para probar todo. Luego elige el plan que mejor se adapte a ti.
           </p>
         </div>
 
-        {/* Toggle mensual/anual */}
-        <div className="mt-8 flex items-center justify-center gap-4">
-          <button
-            onClick={() => setBillingInterval('month')}
-            className={`px-6 py-3 rounded-lg font-bold transition ${
-              billingInterval === 'month'
-                ? 'bg-primary text-white shadow-lg'
-                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-            }`}
-          >
-            Mensual
-          </button>
-          <button
-            onClick={() => setBillingInterval('year')}
-            className={`px-6 py-3 rounded-lg font-bold transition relative ${
-              billingInterval === 'year'
-                ? 'bg-primary text-white shadow-lg'
-                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-            }`}
-          >
-            Anual
-            <span className="absolute -top-2 -right-2 bg-green-500 text-white text-xs px-2 py-0.5 rounded-full font-bold">
-              Ahorra {formatPrice(yearlySavings)}
-            </span>
-          </button>
-        </div>
-      </div>
-
-      {/* Plans Grid */}
-      <div className="container mx-auto px-4 pb-24">
-        <div className="grid gap-8 lg:grid-cols-2 max-w-5xl mx-auto">
-          {/* Plan Premium Mensual/Anual */}
-          <Card className="relative p-8 border-2 border-primary shadow-xl scale-105">
-            {/* Badge */}
-            <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-white px-4 py-1 rounded-full text-sm font-medium">
-              MÁS POPULAR
-            </div>
-
-            <div className="mb-6">
-              <div className="flex items-center gap-2 text-primary mb-2">
-                <Zap className="h-5 w-5" />
-                <span className="text-sm font-medium">RECOMENDADO</span>
+        {/* Plans Grid - 3 columnas IGUAL QUE HOME */}
+        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          {/* Plan Trial - Card sombreada si está logueado */}
+          <Card className={`border-2 p-6 hover:shadow-xl transition ${
+            isLoggedIn ? 'border-gray-200 opacity-60 bg-gray-50' : 'border-gray-200'
+          }`}>
+            <div className="text-center mb-6">
+              <div className="inline-block p-3 bg-blue-100 rounded-full mb-4">
+                <Clock className="h-8 w-8 text-blue-600" />
               </div>
-              <h3 className="text-2xl font-bold text-gray-900">
-                {billingInterval === 'month' 
-                  ? PLANS.premium_monthly.name 
-                  : PLANS.premium_yearly.name
-                }
-              </h3>
-              <div className="mt-4 flex items-baseline gap-2">
-                <span className="text-4xl font-bold text-gray-900">
-                  {formatPrice(
-                    billingInterval === 'month'
-                      ? PLANS.premium_monthly.price
-                      : PLANS.premium_yearly.price / 12
-                  )}
-                </span>
-                <span className="text-gray-600">/mes</span>
-              </div>
-              {billingInterval === 'year' && (
-                <p className="mt-1 text-sm text-green-600 font-medium">
-                  Facturado {formatPrice(PLANS.premium_yearly.price)} anualmente
-                </p>
-              )}
-              <p className="mt-2 text-sm text-gray-600">
-                Para viajeros frecuentes
-              </p>
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">Prueba Gratis</h3>
+              <div className="text-4xl font-bold text-blue-600 mb-2">0€</div>
+              <p className="text-gray-600">30 días completos</p>
             </div>
-
-            <ul className="space-y-3 mb-8">
-              {(billingInterval === 'month' 
-                ? PLANS.premium_monthly.features 
-                : PLANS.premium_yearly.features
-              ).map((feature, index) => (
-                <li key={index} className="flex items-start gap-3">
-                  <Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
-                  <span className="text-gray-700">{feature}</span>
-                </li>
-              ))}
+            <ul className="space-y-3 mb-6">
+              <li className="flex items-start gap-2">
+                <Check className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
+                <span className="text-sm text-gray-700">Acceso total a mapa interactivo</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <Check className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
+                <span className="text-sm text-gray-700">Chatbot IA ilimitado</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <Check className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
+                <span className="text-sm text-gray-700">Planificador de rutas</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <Check className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
+                <span className="text-sm text-gray-700">No se cobra hasta día 31</span>
+              </li>
             </ul>
-
-            <Button
+            <Button 
+              onClick={() => router.push('/registro')}
+              variant="outline"
               className="w-full"
-              loading={loading === (billingInterval === 'month' ? 'premium_monthly' : 'premium_yearly')}
-              onClick={() => handleSubscribe(
-                billingInterval === 'month' ? 'premium_monthly' : 'premium_yearly'
-              )}
+              disabled={isLoggedIn}
             >
-              Probar 30 Días Gratis
+              {isLoggedIn ? 'Ya estás registrado' : 'Empezar Gratis'}
             </Button>
-
-            <p className="mt-4 text-center text-xs text-gray-500">
-              Requiere tarjeta. No se cobra hasta el día 31. Cancela cuando quieras.
-            </p>
           </Card>
 
+          {/* Plan Mensual */}
+          <Card className="border-2 border-indigo-200 p-6 hover:shadow-xl transition">
+            <div className="text-center mb-6">
+              <div className="inline-block p-3 bg-indigo-100 rounded-full mb-4">
+                <Zap className="h-8 w-8 text-indigo-600" />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">Premium Mensual</h3>
+              <div className="text-4xl font-bold text-indigo-600 mb-2">2,99€</div>
+              <p className="text-gray-600">por mes</p>
+            </div>
+            <ul className="space-y-3 mb-6">
+              <li className="flex items-start gap-2">
+                <Check className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
+                <span className="text-sm text-gray-700">Todo del plan gratis</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <Check className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
+                <span className="text-sm text-gray-700">Sin límites de tiempo</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <Check className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
+                <span className="text-sm text-gray-700">Nuevos lugares cada semana</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <Check className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
+                <span className="text-sm text-gray-700">Cancela cuando quieras</span>
+              </li>
+            </ul>
+            <Button 
+              onClick={() => handleSubscribe('premium_monthly')}
+              loading={loading === 'premium_monthly'}
+              className="w-full bg-indigo-600 hover:bg-indigo-700"
+            >
+              Suscribirse
+            </Button>
+          </Card>
+
+          {/* Plan Anual - DESTACADO */}
+          <Card className="border-2 border-purple-400 bg-gradient-to-br from-purple-50 to-white p-6 hover:shadow-2xl transition relative">
+            {/* Badge de ahorro */}
+            <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+              <div className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-4 py-1 rounded-full text-sm font-bold shadow-lg">
+                ¡Ahorra 30%!
+              </div>
+            </div>
+            
+            <div className="text-center mb-6 mt-2">
+              <div className="inline-block p-3 bg-purple-100 rounded-full mb-4">
+                <Crown className="h-8 w-8 text-purple-600" />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">Premium Anual</h3>
+              <div className="text-4xl font-bold text-purple-600 mb-2">24,99€</div>
+              <p className="text-gray-600">por año · Solo 2,08€/mes</p>
+            </div>
+            <ul className="space-y-3 mb-6">
+              <li className="flex items-start gap-2">
+                <Check className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
+                <span className="text-sm text-gray-700 font-medium">Todo del plan mensual</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <Check className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
+                <span className="text-sm text-gray-700 font-medium">Casi 4 meses gratis al año</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <Check className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
+                <span className="text-sm text-gray-700 font-medium">Soporte prioritario</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <Check className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
+                <span className="text-sm text-gray-700 font-medium">Acceso anticipado a nuevos lugares</span>
+              </li>
+            </ul>
+            <Button 
+              onClick={() => handleSubscribe('premium_yearly')}
+              loading={loading === 'premium_yearly'}
+              className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 shadow-lg"
+            >
+              Mejor Valor
+            </Button>
+          </Card>
         </div>
 
-        {/* FAQ Section */}
-        <div className="mt-24 max-w-3xl mx-auto">
-          <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
-            Preguntas Frecuentes
-          </h2>
-
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                ¿Puedo cancelar en cualquier momento?
-              </h3>
-              <p className="text-gray-600">
-                Sí, puedes cancelar tu suscripción en cualquier momento desde tu dashboard.
-                No hay compromisos ni penalizaciones.
-              </p>
+        {/* FAQs rápidos - IGUAL QUE HOME */}
+        <div className="mt-12 max-w-3xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="bg-white p-6 rounded-lg border border-gray-200">
+              <h4 className="font-semibold text-gray-900 mb-2">¿Necesito tarjeta para el trial?</h4>
+              <p className="text-sm text-gray-600">Sí. Necesitas tarjeta para los 30 días de prueba, pero no cobramos hasta el día 31. Cancela antes sin cargos.</p>
             </div>
-
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                ¿Qué métodos de pago aceptan?
-              </h3>
-              <p className="text-gray-600">
-                Aceptamos todas las tarjetas de crédito y débito principales a través de Stripe,
-                nuestro procesador de pagos seguro.
-              </p>
+            <div className="bg-white p-6 rounded-lg border border-gray-200">
+              <h4 className="font-semibold text-gray-900 mb-2">¿Puedo cancelar cuando quiera?</h4>
+              <p className="text-sm text-gray-600">Sí. Cancela en cualquier momento desde tu perfil. Si es antes del día 31, no se cobra nada.</p>
             </div>
-
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                ¿Puedo cambiar de plan después?
-              </h3>
-              <p className="text-gray-600">
-                Por supuesto. Puedes actualizar o cambiar tu plan en cualquier momento desde tu dashboard.
-                Los cambios se aplican de manera inmediata.
-              </p>
+            <div className="bg-white p-6 rounded-lg border border-gray-200">
+              <h4 className="font-semibold text-gray-900 mb-2">¿Cuándo se cobra?</h4>
+              <p className="text-sm text-gray-600">Después de 30 días de prueba. Si no cancelas, se cobra automáticamente 2,99€/mes o 24,99€/año según tu plan.</p>
             </div>
-
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                ¿La prueba gratuita requiere tarjeta?
-              </h3>
-              <p className="text-gray-600">
-                Sí, necesitamos una tarjeta para comenzar tu prueba de 30 días, pero no te cobraremos
-                hasta el día 31. Puedes cancelar antes sin ningún cargo.
-              </p>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                ¿Ofrecen descuentos para estudiantes?
-              </h3>
-              <p className="text-gray-600">
-                Actualmente no, pero estamos trabajando en programas especiales para estudiantes y educadores.
-                Mantente atento a nuestras novedades.
-              </p>
+            <div className="bg-white p-6 rounded-lg border border-gray-200">
+              <h4 className="font-semibold text-gray-900 mb-2">¿Por qué el plan anual es mejor?</h4>
+              <p className="text-sm text-gray-600">Ahorras 10,89€ al año (casi 4 meses gratis) y obtienes soporte prioritario.</p>
             </div>
           </div>
-        </div>
-
-        {/* CTA Final */}
-        <div className="mt-24 text-center">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">
-            ¿Listo para descubrir lugares excepcionales?
-          </h2>
-          <p className="text-xl text-gray-600 mb-8">
-            Únete a miles de viajeros que ya confían en Casi Cinco
-          </p>
-          <Link href="/registro">
-            <Button size="lg">
-              Empezar Gratis
-            </Button>
-          </Link>
         </div>
       </div>
     </div>
