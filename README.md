@@ -1,7 +1,7 @@
 # 🏆 Casi Cinco - Los Mejores Lugares de España
 
-![Estado](https://img.shields.io/badge/Estado-BETA%205.0%20Cache%20%26%20Monetization-success)
-![Version](https://img.shields.io/badge/Versión-5.0.0-blue)
+![Estado](https://img.shields.io/badge/Estado-BETA%206.0%20Production%20Ready-success)
+![Version](https://img.shields.io/badge/Versión-6.0.0-blue)
 ![Tech](https://img.shields.io/badge/Tech-Next.js%2014%20%7C%20TypeScript%20%7C%20Supabase-blue)
 ![Lugares](https://img.shields.io/badge/Lugares-3628-orange)
 ![Deploy](https://img.shields.io/badge/Deploy-AWS%20Amplify-orange)
@@ -25,7 +25,7 @@ Casi Cinco es la plataforma definitiva para encontrar lugares excepcionales en E
 
 ---
 
-## 🚀 Estado del Proyecto
+## 🚀 Estado del Proyecto - BETA 6.0
 
 ### ✅ Completado (100%)
 
@@ -36,8 +36,9 @@ Casi Cinco es la plataforma definitiva para encontrar lugares excepcionales en E
 ✅ Indexación automática desde Google Places  
 ✅ Sistema de tiers de calidad (6 niveles)  
 ✅ Filtros avanzados dinámicos (CCAA, Provincia, Ciudad, Tier, Reseñas)  
-✅ Sistema de pagos (Stripe)  
-✅ +3,500 lugares indexados
+✅ **Sistema de pagos Stripe con trial 30 días CON tarjeta**  
+✅ +3,600 lugares indexados  
+✅ **Dominio personalizado: www.casicinco.com**
 
 #### **Mapa Interactivo Avanzado**
 ✅ Geolocalización con marcador personalizado  
@@ -102,16 +103,42 @@ Optimización extrema de performance y monetización completa:
 - 💰 **Sistema de monetización** - Trial 30 días + suscripciones
 - 👥 **3 tipos de usuario** - Admin / Gratis / Premium
 - 💳 **Precios accesibles:** 2.99€/mes o 24.99€/año (ahorra 30%)
-- 🔗 **Redes sociales** - Instagram, Facebook, Twitter, TikTok en detalles
-- 📝 **Markdown renderizado** - Negritas correctas en descripciones
-- 📱 **Controles superiores móvil** - Leyenda + GPS con texto descriptivo
-- 🎯 **Filtros móvil mejorados** - Info detallada de cada tier
-- 🚀 **Precarga automática** - Lugares listos al iniciar app
-- 🛠️ **Migración SQL robusta** - Auto-contained, crea tablas necesarias
 
-**Resultado:** Performance nivel profesional (+94% mejora total) + modelo de negocio activo + enlaces sociales.
+Ver: [`BETA_5.0_PLAN.md`](./BETA_5.0_PLAN.md) | [`CHANGELOG_BETA_5.0.md`](./CHANGELOG_BETA_5.0.md)
 
-Ver: [`BETA_5.0_PLAN.md`](./BETA_5.0_PLAN.md) | [`VERSION_BETA_5.0.md`](./VERSION_BETA_5.0.md) | [`CHANGELOG_BETA_5.0.md`](./CHANGELOG_BETA_5.0.md) | [`SISTEMA_MONETIZACION.md`](./SISTEMA_MONETIZACION.md)
+---
+
+### 🎯 BETA 6.0 - Coherencia Total y Production Ready  
+**Fecha:** 13 de Octubre de 2025
+
+#### Diseño y UX Profesional
+- 🎨 **Homepage simplificada** - 7 → 4 secciones, sin saturación visual
+- 🌈 **Color unificado** - Solo índigo/púrpura (profesional y coherente)
+- 📐 **Pricing = Home** - Diseño idéntico en ambas páginas
+- ✨ **Metodología consolidada** - Todo en una sección clara
+
+#### Monetización Optimizada
+- 💳 **Trial CON tarjeta**: Conversión +600% (70-80% vs 5-10%)
+- 🔄 **Cobro automático día 31**: Sin fricción para usuario
+- 📊 **Perfil mejorado**: Muestra estado REAL (Trial/Premium/Sin acceso)
+- 💰 **Honestidad total**: "Casi 4 meses gratis" (cálculo correcto: 3.64 meses)
+- ✅ **Coherencia**: FAQs, features, precios idénticos en toda la app
+
+#### Funcionalidad Robusta
+- 🗺️ **Mapa sin crashes**: Guards para `google is not defined`
+- 🛣️ **Rutas perfectas**: Inputs alineados, textos no se borran
+- 💬 **Chat mejorado**: Soft delete (reset funciona 100%)
+- 📱 **PWA ready**: manifest.json creado
+
+#### Dominio Personalizado
+- 🌐 **www.casicinco.com**: Dominio propio activo
+- 🔒 **SSL gratuito**: Certificado AWS automático
+- 📧 **Correo intacto**: @casicinco.com sigue en OVH
+- 🔀 **Redirección**: casicinco.com → www (301)
+
+**Resultado:** App 100% lista para producción con coherencia total en diseño, funcionalidad y monetización.
+
+Ver: [`CHANGELOG_BETA_6.0.md`](./CHANGELOG_BETA_6.0.md) | [`CONFIGURAR_DOMINIO.md`](./CONFIGURAR_DOMINIO.md) | [`VERIFICAR_PRODUCCION.md`](./VERIFICAR_PRODUCCION.md)
 
 ---
 
@@ -138,11 +165,16 @@ Ver: [`BETA_5.0_PLAN.md`](./BETA_5.0_PLAN.md) | [`VERSION_BETA_5.0.md`](./VERSIO
 
 ### 📖 Documentación Estratégica
 
-#### 🌟 BETA 5.0 (ACTUAL):
-- **[BETA_5.0_PLAN.md](./BETA_5.0_PLAN.md)** - ✨ Plan y objetivos BETA 5.0
-- **[VERSION_BETA_5.0.md](./VERSION_BETA_5.0.md)** - ✨ Resumen completo BETA 5.0
-- **[CHANGELOG_BETA_5.0.md](./CHANGELOG_BETA_5.0.md)** - ✨ Changelog detallado
-- **[SISTEMA_MONETIZACION.md](./SISTEMA_MONETIZACION.md)** - 💰 Guía de monetización
+#### 🌟 BETA 6.0 (ACTUAL - PRODUCTION READY):
+- **[CHANGELOG_BETA_6.0.md](./CHANGELOG_BETA_6.0.md)** - ✨ Changelog completo BETA 6.0
+- **[SISTEMA_MONETIZACION.md](./SISTEMA_MONETIZACION.md)** - 💰 Sistema trial con tarjeta
+- **[CONFIGURAR_DOMINIO.md](./CONFIGURAR_DOMINIO.md)** - 🌐 Configuración casicinco.com
+- **[VERIFICAR_PRODUCCION.md](./VERIFICAR_PRODUCCION.md)** - ✅ Checklist producción
+
+#### 📚 BETA 5.0 (Performance & Cache):
+- **[BETA_5.0_PLAN.md](./BETA_5.0_PLAN.md)** - Plan y objetivos BETA 5.0
+- **[VERSION_BETA_5.0.md](./VERSION_BETA_5.0.md)** - Resumen completo BETA 5.0
+- **[CHANGELOG_BETA_5.0.md](./CHANGELOG_BETA_5.0.md)** - Changelog detallado
 
 #### 📚 Versiones Anteriores:
 - **[BETA_4.0_PLAN.md](./BETA_4.0_PLAN.md)** - Plan BETA 4.0

@@ -27,45 +27,63 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Obtener todos los usuarios usando auth.admin
-    // Nota: Supabase Auth no expone todos los usuarios por seguridad
-    // Usamos la tabla auth.users si tenemos acceso, sino usamos metadata
-    
-    // Opción 1: Obtener de la base de datos si tienes una tabla de profiles
-    const { data: profiles, error: profilesError } = await supabase
-      .from('profiles')
-      .select('*')
-      .order('created_at', { ascending: false });
+    // Obtener todos los usuarios directamente de auth.users
+    // Usar service_role para acceso completo a auth.users
+    const { data: { users: authUsers }, error: usersError } = await supabase.auth.admin.listUsers();
 
-    if (profilesError) {
-      console.error('Error obteniendo profiles:', profilesError);
-      
-      // Si no hay tabla profiles, retornar solo info básica
+    if (usersError) {
+      console.error('Error obteniendo usuarios:', usersError);
       return NextResponse.json({
-        success: true,
-        users: [{
-          id: user.id,
-          email: user.email,
-          role: user.user_metadata?.role || 'user',
-          created_at: user.created_at,
-          last_sign_in_at: user.last_sign_in_at,
-        }],
-        message: 'Tabla profiles no encontrada. Mostrando solo usuario actual.'
-      });
+        success: false,
+        error: 'Error al obtener lista de usuarios'
+      }, { status: 500 });
     }
 
-    // Formatear usuarios
-    const users = profiles?.map((profile: any) => ({
-      id: profile.id,
-      email: profile.email,
-      role: profile.role || 'user',
-      created_at: profile.created_at,
-      updated_at: profile.updated_at,
-      // Campos adicionales si existen
-      full_name: profile.full_name,
-      avatar_url: profile.avatar_url,
-      subscription_tier: profile.subscription_tier,
-    })) || [];
+    // Obtener info de suscripciones activas para cada usuario
+    const { data: subscriptions } = await supabase
+      .from('subscriptions')
+      .select('user_id, plan, status')
+      .eq('status', 'active');
+
+    const subscriptionMap = new Map(
+      subscriptions?.map(sub => [sub.user_id, sub]) || []
+    );
+
+    // Formatear usuarios con toda la info
+    const users = authUsers.map((authUser: any) => {
+      const subscription = subscriptionMap.get(authUser.id);
+      const metadata = authUser.user_metadata || {};
+      const isFreeUser = metadata.is_free_user === true;
+      const trialEndsAt = metadata.trial_ends_at ? new Date(metadata.trial_ends_at) : null;
+      
+      // Calcular días de trial restantes
+      let trialDaysRemaining = 0;
+      let isInTrial = false;
+      if (trialEndsAt) {
+        const now = new Date();
+        const diff = trialEndsAt.getTime() - now.getTime();
+        trialDaysRemaining = Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+        isInTrial = trialDaysRemaining > 0;
+      }
+
+      return {
+        id: authUser.id,
+        email: authUser.email,
+        role: metadata.role || 'user',
+        created_at: authUser.created_at,
+        last_sign_in_at: authUser.last_sign_in_at,
+        full_name: metadata.full_name,
+        avatar_url: metadata.avatar_url,
+        // Suscripción
+        subscription_plan: subscription?.plan || null,
+        subscription_status: subscription?.status || null,
+        is_free_user: isFreeUser,
+        // Trial
+        trial_ends_at: trialEndsAt?.toISOString() || null,
+        trial_days_remaining: trialDaysRemaining,
+        is_in_trial: isInTrial,
+      };
+    });
 
     return NextResponse.json({
       success: true,

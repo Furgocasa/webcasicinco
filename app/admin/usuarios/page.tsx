@@ -29,7 +29,12 @@ interface UserData {
   updated_at?: string;
   full_name?: string;
   avatar_url?: string;
-  subscription_tier?: string;
+  subscription_plan?: string | null;
+  subscription_status?: string | null;
+  is_free_user?: boolean;
+  trial_ends_at?: string | null;
+  trial_days_remaining?: number;
+  is_in_trial?: boolean;
   last_sign_in_at?: string;
 }
 
@@ -115,6 +120,36 @@ export default function UsuariosPage() {
     }
   };
 
+  const handleToggleFreeUser = async (userId: string, currentIsFree: boolean, userEmail: string) => {
+    const action = currentIsFree ? 'quitar acceso gratis a' : 'dar acceso gratis a';
+    if (!confirm(`¿Estás seguro de ${action} ${userEmail}?`)) {
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/admin/users/set-free', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          userId, 
+          isFree: !currentIsFree 
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast.success(data.message || '✅ Estado actualizado');
+        loadUsers(); // Recargar lista
+      } else {
+        toast.error(data.error || 'Error actualizando usuario');
+      }
+    } catch (error) {
+      console.error('Error cambiando estado free:', error);
+      toast.error('Error al actualizar usuario');
+    }
+  };
+
   // Filtrar usuarios
   const filteredUsers = users.filter(user => {
     const matchesSearch = !searchTerm || 
@@ -131,7 +166,9 @@ export default function UsuariosPage() {
     total: users.length,
     admins: users.filter(u => u.role === 'admin').length,
     regulares: users.filter(u => u.role === 'user' || !u.role).length,
-    premium: users.filter(u => u.subscription_tier && u.subscription_tier !== 'free').length,
+    premium: users.filter(u => u.subscription_plan).length,
+    freeUsers: users.filter(u => u.is_free_user).length,
+    inTrial: users.filter(u => u.is_in_trial).length,
   };
 
   return (
@@ -156,51 +193,63 @@ export default function UsuariosPage() {
       </div>
 
       {/* Estadísticas */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
         <Card>
           <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Usuarios</p>
-                <p className="text-3xl font-bold text-gray-900 mt-2">{stats.total}</p>
-              </div>
-              <Users className="h-12 w-12 text-indigo-600 opacity-80" />
+            <div className="text-center">
+              <Users className="h-8 w-8 text-indigo-600 mx-auto mb-2" />
+              <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
+              <p className="text-xs font-medium text-gray-600">Total</p>
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Administradores</p>
-                <p className="text-3xl font-bold text-purple-600 mt-2">{stats.admins}</p>
-              </div>
-              <Crown className="h-12 w-12 text-purple-600 opacity-80" />
+            <div className="text-center">
+              <Crown className="h-8 w-8 text-purple-600 mx-auto mb-2" />
+              <p className="text-2xl font-bold text-purple-600">{stats.admins}</p>
+              <p className="text-xs font-medium text-gray-600">Admins</p>
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Usuarios Regulares</p>
-                <p className="text-3xl font-bold text-blue-600 mt-2">{stats.regulares}</p>
-              </div>
-              <User className="h-12 w-12 text-blue-600 opacity-80" />
+            <div className="text-center">
+              <UserCheck className="h-8 w-8 text-green-600 mx-auto mb-2" />
+              <p className="text-2xl font-bold text-green-600">{stats.freeUsers}</p>
+              <p className="text-xs font-medium text-gray-600">Free</p>
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Premium</p>
-                <p className="text-3xl font-bold text-amber-600 mt-2">{stats.premium}</p>
-              </div>
-              <Shield className="h-12 w-12 text-amber-600 opacity-80" />
+            <div className="text-center">
+              <Calendar className="h-8 w-8 text-blue-600 mx-auto mb-2" />
+              <p className="text-2xl font-bold text-blue-600">{stats.inTrial}</p>
+              <p className="text-xs font-medium text-gray-600">En Trial</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-center">
+              <Shield className="h-8 w-8 text-amber-600 mx-auto mb-2" />
+              <p className="text-2xl font-bold text-amber-600">{stats.premium}</p>
+              <p className="text-xs font-medium text-gray-600">Premium</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-center">
+              <User className="h-8 w-8 text-gray-600 mx-auto mb-2" />
+              <p className="text-2xl font-bold text-gray-600">{stats.regulares}</p>
+              <p className="text-xs font-medium text-gray-600">Regulares</p>
             </div>
           </CardContent>
         </Card>
@@ -266,6 +315,7 @@ export default function UsuariosPage() {
                     <th className="text-left py-3 px-4 font-semibold text-gray-700">Rol</th>
                     <th className="text-left py-3 px-4 font-semibold text-gray-700">Registro</th>
                     <th className="text-left py-3 px-4 font-semibold text-gray-700">Suscripción</th>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Estado</th>
                     <th className="text-right py-3 px-4 font-semibold text-gray-700">Acciones</th>
                   </tr>
                 </thead>
@@ -329,9 +379,41 @@ export default function UsuariosPage() {
 
                       {/* Suscripción */}
                       <td className="py-4 px-4">
-                        <Badge variant={user.subscription_tier === 'premium' ? 'default' : 'secondary'}>
-                          {user.subscription_tier || 'free'}
+                        <Badge variant={
+                          user.subscription_plan ? 'default' : 
+                          user.is_free_user ? 'success' : 
+                          'secondary'
+                        }>
+                          {user.is_free_user ? '🎁 Free' :
+                           user.subscription_plan === 'premium_monthly' ? '💎 Mensual' :
+                           user.subscription_plan === 'premium_yearly' ? '👑 Anual' :
+                           user.subscription_plan || 'Ninguna'}
                         </Badge>
+                      </td>
+
+                      {/* Estado (Trial/Activo) */}
+                      <td className="py-4 px-4">
+                        {user.role === 'admin' ? (
+                          <Badge className="bg-purple-100 text-purple-700">
+                            👑 Admin
+                          </Badge>
+                        ) : user.is_free_user ? (
+                          <Badge className="bg-green-100 text-green-700">
+                            ✅ Acceso Gratis
+                          </Badge>
+                        ) : user.is_in_trial ? (
+                          <Badge className="bg-blue-100 text-blue-700">
+                            ⏰ Trial ({user.trial_days_remaining}d)
+                          </Badge>
+                        ) : user.subscription_status === 'active' ? (
+                          <Badge className="bg-indigo-100 text-indigo-700">
+                            ✅ Activo
+                          </Badge>
+                        ) : (
+                          <Badge className="bg-orange-100 text-orange-700">
+                            ❌ Sin acceso
+                          </Badge>
+                        )}
                       </td>
 
                       {/* Acciones */}
@@ -355,6 +437,22 @@ export default function UsuariosPage() {
                             </>
                           ) : (
                             <>
+                              {/* Botón marcar como Free (solo para usuarios no-admin) */}
+                              {user.role !== 'admin' && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleToggleFreeUser(user.id, user.is_free_user || false, user.email)}
+                                  className={user.is_free_user ? 
+                                    "bg-green-50 border-green-500 text-green-700 hover:bg-green-100" :
+                                    "hover:bg-green-50 hover:border-green-500 hover:text-green-700"
+                                  }
+                                  title={user.is_free_user ? "Quitar acceso gratis" : "Dar acceso gratis permanente"}
+                                >
+                                  {user.is_free_user ? <UserX className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}
+                                </Button>
+                              )}
+                              
                               <Button
                                 size="sm"
                                 variant="outline"
@@ -388,31 +486,65 @@ export default function UsuariosPage() {
         </CardContent>
       </Card>
 
-      {/* Info de Roles */}
+      {/* Info de Roles y Estados */}
       <Card className="bg-blue-50 border-blue-200">
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
             <Shield className="h-5 w-5 text-blue-600" />
-            Información de Roles
+            Información de Roles y Estados
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="flex items-start gap-3">
-            <Crown className="h-5 w-5 text-purple-600 mt-0.5" />
-            <div>
-              <p className="font-semibold text-gray-900">Administrador</p>
-              <p className="text-sm text-gray-600">
-                Acceso completo: gestión de lugares, indexación, configuración y usuarios.
-              </p>
+        <CardContent className="grid md:grid-cols-2 gap-6">
+          <div className="space-y-3">
+            <h4 className="font-semibold text-gray-900 mb-3">Roles:</h4>
+            <div className="flex items-start gap-3">
+              <Crown className="h-5 w-5 text-purple-600 mt-0.5" />
+              <div>
+                <p className="font-semibold text-gray-900">Administrador</p>
+                <p className="text-sm text-gray-600">
+                  Acceso completo: gestión de lugares, indexación, configuración y usuarios.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <User className="h-5 w-5 text-blue-600 mt-0.5" />
+              <div>
+                <p className="font-semibold text-gray-900">Usuario</p>
+                <p className="text-sm text-gray-600">
+                  Acceso estándar: mapa, chatbot, rutas (según suscripción).
+                </p>
+              </div>
             </div>
           </div>
-          <div className="flex items-start gap-3">
-            <User className="h-5 w-5 text-blue-600 mt-0.5" />
-            <div>
-              <p className="font-semibold text-gray-900">Usuario</p>
-              <p className="text-sm text-gray-600">
-                Acceso básico: ver lugares, guardar favoritos, planificar rutas.
-              </p>
+          
+          <div className="space-y-3">
+            <h4 className="font-semibold text-gray-900 mb-3">Estados:</h4>
+            <div className="flex items-start gap-3">
+              <UserCheck className="h-5 w-5 text-green-600 mt-0.5" />
+              <div>
+                <p className="font-semibold text-gray-900">🎁 Free (Cortesía)</p>
+                <p className="text-sm text-gray-600">
+                  Acceso gratis permanente. Admin puede activar/desactivar.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <Calendar className="h-5 w-5 text-blue-600 mt-0.5" />
+              <div>
+                <p className="font-semibold text-gray-900">⏰ Trial</p>
+                <p className="text-sm text-gray-600">
+                  30 días de prueba gratis. Cobra automáticamente al terminar.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <Shield className="h-5 w-5 text-indigo-600 mt-0.5" />
+              <div>
+                <p className="font-semibold text-gray-900">💎 Premium</p>
+                <p className="text-sm text-gray-600">
+                  Suscripción activa: 2,99€/mes o 24,99€/año.
+                </p>
+              </div>
             </div>
           </div>
         </CardContent>
@@ -426,10 +558,11 @@ export default function UsuariosPage() {
             <div className="flex-1">
               <p className="font-semibold text-amber-900">⚠️ Precauciones</p>
               <ul className="text-sm text-amber-800 mt-2 space-y-1">
+                <li>• <strong>Botón verde (🎁):</strong> Da/Quita acceso gratis permanente (no necesitan pagar)</li>
+                <li>• <strong>Free users:</strong> Ignora suscripción Stripe, siempre tienen acceso</li>
                 <li>• No puedes eliminar tu propia cuenta de administrador</li>
                 <li>• Eliminar un usuario NO se puede deshacer</li>
-                <li>• Al cambiar un usuario a admin, tendrá acceso total</li>
-                <li>• Los usuarios premium mantendrán su suscripción</li>
+                <li>• Al cambiar un usuario a admin, tendrá acceso total al panel</li>
               </ul>
             </div>
           </div>
