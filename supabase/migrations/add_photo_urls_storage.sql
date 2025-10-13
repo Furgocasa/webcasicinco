@@ -29,6 +29,12 @@ ON CONFLICT (id) DO NOTHING;
 -- 3. CREAR POLÍTICA RLS para el bucket (público)
 -- ============================================================================
 
+-- Eliminar políticas existentes si existen
+DROP POLICY IF EXISTS "Fotos de lugares públicas 1" ON storage.objects;
+DROP POLICY IF EXISTS "Subir fotos requiere autenticación" ON storage.objects;
+DROP POLICY IF EXISTS "Actualizar fotos solo admin" ON storage.objects;
+DROP POLICY IF EXISTS "Borrar fotos solo admin" ON storage.objects;
+
 -- Permitir SELECT público (leer fotos)
 CREATE POLICY "Fotos de lugares públicas 1" 
 ON storage.objects FOR SELECT 
