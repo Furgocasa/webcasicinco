@@ -35,12 +35,13 @@ export async function POST(
       );
     }
 
-    // Actualizar el estado del job a cancelado
+    // Actualizar el estado del job a failed (no existe 'cancelled' en el enum)
     const { data, error } = await supabase
       .from('indexation_jobs')
       .update({
-        status: 'cancelled',
+        status: 'failed',
         completed_at: new Date().toISOString(),
+        error_log: { cancelled: true, reason: 'Cancelado manualmente por el administrador' }
       })
       .eq('id', jobId)
       .eq('status', 'running') // Solo cancelar si está corriendo
