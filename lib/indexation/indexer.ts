@@ -98,12 +98,13 @@ export async function startIndexation(
           const searchTerm = searchTerms[category] || category;
           const cities = mainCitiesByProvince[province] || [province];
           
-          // Buscar Y PROCESAR por ciudad (procesamiento progresivo)
+          // ==========================================
+          // FASE 1: BÚSQUEDA COMPLETA (rápida)
+          // ==========================================
+          console.log('\n🔍 ========== FASE 1: BÚSQUEDA ==========');
           for (const city of cities) {
             try {
               console.log(`\n🔍 Buscando ${searchTerm} en ${city}, ${province}...`);
-              console.log(`   API Key presente: ${GOOGLE_API_KEY ? 'SÍ (' + GOOGLE_API_KEY.substring(0, 10) + '...)' : 'NO'}`);
-              console.log(`   Parámetros: location="${city}, ${province}, España", keyword="${searchTerm}", minRating=${params.minRating}`);
               
               const placeIds = await searchPlaces({
                 location: `${city}, ${province}, España`,
@@ -112,21 +113,8 @@ export async function startIndexation(
                 radius: 50000, // 50km por ciudad
               });
 
-              console.log(`   Respuesta de Google: ${placeIds.length} lugares`);
-              
-              // Agregar y obtener solo los NUEVOS de esta ciudad
-              const newPlaceIdsFromCity: string[] = [];
-              placeIds.forEach(id => {
-                const sizeBefore = allPlaceIds.size;
-                allPlaceIds.add(id);
-                // Si aumentó el tamaño, es nuevo
-                if (allPlaceIds.size > sizeBefore && !processedPlaceIds.has(id)) {
-                  newPlaceIdsFromCity.push(id);
-                }
-              });
-              
-              console.log(`✅ ${placeIds.length} lugares encontrados en ${city}`);
-              console.log(`   🆕 ${newPlaceIdsFromCity.length} son nuevos (no duplicados)`);
+              console.log(`   Respuesta: ${placeIds.length} lugares`);
+              placeIds.forEach(id => allPlaceIds.add(id));
               console.log(`   📊 Total acumulado: ${allPlaceIds.size} lugares únicos\n`);
               
               // Actualizar total acumulado en tiempo real
@@ -135,11 +123,25 @@ export async function startIndexation(
                 .update({ total_places: allPlaceIds.size })
                 .eq('id', jobId);
               
-              // ✅ PROCESAR INMEDIATAMENTE los lugares nuevos de esta ciudad
-              if (newPlaceIdsFromCity.length > 0) {
-                console.log(`🔄 Procesando ${newPlaceIdsFromCity.length} lugares nuevos de ${city}...\n`);
-                
-                for (const placeId of newPlaceIdsFromCity) {
+              // Pausa para no saturar la API
+              await new Promise(resolve => setTimeout(resolve, 1000));
+            } catch (error) {
+              console.error(`❌ Error buscando en ${city}:`, error);
+            }
+          }
+          
+          console.log(`\n✅ BÚSQUEDA COMPLETADA: ${allPlaceIds.size} lugares únicos encontrados`);
+          console.log('==========================================\n');
+          
+          // ==========================================
+          // FASE 2: PROCESAMIENTO CON PROGRESO VISIBLE
+          // ==========================================
+          console.log('🔄 ========== FASE 2: PROCESAMIENTO ==========');
+          
+          const newPlaceIds = Array.from(allPlaceIds).filter(id => !processedPlaceIds.has(id));
+          console.log(`🔄 Procesando ${newPlaceIds.length} lugares de ${category}...\n`);
+          
+          for (const placeId of newPlaceIds) {
             try {
               // Marcar como procesado PRIMERO
               processedPlaceIds.add(placeId);
@@ -232,21 +234,15 @@ export async function startIndexation(
               console.log(`⏳ Pausa de 1 segundo...\n`);
               await new Promise(resolve => setTimeout(resolve, 1000));
 
-                } catch (error: any) {
-                  console.error(`❌ Error fatal procesando:`, error.message);
-                  console.error(error.stack);
-                  totalFailed++;
-                }
-              } // Fin for placeId
-              } // Fin if newPlaceIdsFromCity.length > 0
-              
-              // Pausa entre ciudades
-              await new Promise(resolve => setTimeout(resolve, 500));
-              
-            } catch (error) {
-              console.error(`❌ Error buscando/procesando en ${city}:`, error);
+            } catch (error: any) {
+              console.error(`❌ Error fatal procesando:`, error.message);
+              console.error(error.stack);
+              totalFailed++;
             }
-          } // Fin for city
+          } // Fin for placeId
+          
+          console.log('\n✅ PROCESAMIENTO COMPLETADO');
+          console.log('==========================================\n');
           
         } catch (error) {
           console.error(`❌ Error en categoría ${category} - ${province}:`, error);
