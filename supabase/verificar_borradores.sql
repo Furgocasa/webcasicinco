@@ -14,7 +14,7 @@ SELECT
   published,
   (ai_description IS NOT NULL) as tiene_ia,
   (photo_urls IS NOT NULL AND array_length(photo_urls, 1) > 0) as tiene_fotos_supabase,
-  (photos IS NOT NULL AND array_length(photos, 1) > 0) as tiene_fotos_google,
+  (photos IS NOT NULL) as tiene_fotos_google,
   created_at
 FROM public.places
 WHERE published = false
@@ -25,7 +25,7 @@ SELECT
   COUNT(*) as total_borradores,
   SUM(CASE WHEN ai_description IS NOT NULL THEN 1 ELSE 0 END) as con_ia,
   SUM(CASE WHEN ai_description IS NULL THEN 1 ELSE 0 END) as sin_ia,
-  SUM(CASE WHEN photo_urls IS NOT NULL AND array_length(photo_urls, 1) > 0 THEN 1 ELSE 0 END) as con_fotos_supabase
+  SUM(CASE WHEN photo_urls IS NOT NULL THEN 1 ELSE 0 END) as con_fotos_supabase
 FROM public.places
 WHERE published = false;
 

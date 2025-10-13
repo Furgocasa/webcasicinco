@@ -406,9 +406,9 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* KPIs Grid - 6 tarjetas principales */}
+      {/* KPIs Grid - 5 tarjetas principales */}
       {stats.totalPlaces > 0 && (
-        <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 md:overflow-x-visible scrollbar-hide">
+        <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 md:overflow-x-visible scrollbar-hide">
           {/* Total Lugares */}
           <Card className="min-w-[280px] md:min-w-0 snap-start bg-gradient-to-br from-indigo-500 to-indigo-600 text-white flex-shrink-0">
             <CardContent className="p-4">
@@ -438,24 +438,6 @@ export default function DashboardPage() {
                   </p>
                 </div>
                 <Eye className="h-8 w-8 text-green-200" />
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Pendientes */}
-          <Card className="min-w-[280px] md:min-w-0 snap-start bg-gradient-to-br from-orange-500 to-orange-600 text-white flex-shrink-0">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-medium text-orange-100">Borradores</p>
-                  <p className="mt-1 text-2xl font-bold">
-                    {stats.pending}
-                  </p>
-                  <p className="text-[10px] text-orange-100 mt-0.5">
-                    {Math.round((stats.pending / stats.totalPlaces) * 100)}%
-                  </p>
-                </div>
-                <EyeOff className="h-8 w-8 text-orange-200" />
               </div>
             </CardContent>
           </Card>
@@ -797,19 +779,12 @@ export default function DashboardPage() {
             <CardTitle>Accesos Rápidos</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <Link href="/admin/indexar">
                 <Button variant="outline" className="h-auto w-full flex-col gap-2 py-6 hover:border-indigo-500 hover:bg-indigo-50 transition">
                   <Plus className="h-8 w-8 text-indigo-600" />
                   <span className="font-semibold">Nueva Indexación</span>
-                </Button>
-              </Link>
-
-              <Link href="/admin/lugares?filter=pending">
-                <Button variant="outline" className="h-auto w-full flex-col gap-2 py-6 hover:border-orange-500 hover:bg-orange-50 transition">
-                  <Clock className="h-8 w-8 text-orange-600" />
-                  <span className="font-semibold">Ver Borradores</span>
-                  <Badge className="bg-orange-500 text-white">{stats.pending}</Badge>
+                  <span className="text-xs text-gray-500">Buscar lugares de calidad</span>
                 </Button>
               </Link>
 
@@ -817,7 +792,7 @@ export default function DashboardPage() {
                 <Button variant="outline" className="h-auto w-full flex-col gap-2 py-6 hover:border-cyan-500 hover:bg-cyan-50 transition">
                   <MapPin className="h-8 w-8 text-cyan-600" />
                   <span className="font-semibold">Gestionar Lugares</span>
-                  <Badge className="bg-cyan-500 text-white">{stats.totalPlaces}</Badge>
+                  <Badge className="bg-cyan-500 text-white">{stats.totalPlaces.toLocaleString()}</Badge>
                 </Button>
               </Link>
             </div>
