@@ -68,7 +68,8 @@ export interface Place {
   ai_description?: string;
   ai_review_summary?: string;
   ai_highlights?: string[];
-  photos?: string[];
+  photos?: string[]; // Legacy: photo_reference de Google (backward compatibility)
+  photo_urls?: string[]; // NUEVO: URLs de Supabase Storage (ahorra costos)
   google_maps_url?: string;
   published: boolean;
   featured: boolean;
@@ -116,6 +117,7 @@ export interface PlaceCardData {
   city: string;
   province: string;
   price_level?: number;
-  photos: string[];
+  photos: string[]; // Legacy
+  photo_urls?: string[]; // Nuevo
   featured?: boolean;
 }

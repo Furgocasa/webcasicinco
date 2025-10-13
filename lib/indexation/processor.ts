@@ -6,6 +6,7 @@ import { createAdminClient } from '../supabase/server';
 import {
   getPlaceDetails,
   downloadPlacePhotos,
+  downloadAndUploadPhotosToSupabase,
   extractReviews,
   categorizePlaceByTypes,
   extractProvinceFromPlaceData,
@@ -51,10 +52,15 @@ export async function processPlace(
       };
     }
 
-    // 2. Descargar fotos
+    // 2. Descargar fotos Y subirlas a Supabase Storage
     console.log(`[PROCESSOR] Downloading photos for ${placeDetails.name}`);
-    const photoUrls = await downloadPlacePhotos(placeDetails.photos || [], 5);
-    cost += photoUrls.length * 0.007; // Place Photos API cost
+    const { supabaseUrls, photoReferences } = await downloadAndUploadPhotosToSupabase(
+      placeDetails.photos || [], 
+      placeDetails.name,
+      placeDetails.place_id,
+      5
+    );
+    cost += supabaseUrls.length * 0.007; // Place Photos API cost (solo 1 vez al indexar)
 
     // 3. Extraer reseñas
     const reviews = extractReviews(placeDetails);
@@ -117,7 +123,8 @@ export async function processPlace(
       ai_description: description,
       ai_review_summary: reviewSummary,
       ai_highlights: highlights,
-      photos: photoUrls,
+      photos: photoReferences, // Mantener referencias para backward compatibility
+      photo_urls: supabaseUrls, // NUEVO: URLs de Supabase Storage
       google_maps_url: placeDetails.url,
       published: false,
       featured: false,

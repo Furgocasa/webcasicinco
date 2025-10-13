@@ -154,7 +154,91 @@ export function getPlacePhotoUrl(
 }
 
 /**
- * Descarga múltiples fotos de un lugar
+ * Descarga fotos desde Google y las sube a Supabase Storage
+ * NUEVO: Ahorra costos - solo descarga 1 vez, muestra desde Supabase siempre
+ */
+export async function downloadAndUploadPhotosToSupabase(
+  photos: GooglePlacePhoto[],
+  placeName: string,
+  placeId: string,
+  maxPhotos: number = 5
+): Promise<{ supabaseUrls: string[], photoReferences: string[] }> {
+  try {
+    const { createClient } = await import('@supabase/supabase-js');
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
+    const photoReferences: string[] = [];
+    const supabaseUrls: string[] = [];
+    const photosToProcess = photos.slice(0, maxPhotos);
+
+    for (let i = 0; i < photosToProcess.length; i++) {
+      const photo = photosToProcess[i];
+      const photoRef = photo.photo_reference;
+      photoReferences.push(photoRef);
+
+      try {
+        // 1. Descargar foto desde Google
+        const googlePhotoUrl = getPlacePhotoUrl(photoRef, 1200);
+        const response = await axios.get(googlePhotoUrl, {
+          responseType: 'arraybuffer',
+          timeout: 10000,
+        });
+
+        // 2. Preparar nombre de archivo único
+        const fileName = `${placeId}_${i}.jpg`;
+        const filePath = `places/${placeId}/${fileName}`;
+
+        // 3. Subir a Supabase Storage
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('place-photos')
+          .upload(filePath, response.data, {
+            contentType: 'image/jpeg',
+            cacheControl: '3600',
+            upsert: true, // Sobrescribir si ya existe
+          });
+
+        if (uploadError) {
+          console.error(`Error subiendo foto ${i} a Supabase:`, uploadError);
+          continue;
+        }
+
+        // 4. Obtener URL pública
+        const { data: { publicUrl } } = supabase.storage
+          .from('place-photos')
+          .getPublicUrl(filePath);
+
+        supabaseUrls.push(publicUrl);
+        console.log(`✅ Foto ${i + 1}/${photosToProcess.length} subida a Supabase`);
+
+      } catch (photoError) {
+        console.error(`Error procesando foto ${i}:`, photoError);
+        // Continuar con la siguiente foto
+      }
+
+      // Pausa para no saturar
+      if (i < photosToProcess.length - 1) {
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+    }
+
+    return { supabaseUrls, photoReferences };
+
+  } catch (error) {
+    console.error('Error downloading and uploading photos:', error);
+    // Fallback: devolver solo referencias si falla Supabase
+    return { 
+      supabaseUrls: [], 
+      photoReferences: photos.slice(0, maxPhotos).map(p => p.photo_reference) 
+    };
+  }
+}
+
+/**
+ * LEGACY: Descarga múltiples fotos de un lugar (solo construye URLs de Google)
+ * @deprecated Usar downloadAndUploadPhotosToSupabase en su lugar
  */
 export async function downloadPlacePhotos(
   photos: GooglePlacePhoto[],

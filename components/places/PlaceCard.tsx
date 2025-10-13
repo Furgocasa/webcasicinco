@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { Place } from '@/types/place';
 import { Card, CardContent } from '../ui/Card';
 import { Badge } from '../ui/Badge';
+import { getPlacePhotoUrl, hasPlacePhotos } from '@/lib/utils/photo-helper';
 
 interface PlaceCardProps {
   place: Place;
@@ -11,17 +12,19 @@ interface PlaceCardProps {
 
 export default function PlaceCard({ place }: PlaceCardProps) {
   const placeUrl = `/${place.category}/${place.province}/${place.slug}`;
+  const photoUrl = getPlacePhotoUrl(place, 0);
 
   return (
     <Link href={placeUrl}>
       <Card className="hover:shadow-xl transition-shadow cursor-pointer h-full">
         {/* Imagen */}
         <div className="relative h-48 bg-gray-200 rounded-t-lg overflow-hidden">
-          {place.photos && place.photos.length > 0 ? (
+          {photoUrl ? (
             <img
-              src={place.photos[0]}
+              src={photoUrl}
               alt={place.name}
               className="w-full h-full object-cover"
+              loading="lazy"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
