@@ -178,16 +178,3 @@ export function shouldExcludeChain(placeName: string, excludeChains: boolean): b
     placeName.toLowerCase().includes(chain.toLowerCase())
   );
 }
-
-/**
- * Inicia el proceso de indexación (placeholder por ahora)
- */
-export async function startIndexation(
-  jobId: string,
-  params: { provinces: string[]; categories: string[]; minRating: number }
-): Promise<void> {
-  console.log('Indexación iniciada para job:', jobId, params);
-  // TODO: Implementar lógica real de indexación
-  // Por ahora solo registramos que se inició
-  return Promise.resolve();
-}
