@@ -403,12 +403,74 @@ export default function MapPage() {
     }
   }, [allPlaces, isLoaded]); // NO incluir searchParams ni selectedPlace para evitar loops
 
+  // 🎨 CACHE DE ICONOS: Pre-renderizar iconos una sola vez (mejora performance)
+  const markerIcons = useMemo(() => {
+    const isMobile = typeof window !== 'undefined' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    const markerSize = isMobile ? 28 : 36;
+    const markerRadius = isMobile ? 12 : 16;
+    const fontSize = isMobile ? 16 : 20;
+    const grayMarkerSize = isMobile ? 18 : 24;
+    const grayMarkerRadius = isMobile ? 8 : 10;
+    const grayFontSize = isMobile ? 11 : 14;
+
+    const tierColors: Record<string, string> = {
+      diamond: '#93c5fd',
+      platinum: '#e5e7eb',
+      gold: '#fbbf24',
+      silver: '#d1d5db',
+      bronze: '#fb923c',
+      none: '#ffffff'
+    };
+
+    const tierIcons: Record<string, string> = {
+      diamond: '💎',
+      platinum: '🏆',
+      gold: '🥇',
+      silver: '🥈',
+      bronze: '🥉',
+      none: '⚪'
+    };
+
+    // Pre-renderizar todos los iconos de tiers
+    const icons: Record<string, any> = {};
+    
+    Object.keys(tierColors).forEach(tier => {
+      icons[tier] = {
+        url: `data:image/svg+xml,${encodeURIComponent(`
+          <svg xmlns="http://www.w3.org/2000/svg" width="${markerSize}" height="${markerSize}" viewBox="0 0 ${markerSize} ${markerSize}">
+            <circle cx="${markerSize/2}" cy="${markerSize/2}" r="${markerRadius}" fill="${tierColors[tier]}" stroke="#d1d5db" stroke-width="2"/>
+            <text x="${markerSize/2}" y="${markerSize/2 + 7}" text-anchor="middle" font-size="${fontSize}">${tierIcons[tier]}</text>
+          </svg>
+        `)}`,
+        scaledSize: new google.maps.Size(markerSize, markerSize),
+        anchor: new google.maps.Point(markerSize/2, markerSize/2),
+      };
+
+      // Iconos grises para lugares no filtrados
+      icons[`${tier}_gray`] = {
+        url: `data:image/svg+xml,${encodeURIComponent(`
+          <svg xmlns="http://www.w3.org/2000/svg" width="${grayMarkerSize}" height="${grayMarkerSize}" viewBox="0 0 ${grayMarkerSize} ${grayMarkerSize}">
+            <circle cx="${grayMarkerSize/2}" cy="${grayMarkerSize/2}" r="${grayMarkerRadius}" fill="#f3f4f6" stroke="#d1d5db" stroke-width="1.5" opacity="0.4"/>
+            <text x="${grayMarkerSize/2}" y="${grayMarkerSize/2 + 4}" text-anchor="middle" font-size="${grayFontSize}" opacity="0.4">${tierIcons[tier]}</text>
+          </svg>
+        `)}`,
+        scaledSize: new google.maps.Size(grayMarkerSize, grayMarkerSize),
+        anchor: new google.maps.Point(grayMarkerSize/2, grayMarkerSize/2),
+      };
+    });
+
+    console.log('🎨 Iconos pre-renderizados:', Object.keys(icons).length);
+    return icons;
+  }, [isLoaded]); // Solo recrear si cambia isLoaded
+
   // 🚀 CLUSTERING: Mostrar TODOS los lugares (filtrados en color, no filtrados en gris)
   useEffect(() => {
-    if (!mapRef.current || !isLoaded || allPlaces.length === 0) return;
+    if (!mapRef.current || !isLoaded || allPlaces.length === 0 || !markerIcons) return;
 
     // Debounce para evitar recrear constantemente mientras se ajustan filtros
     const timer = setTimeout(() => {
+      console.time('⏱️ Creación de marcadores');
+      
       // Limpiar marcadores anteriores de forma eficiente
       if (clustererRef.current) {
         clustererRef.current.clearMarkers();
@@ -420,41 +482,14 @@ export default function MapPage() {
     const filteredIds = new Set(filteredPlaces.map(p => p.id));
     const notFilteredPlaces = allPlaces.filter(p => !filteredIds.has(p.id));
     
-    // 1️⃣ Crear marcadores FILTRADOS (van al cluster)
-    // Tamaño adaptativo según dispositivo
-    const isMobile = typeof window !== 'undefined' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    const markerSize = isMobile ? 28 : 36; // Más pequeños en móvil
-    const markerRadius = isMobile ? 12 : 16;
-    const fontSize = isMobile ? 16 : 20;
-    
+    // 1️⃣ Crear marcadores FILTRADOS (van al cluster) - USANDO CACHE DE ICONOS
     const filteredMarkers = filteredPlaces.map((place) => {
       const tier = calculateQualityTier(place.rating, place.review_count || 0);
       const tierInfo = getTierInfo(tier);
       
-      // Color de fondo según el color de la medalla
-      const tierColors: Record<string, string> = {
-        diamond: '#93c5fd',   // Azul diamante brillante
-        platinum: '#e5e7eb',  // Platino/gris metálico
-        gold: '#fbbf24',      // Oro dorado
-        silver: '#d1d5db',    // Plata metálica
-        bronze: '#fb923c',    // Bronce/cobre
-        none: '#ffffff'       // Blanco
-      };
-      
-      const bgColor = tierColors[tier] || '#ffffff';
-      
       const marker = new google.maps.Marker({
         position: { lat: place.latitude, lng: place.longitude },
-        icon: {
-          url: `data:image/svg+xml,${encodeURIComponent(`
-            <svg xmlns="http://www.w3.org/2000/svg" width="${markerSize}" height="${markerSize}" viewBox="0 0 ${markerSize} ${markerSize}">
-              <circle cx="${markerSize/2}" cy="${markerSize/2}" r="${markerRadius}" fill="${bgColor}" stroke="#d1d5db" stroke-width="2"/>
-              <text x="${markerSize/2}" y="${markerSize/2 + 7}" text-anchor="middle" font-size="${fontSize}">${tierInfo.icon}</text>
-            </svg>
-          `)}`,
-          scaledSize: new google.maps.Size(markerSize, markerSize),
-          anchor: new google.maps.Point(markerSize/2, markerSize/2),
-        },
+        icon: markerIcons[tier], // ← REUTILIZAR icono pre-renderizado
         title: `${place.name} - ${tierInfo.name}`,
         zIndex: 100,
       });
@@ -466,27 +501,14 @@ export default function MapPage() {
       return marker;
     });
     
-    // 2️⃣ Crear marcadores NO FILTRADOS (grises, individuales, SIN cluster)
-    const grayMarkerSize = isMobile ? 18 : 24; // Más pequeños en móvil
-    const grayMarkerRadius = isMobile ? 8 : 10;
-    const grayFontSize = isMobile ? 11 : 14;
-    
+    // 2️⃣ Crear marcadores NO FILTRADOS (grises) - USANDO CACHE DE ICONOS
     const notFilteredMarkers = notFilteredPlaces.map((place) => {
       const tier = calculateQualityTier(place.rating, place.review_count || 0);
       const tierInfo = getTierInfo(tier);
       
       const marker = new google.maps.Marker({
         position: { lat: place.latitude, lng: place.longitude },
-        icon: {
-          url: `data:image/svg+xml,${encodeURIComponent(`
-            <svg xmlns="http://www.w3.org/2000/svg" width="${grayMarkerSize}" height="${grayMarkerSize}" viewBox="0 0 ${grayMarkerSize} ${grayMarkerSize}">
-              <circle cx="${grayMarkerSize/2}" cy="${grayMarkerSize/2}" r="${grayMarkerRadius}" fill="#f3f4f6" stroke="#d1d5db" stroke-width="1.5" opacity="0.4"/>
-              <text x="${grayMarkerSize/2}" y="${grayMarkerSize/2 + 4}" text-anchor="middle" font-size="${grayFontSize}" opacity="0.4">${tierInfo.icon}</text>
-            </svg>
-          `)}`,
-          scaledSize: new google.maps.Size(grayMarkerSize, grayMarkerSize),
-          anchor: new google.maps.Point(grayMarkerSize/2, grayMarkerSize/2),
-        },
+        icon: markerIcons[`${tier}_gray`], // ← REUTILIZAR icono gris pre-renderizado
         title: `${place.name} - ${tierInfo.name}`,
         zIndex: 10,
         map: mapRef.current, // Añadir directamente al mapa (SIN cluster)
@@ -498,11 +520,14 @@ export default function MapPage() {
 
       return marker;
     });
+    
+    console.timeEnd('⏱️ Creación de marcadores');
 
     markersRef.current = [...filteredMarkers, ...notFilteredMarkers];
 
     // Crear o actualizar clusterer con estilo personalizado simple
     // Tamaño adaptativo para clusters
+    const isMobile = typeof window !== 'undefined' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     const clusterSize = isMobile ? 32 : 40;
     const clusterRadius = isMobile ? 14 : 18;
     const clusterFontSize = isMobile ? 10 : 12;
@@ -576,7 +601,7 @@ export default function MapPage() {
       }
       markersRef.current.forEach(marker => marker.setMap(null));
     };
-  }, [allPlaces, filteredPlaces, isLoaded]);
+  }, [allPlaces, filteredPlaces, isLoaded, markerIcons]);
 
   // Reactivar geolocalización si estaba activa antes
   useEffect(() => {

@@ -14,7 +14,11 @@ import {
   Trash2,
   ExternalLink,
   User,
-  BarChart3
+  BarChart3,
+  Crown,
+  CreditCard,
+  Check,
+  X as XIcon
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -28,7 +32,9 @@ export default function PerfilPage() {
   const [favorites, setFavorites] = useState<any[]>([]);
   const [visits, setVisits] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'favorites' | 'visits' | 'stats'>('favorites');
+  const [activeTab, setActiveTab] = useState<'favorites' | 'visits' | 'stats' | 'subscription'>('favorites');
+  const [subscriptionInfo, setSubscriptionInfo] = useState<any>(null);
+  const [loadingSubscription, setLoadingSubscription] = useState(false);
 
   useEffect(() => {
     loadUserData();
@@ -243,6 +249,21 @@ export default function PerfilPage() {
           >
             <BarChart3 className="h-4 w-4 inline mr-2" />
             Estadísticas
+          </button>
+          
+          <button
+            onClick={() => {
+              setActiveTab('subscription');
+              loadSubscription();
+            }}
+            className={`px-6 py-3 font-semibold transition border-b-2 ${
+              activeTab === 'subscription'
+                ? 'border-indigo-500 text-indigo-600'
+                : 'border-transparent text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            <Crown className="h-4 w-4 inline mr-2" />
+            Suscripción
           </button>
         </div>
 
