@@ -337,6 +337,8 @@ CREATE INDEX idx_chat_history_active ON chat_history(user_id, is_active, created
 |-----|-----------|----------|
 | `google is not defined` | 🔴 Crítico | Guards antes de usar Google Maps |
 | `manifest.json 404` | 🟡 Media | Creado public/manifest.json |
+| Admin ve solo 1 usuario | 🔴 Crítico | API usa auth.admin.listUsers() con SERVICE_ROLE |
+| Usuarios sin trial | 🟠 Alta | Migración SQL + función assign_trial_to_user() |
 | Chat reset no funciona | 🟠 Alta | Soft delete con is_active |
 | Inputs rutas desalineados | 🟡 Media | Padding uniforme px-4 py-3 |
 | Textos se borran en rutas | 🟠 Alta | Validación before set |

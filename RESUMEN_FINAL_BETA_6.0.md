@@ -139,32 +139,55 @@
 
 ---
 
-### 7. 👥 Admin Panel - Usuarios Completo
+### 7. 👥 Admin Panel - Gestión Completa de Usuarios
 
 **Problema:** Solo veía 1 usuario cuando hay 3 en BD
 
 **Solución:**
-- ✅ API usa `auth.admin.listUsers()` → Ve TODOS los usuarios
-- ✅ Muestra días de trial restantes
+- ✅ API usa `auth.admin.listUsers()` con SERVICE_ROLE_KEY → Ve TODOS
+- ✅ Muestra días de trial restantes calculados correctamente
 - ✅ Muestra si es Free user
 - ✅ Muestra suscripción (Mensual/Anual/Ninguna)
 
-**Nueva funcionalidad:**
-- ✅ **Botón verde 🎁**: Admin puede marcar usuarios como "Free"
-- ✅ Free users = acceso gratis permanente (no pagan nunca)
-- ✅ Útil para: Colaboradores, testers, amigos, familia
+**Funcionalidades del Panel:**
 
-**Nueva columna "Estado":**
-- 👑 Admin
-- 🎁 Acceso Gratis
-- ⏰ Trial (25d) ← Muestra días restantes
-- ✅ Activo (Premium)
-- ❌ Sin acceso
-
-**Estadísticas:**
+**1. Estadísticas (6 cards):**
 - Total, Admins, Free, En Trial, Premium, Regulares
 
-**Resultado:** Admin tiene control total, ve info completa de cada usuario
+**2. Ordenamiento por columnas:**
+- Click en header para ordenar
+- Email ↑↓, Rol ↑↓, Registro ↑↓, Estado ↑↓
+- Indicador visual de columna activa
+
+**3. Paginación:**
+- 10 usuarios por página
+- Botones Anterior/Siguiente
+- Números de página
+- Contador "Mostrando X a Y de Z"
+
+**4. Modal Editar Suscripción:**
+- Botón corona 👑 en cada usuario
+- Admin puede cambiar a:
+  - 🎁 Free (acceso gratis permanente)
+  - ⏰ Trial (30 días desde hoy)
+  - 💎 Premium Mensual (2,99€/mes)
+  - 👑 Premium Anual (24,99€/año)
+  - ❌ Sin Acceso (bloquear)
+- Warning sobre conflictos con Stripe
+- Útil para: Soporte, emergencias, promociones
+
+**5. Botón Editar Rol:**
+- Cambiar entre Usuario ↔ Admin
+- Tooltip claro: "Hacer admin" o "Quitar admin"
+
+**Nueva columna "Estado":**
+- 👑 Admin (acceso perpetuo)
+- 🎁 Acceso Gratis (free user)
+- ⏰ Trial (30d, 25d, etc.) ← Días restantes en tiempo real
+- ✅ Activo (Premium con suscripción)
+- ❌ Sin acceso (necesita suscribirse)
+
+**Resultado:** Admin tiene control TOTAL sobre usuarios y suscripciones
 
 ---
 

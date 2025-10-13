@@ -45,6 +45,19 @@ export default function UsuariosPage() {
   const [roleFilter, setRoleFilter] = useState<'all' | 'admin' | 'user'>('all');
   const [editingUser, setEditingUser] = useState<UserData | null>(null);
   const [newRole, setNewRole] = useState<'user' | 'admin'>('user');
+  
+  // Paginación
+  const [currentPage, setCurrentPage] = useState(1);
+  const [usersPerPage] = useState(10);
+  
+  // Ordenamiento
+  const [sortBy, setSortBy] = useState<'email' | 'created_at' | 'role' | 'status'>('created_at');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  
+  // Modal de edición de suscripción
+  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
+  const [editingSubscription, setEditingSubscription] = useState<UserData | null>(null);
+  const [newSubscriptionType, setNewSubscriptionType] = useState<'free' | 'trial' | 'premium_monthly' | 'premium_yearly' | 'none'>('trial');
 
   useEffect(() => {
     loadUsers();
@@ -150,16 +163,106 @@ export default function UsuariosPage() {
     }
   };
 
-  // Filtrar usuarios
-  const filteredUsers = users.filter(user => {
-    const matchesSearch = !searchTerm || 
-      user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.full_name?.toLowerCase().includes(searchTerm.toLowerCase());
+  const handleOpenSubscriptionModal = (user: UserData) => {
+    setEditingSubscription(user);
     
-    const matchesRole = roleFilter === 'all' || user.role === roleFilter;
+    // Determinar tipo actual
+    if (user.is_free_user) {
+      setNewSubscriptionType('free');
+    } else if (user.is_in_trial) {
+      setNewSubscriptionType('trial');
+    } else if (user.subscription_plan === 'premium_monthly') {
+      setNewSubscriptionType('premium_monthly');
+    } else if (user.subscription_plan === 'premium_yearly') {
+      setNewSubscriptionType('premium_yearly');
+    } else {
+      setNewSubscriptionType('none');
+    }
     
-    return matchesSearch && matchesRole;
-  });
+    setShowSubscriptionModal(true);
+  };
+
+  const handleUpdateSubscription = async () => {
+    if (!editingSubscription) return;
+
+    try {
+      const response = await fetch(`/api/admin/users/${editingSubscription.id}/subscription`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          subscriptionType: newSubscriptionType 
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast.success('✅ Suscripción actualizada');
+        setShowSubscriptionModal(false);
+        setEditingSubscription(null);
+        loadUsers();
+      } else {
+        toast.error(data.error || 'Error actualizando suscripción');
+      }
+    } catch (error) {
+      console.error('Error actualizando suscripción:', error);
+      toast.error('Error al actualizar suscripción');
+    }
+  };
+
+  // Filtrar y ordenar usuarios
+  const filteredUsers = users
+    .filter(user => {
+      const matchesSearch = !searchTerm || 
+        user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.full_name?.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      const matchesRole = roleFilter === 'all' || user.role === roleFilter;
+      
+      return matchesSearch && matchesRole;
+    })
+    .sort((a, b) => {
+      let comparison = 0;
+      
+      if (sortBy === 'email') {
+        comparison = (a.email || '').localeCompare(b.email || '');
+      } else if (sortBy === 'created_at') {
+        comparison = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+      } else if (sortBy === 'role') {
+        comparison = (a.role || 'user').localeCompare(b.role || 'user');
+      } else if (sortBy === 'status') {
+        // Ordenar por estado: Admin > Free > Trial > Premium > Sin acceso
+        const getStatusPriority = (u: UserData) => {
+          if (u.role === 'admin') return 0;
+          if (u.is_free_user) return 1;
+          if (u.is_in_trial) return 2;
+          if (u.subscription_plan) return 3;
+          return 4;
+        };
+        comparison = getStatusPriority(a) - getStatusPriority(b);
+      }
+      
+      return sortOrder === 'asc' ? comparison : -comparison;
+    });
+
+  // Paginación
+  const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+  const indexOfLastUser = currentPage * usersPerPage;
+  const indexOfFirstUser = indexOfLastUser - usersPerPage;
+  const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
+
+  // Cambiar de página
+  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+
+  // Cambiar ordenamiento
+  const handleSort = (column: 'email' | 'created_at' | 'role' | 'status') => {
+    if (sortBy === column) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(column);
+      setSortOrder('asc');
+    }
+  };
 
   // Estadísticas
   const stats = {
@@ -310,17 +413,57 @@ export default function UsuariosPage() {
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-gray-200">
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Email</th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Rol</th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Registro</th>
+                  <tr className="border-b border-gray-200 bg-gray-50">
+                    <th 
+                      className="text-left py-3 px-4 font-semibold text-gray-700 cursor-pointer hover:bg-gray-100"
+                      onClick={() => handleSort('email')}
+                    >
+                      <div className="flex items-center gap-2">
+                        Email
+                        {sortBy === 'email' && (
+                          <span className="text-xs">{sortOrder === 'asc' ? '↑' : '↓'}</span>
+                        )}
+                      </div>
+                    </th>
+                    <th 
+                      className="text-left py-3 px-4 font-semibold text-gray-700 cursor-pointer hover:bg-gray-100"
+                      onClick={() => handleSort('role')}
+                    >
+                      <div className="flex items-center gap-2">
+                        Rol
+                        {sortBy === 'role' && (
+                          <span className="text-xs">{sortOrder === 'asc' ? '↑' : '↓'}</span>
+                        )}
+                      </div>
+                    </th>
+                    <th 
+                      className="text-left py-3 px-4 font-semibold text-gray-700 cursor-pointer hover:bg-gray-100"
+                      onClick={() => handleSort('created_at')}
+                    >
+                      <div className="flex items-center gap-2">
+                        Registro
+                        {sortBy === 'created_at' && (
+                          <span className="text-xs">{sortOrder === 'asc' ? '↑' : '↓'}</span>
+                        )}
+                      </div>
+                    </th>
                     <th className="text-left py-3 px-4 font-semibold text-gray-700">Suscripción</th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Estado</th>
+                    <th 
+                      className="text-left py-3 px-4 font-semibold text-gray-700 cursor-pointer hover:bg-gray-100"
+                      onClick={() => handleSort('status')}
+                    >
+                      <div className="flex items-center gap-2">
+                        Estado
+                        {sortBy === 'status' && (
+                          <span className="text-xs">{sortOrder === 'asc' ? '↑' : '↓'}</span>
+                        )}
+                      </div>
+                    </th>
                     <th className="text-right py-3 px-4 font-semibold text-gray-700">Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredUsers.map((user) => (
+                  {currentUsers.map((user) => (
                     <tr key={user.id} className="border-b border-gray-100 hover:bg-gray-50 transition">
                       {/* Email */}
                       <td className="py-4 px-4">
@@ -438,18 +581,16 @@ export default function UsuariosPage() {
                           ) : (
                             <>
                               {/* Botón marcar como Free (solo para usuarios no-admin) */}
+                              {/* Botón editar suscripción (icono estrella) */}
                               {user.role !== 'admin' && (
                                 <Button
                                   size="sm"
                                   variant="outline"
-                                  onClick={() => handleToggleFreeUser(user.id, user.is_free_user || false, user.email)}
-                                  className={user.is_free_user ? 
-                                    "bg-green-50 border-green-500 text-green-700 hover:bg-green-100" :
-                                    "hover:bg-green-50 hover:border-green-500 hover:text-green-700"
-                                  }
-                                  title={user.is_free_user ? "Quitar acceso gratis" : "Dar acceso gratis permanente"}
+                                  onClick={() => handleOpenSubscriptionModal(user)}
+                                  className="hover:bg-indigo-50 hover:border-indigo-500 hover:text-indigo-700"
+                                  title="Editar suscripción (Free/Trial/Premium/Sin acceso)"
                                 >
-                                  {user.is_free_user ? <UserX className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}
+                                  <Crown className="h-4 w-4" />
                                 </Button>
                               )}
                               
@@ -460,7 +601,7 @@ export default function UsuariosPage() {
                                   setEditingUser(user);
                                   setNewRole(user.role);
                                 }}
-                                title="Cambiar rol"
+                                title={user.role === 'admin' ? 'Quitar admin' : 'Hacer admin'}
                               >
                                 <Edit2 className="h-4 w-4" />
                               </Button>
@@ -481,10 +622,198 @@ export default function UsuariosPage() {
                   ))}
                 </tbody>
               </table>
+
+              {/* Paginación */}
+              {totalPages > 1 && (
+                <div className="mt-6 flex items-center justify-between">
+                  <p className="text-sm text-gray-600">
+                    Mostrando {indexOfFirstUser + 1} a {Math.min(indexOfLastUser, filteredUsers.length)} de {filteredUsers.length} usuarios
+                  </p>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => paginate(currentPage - 1)}
+                      disabled={currentPage === 1}
+                    >
+                      Anterior
+                    </Button>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                      <Button
+                        key={page}
+                        size="sm"
+                        variant={currentPage === page ? 'default' : 'outline'}
+                        onClick={() => paginate(page)}
+                      >
+                        {page}
+                      </Button>
+                    ))}
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => paginate(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                    >
+                      Siguiente
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </CardContent>
       </Card>
+
+      {/* Modal Editar Suscripción */}
+      {showSubscriptionModal && editingSubscription && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                <Crown className="h-5 w-5 text-indigo-600" />
+                Editar Suscripción
+              </h3>
+              <button
+                onClick={() => setShowSubscriptionModal(false)}
+                className="p-2 hover:bg-gray-100 rounded-lg transition"
+              >
+                <XIcon className="h-5 w-5 text-gray-600" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {/* Info del usuario */}
+              <div className="bg-gray-50 p-3 rounded-lg">
+                <p className="text-sm font-medium text-gray-900">{editingSubscription.email}</p>
+                <p className="text-xs text-gray-600">Registro: {new Date(editingSubscription.created_at).toLocaleDateString('es-ES')}</p>
+              </div>
+
+              {/* Selector de tipo de suscripción */}
+              <div>
+                <label className="block text-sm font-medium text-gray-900 mb-3">
+                  Tipo de Acceso:
+                </label>
+                <div className="space-y-2">
+                  {/* Free */}
+                  <label className={`flex items-start gap-3 p-3 rounded-lg border-2 cursor-pointer transition ${
+                    newSubscriptionType === 'free' ? 'border-green-500 bg-green-50' : 'border-gray-200 hover:border-gray-300'
+                  }`}>
+                    <input
+                      type="radio"
+                      name="subscription"
+                      value="free"
+                      checked={newSubscriptionType === 'free'}
+                      onChange={(e) => setNewSubscriptionType('free')}
+                      className="mt-1"
+                    />
+                    <div>
+                      <p className="font-semibold text-gray-900">🎁 Free (Cortesía)</p>
+                      <p className="text-xs text-gray-600">Acceso gratis permanente. No paga nunca.</p>
+                    </div>
+                  </label>
+
+                  {/* Trial */}
+                  <label className={`flex items-start gap-3 p-3 rounded-lg border-2 cursor-pointer transition ${
+                    newSubscriptionType === 'trial' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
+                  }`}>
+                    <input
+                      type="radio"
+                      name="subscription"
+                      value="trial"
+                      checked={newSubscriptionType === 'trial'}
+                      onChange={(e) => setNewSubscriptionType('trial')}
+                      className="mt-1"
+                    />
+                    <div>
+                      <p className="font-semibold text-gray-900">⏰ Trial (30 días)</p>
+                      <p className="text-xs text-gray-600">30 días de prueba gratis. Requiere tarjeta.</p>
+                    </div>
+                  </label>
+
+                  {/* Premium Mensual */}
+                  <label className={`flex items-start gap-3 p-3 rounded-lg border-2 cursor-pointer transition ${
+                    newSubscriptionType === 'premium_monthly' ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 hover:border-gray-300'
+                  }`}>
+                    <input
+                      type="radio"
+                      name="subscription"
+                      value="premium_monthly"
+                      checked={newSubscriptionType === 'premium_monthly'}
+                      onChange={(e) => setNewSubscriptionType('premium_monthly')}
+                      className="mt-1"
+                    />
+                    <div>
+                      <p className="font-semibold text-gray-900">💎 Premium Mensual</p>
+                      <p className="text-xs text-gray-600">2,99€/mes. Suscripción activa.</p>
+                    </div>
+                  </label>
+
+                  {/* Premium Anual */}
+                  <label className={`flex items-start gap-3 p-3 rounded-lg border-2 cursor-pointer transition ${
+                    newSubscriptionType === 'premium_yearly' ? 'border-purple-500 bg-purple-50' : 'border-gray-200 hover:border-gray-300'
+                  }`}>
+                    <input
+                      type="radio"
+                      name="subscription"
+                      value="premium_yearly"
+                      checked={newSubscriptionType === 'premium_yearly'}
+                      onChange={(e) => setNewSubscriptionType('premium_yearly')}
+                      className="mt-1"
+                    />
+                    <div>
+                      <p className="font-semibold text-gray-900">👑 Premium Anual</p>
+                      <p className="text-xs text-gray-600">24,99€/año (2,08€/mes). Mejor valor.</p>
+                    </div>
+                  </label>
+
+                  {/* Sin acceso */}
+                  <label className={`flex items-start gap-3 p-3 rounded-lg border-2 cursor-pointer transition ${
+                    newSubscriptionType === 'none' ? 'border-orange-500 bg-orange-50' : 'border-gray-200 hover:border-gray-300'
+                  }`}>
+                    <input
+                      type="radio"
+                      name="subscription"
+                      value="none"
+                      checked={newSubscriptionType === 'none'}
+                      onChange={(e) => setNewSubscriptionType('none')}
+                      className="mt-1"
+                    />
+                    <div>
+                      <p className="font-semibold text-gray-900">❌ Sin Acceso</p>
+                      <p className="text-xs text-gray-600">Bloquear acceso. Tendrá que suscribirse.</p>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              {/* Advertencia */}
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                <p className="text-xs text-amber-800">
+                  <strong>⚠️ Atención:</strong> Este cambio es manual y puede conflictuar con Stripe. 
+                  Úsalo solo en casos excepcionales (soporte, emergencias).
+                </p>
+              </div>
+
+              {/* Botones */}
+              <div className="flex gap-3 pt-4">
+                <Button
+                  onClick={() => setShowSubscriptionModal(false)}
+                  variant="outline"
+                  className="flex-1"
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  onClick={handleUpdateSubscription}
+                  className="flex-1 bg-indigo-600 hover:bg-indigo-700"
+                >
+                  Guardar
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Info de Roles y Estados */}
       <Card className="bg-blue-50 border-blue-200">
