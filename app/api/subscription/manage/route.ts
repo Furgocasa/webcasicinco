@@ -162,6 +162,11 @@ export async function GET(request: NextRequest) {
 
     // Obtener detalles de Stripe
     const stripeSubscription = await stripe.subscriptions.retrieve(subscription.stripe_subscription_id);
+    
+    // Obtener precio del primer item
+    const priceItem = stripeSubscription.items.data[0];
+    const amount = priceItem?.price?.unit_amount || 0;
+    const currency = priceItem?.price?.currency || 'eur';
 
     return NextResponse.json({
       success: true,
@@ -173,8 +178,8 @@ export async function GET(request: NextRequest) {
         cancelAtPeriodEnd: subscription.cancel_at_period_end,
         canceledAt: subscription.canceled_at,
         stripeSubscriptionId: subscription.stripe_subscription_id,
-        nextInvoiceAmount: stripeSubscription.plan.amount / 100, // Convertir de centavos a euros
-        currency: stripeSubscription.plan.currency,
+        nextInvoiceAmount: amount / 100, // Convertir de centavos a euros
+        currency: currency,
       },
     });
   } catch (error: any) {
