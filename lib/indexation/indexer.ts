@@ -200,8 +200,18 @@ export async function startIndexation(
                 .single();
 
               if (saveError) {
-                console.error(`❌ Error guardando: ${saveError.message}`);
-                totalFailed++;
+                // Distinguir entre descartados y errores reales
+                if (saveError.code === '23505' || saveError.message?.includes('duplicate') || saveError.message?.includes('unique')) {
+                  console.log(`⏭️  Descartado: ${saveError.message} (slug o ID duplicado)`);
+                  totalSkipped++;
+                } else if (saveError.message?.includes('incomplete') || saveError.message?.includes('null value')) {
+                  console.log(`⏭️  Descartado: Datos incompletos`);
+                  totalSkipped++;
+                } else {
+                  // Error técnico real
+                  console.error(`❌ ERROR TÉCNICO guardando: ${saveError.message} (código: ${saveError.code})`);
+                  totalFailed++;
+                }
               } else {
                 console.log(`✅ "${savedPlace?.name}" guardado como PUBLICADO con ID ${savedPlace?.id}`);
                 totalSuccessful++;
