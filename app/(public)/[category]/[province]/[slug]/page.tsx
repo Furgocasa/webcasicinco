@@ -31,6 +31,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { calculateQualityTier, getTierInfo } from '@/lib/utils/tier-calculator';
 import { MarkdownText } from '@/lib/utils/markdown';
+import { getPlacePhotoUrl } from '@/lib/utils/photo-helper';
 import { toast } from 'sonner';
 
 const libraries: ("places")[] = ["places"];
@@ -109,9 +110,7 @@ export default function PlaceDetailPage() {
 
   const tier = calculateQualityTier(place.rating, place.review_count);
   const tierInfo = getTierInfo(tier);
-  const photoUrl = place.photos && place.photos.length > 0 
-    ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1200&photo_reference=${place.photos[0]}&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`
-    : null;
+  const photoUrl = getPlacePhotoUrl(place, 0, 1200);
 
   const priceLevel = place.price_level ? '€'.repeat(place.price_level) : null;
 
@@ -290,26 +289,57 @@ export default function PlaceDetailPage() {
             )}
 
             {/* Galería de Fotos */}
-            {place.photos && place.photos.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Galería</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {place.photos.slice(0, 6).map((photoRef: string, index: number) => (
-                      <div key={index} className="aspect-square rounded-lg overflow-hidden">
-                        <img
-                          src={`https://maps.googleapis.com/maps/api/place/photo?maxwidth=600&photo_reference=${photoRef}&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`}
-                          alt={`${place.name} - Foto ${index + 1}`}
-                          className="w-full h-full object-cover hover:scale-110 transition-transform duration-300 cursor-pointer"
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+            {/* Galería de fotos - Supabase Storage + Google fallback */}
+            {(() => {
+              const maxPhotos = 6;
+              const photos = [];
+              
+              // Priorizar fotos de Supabase Storage
+              if (place.photo_urls?.length) {
+                photos.push(...place.photo_urls.slice(0, maxPhotos).map((url, index) => ({
+                  src: url,
+                  index,
+                  alt: `${place.name} - Foto ${index + 1}`
+                })));
+              }
+              
+              // Rellenar con fotos de Google si no hay suficientes de Supabase
+              if (photos.length < maxPhotos && place.photos?.length) {
+                const remainingSlots = maxPhotos - photos.length;
+                const googlePhotos = place.photos.slice(0, remainingSlots).map((photoRef: string, index: number) => {
+                  const googleUrl = getPlacePhotoUrl(place, photos.length + index, 600);
+                  return googleUrl ? {
+                    src: googleUrl,
+                    index: photos.length + index,
+                    alt: `${place.name} - Foto ${photos.length + index + 1}`
+                  } : null;
+                }).filter(Boolean);
+                
+                photos.push(...googlePhotos);
+              }
+              
+              return photos.length > 0 ? (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Galería</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                      {photos.map((photo) => (
+                        <div key={photo.index} className="aspect-square rounded-lg overflow-hidden">
+                          <img
+                            src={photo.src}
+                            alt={photo.alt}
+                            className="w-full h-full object-cover hover:scale-110 transition-transform duration-300 cursor-pointer"
+                            loading="lazy"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : null;
+            })()}
           </div>
 
           {/* Columna Lateral */}
