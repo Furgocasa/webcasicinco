@@ -1326,12 +1326,13 @@ export default function MapPage() {
           {/* Barra de controles superior - Móvil */}
           <div className="absolute top-2 left-2 right-2 z-10 flex items-center justify-between gap-2">
             {/* Leyenda de calidad - Izquierda */}
-            <div className="bg-white/95 backdrop-blur-sm shadow-md rounded-lg px-2 py-1.5 border border-gray-200">
+            <div className="bg-white/95 backdrop-blur-sm shadow-md rounded-lg px-2.5 py-1.5 border border-gray-200">
               <button
                 onClick={() => setIsLegendExpanded(!isLegendExpanded)}
-                className="flex items-center gap-1"
+                className="flex items-center gap-1.5"
               >
                 <span className="text-base">💎</span>
+                <span className="text-[10px] font-semibold text-gray-900 whitespace-nowrap">Leyenda de Tier</span>
                 <ChevronDown 
                   className={`h-3 w-3 text-gray-600 transition-transform ${
                     isLegendExpanded ? 'rotate-180' : ''
