@@ -34,7 +34,7 @@ export default function PhotoMigrationTool() {
   };
 
   const startMigration = async () => {
-    if (!confirm(`¿Migrar ${stats.needsMigration} lugares a Supabase Storage?\n\nEsto descargará fotos de Google (última vez) y las subirá a Supabase.\nTiempo estimado: ${Math.ceil(stats.needsMigration / 50 * 5)} minutos`)) {
+    if (!confirm(`¿Migrar ${stats.needsMigration} lugares a Supabase Storage?\n\nEsto descargará fotos de Google (última vez) y las subirá a Supabase.\n\n⚠️ IMPORTANTE: Procesa de 5 en 5 para evitar timeouts.\nTiempo estimado: ${Math.ceil(stats.needsMigration / 5 * 2)} minutos`)) {
       return;
     }
 
@@ -42,7 +42,7 @@ export default function PhotoMigrationTool() {
     setProgress({ processed: 0, successful: 0, failed: 0, total: stats.needsMigration });
 
     let offset = 0;
-    const batchSize = 10; // ⚠️ REDUCIDO a 10 para evitar timeouts
+    const batchSize = 5; // ⚠️ MUY PEQUEÑO para evitar timeouts (5 lugares = ~25 fotos)
     let totalProcessed = 0;
     let totalSuccessful = 0;
     let totalFailed = 0;
@@ -62,7 +62,10 @@ export default function PhotoMigrationTool() {
           const errorText = await response.text();
           console.error(`❌ Error HTTP ${response.status}:`, errorText);
           toast.error(`Error HTTP ${response.status}: ${errorText.substring(0, 100)}`);
-          break;
+          
+          // Si hay error, esperar más y reintentar una vez
+          await new Promise(resolve => setTimeout(resolve, 5000));
+          continue; // Intentar siguiente lote
         }
 
         const data = await response.json();
@@ -71,7 +74,8 @@ export default function PhotoMigrationTool() {
         if (!data.success) {
           console.error('❌ Error en respuesta:', data.error);
           toast.error(data.error || 'Error en migración');
-          break;
+          await new Promise(resolve => setTimeout(resolve, 5000));
+          continue;
         }
 
         totalProcessed += data.processed;
@@ -95,8 +99,8 @@ export default function PhotoMigrationTool() {
 
         offset += batchSize;
 
-        // Pausa entre lotes (aumentada para evitar saturación)
-        await new Promise(resolve => setTimeout(resolve, 3000));
+        // Pausa entre lotes (5 segundos para no saturar)
+        await new Promise(resolve => setTimeout(resolve, 5000));
       }
 
       toast.success(`✅ Migración completada: ${totalSuccessful}/${totalProcessed} lugares`);
@@ -203,44 +207,50 @@ export default function PhotoMigrationTool() {
         </div>
 
         {/* Botón de acción */}
-        <div className="text-center py-6">
-          <AlertTriangle className="h-16 w-16 text-amber-600 mx-auto mb-4" />
-          <p className="text-lg font-semibold text-gray-900 mb-2">
-            ⚠️ Migración Masiva Desactivada Temporalmente
-          </p>
-          <p className="text-sm text-gray-600 mb-4">
-            La migración masiva de 3,600+ lugares causa timeouts en el servidor.
-            <br />
-            <strong>Solución implementada:</strong> Las fotos se migran automáticamente al indexar nuevos lugares.
-          </p>
-          
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-left mb-4">
-            <p className="text-sm text-blue-900 mb-2">
-              <strong>📋 Estrategia de Migración Gradual:</strong>
+        {needsMigration > 0 ? (
+          <div className="space-y-4">
+            <Button
+              onClick={startMigration}
+              disabled={migrating}
+              className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
+              size="lg"
+            >
+              {migrating ? (
+                <>
+                  <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                  Migrando... {progress.processed}/{progress.total}
+                </>
+              ) : (
+                <>
+                  <Image className="h-5 w-5 mr-2" />
+                  Migrar {needsMigration} Lugares a Supabase
+                </>
+              )}
+            </Button>
+            
+            <p className="text-xs text-center text-gray-500">
+              Tiempo estimado: ~{Math.ceil(needsMigration / 5 * 2)} minutos. 
+              Procesa de 5 en 5 para evitar timeouts.
             </p>
-            <ul className="text-sm text-blue-800 space-y-1 ml-4">
-              <li>✅ <strong>Lugares nuevos:</strong> Fotos en Supabase Storage automáticamente</li>
-              <li>✅ <strong>Lugares existentes:</strong> Usan Google Photos API (fallback compatible)</li>
-              <li>💡 <strong>Re-indexación:</strong> Puedes re-indexar lugares específicos para migrar sus fotos</li>
-              <li>💰 <strong>Ahorro gradual:</strong> Cada nuevo lugar = $0 en costos de fotos</li>
-            </ul>
           </div>
-
-          <Button
-            onClick={() => window.open('/admin/indexar', '_blank')}
-            className="bg-indigo-600 hover:bg-indigo-700"
-          >
-            <Database className="h-5 w-5 mr-2" />
-            Ir a Indexar Lugares
-          </Button>
-        </div>
+        ) : (
+          <div className="text-center py-6">
+            <CheckCircle className="h-16 w-16 text-green-600 mx-auto mb-4" />
+            <p className="text-lg font-semibold text-gray-900 mb-2">
+              ✅ Migración Completada
+            </p>
+            <p className="text-sm text-gray-600">
+              Todas las fotos están en Supabase Storage. ¡Ahorro activado!
+            </p>
+          </div>
+        )}
 
         {/* Advertencia */}
         {needsMigration > 0 && (
           <div className="mt-6 bg-amber-50 border border-amber-200 rounded-lg p-3">
             <p className="text-xs text-amber-800">
-              <strong>💡 Nota técnica:</strong> La migración masiva requiere un proceso en background (workers).
-              Por ahora, la estrategia gradual es más eficiente y no genera timeouts.
+              <strong>⚠️ Importante:</strong> Migra de 5 en 5 lugares para evitar timeouts del servidor. 
+              Puedes cerrar esta página, el progreso se guarda automáticamente.
             </p>
           </div>
         )}
