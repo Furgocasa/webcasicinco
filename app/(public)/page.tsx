@@ -270,287 +270,8 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* SOCIAL PROOF */}
-        <section className="py-20 bg-white">
-          <div className="container mx-auto px-4">
-            <div className="max-w-6xl mx-auto">
-              <div className="text-center mb-12">
-                <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                  Lo que dicen nuestros usuarios
-                </h2>
-              </div>
-
-              <div className="grid md:grid-cols-3 gap-8">
-                {/* Testimonial 1 */}
-                <Card className="p-6 hover:shadow-lg transition-shadow">
-                  <div className="flex items-center gap-1 mb-4">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                    ))}
-                  </div>
-                  <p className="text-gray-700 mb-4">
-                    "Encontré el restaurante perfecto en 5 minutos. <strong>La mejor experiencia</strong> que he tenido en Málaga. Esta app me salvó el viaje."
-                  </p>
-                  <div className="flex items-center gap-3">
-                    <div className="bg-purple-100 w-10 h-10 rounded-full flex items-center justify-center">
-                      <span className="text-sm font-bold text-purple-600">LC</span>
-                    </div>
-                    <div>
-                      <p className="font-semibold text-gray-900">Laura C.</p>
-                      <p className="text-sm text-gray-500">Madrid</p>
-                    </div>
-                  </div>
-                </Card>
-
-                {/* Testimonial 2 */}
-                <Card className="p-6 hover:shadow-lg transition-shadow border-2 border-purple-200">
-                  <div className="flex items-center gap-1 mb-4">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                    ))}
-                  </div>
-                  <p className="text-gray-700 mb-4">
-                    "Ya no pierdo tiempo leyendo reseñas. <strong>Solo lugares increíbles</strong>. El filtro de 4.7★ es genial."
-                  </p>
-                  <div className="flex items-center gap-3">
-                    <div className="bg-blue-100 w-10 h-10 rounded-full flex items-center justify-center">
-                      <span className="text-sm font-bold text-blue-600">CM</span>
-                    </div>
-                    <div>
-                      <p className="font-semibold text-gray-900">Carlos M.</p>
-                      <p className="text-sm text-gray-500">Barcelona</p>
-                    </div>
-                  </div>
-                </Card>
-
-                {/* Testimonial 3 */}
-                <Card className="p-6 hover:shadow-lg transition-shadow">
-                  <div className="flex items-center gap-1 mb-4">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                    ))}
-                  </div>
-                  <p className="text-gray-700 mb-4">
-                    "Como influencer necesito lugares espectaculares. <strong>Casi Cinco nunca falla</strong>. Todas mis fotos son en lugares de aquí."
-                  </p>
-                  <div className="flex items-center gap-3">
-                    <div className="bg-pink-100 w-10 h-10 rounded-full flex items-center justify-center">
-                      <span className="text-sm font-bold text-pink-600">MR</span>
-                    </div>
-                    <div>
-                      <p className="font-semibold text-gray-900">María R.</p>
-                      <p className="text-sm text-gray-500">Sevilla</p>
-                    </div>
-                  </div>
-                </Card>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* HOW IT WORKS */}
-        <section className="py-20 bg-gradient-to-br from-purple-50 to-pink-50">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                Tan fácil que da gusto
-              </h2>
-              <p className="text-xl text-gray-600">
-                3 pasos para encontrar lugares excepcionales
-              </p>
-            </div>
-
-            <div className="max-w-5xl mx-auto">
-              <div className="grid md:grid-cols-3 gap-8">
-                {/* Step 1 */}
-                <div className="text-center">
-                  <div className="bg-gradient-to-br from-purple-500 to-pink-500 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-white text-2xl font-bold">
-                    1
-                  </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">Busca lo que quieras</h3>
-                  <p className="text-gray-600">
-                    "Restaurantes Málaga", "Hoteles con spa"... Lo que sea.
-                  </p>
-                </div>
-
-                {/* Step 2 */}
-                <div className="text-center">
-                  <div className="bg-gradient-to-br from-purple-500 to-pink-500 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-white text-2xl font-bold">
-                    2
-                  </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">Ve solo lo mejor</h3>
-                  <p className="text-gray-600">
-                    Solo lugares 4.7★+. Todos verificados. Cero basura.
-                  </p>
-                </div>
-
-                {/* Step 3 */}
-                <div className="text-center">
-                  <div className="bg-gradient-to-br from-purple-500 to-pink-500 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-white text-2xl font-bold">
-                    3
-                  </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">Disfruta sin miedo</h3>
-                  <p className="text-gray-600">
-                    Elige cualquiera. Todos son excepcionales. Garantizado.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* METODOLOGÍA - LA IDENTIDAD */}
-        <section className="py-20 bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 text-white relative overflow-hidden">
-          <div className="absolute inset-0 bg-black opacity-30"></div>
-          <div className="relative container mx-auto px-4">
-            <div className="max-w-4xl mx-auto">
-              <div className="text-center mb-12">
-                <h2 className="text-3xl md:text-5xl font-bold mb-6">
-                  ¿Lo "Mejor" es Subjetivo?
-                  <br />
-                  <span className="bg-clip-text text-transparent bg-gradient-to-r from-yellow-300 to-orange-300">
-                    No Para Nosotros.
-                  </span>
-                </h2>
-                <p className="text-xl text-white/90 leading-relaxed">
-                  "Lo mejor" puede ser opinión. Pero <strong>un 4.8★ con 2,000 reseñas</strong> no es opinión.
-                  <br />
-                  Es <strong>matemática pura</strong>. Es <strong>consenso de miles</strong>. Es <strong>objetividad</strong>.
-                </p>
-              </div>
-
-              <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20 mb-8">
-                <h3 className="text-2xl font-bold mb-6 text-center">Nuestro Algoritmo</h3>
-                <div className="grid md:grid-cols-3 gap-6">
-                  <div className="text-center">
-                    <div className="bg-yellow-400 text-gray-900 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl font-bold">
-                      1
-                    </div>
-                    <h4 className="font-bold mb-2">Rating</h4>
-                    <p className="text-sm text-white/80">Mínimo 4.7★ - Solo el top 5% de España</p>
-                  </div>
-                  <div className="text-center">
-                    <div className="bg-yellow-400 text-gray-900 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl font-bold">
-                      2
-                    </div>
-                    <h4 className="font-bold mb-2">Reseñas</h4>
-                    <p className="text-sm text-white/80">Más reseñas = más validación = más confianza</p>
-                  </div>
-                  <div className="text-center">
-                    <div className="bg-yellow-400 text-gray-900 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl font-bold">
-                      3
-                    </div>
-                    <h4 className="font-bold mb-2">IA Valida</h4>
-                    <p className="text-sm text-white/80">Análisis profundo de miles de opiniones reales</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="text-center">
-                <Button 
-                  size="lg"
-                  variant="outline"
-                  onClick={() => router.push('/metodologia')}
-                  className="border-2 border-white text-white hover:bg-white hover:text-purple-900 font-bold text-lg px-8 py-6"
-                >
-                  Saber Más Sobre Nuestra Metodología
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* STATS IMPACTANTES - DATOS REALES */}
-        <section className="py-20 bg-gray-900 text-white">
-          <div className="container mx-auto px-4">
-            <div className="max-w-6xl mx-auto">
-              <div className="text-center mb-12">
-                <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                  Números que hablan por sí solos
-                </h2>
-              </div>
-
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 text-center">
-                <div>
-                  <div className="text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-400 mb-2">
-                    {stats.totalPlaces.toLocaleString('es-ES')}
-                  </div>
-                  <p className="text-gray-400">Lugares verificados</p>
-                  <p className="text-sm text-gray-500 mt-1">Y subiendo cada día</p>
-                </div>
-
-                <div>
-                  <div className="text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-400 mb-2">
-                    {stats.avgRating}★
-                  </div>
-                  <p className="text-gray-400">Rating promedio</p>
-                  <p className="text-sm text-gray-500 mt-1">Solo lo excepcional</p>
-                </div>
-
-                <div>
-                  <div className="text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-400 mb-2">
-                    {stats.provincesCount}
-                  </div>
-                  <p className="text-gray-400">Provincias cubiertas</p>
-                  <p className="text-sm text-gray-500 mt-1">Toda España</p>
-                </div>
-
-                <div>
-                  <div className="text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-400 mb-2">
-                    {(stats.totalReviews / 1000).toFixed(0)}K+
-                  </div>
-                  <p className="text-gray-400">Reseñas analizadas</p>
-                  <p className="text-sm text-gray-500 mt-1">Por nuestra IA</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* FINAL CTA - MUY POTENTE */}
-        <section className="py-24 bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 text-white relative overflow-hidden">
-          <div className="absolute inset-0 bg-black opacity-20"></div>
-          
-          <div className="relative container mx-auto px-4 text-center">
-            <div className="max-w-3xl mx-auto">
-              <h2 className="text-4xl md:text-5xl font-bold mb-6">
-                Acaba con las experiencias mediocres
-              </h2>
-              <p className="text-xl md:text-2xl mb-8 text-white/90">
-                Únete a miles de viajeros que ya solo eligen <strong>lugares excepcionales</strong>
-              </p>
-
-              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                <Button 
-                  size="lg" 
-                  onClick={() => router.push('/registro')}
-                  className="bg-white text-purple-600 hover:bg-gray-100 font-bold text-lg px-8 py-6 shadow-2xl"
-                >
-                  Empezar Gratis
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-                
-                <Button 
-                  size="lg" 
-                  variant="outline"
-                  onClick={() => router.push('/mapa')}
-                  className="border-2 border-white text-white hover:bg-white/10 font-bold text-lg px-8 py-6"
-                >
-                  Ver Mapa
-                  <MapPin className="ml-2 h-5 w-5" />
-                </Button>
-              </div>
-
-              <p className="mt-6 text-sm text-white/80">
-                ✓ Gratis para siempre · ✓ Sin tarjeta requerida · ✓ Empieza en 30 segundos
-              </p>
-            </div>
-          </div>
-        </section>
-
         {/* PRICING SECTION */}
-        <section className="py-20 bg-gradient-to-b from-gray-50 to-white">
+        <section className="py-20 bg-gradient-to-b from-white to-gray-50">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
               <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
@@ -699,6 +420,223 @@ export default function HomePage() {
                   <p className="text-sm text-gray-600">Ahorras 30% (10.89€ al año) y obtienes soporte prioritario.</p>
                 </div>
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* SOCIAL PROOF */}
+        <section className="py-20 bg-white">
+          <div className="container mx-auto px-4">
+            <div className="max-w-6xl mx-auto">
+              <div className="text-center mb-12">
+                <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                  Lo que dicen nuestros usuarios
+                </h2>
+              </div>
+
+              <div className="grid md:grid-cols-3 gap-8">
+                {/* Testimonial 1 */}
+                <Card className="p-6 hover:shadow-lg transition-shadow">
+                  <div className="flex items-center gap-1 mb-4">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                    ))}
+                  </div>
+                  <p className="text-gray-700 mb-4">
+                    "Encontré el restaurante perfecto en 5 minutos. <strong>La mejor experiencia</strong> que he tenido en Málaga. Esta app me salvó el viaje."
+                  </p>
+                  <div className="flex items-center gap-3">
+                    <div className="bg-purple-100 w-10 h-10 rounded-full flex items-center justify-center">
+                      <span className="text-sm font-bold text-purple-600">LC</span>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-900">Laura C.</p>
+                      <p className="text-sm text-gray-500">Madrid</p>
+                    </div>
+                  </div>
+                </Card>
+
+                {/* Testimonial 2 */}
+                <Card className="p-6 hover:shadow-lg transition-shadow border-2 border-purple-200">
+                  <div className="flex items-center gap-1 mb-4">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                    ))}
+                  </div>
+                  <p className="text-gray-700 mb-4">
+                    "Ya no pierdo tiempo leyendo reseñas. <strong>Solo lugares increíbles</strong>. El filtro de 4.7★ es genial."
+                  </p>
+                  <div className="flex items-center gap-3">
+                    <div className="bg-blue-100 w-10 h-10 rounded-full flex items-center justify-center">
+                      <span className="text-sm font-bold text-blue-600">CM</span>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-900">Carlos M.</p>
+                      <p className="text-sm text-gray-500">Barcelona</p>
+                    </div>
+                  </div>
+                </Card>
+
+                {/* Testimonial 3 */}
+                <Card className="p-6 hover:shadow-lg transition-shadow">
+                  <div className="flex items-center gap-1 mb-4">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                    ))}
+                  </div>
+                  <p className="text-gray-700 mb-4">
+                    "Como influencer necesito lugares espectaculares. <strong>Casi Cinco nunca falla</strong>. Todas mis fotos son en lugares de aquí."
+                  </p>
+                  <div className="flex items-center gap-3">
+                    <div className="bg-pink-100 w-10 h-10 rounded-full flex items-center justify-center">
+                      <span className="text-sm font-bold text-pink-600">MR</span>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-900">María R.</p>
+                      <p className="text-sm text-gray-500">Sevilla</p>
+                    </div>
+                  </div>
+                </Card>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* METODOLOGÍA + STATS CONSOLIDADO */}
+        <section className="py-20 bg-gray-50">
+          <div className="container mx-auto px-4">
+            <div className="max-w-6xl mx-auto">
+              {/* Metodología simplificada */}
+              <div className="text-center mb-16">
+                <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                  Nuestra Metodología: Objetividad, No Opinión
+                </h2>
+                <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
+                  Un 4.8★ con 2,000 reseñas no es opinión. Es <strong>matemática pura</strong>, 
+                  validado por miles de personas reales.
+                </p>
+              </div>
+
+              {/* Algoritmo en 3 pasos */}
+              <div className="grid md:grid-cols-3 gap-8 mb-16">
+                <Card className="p-6 text-center hover:shadow-lg transition">
+                  <div className="bg-indigo-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span className="text-3xl font-bold text-indigo-600">1</span>
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">Rating 4.7★+</h3>
+                  <p className="text-gray-600">
+                    Solo el top 5% de España. Filtro extremo sin concesiones.
+                  </p>
+                </Card>
+
+                <Card className="p-6 text-center hover:shadow-lg transition">
+                  <div className="bg-indigo-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span className="text-3xl font-bold text-indigo-600">2</span>
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">Validación Masiva</h3>
+                  <p className="text-gray-600">
+                    Más reseñas = más confianza. Priorizamos consenso real.
+                  </p>
+                </Card>
+
+                <Card className="p-6 text-center hover:shadow-lg transition">
+                  <div className="bg-indigo-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span className="text-3xl font-bold text-indigo-600">3</span>
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">IA Analiza</h3>
+                  <p className="text-gray-600">
+                    Resumen inteligente de miles de opiniones en segundos.
+                  </p>
+                </Card>
+              </div>
+
+              {/* Stats integrados */}
+              <div className="bg-white rounded-2xl shadow-lg p-8 md:p-12">
+                <h3 className="text-2xl font-bold text-center text-gray-900 mb-8">
+                  Números que nos avalan
+                </h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+                  <div>
+                    <div className="text-4xl md:text-5xl font-bold text-indigo-600 mb-2">
+                      {stats.totalPlaces.toLocaleString('es-ES')}
+                    </div>
+                    <p className="text-gray-600 text-sm">Lugares verificados</p>
+                  </div>
+
+                  <div>
+                    <div className="text-4xl md:text-5xl font-bold text-indigo-600 mb-2">
+                      {stats.avgRating}★
+                    </div>
+                    <p className="text-gray-600 text-sm">Rating promedio</p>
+                  </div>
+
+                  <div>
+                    <div className="text-4xl md:text-5xl font-bold text-indigo-600 mb-2">
+                      {stats.provincesCount}
+                    </div>
+                    <p className="text-gray-600 text-sm">Provincias</p>
+                  </div>
+
+                  <div>
+                    <div className="text-4xl md:text-5xl font-bold text-indigo-600 mb-2">
+                      {(stats.totalReviews / 1000).toFixed(0)}K+
+                    </div>
+                    <p className="text-gray-600 text-sm">Reseñas analizadas</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* CTA Metodología */}
+              <div className="text-center mt-8">
+                <Button 
+                  variant="outline"
+                  onClick={() => router.push('/metodologia')}
+                  className="text-indigo-600 border-indigo-600 hover:bg-indigo-50"
+                >
+                  Conocer Nuestra Metodología Completa
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* CTA FINAL SIMPLIFICADO */}
+        <section className="py-20 bg-gradient-to-br from-indigo-600 to-purple-600 text-white">
+          <div className="container mx-auto px-4 text-center">
+            <div className="max-w-3xl mx-auto">
+              <h2 className="text-4xl md:text-5xl font-bold mb-6">
+                Empieza a Descubrir Lugares Excepcionales
+              </h2>
+              <p className="text-xl md:text-2xl mb-8 text-white/90">
+                30 días gratis. Luego solo <strong>2,99€/mes</strong>. 
+                Cancela cuando quieras.
+              </p>
+
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-6">
+                <Button 
+                  size="lg" 
+                  onClick={() => router.push('/registro')}
+                  className="bg-white text-indigo-600 hover:bg-gray-100 font-bold text-lg px-10 py-6 shadow-2xl"
+                >
+                  Probar Gratis 30 Días
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+                
+                <Button 
+                  size="lg" 
+                  variant="outline"
+                  onClick={() => router.push('/mapa')}
+                  className="border-2 border-white text-white hover:bg-white/10 font-bold text-lg px-10 py-6"
+                >
+                  Ver Mapa
+                  <MapPin className="ml-2 h-5 w-5" />
+                </Button>
+              </div>
+
+              <p className="text-sm text-white/80">
+                ✓ Sin tarjeta requerida · ✓ Acceso completo · ✓ Cancela en cualquier momento
+              </p>
             </div>
           </div>
         </section>

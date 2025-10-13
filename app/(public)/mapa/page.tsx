@@ -405,6 +405,12 @@ export default function MapPage() {
 
   // 🎨 CACHE DE ICONOS: Pre-renderizar iconos una sola vez (mejora performance)
   const markerIcons = useMemo(() => {
+    // ✅ CRÍTICO: Verificar que Google Maps esté cargado
+    if (!isLoaded || typeof google === 'undefined' || !google.maps) {
+      console.log('⏳ Google Maps aún no está listo, esperando...');
+      return null;
+    }
+
     const isMobile = typeof window !== 'undefined' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     const markerSize = isMobile ? 28 : 36;
     const markerRadius = isMobile ? 12 : 16;
@@ -465,7 +471,12 @@ export default function MapPage() {
 
   // 🚀 CLUSTERING: Mostrar TODOS los lugares (filtrados en color, no filtrados en gris)
   useEffect(() => {
+    // ✅ Verificar que Google Maps esté completamente listo
     if (!mapRef.current || !isLoaded || allPlaces.length === 0 || !markerIcons) return;
+    if (typeof google === 'undefined' || !google.maps) {
+      console.log('⚠️ Google Maps no disponible aún');
+      return;
+    }
 
     // Debounce para evitar recrear constantemente mientras se ajustan filtros
     const timer = setTimeout(() => {

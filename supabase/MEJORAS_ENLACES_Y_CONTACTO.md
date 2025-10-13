@@ -305,3 +305,4 @@ LIMIT 50;
 Con estas mejoras, el chatbot pasa de ser solo informativo a ser una **herramienta de navegación activa** que impulsa el tráfico interno y mejora la experiencia del usuario.
 
 
+
