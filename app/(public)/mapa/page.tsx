@@ -378,6 +378,59 @@ export default function MapPage() {
     loadPlaces();
   }, []);
 
+  // 🔄 REVALIDACIÓN AUTOMÁTICA: Recargar cada 5 minutos
+  useEffect(() => {
+    const REVALIDATE_INTERVAL = 5 * 60 * 1000; // 5 minutos
+    
+    const interval = setInterval(async () => {
+      console.log('🔄 Revalidación automática (cada 5 minutos)...');
+      
+      try {
+        // Forzar recarga desde API (bypass cache)
+        const batchSize = 1000;
+        let offset = 0;
+        let hasMore = true;
+        let freshPlaces: PlaceWithTier[] = [];
+        
+        while (hasMore) {
+          const response = await fetch(`/api/places?limit=${batchSize}&offset=${offset}&t=${Date.now()}`);
+          const data = await response.json();
+          
+          if (data.success && data.places && data.places.length > 0) {
+            freshPlaces = [...freshPlaces, ...data.places];
+            offset += batchSize;
+            
+            if (data.places.length < batchSize) {
+              hasMore = false;
+            }
+          } else {
+            hasMore = false;
+          }
+        }
+        
+        if (freshPlaces.length > 0) {
+          const oldCount = allPlaces.length;
+          const newCount = freshPlaces.length;
+          
+          setAllPlaces(freshPlaces);
+          savePlacesToCache(freshPlaces);
+          
+          if (newCount > oldCount) {
+            const diff = newCount - oldCount;
+            toast.success(`🆕 ${diff} lugares nuevos disponibles`, { duration: 5000 });
+            console.log(`✅ Revalidación: ${newCount} lugares (${diff} nuevos)`);
+          } else {
+            console.log(`✅ Revalidación: ${newCount} lugares (sin cambios)`);
+          }
+        }
+      } catch (error) {
+        console.error('⚠️ Error en revalidación automática:', error);
+      }
+    }, REVALIDATE_INTERVAL);
+    
+    return () => clearInterval(interval);
+  }, [allPlaces.length]);
+
   // 🔗 Abrir lugar desde URL (ej: desde chatbot con ?place=ID)
   useEffect(() => {
     const placeIdFromUrl = searchParams.get('place');

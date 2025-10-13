@@ -65,6 +65,21 @@ export default function PlaceDetailPage() {
         
         if (data.success) {
           setPlace(data.place);
+          
+          // 📝 SEO: Actualizar título del navegador con nombre del lugar
+          if (data.place) {
+            const categoryName = {
+              restaurante: 'Restaurante',
+              hotel: 'Hotel',
+              spa: 'Spa',
+              bar: 'Bar',
+              cafe: 'Cafetería',
+              experiencia: 'Experiencia',
+              monumento: 'Monumento',
+            }[data.place.category] || '';
+            
+            document.title = `${data.place.name} - ${categoryName} en ${data.place.city}, ${data.place.province} | Casi Cinco`;
+          }
         }
       } catch (error) {
         console.error('Error cargando lugar:', error);
