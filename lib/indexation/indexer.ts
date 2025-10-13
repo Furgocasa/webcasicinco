@@ -223,25 +223,26 @@ export async function startIndexation(
                 }
               }
 
-              // Actualizar progreso en BD (TODOS los contadores en tiempo real)
-              await supabase
-                .from('indexation_jobs')
-                .update({
-                  total_places: allPlaceIds.size,
-                  processed_places: totalProcessed,
-                  successful_places: totalSuccessful,
-                  failed_places: totalFailed,
-                  error_log: {
-                    skipped: totalSkipped,
-                    lowRating: totalLowRating,
-                    lowReviews: totalLowReviews,
-                    summary: `${totalSuccessful} guardados | ${totalSkipped} duplicados | ${totalLowRating} rating bajo | ${totalLowReviews} pocas reseñas | ${totalFailed} errores`
-                  }
-                })
-                .eq('id', jobId);
+              // Actualizar progreso en BD cada 5 lugares (no cada 1, ralentiza mucho)
+              if (totalProcessed % 5 === 0) {
+                await supabase
+                  .from('indexation_jobs')
+                  .update({
+                    total_places: allPlaceIds.size,
+                    processed_places: totalProcessed,
+                    successful_places: totalSuccessful,
+                    failed_places: totalFailed,
+                    error_log: {
+                      skipped: totalSkipped,
+                      lowRating: totalLowRating,
+                      lowReviews: totalLowReviews,
+                      summary: `${totalSuccessful} guardados | ${totalSkipped} duplicados | ${totalLowRating} rating bajo | ${totalLowReviews} pocas reseñas | ${totalFailed} errores`
+                    }
+                  })
+                  .eq('id', jobId);
+              }
 
-              // Pausa mínima para no saturar APIs
-              await new Promise(resolve => setTimeout(resolve, 100)); // 0.1 seg (10x más rápido)
+              // SIN pausas artificiales (las APIs ya tienen sus propios límites)
 
             } catch (error: any) {
               console.error(`❌ Error fatal procesando:`, error.message);
