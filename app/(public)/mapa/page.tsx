@@ -2021,30 +2021,42 @@ export default function MapPage() {
             </select>
           </div>
 
-          {/* Tier - Multi-selección como en PC */}
+          {/* Tier - Multi-selección con información detallada */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-3">
               💎 Tier de Calidad
             </label>
             <div className="space-y-2">
-              {Object.entries(QUALITY_TIERS).map(([key, tier]) => (
-                <label key={key} className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={filters.qualityTier?.includes(key as QualityTier) || false}
-                    onChange={(e) => {
-                      const currentTiers = filters.qualityTier || [];
-                      if (e.target.checked) {
-                        setFilters({ ...filters, qualityTier: [...currentTiers, key as QualityTier] });
-                      } else {
-                        setFilters({ ...filters, qualityTier: currentTiers.filter(t => t !== key) });
-                      }
-                    }}
-                    className="w-5 h-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                  />
-                  <span className="text-base">{tier.icon} {tier.name}</span>
-                </label>
-              ))}
+              {Object.entries(QUALITY_TIERS).map(([key, tier]) => {
+                if (key === 'none') return null; // No mostrar "Sin clasificar"
+                
+                return (
+                  <label key={key} className="flex items-start gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer active:bg-gray-100 transition">
+                    <input
+                      type="checkbox"
+                      checked={filters.qualityTier?.includes(key as QualityTier) || false}
+                      onChange={(e) => {
+                        const currentTiers = filters.qualityTier || [];
+                        if (e.target.checked) {
+                          setFilters({ ...filters, qualityTier: [...currentTiers, key as QualityTier] });
+                        } else {
+                          setFilters({ ...filters, qualityTier: currentTiers.filter(t => t !== key) });
+                        }
+                      }}
+                      className="w-5 h-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mt-0.5 shrink-0"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-xl">{tier.icon}</span>
+                        <span className="font-semibold text-gray-900">{tier.name}</span>
+                      </div>
+                      <p className="text-xs text-gray-600 leading-tight">
+                        {tier.description}
+                      </p>
+                    </div>
+                  </label>
+                );
+              })}
             </div>
           </div>
 
