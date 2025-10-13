@@ -68,7 +68,7 @@ export default function PlaceDetailPage() {
           
           // 📝 SEO: Actualizar título del navegador con nombre del lugar
           if (data.place) {
-            const categoryName = {
+            const categoryNames: Record<string, string> = {
               restaurante: 'Restaurante',
               hotel: 'Hotel',
               spa: 'Spa',
@@ -76,7 +76,9 @@ export default function PlaceDetailPage() {
               cafe: 'Cafetería',
               experiencia: 'Experiencia',
               monumento: 'Monumento',
-            }[data.place.category] || '';
+            };
+            
+            const categoryName = categoryNames[data.place.category as string] || '';
             
             document.title = `${data.place.name} - ${categoryName} en ${data.place.city}, ${data.place.province} | Casi Cinco`;
           }
