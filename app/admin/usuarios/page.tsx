@@ -642,7 +642,7 @@ export default function UsuariosPage() {
                       <Button
                         key={page}
                         size="sm"
-                        variant={currentPage === page ? 'default' : 'outline'}
+                        variant={currentPage === page ? 'primary' : 'outline'}
                         onClick={() => paginate(page)}
                       >
                         {page}
