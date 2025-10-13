@@ -64,23 +64,19 @@ export async function startIndexation(
     // 1. BUSCAR Y PROCESAR POR CATEGORÍA (progresivo)
     console.log('🔍 Iniciando búsqueda y procesamiento progresivo...\n');
     
-    // Ciudades por provincia - LISTA COMPLETA para máxima cobertura
+    // Ciudades principales por provincia - OPTIMIZADO (solo top 5 para velocidad)
     const mainCitiesByProvince: Record<string, string[]> = {
-      'Murcia': [
-        'Murcia', 'Cartagena', 'Lorca', 'Molina de Segura', 'Alcantarilla',
-        'Mazarrón', 'Yecla', 'Jumilla', 'Cieza', 'Águilas', 'San Javier',
-        'Torre-Pacheco', 'Las Torres de Cotillas', 'San Pedro del Pinatar',
-        'Totana', 'Archena', 'Caravaca de la Cruz', 'Alhama de Murcia'
-      ],
-      'Alicante': [
-        'Alicante', 'Elche', 'Torrevieja', 'Orihuela', 'Benidorm', 'Alcoy',
-        'San Vicente del Raspeig', 'Elda', 'Villena', 'Dénia', 'Calpe',
-        'Altea', 'Jávea', 'Petrer', 'Santa Pola', 'Guardamar del Segura'
-      ],
+      'Murcia': ['Murcia', 'Cartagena', 'Lorca', 'Molina de Segura', 'Mazarrón'],
+      'Alicante': ['Alicante', 'Elche', 'Torrevieja', 'Benidorm', 'Orihuela'],
       'Madrid': ['Madrid', 'Móstoles', 'Alcalá de Henares', 'Fuenlabrada', 'Leganés'],
       'Barcelona': ['Barcelona', 'Hospitalet de Llobregat', 'Terrassa', 'Badalona', 'Sabadell'],
       'Valencia': ['Valencia', 'Gandía', 'Torrent', 'Paterna', 'Sagunto'],
-      // Agregar más según necesidad
+      'Sevilla': ['Sevilla', 'Dos Hermanas', 'Alcalá de Guadaíra', 'Utrera', 'Mairena del Aljarafe'],
+      'Málaga': ['Málaga', 'Marbella', 'Mijas', 'Vélez-Málaga', 'Fuengirola'],
+      'Granada': ['Granada', 'Motril', 'Almuñécar', 'Baza', 'Guadix'],
+      'Cádiz': ['Cádiz', 'Jerez de la Frontera', 'Algeciras', 'San Fernando', 'El Puerto de Santa María'],
+      'Córdoba': ['Córdoba', 'Lucena', 'Puente Genil', 'Montilla', 'Priego de Córdoba'],
+      // Otras provincias: buscar solo en la capital (más rápido)
     };
     
     for (const province of params.provinces) {
@@ -102,9 +98,14 @@ export async function startIndexation(
           // FASE 1: BÚSQUEDA COMPLETA (rápida)
           // ==========================================
           console.log('\n🔍 ========== FASE 1: BÚSQUEDA ==========');
+          console.log(`Ciudades a buscar: ${cities.length}`);
+          
+          let citiesSearched = 0;
+          
           for (const city of cities) {
             try {
-              console.log(`\n🔍 Buscando ${searchTerm} en ${city}, ${province}...`);
+              citiesSearched++;
+              console.log(`\n🔍 [${citiesSearched}/${cities.length}] Buscando ${searchTerm} en ${city}, ${province}...`);
               
               const placeIds = await searchPlaces({
                 location: `${city}, ${province}, España`,
@@ -113,9 +114,14 @@ export async function startIndexation(
                 radius: 50000, // 50km por ciudad
               });
 
-              console.log(`   Respuesta: ${placeIds.length} lugares`);
+              console.log(`   ✅ ${placeIds.length} resultados de ${city}`);
+              
+              const newPlacesCount = allPlaceIds.size;
               placeIds.forEach(id => allPlaceIds.add(id));
-              console.log(`   📊 Total acumulado: ${allPlaceIds.size} lugares únicos\n`);
+              const addedCount = allPlaceIds.size - newPlacesCount;
+              
+              console.log(`   🆕 ${addedCount} nuevos (${placeIds.length - addedCount} duplicados)`);
+              console.log(`   📊 Total único: ${allPlaceIds.size} | Progreso búsqueda: ${Math.round((citiesSearched/cities.length)*100)}%\n`);
               
               // Actualizar total acumulado en tiempo real
               await supabase
@@ -123,14 +129,14 @@ export async function startIndexation(
                 .update({ total_places: allPlaceIds.size })
                 .eq('id', jobId);
               
-              // Pausa para no saturar la API
-              await new Promise(resolve => setTimeout(resolve, 1000));
+              // Pausa MÁS CORTA para no saturar (500ms en lugar de 1000ms)
+              await new Promise(resolve => setTimeout(resolve, 500));
             } catch (error) {
               console.error(`❌ Error buscando en ${city}:`, error);
             }
           }
           
-          console.log(`\n✅ BÚSQUEDA COMPLETADA: ${allPlaceIds.size} lugares únicos encontrados`);
+          console.log(`\n✅ BÚSQUEDA COMPLETADA: ${allPlaceIds.size} lugares únicos encontrados en ${cities.length} ciudades`);
           console.log('==========================================\n');
           
           // ==========================================

@@ -105,13 +105,17 @@ export default function MapPage() {
 
   // Geolocalización
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
-  const [isGeolocationActive, setIsGeolocationActive] = useState(() => {
-    // Recuperar estado de localStorage al iniciar
+  const [isGeolocationActive, setIsGeolocationActive] = useState(false); // ✅ Siempre false inicialmente (sin hidratación)
+  
+  // ✅ Recuperar estado de localStorage DESPUÉS de montar (evita hidratación)
+  useEffect(() => {
     if (typeof window !== 'undefined') {
-      return localStorage.getItem('geolocationActive') === 'true';
+      const saved = localStorage.getItem('geolocationActive') === 'true';
+      if (saved) {
+        setIsGeolocationActive(true);
+      }
     }
-    return false;
-  });
+  }, []);
   const [geolocationError, setGeolocationError] = useState<string | null>(null);
 
   // Ordenamiento de lista
