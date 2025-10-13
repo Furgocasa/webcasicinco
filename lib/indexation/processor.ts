@@ -95,32 +95,58 @@ export async function processPlace(
     const province = extractProvinceFromPlaceData(placeDetails);
     const city = extractCityFromPlaceData(placeDetails);
 
-    // Generar descripción
-    const description = await generatePlaceDescription({
-      name: placeDetails.name,
-      category,
-      city,
-      province,
-      rating: placeDetails.rating,
-      review_count: placeDetails.user_ratings_total,
-      price_level: placeDetails.price_level,
-      reviews: reviews.map(r => r.text || '').filter(Boolean),
-    });
-    cost += 0.015; // Estimación OpenAI
+    let description, reviewSummary, highlights;
 
-    // Generar resumen de reseñas
-    const reviewSummary = await summarizeReviews(reviews.map(r => r.text || '').filter(Boolean));
-    cost += 0.008; // Estimación OpenAI
+    try {
+      // Generar descripción
+      description = await generatePlaceDescription({
+        name: placeDetails.name,
+        category,
+        city,
+        province,
+        rating: placeDetails.rating,
+        review_count: placeDetails.user_ratings_total,
+        price_level: placeDetails.price_level,
+        reviews: reviews.map(r => r.text || '').filter(Boolean),
+      });
+      cost += 0.015;
+    } catch (aiError: any) {
+      return {
+        success: false,
+        error: `Error OpenAI generando descripción: ${aiError.message}`,
+        cost,
+      };
+    }
 
-    // Generar highlights
-    const highlights = await generateHighlights({
-      name: placeDetails.name,
-      category,
-      rating: placeDetails.rating,
-      reviews: reviews.map(r => r.text || '').filter(Boolean),
-      description: description,
-    });
-    cost += 0.008; // Estimación OpenAI
+    try {
+      // Generar resumen de reseñas
+      reviewSummary = await summarizeReviews(reviews.map(r => r.text || '').filter(Boolean));
+      cost += 0.008;
+    } catch (aiError: any) {
+      return {
+        success: false,
+        error: `Error OpenAI resumiendo reseñas: ${aiError.message}`,
+        cost,
+      };
+    }
+
+    try {
+      // Generar highlights
+      highlights = await generateHighlights({
+        name: placeDetails.name,
+        category,
+        rating: placeDetails.rating,
+        reviews: reviews.map(r => r.text || '').filter(Boolean),
+        description: description,
+      });
+      cost += 0.008;
+    } catch (aiError: any) {
+      return {
+        success: false,
+        error: `Error OpenAI generando highlights: ${aiError.message}`,
+        cost,
+      };
+    }
 
     // 5. Preparar datos del lugar
     const slug = generatePlaceSlug(placeDetails.name, city);

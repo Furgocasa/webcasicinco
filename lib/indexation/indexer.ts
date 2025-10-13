@@ -185,13 +185,16 @@ export async function startIndexation(
                   totalLowReviews++;
                 }
                 // ERRORES TÉCNICOS (fallo de APIs o conexión)
-                else if (result.error?.includes('timeout') || result.error?.includes('ETIMEDOUT')) {
-                  console.error(`❌ ERROR TÉCNICO: Timeout - ${result.error}`);
+                else if (result.error?.includes('OpenAI') || result.error?.includes('timeout') || result.error?.includes('ETIMEDOUT')) {
+                  console.error(`❌ ERROR TÉCNICO: ${result.error}`);
                   totalFailed++;
-                } else if (result.error?.includes('API') || result.error?.includes('quota') || result.error?.includes('limit')) {
-                  console.error(`❌ ERROR TÉCNICO: Problema con API - ${result.error}`);
+                } else if (result.error?.includes('Google') || result.error?.includes('REQUEST_DENIED') || result.error?.includes('OVER_QUERY_LIMIT')) {
+                  console.error(`❌ ERROR TÉCNICO: Google API - ${result.error}`);
                   totalFailed++;
-                } else if (result.error?.includes('network') || result.error?.includes('ECONNREFUSED')) {
+                } else if (result.error?.includes('quota') || result.error?.includes('limit') || result.error?.includes('rate')) {
+                  console.error(`❌ ERROR TÉCNICO: Límite de cuota - ${result.error}`);
+                  totalFailed++;
+                } else if (result.error?.includes('network') || result.error?.includes('ECONNREFUSED') || result.error?.includes('fetch')) {
                   console.error(`❌ ERROR TÉCNICO: Error de red - ${result.error}`);
                   totalFailed++;
                 }
