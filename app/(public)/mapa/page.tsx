@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
+import { getPlacesFromCache, savePlacesToCache } from '@/lib/utils/places-cache';
 
 // 🚀 HOOK DE DEBOUNCE para optimizar búsquedas
 function useDebounce<T>(value: T, delay: number): T {
@@ -137,18 +138,28 @@ export default function MapPage() {
   const [minReviews, setMinReviews] = useState(0);
   const [maxReviews, setMaxReviews] = useState(10000);
 
-  // 🚀 CARGA AUTOMÁTICA: Todos los lugares sin timeout
+  // 🚀 CARGA CON CACHE: Primero intenta cache (24h), luego API
   const loadPlaces = async () => {
     setLoading(true);
     let loadedPlaces: PlaceWithTier[] = [];
     
     try {
-      // CACHÉ DESHABILITADO: 3500+ lugares exceden quota de localStorage
-      // Siempre cargar desde API
-      console.log('🔄 Cargando lugares desde API...');
+      // 1️⃣ INTENTAR CARGAR DESDE CACHE (IndexedDB - 24 horas)
+      console.log('📦 Intentando cargar desde cache...');
+      const cachedPlaces = await getPlacesFromCache();
       
-      // Cargar en lotes automáticamente (sin timeout)
-      console.log('🔄 Cargando lugares...');
+      if (cachedPlaces && cachedPlaces.length > 0) {
+        // ✅ CACHE HIT: Usar datos cacheados
+        loadedPlaces = cachedPlaces;
+        setAllPlaces(loadedPlaces);
+        setLoading(false);
+        console.log(`✅ ${loadedPlaces.length} lugares cargados desde cache (instantáneo)`);
+        return; // Terminar aquí, no cargar desde API
+      }
+      
+      // 2️⃣ CACHE MISS: Cargar desde API
+      console.log('🔄 Cache no disponible, cargando desde API...');
+      
       const batchSize = 1000;
       let offset = 0;
       let hasMore = true;
@@ -176,13 +187,16 @@ export default function MapPage() {
         }
       }
       
-      // Actualizar estado SOLO (NO guardar en localStorage - demasiado grande)
+      // 3️⃣ GUARDAR EN CACHE para próximas visitas
       if (loadedPlaces.length > 0) {
         setAllPlaces(loadedPlaces);
-        // CACHE DESHABILITADO: 3500+ lugares exceden quota de localStorage
-        // localStorage.setItem(cacheKey, JSON.stringify(loadedPlaces));
-        // localStorage.setItem(cacheTimeKey, now.toString());
-        console.log(`✅ ${loadedPlaces.length} lugares cargados correctamente (sin caché)`);
+        
+        // Guardar en IndexedDB (asíncrono, no bloquea)
+        savePlacesToCache(loadedPlaces).catch(err => {
+          console.warn('⚠️ Error guardando en cache (no crítico):', err);
+        });
+        
+        console.log(`✅ ${loadedPlaces.length} lugares cargados desde API y guardados en cache`);
       } else {
         console.warn('⚠️ No se encontraron lugares');
       }

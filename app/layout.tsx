@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import { Toaster } from 'sonner';
 import Header from '@/components/layout/Header';
 import ChatbotFloating from '@/components/ChatbotFloating';
+import PlacesPreloader from '@/components/PlacesPreloader';
 import './globals.css';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
@@ -72,6 +73,7 @@ export default function RootLayout({
   return (
     <html lang="es" className={inter.variable}>
       <body className={inter.className}>
+        <PlacesPreloader />
         <Header />
         <main>
           {children}

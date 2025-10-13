@@ -30,6 +30,7 @@ import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { calculateQualityTier, getTierInfo } from '@/lib/utils/tier-calculator';
+import { MarkdownText } from '@/lib/utils/markdown';
 import { toast } from 'sonner';
 
 const libraries: ("places")[] = ["places"];
@@ -241,9 +242,10 @@ export default function PlaceDetailPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-700 leading-relaxed whitespace-pre-line text-lg">
-                    {place.ai_description}
-                  </p>
+                  <MarkdownText 
+                    text={place.ai_description}
+                    className="text-gray-700 leading-relaxed text-lg"
+                  />
                 </CardContent>
               </Card>
             )}
@@ -258,9 +260,9 @@ export default function PlaceDetailPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-blue-900 italic leading-relaxed">
-                    "{place.ai_review_summary}"
-                  </p>
+                  <div className="text-blue-900 italic leading-relaxed">
+                    "<MarkdownText text={place.ai_review_summary} className="inline" />"
+                  </div>
                 </CardContent>
               </Card>
             )}
