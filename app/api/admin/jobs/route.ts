@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createClient, createAdminClient } from '@/lib/supabase/server';
 
 export const dynamic = 'force-dynamic';
 
@@ -64,6 +64,7 @@ export async function GET(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
+    // Usar cliente normal para autenticación
     const supabase = await createClient();
     
     // Verificar autenticación y rol admin
@@ -84,12 +85,17 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
+    // Usar cliente admin para DELETE (evita problemas de RLS)
+    const adminSupabase = createAdminClient();
+    
     const body = await request.json();
     const { jobId, deleteAll, filterStatus } = body;
 
+    console.log('🗑️ DELETE request:', { jobId, deleteAll, filterStatus, userId: user.id });
+
     if (deleteAll) {
       // Eliminar múltiples trabajos según filtro
-      let query = supabase
+      let query = adminSupabase
         .from('indexation_jobs')
         .delete()
         .eq('admin_user_id', user.id);
@@ -98,33 +104,47 @@ export async function DELETE(request: NextRequest) {
         query = query.in('status', filterStatus);
       }
 
-      const { error } = await query;
+      const { data, error, count } = await query.select();
+
+      console.log('🗑️ DELETE multiple result:', { count, error: error?.message });
 
       if (error) {
-        console.error('Error eliminando trabajos:', error);
+        console.error('❌ Error eliminando trabajos:', error);
         return NextResponse.json(
-          { error: 'Error al eliminar los trabajos' },
+          { error: `Error al eliminar los trabajos: ${error.message}` },
           { status: 500 }
         );
       }
 
       return NextResponse.json({
         success: true,
-        message: 'Trabajos eliminados correctamente',
+        message: `${count || 0} trabajos eliminados correctamente`,
+        deleted: count || 0,
       });
     } else if (jobId) {
       // Eliminar un trabajo específico
-      const { error } = await supabase
+      const { data, error } = await adminSupabase
         .from('indexation_jobs')
         .delete()
         .eq('id', jobId)
-        .eq('admin_user_id', user.id);
+        .eq('admin_user_id', user.id)
+        .select()
+        .single();
+
+      console.log('🗑️ DELETE single result:', { deleted: !!data, error: error?.message });
 
       if (error) {
-        console.error('Error eliminando trabajo:', error);
+        console.error('❌ Error eliminando trabajo:', error);
         return NextResponse.json(
-          { error: 'Error al eliminar el trabajo' },
+          { error: `Error al eliminar el trabajo: ${error.message}` },
           { status: 500 }
+        );
+      }
+
+      if (!data) {
+        return NextResponse.json(
+          { error: 'Trabajo no encontrado o sin permisos' },
+          { status: 404 }
         );
       }
 
