@@ -115,20 +115,31 @@ export default function DashboardPage() {
 
   const loadDashboardData = async () => {
     try {
+      console.log('🔄 Cargando datos del dashboard...');
+      
       // Cargar TODOS los lugares en lotes progresivos
       let allPlaces: any[] = [];
       let page = 1;
       const maxPages = 40; // Máximo 4000 lugares (40 páginas × 100)
       
       while (page <= maxPages) {
+        console.log(`📥 Solicitando página ${page}...`);
         const placesResponse = await fetch(`/api/admin/places?page=${page}&limit=100`);
         
+        console.log(`   Status: ${placesResponse.status} ${placesResponse.statusText}`);
+        
         if (!placesResponse.ok) {
-          console.warn(`Error cargando página ${page}`);
+          const errorText = await placesResponse.text();
+          console.error(`❌ Error HTTP ${placesResponse.status} en página ${page}:`, errorText);
           break;
         }
         
         const placesData = await placesResponse.json();
+        console.log(`   Respuesta:`, {
+          success: placesData.success,
+          places: placesData.places?.length || 0,
+          total: placesData.total,
+        });
         
         if (placesData.success && placesData.places && placesData.places.length > 0) {
           allPlaces = [...allPlaces, ...placesData.places];
@@ -137,9 +148,11 @@ export default function DashboardPage() {
           
           // Si recibimos menos de 100, no hay más páginas
           if (placesData.places.length < 100) {
+            console.log(`ℹ️  Última página alcanzada (${placesData.places.length} lugares)`);
             break;
           }
         } else {
+          console.log(`⚠️  Sin más datos en página ${page}`);
           break;
         }
       }
