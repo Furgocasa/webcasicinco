@@ -2,8 +2,51 @@
 -- CASI CINCO - MIGRACIÓN: Sistema de Trial de 30 días y Usuarios Gratis
 -- ============================================================================
 -- Fecha: 12 de Octubre de 2025
--- Versión: BETA 4.0
+-- Versión: BETA 5.0
+-- PREREQUISITO: Ejecutar stripe_setup.sql PRIMERO (crea tabla subscriptions)
 -- ============================================================================
+
+-- ============================================================================
+-- 0. CREAR TIPOS Y TABLAS SI NO EXISTEN (compatibilidad)
+-- ============================================================================
+-- Crear ENUMs si no existen
+DO $$ BEGIN
+  CREATE TYPE subscription_status AS ENUM (
+    'trialing', 'active', 'past_due', 'canceled', 
+    'incomplete', 'incomplete_expired', 'unpaid'
+  );
+EXCEPTION
+  WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
+  CREATE TYPE subscription_plan AS ENUM (
+    'free', 'premium_monthly', 'premium_yearly', 'admin_monthly'
+  );
+EXCEPTION
+  WHEN duplicate_object THEN null;
+END $$;
+
+-- Crear tabla subscriptions si no existe
+CREATE TABLE IF NOT EXISTS public.subscriptions (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  stripe_subscription_id VARCHAR(255) UNIQUE,
+  stripe_customer_id VARCHAR(255),
+  plan subscription_plan NOT NULL DEFAULT 'free',
+  status subscription_status NOT NULL DEFAULT 'incomplete',
+  current_period_start TIMESTAMP,
+  current_period_end TIMESTAMP,
+  cancel_at_period_end BOOLEAN DEFAULT FALSE,
+  canceled_at TIMESTAMP,
+  trial_start TIMESTAMP,
+  trial_end TIMESTAMP,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_subscriptions_user ON public.subscriptions(user_id);
+CREATE INDEX IF NOT EXISTS idx_subscriptions_status ON public.subscriptions(status);
 
 -- ============================================================================
 -- 1. AÑADIR COLUMNAS A AUTH.USERS (via metadata)
@@ -165,7 +208,7 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- ============================================================================
--- 7. VISTA: user_access_info
+-- 7. VISTA: user_access_info - Información completa de acceso
 -- Vista práctica para ver el estado de acceso de cada usuario
 -- ============================================================================
 CREATE OR REPLACE VIEW public.user_access_info AS
