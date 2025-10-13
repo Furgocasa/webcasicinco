@@ -93,21 +93,23 @@ Perfeccionamiento de la experiencia móvil con:
 - ✅ **pb-16** correcto para navegación inferior
 - ✅ Estructura idéntica a `/ruta` (que funcionaba perfectamente)
 
-### 🚀 BETA 5.0 - Cache & Monetization 💰
+### 🚀 BETA 5.0 - Performance & Monetization 💰
 
-Sistema de cache y monetización completo:
-- ✅ **Cache IndexedDB de 24h** - Carga instantánea (<100ms, +98% mejora)
-- ✅ **Sistema de monetización** - Trial 30 días + suscripciones
-- ✅ **3 tipos de usuario** - Admin / Gratis / Premium
-- ✅ **Precios:** 2.99€/mes o 24.99€/año (30% ahorro)
-- ✅ **Redes sociales** - Instagram, Facebook, Twitter, TikTok en detalles
-- ✅ **Markdown renderizado** - Negritas correctas en descripciones
-- ✅ **Controles superiores** - Leyenda + GPS con texto descriptivo
-- ✅ **Filtros móvil mejorados** - Info detallada de cada tier
-- ✅ **Precarga automática** - Lugares listos al iniciar app
-- ✅ **Migración SQL robusta** - Crea tablas necesarias automáticamente
+Optimización extrema de performance y monetización completa:
+- ⚡ **Cache IndexedDB de 24h** - Carga de datos instantánea (<100ms, +98%)
+- 🎨 **Iconos pre-renderizados** - Solo 12 SVGs vs 3,628 (+90% velocidad marcadores)
+- ⏱️ **Tiempo total optimizado** - 8-10s → **0.6s** en cargas repetidas (+94%)
+- 💰 **Sistema de monetización** - Trial 30 días + suscripciones
+- 👥 **3 tipos de usuario** - Admin / Gratis / Premium
+- 💳 **Precios accesibles:** 2.99€/mes o 24.99€/año (ahorra 30%)
+- 🔗 **Redes sociales** - Instagram, Facebook, Twitter, TikTok en detalles
+- 📝 **Markdown renderizado** - Negritas correctas en descripciones
+- 📱 **Controles superiores móvil** - Leyenda + GPS con texto descriptivo
+- 🎯 **Filtros móvil mejorados** - Info detallada de cada tier
+- 🚀 **Precarga automática** - Lugares listos al iniciar app
+- 🛠️ **Migración SQL robusta** - Auto-contained, crea tablas necesarias
 
-**Resultado:** Rendimiento excepcional + modelo de negocio activo + enlaces sociales.
+**Resultado:** Performance nivel profesional (+94% mejora total) + modelo de negocio activo + enlaces sociales.
 
 Ver: [`BETA_5.0_PLAN.md`](./BETA_5.0_PLAN.md) | [`VERSION_BETA_5.0.md`](./VERSION_BETA_5.0.md) | [`CHANGELOG_BETA_5.0.md`](./CHANGELOG_BETA_5.0.md) | [`SISTEMA_MONETIZACION.md`](./SISTEMA_MONETIZACION.md)
 

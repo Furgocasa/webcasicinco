@@ -6,12 +6,12 @@ export default function Footer() {
   return (
     <footer className="bg-gray-900 text-gray-300">
       <div className="container mx-auto px-4 py-12">
-        <div className="grid md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
           {/* About */}
-          <div>
-            <h3 className="text-white font-bold text-lg mb-4">Casi Cinco</h3>
-            <p className="text-sm">
-              Descubre los mejores lugares de España con mínimo 4.7★ de valoración.
+          <div className="col-span-2 md:col-span-1">
+            <h3 className="text-white font-bold text-lg mb-4">Casi Cinco ⭐</h3>
+            <p className="text-sm text-gray-400">
+              Los mejores lugares de España con mínimo 4.7★ de valoración.
             </p>
           </div>
 
@@ -37,14 +37,13 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Sobre Nosotros */}
+          {/* Sobre Nosotros + Pricing */}
           <div>
-            <h4 className="text-white font-semibold mb-4">Sobre Nosotros</h4>
+            <h4 className="text-white font-semibold mb-4">Nosotros</h4>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link href="/metodologia" className="hover:text-white transition flex items-center gap-1">
-                  <span className="text-yellow-400">⭐</span>
-                  Nuestra Metodología
+                <Link href="/metodologia" className="hover:text-white transition">
+                  Metodología
                 </Link>
               </li>
               <li>
@@ -65,22 +64,22 @@ export default function Footer() {
             <h4 className="text-white font-semibold mb-4">Categorías</h4>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link href="/restaurantes" className="hover:text-white transition">
+                <Link href="/restaurante" className="hover:text-white transition">
                   Restaurantes
                 </Link>
               </li>
               <li>
-                <Link href="/hoteles" className="hover:text-white transition">
+                <Link href="/hotel" className="hover:text-white transition">
                   Hoteles
                 </Link>
               </li>
               <li>
-                <Link href="/spas" className="hover:text-white transition">
+                <Link href="/spa" className="hover:text-white transition">
                   Spas
                 </Link>
               </li>
               <li>
-                <Link href="/experiencias" className="hover:text-white transition">
+                <Link href="/experiencia" className="hover:text-white transition">
                   Experiencias
                 </Link>
               </li>
@@ -116,9 +115,9 @@ export default function Footer() {
         </div>
 
         {/* Bottom bar */}
-        <div className="border-t border-gray-800 mt-8 pt-8 text-sm text-center">
-          <p>© {currentYear} Casi Cinco. Todos los derechos reservados.</p>
-          <p className="mt-2 text-gray-500">
+        <div className="border-t border-gray-800 mt-8 pt-6 flex flex-col md:flex-row items-center justify-between text-sm">
+          <p className="text-gray-400">© {currentYear} Casi Cinco. Todos los derechos reservados.</p>
+          <p className="mt-2 md:mt-0 text-gray-500">
             Hecho con ❤️ en España
           </p>
         </div>
