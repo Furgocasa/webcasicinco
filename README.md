@@ -100,12 +100,14 @@ Sistema de cache y monetización completo:
 - ✅ **Sistema de monetización** - Trial 30 días + suscripciones
 - ✅ **3 tipos de usuario** - Admin / Gratis / Premium
 - ✅ **Precios:** 2.99€/mes o 24.99€/año (30% ahorro)
+- ✅ **Redes sociales** - Instagram, Facebook, Twitter, TikTok en detalles
 - ✅ **Markdown renderizado** - Negritas correctas en descripciones
 - ✅ **Controles superiores** - Leyenda + GPS con texto descriptivo
 - ✅ **Filtros móvil mejorados** - Info detallada de cada tier
 - ✅ **Precarga automática** - Lugares listos al iniciar app
+- ✅ **Migración SQL robusta** - Crea tablas necesarias automáticamente
 
-**Resultado:** Rendimiento excepcional + modelo de negocio activo.
+**Resultado:** Rendimiento excepcional + modelo de negocio activo + enlaces sociales.
 
 Ver: [`BETA_5.0_PLAN.md`](./BETA_5.0_PLAN.md) | [`VERSION_BETA_5.0.md`](./VERSION_BETA_5.0.md) | [`CHANGELOG_BETA_5.0.md`](./CHANGELOG_BETA_5.0.md) | [`SISTEMA_MONETIZACION.md`](./SISTEMA_MONETIZACION.md)
 
