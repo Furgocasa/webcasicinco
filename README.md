@@ -1,7 +1,7 @@
 # 🏆 Casi Cinco - Los Mejores Lugares de España
 
-![Estado](https://img.shields.io/badge/Estado-BETA%204.0%20Mobile%20Perfection-success)
-![Version](https://img.shields.io/badge/Versión-4.0.0-blue)
+![Estado](https://img.shields.io/badge/Estado-BETA%205.0%20Cache%20%26%20Monetization-success)
+![Version](https://img.shields.io/badge/Versión-5.0.0-blue)
 ![Tech](https://img.shields.io/badge/Tech-Next.js%2014%20%7C%20TypeScript%20%7C%20Supabase-blue)
 ![Lugares](https://img.shields.io/badge/Lugares-3628-orange)
 ![Deploy](https://img.shields.io/badge/Deploy-AWS%20Amplify-orange)
@@ -91,12 +91,23 @@ Perfeccionamiento de la experiencia móvil con:
 - ✅ **Leyenda expandible** con información detallada de tiers
 - ✅ **Controles flotantes** siempre visibles sobre el mapa
 - ✅ **pb-16** correcto para navegación inferior
-- ✅ **absolute inset-0** para ocupar todo el espacio
 - ✅ Estructura idéntica a `/ruta` (que funcionaba perfectamente)
 
-**Resultado:** UX móvil impecable sin scroll, controles visibles, información contextual.
+### 🚀 BETA 5.0 - Cache & Monetization 💰
 
-Ver: [`BETA_4.0_PLAN.md`](./BETA_4.0_PLAN.md) | [`VERSION_BETA_4.0.md`](./VERSION_BETA_4.0.md) | [`CHANGELOG_BETA_4.0.md`](./CHANGELOG_BETA_4.0.md)
+Sistema de cache y monetización completo:
+- ✅ **Cache IndexedDB de 24h** - Carga instantánea (<100ms, +98% mejora)
+- ✅ **Sistema de monetización** - Trial 30 días + suscripciones
+- ✅ **3 tipos de usuario** - Admin / Gratis / Premium
+- ✅ **Precios:** 2.99€/mes o 24.99€/año (30% ahorro)
+- ✅ **Markdown renderizado** - Negritas correctas en descripciones
+- ✅ **Controles superiores** - Leyenda + GPS con texto descriptivo
+- ✅ **Filtros móvil mejorados** - Info detallada de cada tier
+- ✅ **Precarga automática** - Lugares listos al iniciar app
+
+**Resultado:** Rendimiento excepcional + modelo de negocio activo.
+
+Ver: [`BETA_5.0_PLAN.md`](./BETA_5.0_PLAN.md) | [`VERSION_BETA_5.0.md`](./VERSION_BETA_5.0.md) | [`CHANGELOG_BETA_5.0.md`](./CHANGELOG_BETA_5.0.md) | [`SISTEMA_MONETIZACION.md`](./SISTEMA_MONETIZACION.md)
 
 ---
 
@@ -123,19 +134,22 @@ Ver: [`BETA_4.0_PLAN.md`](./BETA_4.0_PLAN.md) | [`VERSION_BETA_4.0.md`](./VERSIO
 
 ### 📖 Documentación Estratégica
 
-- **[BETA_4.0_PLAN.md](./BETA_4.0_PLAN.md)** - ✨ Plan y objetivos BETA 4.0 (ACTUAL)
-- **[VERSION_BETA_4.0.md](./VERSION_BETA_4.0.md)** - ✨ Resumen completo BETA 4.0
-- **[CHANGELOG_BETA_4.0.md](./CHANGELOG_BETA_4.0.md)** - ✨ Changelog detallado BETA 4.0
+#### 🌟 BETA 5.0 (ACTUAL):
+- **[BETA_5.0_PLAN.md](./BETA_5.0_PLAN.md)** - ✨ Plan y objetivos BETA 5.0
+- **[VERSION_BETA_5.0.md](./VERSION_BETA_5.0.md)** - ✨ Resumen completo BETA 5.0
+- **[CHANGELOG_BETA_5.0.md](./CHANGELOG_BETA_5.0.md)** - ✨ Changelog detallado
+- **[SISTEMA_MONETIZACION.md](./SISTEMA_MONETIZACION.md)** - 💰 Guía de monetización
+
+#### 📚 Versiones Anteriores:
+- **[BETA_4.0_PLAN.md](./BETA_4.0_PLAN.md)** - Plan BETA 4.0
 - **[VERSION_BETA_3.0.md](./VERSION_BETA_3.0.md)** - Novedades BETA 3.0
 - **[VERSION_BETA_2.0.md](./VERSION_BETA_2.0.md)** - Novedades BETA 2.0
-- **[LANZAMIENTO_BETA_2.0.md](./LANZAMIENTO_BETA_2.0.md)** - Plan de lanzamiento
-- **[SISTEMA_FILTRADO.md](./SISTEMA_FILTRADO.md)** - Sistema de tiers y filtro por reseñas
-- **[CHATBOT_TIO_VIAJERO.md](./CHATBOT_TIO_VIAJERO.md)** - Documentación del chatbot IA
 
-### 🏗️ Documentación Técnica
-
+#### 🔧 Documentación Técnica:
+- **[SISTEMA_FILTRADO.md](./SISTEMA_FILTRADO.md)** - Sistema de tiers y filtrado
+- **[CHATBOT_TIO_VIAJERO.md](./CHATBOT_TIO_VIAJERO.md)** - Chatbot IA
 - **[RESUMEN_STRIPE.md](./RESUMEN_STRIPE.md)** - Integración de pagos
-- **[CHANGELOG.md](./CHANGELOG.md)** - Historial de cambios
+- **[CHANGELOG.md](./CHANGELOG.md)** - Historial de cambios completo
 - **[supabase/README.md](./supabase/README.md)** - Configuración de base de datos
 
 ---
