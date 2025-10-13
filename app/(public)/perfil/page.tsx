@@ -24,6 +24,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { calculateQualityTier, getTierInfo } from '@/lib/utils/tier-calculator';
+import { getPlacePhotoUrl } from '@/lib/utils/photo-helper';
 import { toast } from 'sonner';
 
 export default function PerfilPage() {
@@ -296,13 +297,16 @@ export default function PerfilPage() {
                       <Card key={fav.id} className="hover:shadow-lg transition">
                         <CardContent className="p-0">
                           {/* Foto */}
-                          {place.photos && place.photos.length > 0 && (
-                            <div className="relative h-48">
-                              <img
-                                src={`https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference=${place.photos[0]}&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`}
-                                alt={place.name}
-                                className="w-full h-full object-cover rounded-t-lg"
-                              />
+                          {(() => {
+                            const photoUrl = getPlacePhotoUrl(place, 0);
+                            return photoUrl ? (
+                              <div className="relative h-48">
+                                <img
+                                  src={photoUrl}
+                                  alt={place.name}
+                                  className="w-full h-full object-cover rounded-t-lg"
+                                  loading="lazy"
+                                />
                               <div className="absolute top-2 right-2">
                                 <button
                                   onClick={() => handleRemoveFavorite(fav.id)}
@@ -313,7 +317,8 @@ export default function PerfilPage() {
                                 </button>
                               </div>
                             </div>
-                          )}
+                          ) : null;
+                          })()}
                           
                           <div className="p-4">
                             <div className="flex items-start justify-between mb-2">

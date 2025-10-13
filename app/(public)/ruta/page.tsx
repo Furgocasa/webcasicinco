@@ -652,14 +652,16 @@ export default function RutaPage() {
                   </button>
 
                   {/* Foto del lugar */}
-                  {selectedPlace.photos && selectedPlace.photos.length > 0 && (
-                    <div className="relative">
-                      <img
-                        src={`https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference=${selectedPlace.photos[0]}&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`}
-                        alt={selectedPlace.name}
-                        className="w-full h-32 object-cover rounded-t-xl"
-                        loading="lazy"
-                      />
+                  {(() => {
+                    const photoUrl = getPlacePhotoUrl(selectedPlace, 0);
+                    return photoUrl ? (
+                      <div className="relative">
+                        <img
+                          src={photoUrl}
+                          alt={selectedPlace.name}
+                          className="w-full h-32 object-cover rounded-t-xl"
+                          loading="lazy"
+                        />
                       {/* Badge de distancia en esquina superior derecha */}
                       {distance !== null && (
                         <div className="absolute top-2 right-2 bg-blue-600 text-white px-2 py-1 rounded-full text-xs font-semibold shadow-lg flex items-center gap-1">
@@ -671,7 +673,8 @@ export default function RutaPage() {
                         </div>
                       )}
                     </div>
-                  )}
+                  ) : null;
+                  })()}
 
                   {/* Contenido */}
                   <div className="p-4">
@@ -802,14 +805,16 @@ export default function RutaPage() {
                       }}
                     >
                       {/* Foto del lugar */}
-                      {place.photos && place.photos.length > 0 && (
-                        <div className="mb-3 -mx-4 -mt-4 relative">
-                          <img
-                            src={`https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference=${place.photos[0]}&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`}
-                            alt={place.name}
-                            className="w-full h-32 object-cover rounded-t-lg"
-                            loading="lazy"
-                          />
+                      {(() => {
+                        const photoUrl = getPlacePhotoUrl(place, 0);
+                        return photoUrl ? (
+                          <div className="mb-3 -mx-4 -mt-4 relative">
+                            <img
+                              src={photoUrl}
+                              alt={place.name}
+                              className="w-full h-32 object-cover rounded-t-lg"
+                              loading="lazy"
+                            />
                           {/* Badge de distancia */}
                           {distance !== null && (
                             <div className="absolute top-2 right-2 bg-blue-600 text-white px-2 py-1 rounded-full text-xs font-semibold shadow-lg flex items-center gap-1">
@@ -821,7 +826,8 @@ export default function RutaPage() {
                             </div>
                           )}
                         </div>
-                      )}
+                      ) : null;
+                      })()}
 
                       {/* Nombre y rating */}
                       <div className="flex items-start justify-between mb-2">
@@ -1145,14 +1151,16 @@ export default function RutaPage() {
                     className="border rounded-xl p-3 hover:shadow-md transition cursor-pointer bg-white"
                   >
                     {/* Foto */}
-                    {place.photos && place.photos.length > 0 && (
-                      <div className="mb-3 -mx-3 -mt-3 relative">
-                        <img
-                          src={`https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference=${place.photos[0]}&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`}
-                          alt={place.name}
-                          className="w-full h-32 object-cover rounded-t-xl"
-                          loading="lazy"
-                        />
+                    {(() => {
+                      const photoUrl = getPlacePhotoUrl(place, 0);
+                      return photoUrl ? (
+                        <div className="mb-3 -mx-3 -mt-3 relative">
+                          <img
+                            src={photoUrl}
+                            alt={place.name}
+                            className="w-full h-32 object-cover rounded-t-xl"
+                            loading="lazy"
+                          />
                         {/* Badge de distancia en esquina superior derecha */}
                         {distance !== null && (
                           <div className="absolute top-2 right-2 bg-blue-600 text-white px-2 py-1 rounded-full text-xs font-semibold shadow-lg flex items-center gap-1">
@@ -1164,7 +1172,8 @@ export default function RutaPage() {
                           </div>
                         )}
                       </div>
-                    )}
+                    ) : null;
+                    })()}
 
                     {/* Nombre y rating */}
                     <div className="flex items-start justify-between mb-2">
