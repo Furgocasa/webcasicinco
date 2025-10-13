@@ -225,7 +225,7 @@ export async function startIndexation(
                 totalSuccessful++;
               }
 
-              // Actualizar progreso en BD
+              // Actualizar progreso en BD (TODOS los contadores en tiempo real)
               await supabase
                 .from('indexation_jobs')
                 .update({
@@ -233,6 +233,12 @@ export async function startIndexation(
                   processed_places: totalProcessed,
                   successful_places: totalSuccessful,
                   failed_places: totalFailed,
+                  error_log: {
+                    skipped: totalSkipped,
+                    lowRating: totalLowRating,
+                    lowReviews: totalLowReviews,
+                    summary: `${totalSuccessful} guardados | ${totalSkipped} duplicados | ${totalLowRating} rating bajo | ${totalLowReviews} pocas reseñas | ${totalFailed} errores`
+                  }
                 })
                 .eq('id', jobId);
 
