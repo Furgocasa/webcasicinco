@@ -93,6 +93,7 @@ export default function MapPage() {
   const [loading, setLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(true);
   const [showPlacesList, setShowPlacesList] = useState(true);
+  const [mapReady, setMapReady] = useState(false); // ✅ Nuevo: saber cuándo el mapa está listo
   
   // Vista móvil: 'map', 'filters', 'list'
   const [mobileView, setMobileView] = useState<'map' | 'filters' | 'list'>('map');
@@ -526,6 +527,7 @@ export default function MapPage() {
   // 🚀 CLUSTERING: Mostrar TODOS los lugares (filtrados en color, no filtrados en gris)
   useEffect(() => {
     console.log('🔄 useEffect marcadores triggered:', {
+      mapReady,
       mapRef: !!mapRef.current,
       isLoaded,
       allPlacesLength: allPlaces.length,
@@ -536,8 +538,13 @@ export default function MapPage() {
     });
 
     // ✅ Verificar que Google Maps esté completamente listo
+    if (!mapReady) {
+      console.log('⏭️ Marcadores: Esperando que el mapa se cargue (mapReady=false)');
+      return;
+    }
+    
     if (!mapRef.current) {
-      console.log('⏭️ Marcadores: mapRef no disponible');
+      console.log('⏭️ Marcadores: mapRef no disponible (no debería pasar si mapReady=true)');
       return;
     }
     
@@ -561,7 +568,7 @@ export default function MapPage() {
       return;
     }
 
-    console.log('✅ Todos los requisitos listos, creando marcadores...');
+    console.log('✅ TODOS LOS REQUISITOS CUMPLIDOS - Creando marcadores...');
 
     // Ejecutar INMEDIATAMENTE (sin setTimeout)
     console.time('⏱️ Creación de marcadores');
@@ -695,7 +702,7 @@ export default function MapPage() {
       }
       markersRef.current.forEach(marker => marker.setMap(null));
     };
-  }, [allPlaces, filteredPlaces, isLoaded, markerIcons]);
+  }, [allPlaces, filteredPlaces, isLoaded, markerIcons, mapReady]); // ✅ Agregado mapReady
 
   // Reactivar geolocalización si estaba activa antes
   useEffect(() => {
@@ -1569,7 +1576,9 @@ export default function MapPage() {
                 zoom={mapZoom}
                 onClick={() => setSelectedPlace(null)}
                 onLoad={(map) => {
+                  console.log('🗺️ Google Map cargado correctamente');
                   mapRef.current = map;
+                  setMapReady(true); // ✅ Disparar creación de marcadores
                 }}
             options={{
               styles: [
