@@ -18,6 +18,7 @@ import { Card } from '@/components/ui/Card';
 import BottomNavigation from '@/components/mobile/BottomNavigation';
 import BottomSheet from '@/components/mobile/BottomSheet';
 import { calculateQualityTier, getTierInfo } from '@/lib/utils/tier-calculator';
+import { getPlacePhotoUrl } from '@/lib/utils/photo-helper';
 import { toast } from 'sonner';
 
 const libraries: ("places" | "geometry" | "drawing")[] = ["places", "geometry", "drawing"];

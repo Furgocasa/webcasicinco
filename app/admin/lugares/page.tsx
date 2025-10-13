@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { calculateQualityTier, getTierMarkerColor, getTierInfo } from '@/lib/utils/tier-calculator';
+import PhotoMigrationTool from '@/components/admin/PhotoMigrationTool';
 
 const libraries: ("places" | "drawing" | "geometry" | "visualization")[] = ["places"];
 

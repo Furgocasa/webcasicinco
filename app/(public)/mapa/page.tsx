@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { getPlacesFromCache, savePlacesToCache } from '@/lib/utils/places-cache';
+import { getPlacePhotoUrl } from '@/lib/utils/photo-helper';
 
 // 🚀 HOOK DE DEBOUNCE para optimizar búsquedas
 function useDebounce<T>(value: T, delay: number): T {
@@ -1588,14 +1589,16 @@ export default function MapPage() {
                   </button>
 
                   {/* Foto del lugar */}
-                  {selectedPlace.photos && selectedPlace.photos.length > 0 && (
-                    <div className="relative">
-                      <img
-                        src={`https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference=${selectedPlace.photos[0]}&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`}
-                        alt={selectedPlace.name}
-                        className="w-full h-32 object-cover rounded-t-xl"
-                        loading="lazy"
-                      />
+                  {(() => {
+                    const photoUrl = getPlacePhotoUrl(selectedPlace, 0);
+                    return photoUrl ? (
+                      <div className="relative">
+                        <img
+                          src={photoUrl}
+                          alt={selectedPlace.name}
+                          className="w-full h-32 object-cover rounded-t-xl"
+                          loading="lazy"
+                        />
                       {/* Badge de distancia en esquina superior derecha */}
                       {distance !== null && (
                         <div className="absolute top-2 right-2 bg-blue-600 text-white px-2 py-1 rounded-full text-xs font-semibold shadow-lg flex items-center gap-1">
@@ -1763,14 +1766,16 @@ export default function MapPage() {
                       onClick={() => handleMarkerClick(place)}
                     >
                       {/* Foto del lugar - Lazy loading para mejor rendimiento */}
-                      {place.photos && place.photos.length > 0 && (
-                        <div className="mb-3 -mx-4 -mt-4 relative">
-                          <img
-                            src={`https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference=${place.photos[0]}&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`}
-                            alt={place.name}
-                            className="w-full h-32 object-cover rounded-t-lg"
-                            loading="lazy"
-                          />
+                      {(() => {
+                        const photoUrl = getPlacePhotoUrl(place, 0);
+                        return photoUrl ? (
+                          <div className="mb-3 -mx-4 -mt-4 relative">
+                            <img
+                              src={photoUrl}
+                              alt={place.name}
+                              className="w-full h-32 object-cover rounded-t-lg"
+                              loading="lazy"
+                            />
                           {/* Badge de distancia */}
                           {distance !== null && (
                             <div className="absolute top-2 right-2 bg-blue-600 text-white px-2 py-1 rounded-full text-xs font-semibold shadow-lg flex items-center gap-1">
@@ -1782,7 +1787,8 @@ export default function MapPage() {
                             </div>
                           )}
                         </div>
-                      )}
+                      ) : null;
+                      })()}
 
                       {/* Nombre y rating */}
                       <div className="flex items-start justify-between mb-2">
@@ -2171,15 +2177,17 @@ export default function MapPage() {
                     mapRef.current?.setZoom(15);
                   }}
                 >
-                  {/* Foto del lugar - Con Google Maps API */}
-                  {place.photos && place.photos.length > 0 && (
-                    <div className="mb-3 -mx-3 -mt-3 relative">
-                      <img
-                        src={`https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference=${place.photos[0]}&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`}
-                        alt={place.name}
-                        className="w-full h-32 object-cover rounded-t-xl"
-                        loading="lazy"
-                      />
+                  {/* Foto del lugar - Desde Supabase o Google (fallback) */}
+                  {(() => {
+                    const photoUrl = getPlacePhotoUrl(place, 0);
+                    return photoUrl ? (
+                      <div className="mb-3 -mx-3 -mt-3 relative">
+                        <img
+                          src={photoUrl}
+                          alt={place.name}
+                          className="w-full h-32 object-cover rounded-t-xl"
+                          loading="lazy"
+                        />
                       {/* Badge de distancia en esquina superior derecha */}
                       {distance !== null && (
                         <div className="absolute top-2 right-2 bg-blue-600 text-white px-2 py-1 rounded-full text-xs font-semibold shadow-lg flex items-center gap-1">
