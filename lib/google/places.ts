@@ -30,13 +30,7 @@ export async function searchPlaces(params: SearchPlacesParams): Promise<string[]
       query += ` in ${location}`;
     }
 
-    console.log('\n🔍 ========== INICIO BÚSQUEDA GOOGLE PLACES ==========');
-    console.log(`📍 Query: "${query}"`);
-    console.log(`🗺️  Location: ${location || 'N/A'}`);
-    console.log(`📐 Coords: ${latitude && longitude ? `${latitude},${longitude}` : 'N/A'}`);
-    console.log(`📏 Radius: ${radius}m`);
-    console.log(`🔑 API Key: ${GOOGLE_MAPS_API_KEY ? GOOGLE_MAPS_API_KEY.substring(0, 20) + '...' : '❌ NO ENCONTRADA'}`);
-
+    // Logs mínimos (solo para debugging crítico)
     if (!GOOGLE_MAPS_API_KEY) {
       throw new Error('❌ GOOGLE_MAPS_API_KEY no está configurada');
     }
@@ -44,67 +38,52 @@ export async function searchPlaces(params: SearchPlacesParams): Promise<string[]
     const allPlaceIds: string[] = [];
     let pageToken: string | undefined = undefined;
     let pageCount = 0;
-    const maxPages = 20; // Límite muy alto - Google normalmente solo devuelve 3 páginas, pero no limitamos artificialmente
+    const maxPages = 3; // ✅ Límite razonable: 3 páginas = 60 lugares por ciudad (suficiente)
 
     // PAGINAR para obtener TODOS los resultados disponibles
     do {
       try {
         // Esperar si hay pageToken (Google requiere delay)
         if (pageToken) {
-          console.log('⏳ Esperando 2 segundos antes de siguiente página...');
           await new Promise(resolve => setTimeout(resolve, 2000));
         }
 
-        const requestParams: any = {
-          query,
-          location: latitude && longitude ? `${latitude},${longitude}` : undefined,
-          radius,
-          type,
-          key: GOOGLE_MAPS_API_KEY,
-          pagetoken: pageToken,
-        };
-
-        console.log(`\n📤 Llamando a Google API (página ${pageCount + 1})...`);
-        console.log(`   URL: ${PLACES_API_BASE}/textsearch/json`);
-        console.log(`   Params:`, JSON.stringify(requestParams, null, 2));
-
         const response: any = await axios.get(`${PLACES_API_BASE}/textsearch/json`, {
-          params: requestParams,
+          params: {
+            query,
+            location: latitude && longitude ? `${latitude},${longitude}` : undefined,
+            radius,
+            type,
+            key: GOOGLE_MAPS_API_KEY,
+            pagetoken: pageToken,
+          },
         });
 
-        console.log(`📥 Respuesta de Google:`);
-        console.log(`   Status: ${response.data.status}`);
-        console.log(`   Resultados: ${response.data.results?.length || 0}`);
-        console.log(`   Tiene next_page_token: ${response.data.next_page_token ? 'SÍ' : 'NO'}`);
-
+        // Verificar errores
         if (response.data.error_message) {
-          console.error(`❌ Error de Google: ${response.data.error_message}`);
+          console.error(`❌ Google API Error: ${response.data.error_message}`);
         }
 
         if (response.data.status !== 'OK' && response.data.status !== 'ZERO_RESULTS') {
-          console.log(`⚠️ Google API status: ${response.data.status}`);
+          console.log(`⚠️ Status: ${response.data.status} - Terminando búsqueda`);
           break;
         }
 
         if (response.data.status === 'ZERO_RESULTS') {
-          console.log('ℹ️  No se encontraron resultados para esta búsqueda');
           break;
         }
 
-        // NO FILTRAR AQUÍ - Devolver TODOS los resultados
-        // El filtrado se hará después al obtener detalles completos
+        // Agregar resultados (sin logs individuales)
         response.data.results.forEach((place: any) => {
           if (!allPlaceIds.includes(place.place_id)) {
             allPlaceIds.push(place.place_id);
-            console.log(`   ✅ Agregado: ${place.name} (${place.place_id})`);
           }
         });
 
         pageToken = response.data.next_page_token;
         pageCount++;
 
-        console.log(`\n📊 Página ${pageCount}: ${response.data.results.length} resultados`);
-        console.log(`   Total acumulado: ${allPlaceIds.length} lugares únicos`);
+        console.log(`   📄 Página ${pageCount}: +${response.data.results.length} resultados | Total: ${allPlaceIds.length}`);
 
       } catch (error: any) {
         console.error('❌ Error en paginación:', error.message);

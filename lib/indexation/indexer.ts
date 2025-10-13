@@ -27,13 +27,13 @@ export async function startIndexation(
 
   try {
     // Actualizar estado del job a "running"
-    console.log(`\n${'='.repeat(80)}`);
-    console.log(`🚀 INICIANDO INDEXACIÓN`);
-    console.log(`   Job ID: ${jobId}`);
-    console.log(`   Provincias: ${params.provinces.join(', ')}`);
-    console.log(`   Categorías: ${params.categories.join(', ')}`);
-    console.log(`   Rating mínimo: ${params.minRating}`);
-    console.log(`${'='.repeat(80)}\n`);
+    console.log(`\n[INDEXACIÓN] ${'='.repeat(70)}`);
+    console.log(`[INDEXACIÓN] 🚀 INICIANDO`);
+    console.log(`[INDEXACIÓN]    Job ID: ${jobId}`);
+    console.log(`[INDEXACIÓN]    Provincias: ${params.provinces.join(', ')}`);
+    console.log(`[INDEXACIÓN]    Categorías: ${params.categories.join(', ')}`);
+    console.log(`[INDEXACIÓN]    Rating mínimo: ${params.minRating}`);
+    console.log(`[INDEXACIÓN] ${'='.repeat(70)}\n`);
     
     const { error: updateError } = await supabase
       .from('indexation_jobs')
@@ -97,15 +97,15 @@ export async function startIndexation(
           // ==========================================
           // FASE 1: BÚSQUEDA COMPLETA (rápida)
           // ==========================================
-          console.log('\n🔍 ========== FASE 1: BÚSQUEDA ==========');
-          console.log(`Ciudades a buscar: ${cities.length}`);
+          console.log('\n[INDEXACIÓN] 🔍 ===== FASE 1: BÚSQUEDA =====');
+          console.log(`[INDEXACIÓN] Ciudades a buscar: ${cities.length}`);
           
           let citiesSearched = 0;
           
           for (const city of cities) {
             try {
               citiesSearched++;
-              console.log(`\n🔍 [${citiesSearched}/${cities.length}] Buscando ${searchTerm} en ${city}, ${province}...`);
+              console.log(`\n[INDEXACIÓN] 🔍 [${citiesSearched}/${cities.length}] Buscando ${searchTerm} en ${city}, ${province}...`);
               
               const placeIds = await searchPlaces({
                 location: `${city}, ${province}, España`,
@@ -136,16 +136,16 @@ export async function startIndexation(
             }
           }
           
-          console.log(`\n✅ BÚSQUEDA COMPLETADA: ${allPlaceIds.size} lugares únicos encontrados en ${cities.length} ciudades`);
-          console.log('==========================================\n');
+          console.log(`\n[INDEXACIÓN] ✅ BÚSQUEDA COMPLETADA: ${allPlaceIds.size} lugares únicos`);
+          console.log(`[INDEXACIÓN] ${'='.repeat(70)}\n`);
           
           // ==========================================
           // FASE 2: PROCESAMIENTO CON PROGRESO VISIBLE
           // ==========================================
-          console.log('🔄 ========== FASE 2: PROCESAMIENTO ==========');
+          console.log(`[INDEXACIÓN] 🔄 ===== FASE 2: PROCESAMIENTO =====`);
           
           const newPlaceIds = Array.from(allPlaceIds).filter(id => !processedPlaceIds.has(id));
-          console.log(`🔄 Procesando ${newPlaceIds.length} lugares de ${category}...\n`);
+          console.log(`[INDEXACIÓN] 🔄 Procesando ${newPlaceIds.length} lugares de ${category}...\n`);
           
           for (const placeId of newPlaceIds) {
             try {

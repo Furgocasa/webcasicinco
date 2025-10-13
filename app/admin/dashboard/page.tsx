@@ -121,42 +121,36 @@ export default function DashboardPage() {
       let page = 1;
       const maxPages = 40; // Máximo 4000 lugares (40 páginas × 100)
       
-      while (page <= maxPages) {
-        console.log(`📥 Solicitando página ${page}...`);
+        while (page <= maxPages) {
         const placesResponse = await fetch(`/api/admin/places?page=${page}&limit=100`);
         
-        console.log(`   Status: ${placesResponse.status} ${placesResponse.statusText}`);
-        
         if (!placesResponse.ok) {
-          const errorText = await placesResponse.text();
-          console.error(`❌ Error HTTP ${placesResponse.status} en página ${page}:`, errorText);
+          console.error(`[DASHBOARD] ❌ Error HTTP ${placesResponse.status} en página ${page}`);
           break;
         }
         
         const placesData = await placesResponse.json();
-        console.log(`   Respuesta:`, {
-          success: placesData.success,
-          places: placesData.places?.length || 0,
-          total: placesData.total,
-        });
         
         if (placesData.success && placesData.places && placesData.places.length > 0) {
           allPlaces = [...allPlaces, ...placesData.places];
-          console.log(`📊 Dashboard: Página ${page} - Total acumulado: ${allPlaces.length}`);
+          
+          // Log cada 10 páginas para no saturar (solo si hay muchas)
+          if (page % 10 === 0 || placesData.places.length < 100) {
+            console.log(`[DASHBOARD] 📊 Cargadas ${page} páginas - Total: ${allPlaces.length} lugares`);
+          }
+          
           page++;
           
           // Si recibimos menos de 100, no hay más páginas
           if (placesData.places.length < 100) {
-            console.log(`ℹ️  Última página alcanzada (${placesData.places.length} lugares)`);
             break;
           }
         } else {
-          console.log(`⚠️  Sin más datos en página ${page}`);
           break;
         }
       }
       
-      console.log(`✅ Dashboard: Cargados ${allPlaces.length} lugares total`);
+      console.log(`[DASHBOARD] ✅ Cargados ${allPlaces.length} lugares para estadísticas`);
       
       if (allPlaces.length > 0) {
         const places = allPlaces;
