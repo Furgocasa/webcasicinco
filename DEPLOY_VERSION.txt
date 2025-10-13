@@ -1,0 +1,12 @@
+BETA 6.1 - Build: 2025-10-13 18:50
+Commit: Sistema completo de indexación optimizado
+Features:
+- Indexación en 2 fases (búsqueda + procesamiento)
+- Descartados vs errores correctamente separados
+- Marcadores del mapa con estado mapReady
+- Sin errores de hidratación React
+- Revalidación automática cada 5 min
+- Títulos SEO únicos por lugar
+- Dashboard optimizado
+- Logs con prefijos [DASHBOARD] e [INDEXACIÓN]
+
