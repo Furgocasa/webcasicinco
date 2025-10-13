@@ -38,9 +38,9 @@ export async function searchPlaces(params: SearchPlacesParams): Promise<string[]
     const allPlaceIds: string[] = [];
     let pageToken: string | undefined = undefined;
     let pageCount = 0;
-    const maxPages = 6; // ✅ 6 páginas = 120 lugares por ciudad (balance entre cobertura y velocidad)
+    const maxPages = 999; // ✅ SIN LÍMITE REAL - Google pagina hasta que no haya más (normalmente 3-5 páginas)
 
-    // PAGINAR para obtener TODOS los resultados disponibles
+    // PAGINAR HASTA EL FINAL - obtener TODOS los resultados que Google tenga
     do {
       try {
         // Esperar si hay pageToken (Google requiere delay)
