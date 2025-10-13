@@ -54,8 +54,12 @@ export default function IndexarPage() {
         setPollingInterval(null);
       }
       
-      // Refrescar estado del job
-      fetchJobStatus();
+      // Refrescar estado del job manualmente
+      const response = await fetch(`/api/admin/indexation-status?jobId=${jobId}`);
+      const statusData = await response.json();
+      if (statusData.success && statusData.job) {
+        setJobStatus(statusData.job);
+      }
       
     } catch (error: any) {
       toast.error(`Error: ${error.message}`);
