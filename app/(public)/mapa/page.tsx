@@ -531,26 +531,41 @@ export default function MapPage() {
       allPlacesLength: allPlaces.length,
       filteredPlacesLength: filteredPlaces.length,
       markerIconsReady: !!markerIcons,
+      markerIconsCount: markerIcons ? Object.keys(markerIcons).length : 0,
       googleAvailable: typeof google !== 'undefined' && !!google.maps,
     });
 
     // ✅ Verificar que Google Maps esté completamente listo
-    if (!mapRef.current || !isLoaded || allPlaces.length === 0 || !markerIcons) {
-      console.log('⏭️ Marcadores no se crean aún (faltan requisitos)');
+    if (!mapRef.current) {
+      console.log('⏭️ Marcadores: mapRef no disponible');
+      return;
+    }
+    
+    if (!isLoaded) {
+      console.log('⏭️ Marcadores: Google Maps no cargado (isLoaded=false)');
+      return;
+    }
+    
+    if (allPlaces.length === 0) {
+      console.log('⏭️ Marcadores: No hay lugares cargados aún');
+      return;
+    }
+    
+    if (!markerIcons || Object.keys(markerIcons).length === 0) {
+      console.log('⏭️ Marcadores: Iconos no pre-renderizados aún');
       return;
     }
     
     if (typeof google === 'undefined' || !google.maps) {
-      console.log('⚠️ Google Maps no disponible aún');
+      console.log('⚠️ Google Maps API no disponible globalmente');
       return;
     }
 
     console.log('✅ Todos los requisitos listos, creando marcadores...');
 
-    // Debounce para evitar recrear constantemente mientras se ajustan filtros
-    const timer = setTimeout(() => {
-      console.time('⏱️ Creación de marcadores');
-      console.log(`📍 Creando ${allPlaces.length} marcadores (${filteredPlaces.length} filtrados)`);
+    // Ejecutar INMEDIATAMENTE (sin setTimeout)
+    console.time('⏱️ Creación de marcadores');
+    console.log(`📍 Creando ${allPlaces.length} marcadores (${filteredPlaces.length} filtrados)`);
       
       // Limpiar marcadores anteriores de forma eficiente
       if (clustererRef.current) {
@@ -671,12 +686,10 @@ export default function MapPage() {
       clustererRef.current.addMarkers(filteredMarkers); // SOLO los filtrados
     }
 
-      console.log(`🎯 Clustering: ${filteredMarkers.length} marcadores filtrados + ${notFilteredMarkers.length} grises individuales`);
-    }, 150); // Esperar 150ms antes de recrear marcadores
+    console.log(`🎯 Clustering: ${filteredMarkers.length} marcadores filtrados + ${notFilteredMarkers.length} grises individuales`);
 
-    // Cleanup: cancelar timer y limpiar marcadores al desmontar
+    // Cleanup: limpiar marcadores al desmontar
     return () => {
-      clearTimeout(timer);
       if (clustererRef.current) {
         clustererRef.current.clearMarkers();
       }
