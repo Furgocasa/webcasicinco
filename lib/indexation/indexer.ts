@@ -98,10 +98,10 @@ export async function startIndexation(
           const searchTerm = searchTerms[category] || category;
           const cities = mainCitiesByProvince[province] || [province];
           
-          // Buscar en cada ciudad importante
+          // Buscar Y PROCESAR por ciudad (procesamiento progresivo)
           for (const city of cities) {
             try {
-              console.log(`🔍 Buscando ${searchTerm} en ${city}, ${province}...`);
+              console.log(`\n🔍 Buscando ${searchTerm} en ${city}, ${province}...`);
               console.log(`   API Key presente: ${GOOGLE_API_KEY ? 'SÍ (' + GOOGLE_API_KEY.substring(0, 10) + '...)' : 'NO'}`);
               console.log(`   Parámetros: location="${city}, ${province}, España", keyword="${searchTerm}", minRating=${params.minRating}`);
               
@@ -113,9 +113,21 @@ export async function startIndexation(
               });
 
               console.log(`   Respuesta de Google: ${placeIds.length} lugares`);
-              placeIds.forEach(id => allPlaceIds.add(id));
+              
+              // Agregar y obtener solo los NUEVOS de esta ciudad
+              const newPlaceIdsFromCity: string[] = [];
+              placeIds.forEach(id => {
+                const sizeBefore = allPlaceIds.size;
+                allPlaceIds.add(id);
+                // Si aumentó el tamaño, es nuevo
+                if (allPlaceIds.size > sizeBefore && !processedPlaceIds.has(id)) {
+                  newPlaceIdsFromCity.push(id);
+                }
+              });
+              
               console.log(`✅ ${placeIds.length} lugares encontrados en ${city}`);
-              console.log(`   Total acumulado: ${allPlaceIds.size} lugares únicos\n`);
+              console.log(`   🆕 ${newPlaceIdsFromCity.length} son nuevos (no duplicados)`);
+              console.log(`   📊 Total acumulado: ${allPlaceIds.size} lugares únicos\n`);
               
               // Actualizar total acumulado en tiempo real
               await supabase
@@ -123,20 +135,11 @@ export async function startIndexation(
                 .update({ total_places: allPlaceIds.size })
                 .eq('id', jobId);
               
-              // Pausa para no saturar la API
-              await new Promise(resolve => setTimeout(resolve, 1000));
-            } catch (error) {
-              console.error(`❌ Error buscando en ${city}:`, error);
-            }
-          }
-          
-          console.log(`📊 Total acumulado: ${allPlaceIds.size} lugares únicos`);
-          
-          // PROCESAR INMEDIATAMENTE los lugares nuevos de esta categoría
-          const newPlaceIds = Array.from(allPlaceIds).filter(id => !processedPlaceIds.has(id));
-          console.log(`🔄 Procesando ${newPlaceIds.length} lugares nuevos de ${category}...\n`);
-          
-          for (const placeId of newPlaceIds) {
+              // ✅ PROCESAR INMEDIATAMENTE los lugares nuevos de esta ciudad
+              if (newPlaceIdsFromCity.length > 0) {
+                console.log(`🔄 Procesando ${newPlaceIdsFromCity.length} lugares nuevos de ${city}...\n`);
+                
+                for (const placeId of newPlaceIdsFromCity) {
             try {
               // Marcar como procesado PRIMERO
               processedPlaceIds.add(placeId);
@@ -219,15 +222,24 @@ export async function startIndexation(
               console.log(`⏳ Pausa de 1 segundo...\n`);
               await new Promise(resolve => setTimeout(resolve, 1000));
 
-            } catch (error: any) {
-              console.error(`❌ Error fatal procesando:`, error.message);
-              console.error(error.stack);
-              totalFailed++;
+                } catch (error: any) {
+                  console.error(`❌ Error fatal procesando:`, error.message);
+                  console.error(error.stack);
+                  totalFailed++;
+                }
+              } // Fin for placeId
+              } // Fin if newPlaceIdsFromCity.length > 0
+              
+              // Pausa entre ciudades
+              await new Promise(resolve => setTimeout(resolve, 500));
+              
+            } catch (error) {
+              console.error(`❌ Error buscando/procesando en ${city}:`, error);
             }
-          }
+          } // Fin for city
           
         } catch (error) {
-          console.error(`❌ Error buscando ${category} en ${province}:`, error);
+          console.error(`❌ Error en categoría ${category} - ${province}:`, error);
         }
       }
     }
