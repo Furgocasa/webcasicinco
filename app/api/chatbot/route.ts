@@ -261,6 +261,7 @@ export async function POST(request: NextRequest) {
       .from('chat_history')
       .select('role, message, created_at')
       .or(user ? `user_id.eq.${user.id}` : `session_id.eq.${session_id}`)
+      .eq('is_active', true) // ✅ SOLO mensajes activos (no obsoletos por reset)
       .order('created_at', { ascending: false })
       .limit(historyLimit * 2); // x2 porque incluye user + assistant
 
@@ -393,6 +394,7 @@ export async function POST(request: NextRequest) {
       session_id: !user ? session_id : null,
       role: 'user',
       message: message,
+      is_active: true, // ✅ Nueva conversación = activa
     });
 
     // Guardar respuesta del asistente
@@ -401,6 +403,7 @@ export async function POST(request: NextRequest) {
       session_id: !user ? session_id : null,
       role: 'assistant',
       message: response,
+      is_active: true, // ✅ Nueva conversación = activa
     });
 
     return NextResponse.json({

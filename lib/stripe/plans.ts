@@ -61,8 +61,8 @@ export const PLANS: Record<SubscriptionPlan, PlanConfig> = {
     stripePriceId: process.env.STRIPE_PREMIUM_YEARLY_PRICE_ID,
     features: [
       'Todo de Premium Mensual +',
-      'Ahorra 30% (2.08€/mes)',
-      'Equivale a 10 meses al año',
+      'Solo 2,08€/mes (ahorra 30%)',
+      'Casi 4 meses gratis al año',
       'Acceso anticipado a nuevos lugares',
       'Soporte prioritario',
     ],

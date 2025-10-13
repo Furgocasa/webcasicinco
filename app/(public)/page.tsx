@@ -380,7 +380,7 @@ export default function HomePage() {
                   </li>
                   <li className="flex items-start gap-2">
                     <Check className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
-                    <span className="text-sm text-gray-700 font-medium">2 meses gratis al año</span>
+                    <span className="text-sm text-gray-700 font-medium">Casi 4 meses gratis al año</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <Check className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />

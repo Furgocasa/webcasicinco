@@ -14,9 +14,11 @@ export async function GET(request: NextRequest) {
     } = await supabase.auth.getUser();
 
     // Cargar historial (últimos 10 mensajes - 5 pares de conversación)
+    // ✅ SOLO mensajes activos (is_active = true)
     let query = supabase
       .from('chat_history')
       .select('role, message, created_at')
+      .eq('is_active', true) // ← FILTRAR SOLO ACTIVOS
       .order('created_at', { ascending: false })
       .limit(10);
 
@@ -63,7 +65,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// DELETE - Borrar historial de conversación
+// DELETE - Marcar historial como obsoleto (SOFT DELETE)
 export async function DELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -74,10 +76,13 @@ export async function DELETE(request: NextRequest) {
       data: { user },
     } = await supabase.auth.getUser();
 
-    // Borrar historial
+    // ✅ SOFT DELETE: Marcar como inactivo en lugar de borrar
     let query = supabase
       .from('chat_history')
-      .delete();
+      .update({ 
+        is_active: false,
+        session_ended_at: new Date().toISOString()
+      });
 
     if (user) {
       query = query.eq('user_id', user.id);
@@ -90,19 +95,24 @@ export async function DELETE(request: NextRequest) {
       });
     }
 
+    // Solo marcar como inactivo los que estén activos
+    query = query.eq('is_active', true);
+
     const { error } = await query;
 
     if (error) {
-      console.error('Error borrando historial:', error);
+      console.error('Error marcando historial como obsoleto:', error);
       return NextResponse.json({
         success: false,
         error: error.message,
       }, { status: 500 });
     }
 
+    console.log(`✅ Conversación ${user ? `usuario ${user.email}` : `sesión ${session_id}`} marcada como obsoleta`);
+
     return NextResponse.json({
       success: true,
-      message: 'Historial borrado correctamente',
+      message: 'Conversación finalizada correctamente',
     });
 
   } catch (error: any) {
