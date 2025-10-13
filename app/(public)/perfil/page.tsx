@@ -252,10 +252,7 @@ export default function PerfilPage() {
           </button>
           
           <button
-            onClick={() => {
-              setActiveTab('subscription');
-              loadSubscription();
-            }}
+            onClick={() => setActiveTab('subscription')}
             className={`px-6 py-3 font-semibold transition border-b-2 ${
               activeTab === 'subscription'
                 ? 'border-indigo-500 text-indigo-600'
@@ -648,6 +645,36 @@ export default function PerfilPage() {
                         </div>
                       </div>
                     </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {/* TAB: SUSCRIPCIÓN */}
+          {activeTab === 'subscription' && (
+            <div className="max-w-4xl mx-auto">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Crown className="h-5 w-5 text-indigo-600" />
+                    Mi Suscripción
+                  </CardTitle>
+                  <CardDescription>Gestiona tu plan y facturación</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-center py-8">
+                    <CreditCard className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">Gestión de Suscripción</h3>
+                    <p className="text-gray-600 mb-6">
+                      Próximamente podrás gestionar tu suscripción, cambiar de plan y ver tu historial de pagos aquí.
+                    </p>
+                    <Button
+                      onClick={() => router.push('/pricing')}
+                      className="bg-indigo-600 hover:bg-indigo-700"
+                    >
+                      Ver Planes Disponibles
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
