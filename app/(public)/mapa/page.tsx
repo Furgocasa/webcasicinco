@@ -1599,18 +1599,19 @@ export default function MapPage() {
                           className="w-full h-32 object-cover rounded-t-xl"
                           loading="lazy"
                         />
-                      {/* Badge de distancia en esquina superior derecha */}
-                      {distance !== null && (
-                        <div className="absolute top-2 right-2 bg-blue-600 text-white px-2 py-1 rounded-full text-xs font-semibold shadow-lg flex items-center gap-1">
-                          <MapPin className="h-3 w-3" />
-                          {distance < 1 
-                            ? `${Math.round(distance * 1000)}m`
-                            : `${distance.toFixed(1)}km`
-                          }
-                        </div>
-                      )}
-                    </div>
-                  )}
+                        {/* Badge de distancia en esquina superior derecha */}
+                        {distance !== null && (
+                          <div className="absolute top-2 right-2 bg-blue-600 text-white px-2 py-1 rounded-full text-xs font-semibold shadow-lg flex items-center gap-1">
+                            <MapPin className="h-3 w-3" />
+                            {distance < 1 
+                              ? `${Math.round(distance * 1000)}m`
+                              : `${distance.toFixed(1)}km`
+                            }
+                          </div>
+                        )}
+                      </div>
+                    ) : null;
+                  })()}
 
                   <div className="p-4">
                     {/* Nombre y rating */}
@@ -1776,18 +1777,18 @@ export default function MapPage() {
                               className="w-full h-32 object-cover rounded-t-lg"
                               loading="lazy"
                             />
-                          {/* Badge de distancia */}
-                          {distance !== null && (
-                            <div className="absolute top-2 right-2 bg-blue-600 text-white px-2 py-1 rounded-full text-xs font-semibold shadow-lg flex items-center gap-1">
-                              <MapPin className="h-3 w-3" />
-                              {distance < 1 
-                                ? `${Math.round(distance * 1000)}m`
-                                : `${distance.toFixed(1)}km`
-                              }
-                            </div>
-                          )}
-                        </div>
-                      ) : null;
+                            {/* Badge de distancia */}
+                            {distance !== null && (
+                              <div className="absolute top-2 right-2 bg-blue-600 text-white px-2 py-1 rounded-full text-xs font-semibold shadow-lg flex items-center gap-1">
+                                <MapPin className="h-3 w-3" />
+                                {distance < 1 
+                                  ? `${Math.round(distance * 1000)}m`
+                                  : `${distance.toFixed(1)}km`
+                                }
+                              </div>
+                            )}
+                          </div>
+                        ) : null;
                       })()}
 
                       {/* Nombre y rating */}
