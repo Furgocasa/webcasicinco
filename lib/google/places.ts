@@ -38,7 +38,7 @@ export async function searchPlaces(params: SearchPlacesParams): Promise<string[]
     const allPlaceIds: string[] = [];
     let pageToken: string | undefined = undefined;
     let pageCount = 0;
-    const maxPages = 3; // ✅ Límite razonable: 3 páginas = 60 lugares por ciudad (suficiente)
+    const maxPages = 6; // ✅ 6 páginas = 120 lugares por ciudad (balance entre cobertura y velocidad)
 
     // PAGINAR para obtener TODOS los resultados disponibles
     do {
