@@ -180,9 +180,16 @@ export async function startIndexation(
 
               // GUARDAR EN BD con UPSERT (evita errores de duplicado)
               console.log(`💾 Guardando en base de datos...`);
+              
+              // ✅ MARCAR COMO PUBLICADO porque ya tiene IA y fotos
+              const placeToSave = {
+                ...result.place,
+                published: true,  // ✅ AUTO-PUBLICAR después de procesar
+              };
+              
               const { data: savedPlace, error: saveError } = await supabase
                 .from('places')
-                .upsert(result.place, {
+                .upsert(placeToSave, {
                   onConflict: 'google_place_id',
                   ignoreDuplicates: false,
                 })
@@ -193,7 +200,7 @@ export async function startIndexation(
                 console.error(`❌ Error guardando: ${saveError.message}`);
                 totalFailed++;
               } else {
-                console.log(`✅ "${savedPlace?.name}" guardado con ID ${savedPlace?.id}`);
+                console.log(`✅ "${savedPlace?.name}" guardado como PUBLICADO con ID ${savedPlace?.id}`);
                 totalSuccessful++;
               }
 
