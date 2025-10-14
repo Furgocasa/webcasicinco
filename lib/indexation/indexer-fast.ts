@@ -40,6 +40,160 @@ interface IndexationResult {
  * Verifica si el trabajo debe continuar ejecutándose
  * Consulta el campo should_continue en la BD
  */
+// 🔥 FUNCIÓN PARA PROCESAR LUGARES POR ZONA
+async function processPlacesFromZone(
+  placeIds: string[], 
+  jobId: string, 
+  supabase: ReturnType<typeof createAdminClient>,
+  logger: IndexationLogger
+): Promise<{processed: number, saved: number, discarded: number}> {
+  let processed = 0;
+  let saved = 0;
+  let discarded = 0;
+  
+  for (const placeId of placeIds) {
+    if (!await shouldContinueJob(jobId, supabase)) {
+      await logger.warning('⏸️ Procesamiento pausado por el administrador');
+      break;
+    }
+    
+    try {
+      const details = await withRetry(
+        () => getPlaceDetails(placeId),
+        3, // 3 intentos
+        8000, // 8 segundos por intento (más rápido)
+        logger,
+        `Obtener detalles del lugar`
+      );
+
+      const province = extractProvinceFromPlaceData(details);
+      const city = extractCityFromPlaceData(details);
+
+      // Función para normalizar nombres de provincias (acepta tildes y variantes)
+      const normalizeProvinceName = (name: string): string => {
+        // Mapa de variantes (euskera/gallego → castellano estándar)
+        const variants: Record<string, string> = {
+          'Gipuzkoa': 'Guipúzcoa',
+          'Bizkaia': 'Vizcaya',
+          'Araba': 'Álava',
+          'La Coruña': 'A Coruña',
+          'Orense': 'Ourense',
+        };
+        
+        // Buscar en el mapa de variantes (comparación sin tildes, case-insensitive)
+        const normalizedInput = name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+        const variantKey = Object.keys(variants).find(
+          key => key.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase() === normalizedInput
+        );
+        
+        return variantKey ? variants[variantKey] : name;
+      };
+
+      const spanishProvinces = [
+        'Albacete', 'Alicante', 'Almería', 'Álava', 'Asturias', 'Ávila', 'Badajoz', 'Baleares',
+        'Barcelona', 'Burgos', 'Cáceres', 'Cádiz', 'Cantabria', 'Castellón', 'Ciudad Real',
+        'Córdoba', 'Cuenca', 'Girona', 'Granada', 'Guadalajara', 'Huelva', 'Huesca',
+        'Jaén', 'A Coruña', 'La Rioja', 'Las Palmas', 'León', 'Lleida', 'Lugo', 'Madrid', 'Málaga',
+        'Murcia', 'Navarra', 'Ourense', 'Palencia', 'Pontevedra', 'Salamanca', 'Segovia', 'Sevilla',
+        'Soria', 'Tarragona', 'Santa Cruz de Tenerife', 'Teruel', 'Toledo', 'Valencia', 'Valladolid',
+        'Zamora', 'Zaragoza', 'Ceuta', 'Melilla',
+        'Guipúzcoa', 'Vizcaya' // Añadir variantes castellanas explícitas
+      ];
+
+      // Normalizar provincia y comparar sin tildes (case-insensitive)
+      const normalizedProvince = normalizeProvinceName(province);
+      const normalizedProvinceNoAccents = normalizedProvince
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase();
+
+      const isSpanishProvince = spanishProvinces.some(sp => 
+        sp.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase() === normalizedProvinceNoAccents
+      );
+
+      if (!isSpanishProvince) {
+        discarded++; // Contar como descartado - fuera de España
+        await logger.warning(`⚠️ Descartado (fuera de España): ${details.name} - ${province} (normalizado: ${normalizedProvince})`);
+        continue;
+      }
+
+      // Verificar si ya existe
+      const { data: existingPlace } = await supabase
+        .from('places')
+        .select('id')
+        .eq('google_place_id', placeId)
+        .single();
+
+      if (existingPlace) {
+        discarded++; // Contar como duplicado
+        await logger.warning(`⚠️ Descartado (duplicado): ${details.name}`);
+        continue;
+      }
+
+      // Validar rating y reseñas
+      if (details.rating < 4.7) {
+        discarded++; // Contar como rating bajo
+        await logger.warning(`⚠️ Descartado (rating bajo): ${details.name} - ${details.rating}`);
+        continue;
+      }
+
+      if (details.user_ratings_total < 50) {
+        discarded++; // Contar como pocas reseñas
+        await logger.warning(`⚠️ Descartado (pocas reseñas): ${details.name} - ${details.user_ratings_total}`);
+        continue;
+      }
+
+      // Categorizar
+      const category = categorizePlace(details);
+      if (!category || !['restaurante', 'bar', 'cafe', 'hotel'].includes(category)) {
+        discarded++; // Contar como categoría inválida
+        await logger.warning(`⚠️ Descartado (categoría inválida): ${details.name} - ${category}`);
+        continue;
+      }
+
+      // Guardar lugar
+      const placeData = {
+        google_place_id: placeId,
+        name: details.name,
+        category: category,
+        province: normalizedProvince,
+        city: city,
+        address: details.formatted_address,
+        rating: details.rating,
+        review_count: details.user_ratings_total,
+        photos: details.photos ? details.photos.map((p: any) => p.photo_reference) : [],
+        phone: details.formatted_phone_number,
+        website: details.website,
+        opening_hours: details.opening_hours?.weekday_text || [],
+        geometry: details.geometry,
+        published: true,
+        created_at: new Date().toISOString(),
+      };
+
+      const { error: insertError } = await supabase
+        .from('places')
+        .insert(placeData);
+
+      if (insertError) {
+        discarded++; // Contar como error
+        await logger.error(`❌ Error guardando: ${details.name} - ${insertError.message}`);
+        continue;
+      }
+
+      saved++;
+      await logger.success(`✅ Guardado: ${details.name} (${category}, ${normalizedProvince})`);
+
+    } catch (error: any) {
+      discarded++; // Contar como error
+      await logger.error(`❌ Error procesando lugar ${placeId}: ${error.message}`);
+    }
+    
+    processed++;
+  }
+  
+  return { processed, saved, discarded };
+}
+
 async function shouldContinueJob(jobId: string, supabase: ReturnType<typeof createAdminClient>): Promise<boolean> {
   try {
     const { data } = await supabase
@@ -289,7 +443,16 @@ export async function startFastIndexation(
             ];
             
             const cityStartCount = allPlaceIds.size;
-            for (const location of searchLocations) {
+            let cityProcessed = 0;
+            let citySaved = 0;
+            let cityDiscarded = 0;
+            
+            // 🔥 PROCESAMIENTO POR ZONA: Buscar y procesar inmediatamente
+            for (let zoneIndex = 0; zoneIndex < searchLocations.length; zoneIndex++) {
+              const location = searchLocations[zoneIndex];
+              
+              await logger.info(`   🔍 Zona ${zoneIndex + 1}/${searchLocations.length}: "${location}"`);
+              
               const placeIds = await withRetry(
                 () => searchPlaces({
                   location: location,
@@ -303,9 +466,22 @@ export async function startFastIndexation(
                 `Buscar en ${location}`
               );
               
-              placeIds.forEach(id => allPlaceIds.add(id));
+              await logger.info(`   📍 Zona ${zoneIndex + 1}/${searchLocations.length}: ${placeIds.length} resultados → Procesando...`);
               
-              // Pequeña pausa entre búsquedas para no saturar
+              // Procesar inmediatamente los lugares encontrados en esta zona
+              const zoneResults = await processPlacesFromZone(placeIds, jobId, supabase, logger);
+              cityProcessed += zoneResults.processed;
+              citySaved += zoneResults.saved;
+              cityDiscarded += zoneResults.discarded;
+              
+              // Acumular en contadores globales
+              totalProcessed += zoneResults.processed;
+              approved += zoneResults.saved;
+              lowRating += zoneResults.discarded; // Simplificado - todos van a lowRating por ahora
+              
+              await logger.info(`   ✅ Zona ${zoneIndex + 1}/${searchLocations.length}: ${zoneResults.saved} guardados, ${zoneResults.discarded} descartados`);
+              
+              // Pequeña pausa entre zonas para no saturar
               await new Promise(r => setTimeout(r, 500));
             }
 
@@ -328,6 +504,8 @@ export async function startFastIndexation(
 
               const coords = cityCoordinates[city];
               if (coords) {
+                await logger.info(`   📍 Nearby search en ${city}...`);
+                
                 const nearbyPlaceIds = await withRetry(
                   () => searchNearbyPlaces(
                     coords.lat, 
@@ -341,14 +519,26 @@ export async function startFastIndexation(
                   `Búsqueda nearby en ${city}`
                 );
 
-                nearbyPlaceIds.forEach(id => allPlaceIds.add(id));
+                await logger.info(`   📍 Nearby search: ${nearbyPlaceIds.length} resultados → Procesando...`);
+                
+                // Procesar inmediatamente los lugares nearby
+                const nearbyResults = await processPlacesFromZone(nearbyPlaceIds, jobId, supabase, logger);
+                cityProcessed += nearbyResults.processed;
+                citySaved += nearbyResults.saved;
+                cityDiscarded += nearbyResults.discarded;
+                
+                // Acumular en contadores globales
+                totalProcessed += nearbyResults.processed;
+                approved += nearbyResults.saved;
+                lowRating += nearbyResults.discarded; // Simplificado
+                
+                await logger.info(`   ✅ Nearby: ${nearbyResults.saved} guardados, ${nearbyResults.discarded} descartados`);
               }
             } catch (nearbyError: any) {
               await logger.warning(`   ⚠️ Nearby search falló en ${city}: ${nearbyError.message}`);
             }
 
-            const cityTotal = allPlaceIds.size - cityStartCount;
-            await logger.info(`   [${i+1}/${cities.length}] ${city}: ${cityTotal} resultados totales (${searchLocations.length} zonas + nearby)`);
+            await logger.info(`   📊 Total ${city}: ${cityProcessed} procesados, ${citySaved} guardados, ${cityDiscarded} descartados`);
 
             await supabase
               .from('indexation_jobs')
@@ -371,38 +561,61 @@ export async function startFastIndexation(
       }
     }
 
-    await logger.success(`✅ Búsqueda completada: ${allPlaceIds.size} lugares encontrados`);
+    // Finalizar
+    await logger.success('🎉 Indexación rápida completada');
 
-    // ==========================================
-    // FASE 2: PROCESAMIENTO RÁPIDO (solo detalles básicos)
-    // ==========================================
-    await logger.info('🔄 FASE 2: Filtrado y guardado rápido iniciado');
+    await logger.info(`📊 RESUMEN:`);
+    await logger.info(`   Total procesados: ${totalProcessed}`);
+    await logger.success(`   ✅ Aprobados: ${approved} (pendientes de enriquecimiento)`);
+    await logger.info(`   ⏭️ Descartados: ${lowRating + lowReviews + chains + duplicates}`);
+    await logger.info(`      - Rating bajo: ${lowRating}`);
+    await logger.info(`      - Pocas reseñas: ${lowReviews}`);
+    await logger.info(`      - Cadenas: ${chains}`);
+    await logger.info(`      - Duplicados: ${duplicates}`);
+    if (errors > 0) {
+      await logger.warning(`   ❌ Errores: ${errors}`);
+    }
 
-    const placesToProcess = Array.from(allPlaceIds).filter(id => !processedIds.has(id));
-    await logger.info(`Procesando ${placesToProcess.length} lugares...`);
+    // Guardar logs finales
+    await logger.close();
 
-    for (const placeId of placesToProcess) {
-      // Verificar si debe continuar cada 10 lugares
-      if (totalProcessed % 10 === 0 && !await shouldContinueJob(jobId, supabase)) {
-        await logger.warning('⏸️ Indexación pausada durante procesamiento');
-        await logger.close();
-        // NO actualizar nada más - el estado ya fue cambiado por el API de pausa/cancel
-        return;
-      }
-
-      try {
-        processedIds.add(placeId);
-        totalProcessed++;
-
-        // Mostrar progreso cada 5 lugares para mejor visibilidad
-        if (totalProcessed % 5 === 0) {
-          await logger.info(`📊 Progreso: ${totalProcessed}/${allPlaceIds.size} (${Math.round((totalProcessed/allPlaceIds.size)*100)}%)`);
+    await supabase
+      .from('indexation_jobs')
+      .update({
+        status: 'completed',
+        completed_at: new Date().toISOString(),
+        processed_places: totalProcessed,
+        successful_places: approved,
+        failed_places: errors,
+        error_log: {
+          approved,
+          lowRating,
+          lowReviews,
+          chains,
+          duplicates,
+          errors,
+          summary: `${approved} aprobados | ${lowRating} rating bajo | ${lowReviews} pocas reseñas | ${chains} cadenas | ${duplicates} duplicados | ${errors} errores`
         }
+      })
+      .eq('id', jobId);
 
-        // Verificar si ya existe
-        const { data: existing } = await supabase
-          .from('places')
-          .select('id')
+  } catch (error: any) {
+    await logger.error(`ERROR FATAL: ${error.message}`, { stack: error.stack });
+    await logger.close();
+
+    await supabase
+      .from('indexation_jobs')
+      .update({
+        status: 'failed',
+        completed_at: new Date().toISOString(),
+        error_log: {
+          fatal_error: error.message,
+          stack: error.stack
+        }
+      })
+      .eq('id', jobId);
+  }
+}
           .eq('google_place_id', placeId)
           .single();
 
