@@ -63,12 +63,12 @@ const defaultCenter = {
   lng: -3.7038, // Madrid
 };
 
-// Límites del mapa para mantener vista en España
+// Límites del mapa para mantener vista en España (incluyendo Canarias y Baleares)
 const SPAIN_BOUNDS = {
-  north: 43.8,
-  south: 36.0,
-  west: -9.5,
-  east: 4.5,
+  north: 44.0,    // Norte de Galicia
+  south: 27.5,    // Sur de Canarias (El Hierro)
+  west: -18.5,    // Oeste de Canarias (La Palma)
+  east: 4.5,      // Este de Baleares (Menorca)
 };
 
 const libraries: ("places" | "drawing" | "geometry" | "visualization")[] = ["places"];
@@ -98,7 +98,7 @@ export default function MapPage() {
   // Vista móvil: 'map', 'filters', 'list'
   const [mobileView, setMobileView] = useState<'map' | 'filters' | 'list'>('map');
   const [mapCenter, setMapCenter] = useState(defaultCenter);
-  const [mapZoom, setMapZoom] = useState(6);
+  const [mapZoom, setMapZoom] = useState(5.5); // Zoom más alejado para ver Canarias
   const [showVisitModal, setShowVisitModal] = useState(false);
   const [visitNotes, setVisitNotes] = useState('');
   const [visitRating, setVisitRating] = useState(0);
@@ -361,10 +361,10 @@ export default function MapPage() {
           console.log(`🔍 Zoom centrado en ${validPlaces} lugares válidos de ${filteredPlaces.length} total`);
         }
       } else if (!hasActiveFilters && filteredPlaces.length === allPlaces.length && mapRef.current) {
-        // SIN FILTROS: Restaurar vista de España
+        // SIN FILTROS: Restaurar vista de España (incluyendo islas)
         mapRef.current.setCenter(defaultCenter);
-        mapRef.current?.setZoom(6);
-        console.log(`🗺️ Zoom restaurado a vista de España`);
+        mapRef.current?.setZoom(5.5);
+        console.log(`🗺️ Zoom restaurado a vista de España completa`);
       }
     }, 300);
 
@@ -789,8 +789,8 @@ export default function MapPage() {
     setTimeout(() => {
       if (mapRef.current) {
         mapRef.current.setCenter(defaultCenter);
-        mapRef.current.setZoom(6);
-        console.log('🗺️ Zoom reseteado a España desde botón Limpiar');
+        mapRef.current.setZoom(5.5); // Zoom para ver toda España con islas
+        console.log('🗺️ Zoom reseteado a España completa desde botón Limpiar');
       }
     }, 100);
   };
@@ -1597,11 +1597,11 @@ export default function MapPage() {
               mapTypeControl: false,
               streetViewControl: false,
               fullscreenControl: true,
-              minZoom: 5.5, // No permitir zoom muy alejado
+              minZoom: 5, // Permitir ver toda España con islas
               maxZoom: 18,
               restriction: {
                 latLngBounds: SPAIN_BOUNDS,
-                strictBounds: false, // false para permitir panning fuera pero vuelve automáticamente
+                strictBounds: false, // Permite ver toda España incluyendo Canarias y Baleares
               },
             }}
           >
