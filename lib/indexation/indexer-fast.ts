@@ -111,12 +111,13 @@ async function processPlacesFromZone(
         sp.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase() === normalizedProvinceNoAccents
       );
 
-      // 🔥 VALIDACIÓN ADICIONAL: Verificar que NO sea de otros países
+      // 🔥 VALIDACIÓN CRÍTICA: Verificar que NO sea de otros países
       const nonSpanishIndicators = [
         'stockholms', 'län', 'suecia', 'sweden', 'stockholm', 'estocolmo',
         'paris', 'france', 'francia', 'london', 'england', 'reino unido',
         'berlin', 'germany', 'alemania', 'roma', 'italy', 'italia',
-        'lisboa', 'portugal', 'madrid tapasbar', 'spansk restaurang'
+        'lisboa', 'portugal', 'madrid tapasbar', 'spansk restaurang',
+        'tapasrestaurang', 'på söder', 'provincia de estocolmo'
       ];
 
       const hasNonSpanishIndicator = nonSpanishIndicators.some(indicator => 
@@ -448,12 +449,12 @@ export async function startFastIndexation(
           try {
             // 🔥 BÚSQUEDA MÚLTIPLE POR ZONAS: Buscar en diferentes puntos de la ciudad para obtener MÁS resultados
             const searchLocations = [
-              `${city}, ${province}, España`, // Búsqueda principal
-              `${city} centro, ${province}, España`, // Centro
-              `${city} norte, ${province}, España`, // Norte
-              `${city} sur, ${province}, España`, // Sur
-              `${city} este, ${province}, España`, // Este
-              `${city} oeste, ${province}, España`, // Oeste
+              `${searchTerm} ${city} ${province} España`, // Búsqueda más específica
+              `${searchTerm} ${city} centro ${province} España`, // Centro
+              `${searchTerm} ${city} norte ${province} España`, // Norte
+              `${searchTerm} ${city} sur ${province} España`, // Sur
+              `${searchTerm} ${city} este ${province} España`, // Este
+              `${searchTerm} ${city} oeste ${province} España`, // Oeste
             ];
             
             const cityStartCount = allPlaceIds.size;
