@@ -71,6 +71,7 @@ export async function GET(request: NextRequest) {
         completed_at: job.completed_at,
         error_message: job.error_message,
         error_log: job.error_log, // ← CRÍTICO: incluir error_log con estadísticas de descartados
+        logs: job.logs || [], // ← CRÍTICO: incluir logs en tiempo real
       },
     });
 
