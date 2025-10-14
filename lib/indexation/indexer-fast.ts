@@ -288,7 +288,7 @@ export async function startFastIndexation(
               `${city} oeste, ${province}, España`, // Oeste
             ];
             
-            let totalFound = 0;
+            const cityStartCount = allPlaceIds.size;
             for (const location of searchLocations) {
               const placeIds = await withRetry(
                 () => searchPlaces({
@@ -303,10 +303,7 @@ export async function startFastIndexation(
                 `Buscar en ${location}`
               );
               
-              const newCount = allPlaceIds.size;
               placeIds.forEach(id => allPlaceIds.add(id));
-              const added = allPlaceIds.size - newCount;
-              totalFound += added;
               
               // Pequeña pausa entre búsquedas para no saturar
               await new Promise(r => setTimeout(r, 500));
@@ -344,20 +341,14 @@ export async function startFastIndexation(
                   `Búsqueda nearby en ${city}`
                 );
 
-                const nearbyCount = allPlaceIds.size;
                 nearbyPlaceIds.forEach(id => allPlaceIds.add(id));
-                const nearbyAdded = allPlaceIds.size - nearbyCount;
-                totalFound += nearbyAdded;
-
-                if (nearbyAdded > 0) {
-                  await logger.info(`   📍 Nearby search en ${city}: +${nearbyAdded} lugares adicionales`);
-                }
               }
             } catch (nearbyError: any) {
               await logger.warning(`   ⚠️ Nearby search falló en ${city}: ${nearbyError.message}`);
             }
 
-            await logger.info(`   [${i+1}/${cities.length}] ${city}: ${totalFound} resultados totales (${searchLocations.length} zonas + nearby)`);
+            const cityTotal = allPlaceIds.size - cityStartCount;
+            await logger.info(`   [${i+1}/${cities.length}] ${city}: ${cityTotal} resultados totales (${searchLocations.length} zonas + nearby)`);
 
             await supabase
               .from('indexation_jobs')
