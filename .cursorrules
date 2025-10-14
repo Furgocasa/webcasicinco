@@ -1,0 +1,75 @@
+# ========================================
+# REGLAS DE CURSOR PARA CASI CINCO APP
+# ========================================
+
+# ARCHIVOS NUEVOS
+================
+NUNCA crearas archivos nuevos ni borraras archivos existentes sin reicibir una orden especifica y siempre previa confirmación.
+El proyecto tiene la  estructura correcta y lo que queda es optimizar codigo de los archivos existentes; no crear archivos nuevos.
+
+# CONTROL DE GIT
+================
+NUNCA hagas commit ni push de forma automática.
+Solo ejecuta "git commit" o "git push" cuando el usuario lo solicite EXPLÍCITAMENTE con comandos como:
+- "haz commit"
+- "sube los cambios"
+- "commit y push"
+- "publica los cambios"
+- pulsando el boton de "Commit & Push" en Cursor.
+
+Siempre pregunta al usuario antes de hacer commit o push.
+Muestra un resumen de los archivos modificados antes de hacer commit.
+
+# DOCUMENTACIÓN
+===============
+Cuando actualices código, explica los cambios de forma clara y concisa.
+Usa comentarios en español en el código.
+Mantén la documentación actualizada.
+
+# ESTILO DE CÓDIGO
+==================
+Usa TypeScript estricto.
+Sigue las convenciones de Next.js.
+Nombra variables y funciones en inglés, comentarios en español.
+Usa nombres descriptivos.
+
+# COMMITS
+=========
+Mensajes de commit en español.
+Formato: "Tipo: Descripción breve"
+Tipos: Feature, Fix, Docs, Refactor, Performance, UX
+No hagas commit ni push automáticamente.
+Solo ejecuta git commit y git push cuando el usuario lo solicite explícitamente.
+Siempre pregunta antes de hacer commit o push.
+
+# TESTING
+=========
+Antes de hacer commit, verifica que el código compile.
+Usa npm run build para verificar.
+
+# PRIORIDADES
+=============
+1. Funcionalidad correcta
+2. Experiencia de usuario
+3. Performance
+4. SEO
+5. Código limpio
+
+# SISTEMA DE 2 FASES
+====================
+La aplicación usa un sistema de indexación en 2 fases:
+- FASE 1: Indexación rápida (sin IA) en /admin/indexar
+- FASE 2: Enriquecimiento IA (separado) en /admin/enriquecer
+
+Mantén esta separación clara en el código y la UI.
+
+# CATEGORÍAS PERMITIDAS
+========================
+Solo 4 categorías:
+- restaurante
+- bar
+- cafe
+- hotel
+
+Rechaza cualquier intento de agregar otras categorías (spa, experiencia, etc).
+
