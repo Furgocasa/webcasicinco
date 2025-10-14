@@ -169,6 +169,57 @@ async function processPlacesFromZone(
       // Generar slug único
       const slug = generatePlaceSlug(details.name, city);
 
+      // Mapear provincia a región (Comunidad Autónoma)
+      const getRegionFromProvince = (province: string): string => {
+        const provinceToRegion: Record<string, string> = {
+          // Andalucía
+          'Almería': 'Andalucía', 'Cádiz': 'Andalucía', 'Córdoba': 'Andalucía', 'Granada': 'Andalucía',
+          'Huelva': 'Andalucía', 'Jaén': 'Andalucía', 'Málaga': 'Andalucía', 'Sevilla': 'Andalucía',
+          // Aragón
+          'Huesca': 'Aragón', 'Teruel': 'Aragón', 'Zaragoza': 'Aragón',
+          // Asturias
+          'Asturias': 'Principado de Asturias',
+          // Baleares
+          'Baleares': 'Islas Baleares',
+          // Canarias
+          'Las Palmas': 'Canarias', 'Santa Cruz de Tenerife': 'Canarias',
+          // Cantabria
+          'Cantabria': 'Cantabria',
+          // Castilla-La Mancha
+          'Albacete': 'Castilla-La Mancha', 'Ciudad Real': 'Castilla-La Mancha', 'Cuenca': 'Castilla-La Mancha',
+          'Guadalajara': 'Castilla-La Mancha', 'Toledo': 'Castilla-La Mancha',
+          // Castilla y León
+          'Ávila': 'Castilla y León', 'Burgos': 'Castilla y León', 'León': 'Castilla y León',
+          'Palencia': 'Castilla y León', 'Salamanca': 'Castilla y León', 'Segovia': 'Castilla y León',
+          'Soria': 'Castilla y León', 'Valladolid': 'Castilla y León', 'Zamora': 'Castilla y León',
+          // Cataluña
+          'Barcelona': 'Cataluña', 'Girona': 'Cataluña', 'Lleida': 'Cataluña', 'Tarragona': 'Cataluña',
+          // Ceuta y Melilla
+          'Ceuta': 'Ceuta', 'Melilla': 'Melilla',
+          // Comunidad Valenciana
+          'Alicante': 'Comunidad Valenciana', 'Castellón': 'Comunidad Valenciana', 'Valencia': 'Comunidad Valenciana',
+          // Extremadura
+          'Badajoz': 'Extremadura', 'Cáceres': 'Extremadura',
+          // Galicia
+          'A Coruña': 'Galicia', 'Lugo': 'Galicia', 'Ourense': 'Galicia', 'Pontevedra': 'Galicia',
+          // La Rioja
+          'La Rioja': 'La Rioja',
+          // Madrid
+          'Madrid': 'Comunidad de Madrid',
+          // Murcia
+          'Murcia': 'Región de Murcia',
+          // Navarra
+          'Navarra': 'Comunidad Foral de Navarra',
+          // País Vasco
+          'Álava': 'País Vasco', 'Guipúzcoa': 'País Vasco', 'Vizcaya': 'País Vasco',
+          'Araba': 'País Vasco', 'Gipuzkoa': 'País Vasco', 'Bizkaia': 'País Vasco',
+        };
+        
+        return provinceToRegion[province] || 'España'; // Fallback a España si no se encuentra
+      };
+
+      const region = getRegionFromProvince(normalizedProvince);
+
       // Guardar lugar
       const placeData = {
         google_place_id: placeId,
@@ -176,6 +227,7 @@ async function processPlacesFromZone(
         name: details.name,
         category: category,
         country: 'España', // ✅ AGREGADO - country requerido
+        region: region, // ✅ AGREGADO - region requerido
         province: normalizedProvince,
         city: city,
         address: details.formatted_address,
