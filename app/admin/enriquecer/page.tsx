@@ -17,10 +17,16 @@ export default function EnriquecerPage() {
     loadPendingCount();
     checkActiveJob();
 
+    // Recargar contador cada 10 segundos
+    const reloadInterval = setInterval(() => {
+      loadPendingCount();
+    }, 10000);
+
     return () => {
       if (pollingInterval) {
         clearInterval(pollingInterval);
       }
+      clearInterval(reloadInterval);
     };
   }, []);
 
