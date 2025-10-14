@@ -166,9 +166,13 @@ async function processPlacesFromZone(
         continue;
       }
 
+      // Generar slug único
+      const slug = generatePlaceSlug(details.name, city);
+
       // Guardar lugar
       const placeData = {
         google_place_id: placeId,
+        slug: slug, // ✅ AGREGADO - slug requerido
         name: details.name,
         category: category,
         province: normalizedProvince,
