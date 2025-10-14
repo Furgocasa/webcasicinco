@@ -479,6 +479,25 @@ export async function startFastIndexation(
               approved += zoneResults.saved;
               lowRating += zoneResults.discarded; // Simplificado - todos van a lowRating por ahora
               
+              // 🔥 ACTUALIZAR CONTADORES EN TIEMPO REAL
+          await supabase
+            .from('indexation_jobs')
+            .update({
+              processed_places: totalProcessed,
+              successful_places: approved,
+                  failed_places: lowRating + lowReviews + chains + duplicates + errors,
+              error_log: {
+                approved,
+                lowRating,
+                lowReviews,
+                chains,
+                duplicates,
+                errors,
+                summary: `${approved} aprobados | ${lowRating} rating bajo | ${lowReviews} pocas reseñas | ${chains} cadenas | ${duplicates} duplicados | ${errors} errores`
+              }
+            })
+            .eq('id', jobId);
+              
               await logger.info(`   ✅ Zona ${zoneIndex + 1}/${searchLocations.length}: ${zoneResults.saved} guardados, ${zoneResults.discarded} descartados`);
               
               // Pequeña pausa entre zonas para no saturar
@@ -531,6 +550,25 @@ export async function startFastIndexation(
                 totalProcessed += nearbyResults.processed;
                 approved += nearbyResults.saved;
                 lowRating += nearbyResults.discarded; // Simplificado
+                
+                // 🔥 ACTUALIZAR CONTADORES EN TIEMPO REAL
+                await supabase
+                  .from('indexation_jobs')
+                  .update({
+                    processed_places: totalProcessed,
+                    successful_places: approved,
+                    failed_places: lowRating + lowReviews + chains + duplicates + errors,
+                    error_log: {
+                      approved,
+                      lowRating,
+                      lowReviews,
+                      chains,
+                      duplicates,
+                      errors,
+                      summary: `${approved} aprobados | ${lowRating} rating bajo | ${lowReviews} pocas reseñas | ${chains} cadenas | ${duplicates} duplicados | ${errors} errores`
+                    }
+                  })
+                  .eq('id', jobId);
                 
                 await logger.info(`   ✅ Nearby: ${nearbyResults.saved} guardados, ${nearbyResults.discarded} descartados`);
               }
