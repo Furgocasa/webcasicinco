@@ -10,7 +10,7 @@
  */
 
 import { createAdminClient } from '@/lib/supabase/server';
-import { searchPlaces, getPlaceDetails, extractProvinceFromPlaceData, extractCityFromPlaceData } from '../google/places';
+import { searchPlaces, searchNearbyPlaces, getPlaceDetails, extractProvinceFromPlaceData, extractCityFromPlaceData } from '../google/places';
 import { shouldExcludeChain } from './searcher';
 import { generatePlaceSlug } from '../utils/slugify';
 import { strictCategorizePlaceByTypes, shouldExcludeFromCategory } from './category-filters';
@@ -210,8 +210,8 @@ export async function startFastIndexation(
       // País Vasco
       'Álava': ['Vitoria-Gasteiz', 'Llodio', 'Amurrio', 'Salvatierra', 'Laguardia'],
       'Araba': ['Vitoria-Gasteiz', 'Llodio', 'Amurrio', 'Salvatierra', 'Laguardia'], // Variante euskera
-      'Guipúzcoa': ['San Sebastián', 'Irún', 'Éibar', 'Rentería', 'Zarautz', 'Mondragón', 'Hernani', 'Hondarribia', 'Tolosa', 'Azpeitia', 'Pasaia'],
-      'Gipuzkoa': ['San Sebastián', 'Irún', 'Éibar', 'Rentería', 'Zarautz', 'Mondragón', 'Hernani', 'Hondarribia', 'Tolosa', 'Azpeitia', 'Pasaia'], // Variante euskera
+      'Guipúzcoa': ['San Sebastián', 'Irún', 'Éibar', 'Rentería', 'Zarautz', 'Mondragón', 'Hernani', 'Hondarribia', 'Tolosa', 'Azpeitia', 'Pasaia', 'Lasarte-Oria', 'Andoain', 'Errenteria', 'Oñati', 'Bergara', 'Beasain', 'Ordizia', 'Legazpi', 'Villabona', 'Usurbil', 'Lezo', 'Oiartzun', 'Astigarraga', 'Hernialde', 'Albiztur', 'Asteasu', 'Zizurkil', 'Aia', 'Zestoa'],
+      'Gipuzkoa': ['San Sebastián', 'Irún', 'Éibar', 'Rentería', 'Zarautz', 'Mondragón', 'Hernani', 'Hondarribia', 'Tolosa', 'Azpeitia', 'Pasaia', 'Lasarte-Oria', 'Andoain', 'Errenteria', 'Oñati', 'Bergara', 'Beasain', 'Ordizia', 'Legazpi', 'Villabona', 'Usurbil', 'Lezo', 'Oiartzun', 'Astigarraga', 'Hernialde', 'Albiztur', 'Asteasu', 'Zizurkil', 'Aia', 'Zestoa'], // Variante euskera
       'Vizcaya': ['Bilbao', 'Barakaldo', 'Getxo', 'Portugalete', 'Sestao', 'Durango', 'Basauri', 'Santurce', 'Bermeo', 'Gernika'],
       'Bizkaia': ['Bilbao', 'Barakaldo', 'Getxo', 'Portugalete', 'Sestao', 'Durango', 'Basauri', 'Santurce', 'Bermeo', 'Gernika'], // Variante euskera
       // Ceuta y Melilla
@@ -278,24 +278,86 @@ export async function startFastIndexation(
           }
           
           try {
-            const placeIds = await withRetry(
-              () => searchPlaces({
-                location: `${city}, ${province}, España`,
-                keyword: searchTerm,
-                minRating: params.minRating,
-                radius: 50000,
-              }),
-              3, // 3 intentos
-              20000, // 20 segundos por intento (búsquedas pueden tardar más)
-              logger,
-              `Buscar en ${city}`
-            );
+            // 🔥 BÚSQUEDA MÚLTIPLE POR ZONAS: Buscar en diferentes puntos de la ciudad para obtener MÁS resultados
+            const searchLocations = [
+              `${city}, ${province}, España`, // Búsqueda principal
+              `${city} centro, ${province}, España`, // Centro
+              `${city} norte, ${province}, España`, // Norte
+              `${city} sur, ${province}, España`, // Sur
+              `${city} este, ${province}, España`, // Este
+              `${city} oeste, ${province}, España`, // Oeste
+            ];
+            
+            let totalFound = 0;
+            for (const location of searchLocations) {
+              const placeIds = await withRetry(
+                () => searchPlaces({
+                  location: location,
+                  keyword: searchTerm,
+                  minRating: params.minRating,
+                  radius: 30000, // Reducir radio para más precisión
+                }),
+                3, // 3 intentos
+                10000, // 10 segundos por intento (más realista)
+                logger,
+                `Buscar en ${location}`
+              );
+              
+              const newCount = allPlaceIds.size;
+              placeIds.forEach(id => allPlaceIds.add(id));
+              const added = allPlaceIds.size - newCount;
+              totalFound += added;
+              
+              // Pequeña pausa entre búsquedas para no saturar
+              await new Promise(r => setTimeout(r, 500));
+            }
 
-            const newCount = allPlaceIds.size;
-            placeIds.forEach(id => allPlaceIds.add(id));
-            const added = allPlaceIds.size - newCount;
+            // 🔥 BÚSQUEDA NEARBY: Buscar lugares cercanos por coordenadas (complementa text search)
+            try {
+              // Obtener coordenadas aproximadas de la ciudad (esto es una aproximación)
+              const cityCoordinates: Record<string, {lat: number, lng: number}> = {
+                'San Sebastián': { lat: 43.3183, lng: -1.9812 },
+                'Irún': { lat: 43.3391, lng: -1.7893 },
+                'Éibar': { lat: 43.1844, lng: -2.4731 },
+                'Rentería': { lat: 43.3122, lng: -1.9014 },
+                'Zarautz': { lat: 43.2844, lng: -2.1719 },
+                'Mondragón': { lat: 43.0644, lng: -2.4897 },
+                'Hernani': { lat: 43.2667, lng: -1.9833 },
+                'Hondarribia': { lat: 43.3631, lng: -1.7914 },
+                'Tolosa': { lat: 43.1333, lng: -2.0667 },
+                'Azpeitia': { lat: 43.1833, lng: -2.2667 },
+                'Pasaia': { lat: 43.3167, lng: -1.9167 },
+              };
 
-            await logger.info(`   [${i+1}/${cities.length}] ${city}: ${placeIds.length} resultados (${added} nuevos)`);
+              const coords = cityCoordinates[city];
+              if (coords) {
+                const nearbyPlaceIds = await withRetry(
+                  () => searchNearbyPlaces(
+                    coords.lat, 
+                    coords.lng, 
+                    30000, // 30km radio
+                    'restaurant' // Tipo específico
+                  ),
+                  3, // 3 intentos
+                  10000, // 10 segundos
+                  logger,
+                  `Búsqueda nearby en ${city}`
+                );
+
+                const nearbyCount = allPlaceIds.size;
+                nearbyPlaceIds.forEach(id => allPlaceIds.add(id));
+                const nearbyAdded = allPlaceIds.size - nearbyCount;
+                totalFound += nearbyAdded;
+
+                if (nearbyAdded > 0) {
+                  await logger.info(`   📍 Nearby search en ${city}: +${nearbyAdded} lugares adicionales`);
+                }
+              }
+            } catch (nearbyError: any) {
+              await logger.warning(`   ⚠️ Nearby search falló en ${city}: ${nearbyError.message}`);
+            }
+
+            await logger.info(`   [${i+1}/${cities.length}] ${city}: ${totalFound} resultados totales (${searchLocations.length} zonas + nearby)`);
 
             await supabase
               .from('indexation_jobs')
@@ -362,7 +424,7 @@ export async function startFastIndexation(
         const details = await withRetry(
           () => getPlaceDetails(placeId),
           3, // 3 intentos
-          15000, // 15 segundos por intento
+          8000, // 8 segundos por intento (más rápido)
           logger,
           `Obtener detalles del lugar`
         );
