@@ -5,9 +5,10 @@
  */
 
 import { createAdminClient } from '@/lib/supabase/server';
-import { searchPlaces, getPlaceDetails, categorizePlaceByTypes, extractProvinceFromPlaceData, extractCityFromPlaceData } from '../google/places';
+import { searchPlaces, getPlaceDetails, extractProvinceFromPlaceData, extractCityFromPlaceData } from '../google/places';
 import { shouldExcludeChain } from './searcher';
 import { generatePlaceSlug } from '../utils/slugify';
+import { strictCategorizePlaceByTypes, shouldExcludeFromCategory } from './category-filters';
 
 interface IndexationParams {
   provinces: string[];
@@ -84,14 +85,12 @@ export async function startFastIndexation(
 
     for (const province of params.provinces) {
       for (const category of params.categories) {
+        // SOLO 4 CATEGORÍAS PERMITIDAS
         const searchTerms: Record<string, string> = {
           'restaurante': 'restaurantes',
-          'hotel': 'hoteles',
-          'spa': 'spa wellness',
-          'bar': 'bares',
-          'cafe': 'cafeterías',
-          'experiencia': 'lugares turísticos',
-          'monumento': 'monumentos',
+          'bar': 'bares tapas',
+          'cafe': 'cafeterías coffee',
+          'hotel': 'hoteles alojamiento',
         };
 
         const searchTerm = searchTerms[category] || category;
@@ -185,8 +184,21 @@ export async function startFastIndexation(
           continue;
         }
 
-        // ✅ LUGAR APROBADO - Guardar datos básicos
-        const category = categorizePlaceByTypes(details.types);
+        // ✅ LUGAR APROBADO - Categorizar con filtro estricto
+        const category = strictCategorizePlaceByTypes(details.types, details.name);
+        
+        // Si no encaja en ninguna de las 4 categorías, descartar
+        if (!category) {
+          chains++; // Contar como "descartado - categoría no válida"
+          continue;
+        }
+
+        // Verificar filtro específico de categoría (ej: evitar autocaravanas en hoteles)
+        if (shouldExcludeFromCategory(details.name, details.types, category)) {
+          chains++; // Contar como "descartado - no cumple criterios de categoría"
+          continue;
+        }
+
         const province = extractProvinceFromPlaceData(details);
         const city = extractCityFromPlaceData(details);
         const slug = generatePlaceSlug(details.name, city);

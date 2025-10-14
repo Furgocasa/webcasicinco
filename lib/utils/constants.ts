@@ -2,26 +2,20 @@
  * Constantes de la aplicación
  */
 
-// Categorías de lugares
+// Categorías de lugares (SOLO 4 categorías principales)
 export const PLACE_CATEGORIES = [
   { value: 'restaurante', label: 'Restaurantes', icon: '🍽️' },
+  { value: 'bar', label: 'Bares', icon: '🍺' },
+  { value: 'cafe', label: 'Cafeterías', icon: '☕' },
   { value: 'hotel', label: 'Hoteles', icon: '🏨' },
-  { value: 'spa', label: 'Spas', icon: '💆' },
-  { value: 'experiencia', label: 'Experiencias', icon: '🎭' },
 ] as const;
 
 // Categorías como objeto (para el mapa)
 export const CATEGORIES: Record<string, string> = {
   restaurante: 'Restaurantes',
-  hotel: 'Hoteles',
-  spa: 'Spas',
-  experiencia: 'Experiencias',
   bar: 'Bares',
   cafe: 'Cafeterías',
-  museo: 'Museos',
-  parque: 'Parques',
-  playa: 'Playas',
-  mirador: 'Miradores',
+  hotel: 'Hoteles',
 };
 
 // Comunidades Autónomas de España
