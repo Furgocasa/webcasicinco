@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { PROVINCES, CATEGORIES } from '@/lib/utils/constants';
+import { Badge } from '@/components/ui/Badge';
+import { PROVINCES, PLACE_CATEGORIES } from '@/lib/utils/constants';
 import { toast } from 'sonner';
 
 export default function IndexarPage() {
@@ -217,9 +218,9 @@ export default function IndexarPage() {
                   }}
                   className="flex h-32 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                 >
-                  {Object.entries(CATEGORIES).map(([key, value]) => (
-                    <option key={key} value={key}>
-                      {value}
+                  {PLACE_CATEGORIES.map((cat) => (
+                    <option key={cat.value} value={cat.value}>
+                      {cat.icon} {cat.label}
                     </option>
                   ))}
                 </select>
