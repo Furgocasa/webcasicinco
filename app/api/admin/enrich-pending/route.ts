@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
     // Ejecutar en background
     Promise.resolve().then(async () => {
       try {
-        await enrichPendingPlaces(batchSize);
+        await enrichPendingPlaces(batchSize, user.id);
       } catch (err) {
         console.error('Error en enriquecimiento:', err);
       }
@@ -40,6 +40,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       message: `Enriquecimiento iniciado para hasta ${batchSize} lugares`,
+      userId: user.id,
     });
 
   } catch (error: any) {

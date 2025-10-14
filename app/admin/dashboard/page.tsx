@@ -786,32 +786,17 @@ export default function DashboardPage() {
                 </Button>
               </Link>
 
-              <Button 
-                variant="outline" 
-                className="h-auto w-full flex-col gap-2 py-6 hover:border-amber-500 hover:bg-amber-50 transition"
-                onClick={async () => {
-                  if (!confirm(`¿Enriquecer ${stats.needsEnrichment} lugares con IA?\n\nEsto descargará fotos y generará contenido IA.\nTiempo estimado: ~${Math.round(stats.needsEnrichment * 3 / 60)} minutos`)) return;
-                  
-                  try {
-                    const response = await fetch('/api/admin/enrich-pending', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ batchSize: 100 })
-                    });
-                    
-                    if (response.ok) {
-                      alert('✅ Enriquecimiento iniciado. Revisa el progreso en Gestión de Lugares.');
-                    }
-                  } catch (error) {
-                    alert('❌ Error al iniciar enriquecimiento');
-                  }
-                }}
-                disabled={stats.needsEnrichment === 0}
-              >
-                <Target className="h-8 w-8 text-amber-600" />
-                <span className="font-semibold">Enriquecer con IA</span>
-                <Badge className="bg-amber-500 text-white">{stats.needsEnrichment}</Badge>
-              </Button>
+              <Link href="/admin/enriquecer">
+                <Button 
+                  variant="outline" 
+                  className="h-auto w-full flex-col gap-2 py-6 hover:border-amber-500 hover:bg-amber-50 transition"
+                  disabled={stats.needsEnrichment === 0}
+                >
+                  <Target className="h-8 w-8 text-amber-600" />
+                  <span className="font-semibold">Enriquecer con IA</span>
+                  <Badge className="bg-amber-500 text-white">{stats.needsEnrichment}</Badge>
+                </Button>
+              </Link>
 
               <Link href="/admin/lugares">
                 <Button variant="outline" className="h-auto w-full flex-col gap-2 py-6 hover:border-cyan-500 hover:bg-cyan-50 transition">
