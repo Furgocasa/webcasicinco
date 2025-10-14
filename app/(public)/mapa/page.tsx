@@ -57,10 +57,10 @@ const mapContainerStyle = {
   height: '100%',
 };
 
-// Centro de España para vista inicial
+// Centro de España para vista inicial (Península centrada)
 const defaultCenter = {
-  lat: 40.4168,
-  lng: -3.7038, // Madrid
+  lat: 40.2,     // Ligeramente más al norte para centrar península
+  lng: -3.7,     // Centro de España
 };
 
 // Límites del mapa para mantener vista en España (incluyendo Canarias y Baleares)
@@ -98,7 +98,7 @@ export default function MapPage() {
   // Vista móvil: 'map', 'filters', 'list'
   const [mobileView, setMobileView] = useState<'map' | 'filters' | 'list'>('map');
   const [mapCenter, setMapCenter] = useState(defaultCenter);
-  const [mapZoom, setMapZoom] = useState(5.5); // Zoom más alejado para ver Canarias
+  const [mapZoom, setMapZoom] = useState(6); // Zoom enfocado en península (Canarias visible si haces scroll)
   const [showVisitModal, setShowVisitModal] = useState(false);
   const [visitNotes, setVisitNotes] = useState('');
   const [visitRating, setVisitRating] = useState(0);
@@ -361,10 +361,10 @@ export default function MapPage() {
           console.log(`🔍 Zoom centrado en ${validPlaces} lugares válidos de ${filteredPlaces.length} total`);
         }
       } else if (!hasActiveFilters && filteredPlaces.length === allPlaces.length && mapRef.current) {
-        // SIN FILTROS: Restaurar vista de España (incluyendo islas)
+        // SIN FILTROS: Restaurar vista de España (península centrada)
         mapRef.current.setCenter(defaultCenter);
-        mapRef.current?.setZoom(5.5);
-        console.log(`🗺️ Zoom restaurado a vista de España completa`);
+        mapRef.current?.setZoom(6);
+        console.log(`🗺️ Zoom restaurado a vista de España`);
       }
     }, 300);
 
@@ -789,8 +789,8 @@ export default function MapPage() {
     setTimeout(() => {
       if (mapRef.current) {
         mapRef.current.setCenter(defaultCenter);
-        mapRef.current.setZoom(5.5); // Zoom para ver toda España con islas
-        console.log('🗺️ Zoom reseteado a España completa desde botón Limpiar');
+        mapRef.current.setZoom(6); // Península centrada
+        console.log('🗺️ Zoom reseteado a vista península');
       }
     }, 100);
   };
@@ -2195,6 +2195,71 @@ export default function MapPage() {
                   </label>
                 );
               })}
+            </div>
+          </div>
+
+          {/* Rating Mínimo - Mobile */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              ⭐ Rating Mínimo
+            </label>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-sm font-medium text-yellow-600">{filters.minRating || 4.7}★</span>
+              <div className="flex-1 h-1 bg-gray-200 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-gradient-to-r from-yellow-400 to-yellow-600"
+                  style={{ width: `${((filters.minRating || 4.7) - 4.7) / (5.0 - 4.7) * 100}%` }}
+                />
+              </div>
+              <span className="text-sm text-gray-500">5.0★</span>
+            </div>
+            <input
+              type="range"
+              min="4.7"
+              max="5.0"
+              step="0.1"
+              value={filters.minRating || 4.7}
+              onChange={(e) => setFilters({ ...filters, minRating: parseFloat(e.target.value) })}
+              className="w-full"
+            />
+          </div>
+
+          {/* Número de Reseñas - Mobile */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              📊 Número de Reseñas
+            </label>
+            <div className="space-y-3">
+              <div>
+                <div className="flex items-center justify-between text-sm mb-1">
+                  <span className="text-gray-600">Mínimo:</span>
+                  <span className="font-medium text-indigo-600">{minReviews === 0 ? 'Todas' : minReviews}</span>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="1000"
+                  step="10"
+                  value={minReviews}
+                  onChange={(e) => setMinReviews(Number(e.target.value))}
+                  className="w-full"
+                />
+              </div>
+              <div>
+                <div className="flex items-center justify-between text-sm mb-1">
+                  <span className="text-gray-600">Máximo:</span>
+                  <span className="font-medium text-indigo-600">{maxReviews >= 10000 ? '∞' : maxReviews}</span>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="10000"
+                  step="100"
+                  value={maxReviews >= 10000 ? 10000 : maxReviews}
+                  onChange={(e) => setMaxReviews(Number(e.target.value))}
+                  className="w-full"
+                />
+              </div>
             </div>
           </div>
 
