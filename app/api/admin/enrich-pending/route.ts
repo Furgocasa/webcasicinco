@@ -63,36 +63,31 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    // Obtener estadísticas de enriquecimiento (usando agregación en BD, no JS)
+    // 🎯 CONTADORES UNIFICADOS: Solo lugares PUBLICADOS sin IA
     const { count: pending } = await supabase
       .from('places')
       .select('*', { count: 'exact', head: true })
-      .eq('needs_enrichment', true)
-      .eq('enrichment_status', 'pending');
-
-    const { count: processing } = await supabase
-      .from('places')
-      .select('*', { count: 'exact', head: true })
-      .eq('enrichment_status', 'processing');
+      .eq('published', true)
+      .is('ai_description', null);
 
     const { count: completed } = await supabase
       .from('places')
       .select('*', { count: 'exact', head: true })
-      .eq('enrichment_status', 'completed');
+      .eq('published', true)
+      .not('ai_description', 'is', null);
 
-    const { count: failed } = await supabase
+    const { count: totalPublished } = await supabase
       .from('places')
       .select('*', { count: 'exact', head: true })
-      .eq('enrichment_status', 'failed');
+      .eq('published', true);
 
     return NextResponse.json({
       success: true,
       stats: {
         pending: pending || 0,
-        processing: processing || 0,
         completed: completed || 0,
-        failed: failed || 0,
-        total: (pending || 0) + (processing || 0) + (completed || 0) + (failed || 0),
+        totalPublished: totalPublished || 0,
+        percentage: totalPublished ? Math.round(((completed || 0) / totalPublished) * 100) : 0,
       }
     });
 

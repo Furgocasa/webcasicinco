@@ -243,51 +243,82 @@ export default function LugaresPage() {
 
   const handleEnrichPlaces = async () => {
     try {
-      // Obtener lugares sin IA
-      const checkResponse = await fetch('/api/admin/places');
-      const checkData = await checkResponse.json();
-      const placesWithoutAI = checkData.places?.filter((p: any) => !p.ai_description) || [];
+      setEnriching(true);
       
-      if (placesWithoutAI.length === 0) {
-        toast.info('✅ Todos los lugares ya están enriquecidos');
+      // 🎯 UNIFICADO: Usar el mismo endpoint que el dashboard
+      const checkResponse = await fetch(`/api/admin/enrich-pending?t=${Date.now()}`);
+      const checkData = await checkResponse.json();
+      
+      if (!checkData.success || !checkData.stats) {
+        toast.error('Error al obtener lugares pendientes');
+        setEnriching(false);
         return;
       }
 
-      const estimatedMinutes = Math.ceil(placesWithoutAI.length * 3 / 60);
-      if (!confirm(`¿Enriquecer ${placesWithoutAI.length} lugares con IA?\n\nTiempo estimado: ~${estimatedMinutes} minutos\n\n⚠️ No cierres esta pestaña durante el proceso.`)) return;
+      const { pending, completed, totalPublished, percentage } = checkData.stats;
+      
+      if (pending === 0) {
+        toast.info(`✅ Todos los lugares publicados ya están enriquecidos (${completed}/${totalPublished} - ${percentage}%)`);
+        setEnriching(false);
+        return;
+      }
 
-      setEnriching(true);
-      setEnrichProgress({ current: 0, total: placesWithoutAI.length });
+      const estimatedMinutes = Math.ceil(pending * 3 / 60);
+      if (!confirm(`¿Enriquecer ${pending} lugares publicados con IA?\n\n📊 Progreso actual: ${completed}/${totalPublished} (${percentage}%)\n⏱️ Tiempo estimado: ~${estimatedMinutes} minutos\n\n⚠️ El proceso se ejecutará en segundo plano.`)) {
+        setEnriching(false);
+        return;
+      }
+
+      setEnrichProgress({ current: 0, total: pending });
+
+      // Obtener los lugares pendientes reales desde Supabase
+      const supabase = createClient();
+      const { data: placesToEnrich } = await supabase
+        .from('places')
+        .select('id, name')
+        .eq('published', true)
+        .is('ai_description', null)
+        .limit(pending);
+
+      if (!placesToEnrich || placesToEnrich.length === 0) {
+        toast.info('No hay lugares pendientes de enriquecer');
+        setEnriching(false);
+        return;
+      }
 
       let enriched = 0;
       let errors = 0;
 
-      // Procesar uno por uno para mostrar progreso
-      for (let i = 0; i < placesWithoutAI.length; i++) {
-        const place = placesWithoutAI[i];
+      // Procesar en lotes de 5 para mejor rendimiento
+      const batchSize = 5;
+      for (let i = 0; i < placesToEnrich.length; i += batchSize) {
+        const batch = placesToEnrich.slice(i, i + batchSize);
         
-        try {
-          console.log(`🎨 Enriqueciendo ${i + 1}/${placesWithoutAI.length}: ${place.name}`);
-          
-          const response = await fetch('/api/admin/enrich-single-place', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ placeId: place.id }),
-          });
+        await Promise.all(batch.map(async (place) => {
+          try {
+            const response = await fetch('/api/admin/enrich-single-place', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ placeId: place.id }),
+            });
 
-          if (response.ok) {
-            enriched++;
-            console.log(`✅ ${place.name} enriquecido`);
-          } else {
+            if (response.ok) {
+              enriched++;
+              console.log(`✅ ${place.name} enriquecido`);
+            } else {
+              errors++;
+              console.error(`❌ Error enriqueciendo ${place.name}`);
+            }
+          } catch (error) {
             errors++;
-            console.error(`❌ Error enriqueciendo ${place.name}`);
+            console.error(`❌ Error en ${place.name}:`, error);
           }
-        } catch (error) {
-          errors++;
-          console.error(`❌ Error en ${place.name}:`, error);
-        }
+        }));
 
-        setEnrichProgress({ current: i + 1, total: placesWithoutAI.length });
+        setEnrichProgress({ current: Math.min(i + batchSize, placesToEnrich.length), total: pending });
+        
+        // Pequeña pausa entre lotes para no saturar
+        await new Promise(resolve => setTimeout(resolve, 500));
       }
 
       toast.success(`✅ Completado: ${enriched} enriquecidos, ${errors} errores`);
