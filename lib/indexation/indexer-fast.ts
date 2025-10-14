@@ -165,7 +165,7 @@ async function processPlacesFromZone(
         phone: details.formatted_phone_number,
         website: details.website,
         opening_hours: (details as any).opening_hours?.weekday_text || [],
-        geometry: details.geometry,
+        // geometry: details.geometry, // ❌ ELIMINADO - columna no existe en BD
         published: true,
         created_at: new Date().toISOString(),
       };
