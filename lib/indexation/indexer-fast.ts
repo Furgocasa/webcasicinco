@@ -164,7 +164,7 @@ async function processPlacesFromZone(
         photos: details.photos ? details.photos.map((p: any) => p.photo_reference) : [],
         phone: details.formatted_phone_number,
         website: details.website,
-        opening_hours: details.opening_hours?.weekday_text || [],
+        opening_hours: (details as any).opening_hours?.weekday_text || [],
         geometry: details.geometry,
         published: true,
         created_at: new Date().toISOString(),
