@@ -25,6 +25,7 @@ interface DashboardStats {
   totalPlaces: number;
   published: number;
   pending: number;
+  needsEnrichment: number; // ✅ NUEVO: Aprobados pero sin IA
   provinces: number;
   communities: number;
   cities: number;
@@ -66,6 +67,7 @@ export default function DashboardPage() {
     totalPlaces: 0,
     published: 0,
     pending: 0,
+    needsEnrichment: 0,
     provinces: 0,
     communities: 0,
     cities: 0,
@@ -166,6 +168,7 @@ export default function DashboardPage() {
           : 0;
         const withAI = places.filter((p: any) => p.ai_description).length;
         const withoutAI = places.filter((p: any) => !p.ai_description).length;
+        const needsEnrichment = places.filter((p: any) => p.needs_enrichment === true).length; // ✅ NUEVO
         const totalReviews = places.reduce((sum: number, p: any) => sum + (p.review_count || 0), 0);
         const avgReviews = places.length > 0 ? Math.round(totalReviews / places.length) : 0;
 
@@ -173,6 +176,7 @@ export default function DashboardPage() {
           totalPlaces: places.length,
           published,
           pending,
+          needsEnrichment, // ✅ NUEVO
           provinces: uniqueProvinces,
           communities: uniqueCommunities,
           cities: uniqueCities,
@@ -454,20 +458,20 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
-          {/* Con IA */}
-          <Card className="min-w-[280px] md:min-w-0 snap-start bg-gradient-to-br from-purple-500 to-purple-600 text-white flex-shrink-0">
+          {/* Pendientes de Enriquecer */}
+          <Card className="min-w-[280px] md:min-w-0 snap-start bg-gradient-to-br from-amber-500 to-amber-600 text-white flex-shrink-0">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-medium text-purple-100">Con IA</p>
+                  <p className="text-xs font-medium text-amber-100">Pendientes IA</p>
                   <p className="mt-1 text-2xl font-bold">
-                    {stats.withAI}
+                    {stats.needsEnrichment}
                   </p>
-                  <p className="text-[10px] text-purple-100 mt-0.5">
-                    {Math.round((stats.withAI / stats.totalPlaces) * 100)}% enriquecidos
+                  <p className="text-[10px] text-amber-100 mt-0.5">
+                    Aprobados sin enriquecer
                   </p>
                 </div>
-                <Target className="h-8 w-8 text-purple-200" />
+                <Clock className="h-8 w-8 text-amber-200" />
               </div>
             </CardContent>
           </Card>
@@ -773,14 +777,41 @@ export default function DashboardPage() {
             <CardTitle>Accesos Rápidos</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <Link href="/admin/indexar">
                 <Button variant="outline" className="h-auto w-full flex-col gap-2 py-6 hover:border-indigo-500 hover:bg-indigo-50 transition">
                   <Plus className="h-8 w-8 text-indigo-600" />
-                  <span className="font-semibold">Nueva Indexación</span>
-                  <span className="text-xs text-gray-500">Buscar lugares de calidad</span>
+                  <span className="font-semibold">Buscar Lugares</span>
+                  <span className="text-xs text-gray-500">Indexación rápida</span>
                 </Button>
               </Link>
+
+              <Button 
+                variant="outline" 
+                className="h-auto w-full flex-col gap-2 py-6 hover:border-amber-500 hover:bg-amber-50 transition"
+                onClick={async () => {
+                  if (!confirm(`¿Enriquecer ${stats.needsEnrichment} lugares con IA?\n\nEsto descargará fotos y generará contenido IA.\nTiempo estimado: ~${Math.round(stats.needsEnrichment * 3 / 60)} minutos`)) return;
+                  
+                  try {
+                    const response = await fetch('/api/admin/enrich-pending', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ batchSize: 100 })
+                    });
+                    
+                    if (response.ok) {
+                      alert('✅ Enriquecimiento iniciado. Revisa el progreso en Gestión de Lugares.');
+                    }
+                  } catch (error) {
+                    alert('❌ Error al iniciar enriquecimiento');
+                  }
+                }}
+                disabled={stats.needsEnrichment === 0}
+              >
+                <Target className="h-8 w-8 text-amber-600" />
+                <span className="font-semibold">Enriquecer con IA</span>
+                <Badge className="bg-amber-500 text-white">{stats.needsEnrichment}</Badge>
+              </Button>
 
               <Link href="/admin/lugares">
                 <Button variant="outline" className="h-auto w-full flex-col gap-2 py-6 hover:border-cyan-500 hover:bg-cyan-50 transition">

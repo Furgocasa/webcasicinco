@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { startIndexation } from '@/lib/indexation/indexer';
+import { startFastIndexation } from '@/lib/indexation/indexer-fast'; // ✅ Nuevo indexer rápido
 
 export async function POST(request: NextRequest) {
   try {
@@ -69,13 +69,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Iniciar proceso de indexación en background (no bloqueante)
-    // El proceso se ejecuta de forma asíncrona sin bloquear la respuesta
+    // Iniciar proceso de indexación RÁPIDA en background
+    // FASE 1: Solo búsqueda + filtrado + guardado básico (SIN IA)
     Promise.resolve().then(async () => {
       try {
-        await startIndexation(job.id, { provinces, categories, minRating: minRating || 4.7 });
+        await startFastIndexation(job.id, { provinces, categories, minRating: minRating || 4.7 });
       } catch (err) {
-        console.error('Error en indexación:', err);
+        console.error('Error en indexación rápida:', err);
       }
     });
 

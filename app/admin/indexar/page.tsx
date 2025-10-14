@@ -265,57 +265,54 @@ export default function IndexarPage() {
         <div className="lg:col-span-2">
           <Card>
             <CardHeader>
-              <CardTitle>📋 Cómo Funciona la Indexación</CardTitle>
+              <CardTitle>📋 Sistema de 2 Fases Optimizado</CardTitle>
               <CardDescription>
-                Proceso automático en segundo plano
+                Búsqueda rápida + Enriquecimiento separado
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4 text-sm text-gray-700">
-                <div className="flex items-start gap-3">
-                  <span className="text-2xl">1️⃣</span>
-                  <div>
-                    <p className="font-semibold mb-1">Búsqueda Exhaustiva</p>
-                    <p>Se buscan TODOS los lugares en Google Maps de las ciudades seleccionadas (sin filtro de rating).</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start gap-3">
-                  <span className="text-2xl">2️⃣</span>
-                  <div>
-                    <p className="font-semibold mb-1">Obtener Detalles</p>
-                    <p>Se descargan los detalles completos de cada lugar (rating exacto, reseñas, fotos, etc.).</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start gap-3">
-                  <span className="text-2xl">3️⃣</span>
-                  <div>
-                    <p className="font-semibold mb-1">Filtrado Inteligente</p>
-                    <p>Se descartan los que no cumplan: rating ≥4.7, reseñas ≥20, y duplicados.</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start gap-3">
-                  <span className="text-2xl">4️⃣</span>
-                  <div>
-                    <p className="font-semibold mb-1">Categorización con IA</p>
-                    <p>Cada lugar se categoriza automáticamente usando inteligencia artificial.</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start gap-3">
-                  <span className="text-2xl">5️⃣</span>
-                  <div>
-                    <p className="font-semibold mb-1">Guardado en Base de Datos</p>
-                    <p>Los lugares nuevos se guardan como borradores listos para enriquecer.</p>
+              <div className="space-y-4">
+                <div className="p-4 bg-blue-50 border-2 border-blue-300 rounded-lg">
+                  <h3 className="font-bold text-blue-900 mb-3 flex items-center gap-2">
+                    🔍 FASE 1: Indexación Rápida <Badge className="bg-blue-600">Este Proceso</Badge>
+                  </h3>
+                  <div className="space-y-2 text-sm text-blue-800">
+                    <p>1️⃣ <strong>Búsqueda exhaustiva</strong> en Google Maps (sin filtros)</p>
+                    <p>2️⃣ <strong>Obtener detalles básicos</strong> (rating, reseñas, ubicación)</p>
+                    <p>3️⃣ <strong>Filtrar</strong> rating ≥4.7, reseñas ≥20, detectar duplicados</p>
+                    <p>4️⃣ <strong>Guardar</strong> como "Pendientes de Enriquecer"</p>
+                    <p className="font-bold mt-3 pt-3 border-t border-blue-300">
+                      ⏱️ Tiempo: 30-60 min para todas las provincias
+                    </p>
+                    <p className="font-bold text-green-700">
+                      ✅ Resultado: ~3,500 lugares aprobados (SIN IA aún)
+                    </p>
                   </div>
                 </div>
 
-                <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                  <p className="font-semibold text-blue-900 mb-2">⏱️ Tiempo Estimado</p>
-                  <p className="text-blue-800 text-sm">
-                    Murcia completa: ~10-15 minutos • Madrid: ~15-20 minutos • Barcelona: ~15-20 minutos
+                <div className="p-4 bg-amber-50 border-2 border-amber-300 rounded-lg">
+                  <h3 className="font-bold text-amber-900 mb-3">
+                    🎨 FASE 2: Enriquecimiento IA
+                  </h3>
+                  <div className="space-y-2 text-sm text-amber-800">
+                    <p>📸 Descargar fotos → Supabase Storage</p>
+                    <p>🤖 Generar descripción con IA</p>
+                    <p>📝 Resumir reseñas con IA</p>
+                    <p>✨ Generar highlights con IA</p>
+                    <p>🚀 Publicar en el mapa</p>
+                    <p className="font-bold mt-3 pt-3 border-t border-amber-300">
+                      ⏱️ Tiempo: ~3 seg/lugar = 3-5 horas para 3,500
+                    </p>
+                    <p className="font-bold text-purple-700">
+                      💡 Acceso: Dashboard → "Enriquecer con IA"
+                    </p>
+                  </div>
+                </div>
+
+                <div className="p-3 bg-green-50 border border-green-300 rounded-lg">
+                  <p className="text-xs text-green-800">
+                    <strong>💰 Ventaja:</strong> Puedes revisar los 3,500 lugares ANTES de gastar en IA.
+                    Si hay duplicados o errores, los eliminas antes de procesarlos.
                   </p>
                 </div>
               </div>
