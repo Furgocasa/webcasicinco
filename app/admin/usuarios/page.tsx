@@ -1,5 +1,9 @@
 'use client';
 
+// Sin caché para admin
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 import { useEffect, useState } from 'react';
 import { 
   Users, 

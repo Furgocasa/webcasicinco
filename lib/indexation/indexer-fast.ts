@@ -64,18 +64,20 @@ export async function startFastIndexation(
     let duplicates = 0;
     let errors = 0;
 
-    // Ciudades principales por provincia
+    // Ciudades principales por provincia (COBERTURA MÁXIMA - 12 ciudades)
     const mainCities: Record<string, string[]> = {
-      'Murcia': ['Murcia', 'Cartagena', 'Lorca', 'Molina de Segura', 'Mazarrón', 'Yecla', 'Jumilla', 'Cieza'],
-      'Alicante': ['Alicante', 'Elche', 'Torrevieja', 'Benidorm', 'Orihuela', 'Alcoy', 'Dénia'],
-      'Madrid': ['Madrid', 'Móstoles', 'Alcalá de Henares', 'Fuenlabrada', 'Leganés', 'Getafe'],
-      'Barcelona': ['Barcelona', 'Hospitalet', 'Terrassa', 'Badalona', 'Sabadell', 'Mataró'],
-      'Valencia': ['Valencia', 'Gandía', 'Torrent', 'Paterna', 'Sagunto', 'Alzira'],
-      'Sevilla': ['Sevilla', 'Dos Hermanas', 'Alcalá de Guadaíra', 'Utrera', 'Mairena'],
-      'Málaga': ['Málaga', 'Marbella', 'Mijas', 'Vélez-Málaga', 'Fuengirola', 'Torremolinos'],
-      'Granada': ['Granada', 'Motril', 'Almuñécar'],
-      'Cádiz': ['Cádiz', 'Jerez de la Frontera', 'Algeciras', 'San Fernando'],
-      'Córdoba': ['Córdoba', 'Lucena', 'Puente Genil'],
+      'Murcia': ['Murcia', 'Cartagena', 'Lorca', 'Molina de Segura', 'Mazarrón', 'Yecla', 'Jumilla', 'Cieza', 'Águilas', 'San Javier', 'Totana', 'Alcantarilla'],
+      'Alicante': ['Alicante', 'Elche', 'Torrevieja', 'Benidorm', 'Orihuela', 'Alcoy', 'Dénia', 'Jávea', 'Calpe', 'Altea', 'Villena', 'Elda'],
+      'Madrid': ['Madrid', 'Móstoles', 'Alcalá de Henares', 'Fuenlabrada', 'Leganés', 'Getafe', 'Torrejón', 'Parla', 'Coslada', 'Pozuelo', 'Las Rozas', 'Majadahonda'],
+      'Barcelona': ['Barcelona', 'Hospitalet', 'Terrassa', 'Badalona', 'Sabadell', 'Mataró', 'Granollers', 'Sitges', 'Vic', 'Manresa', 'Rubí', 'Cornellà'],
+      'Valencia': ['Valencia', 'Gandía', 'Torrent', 'Paterna', 'Sagunto', 'Alzira', 'Cullera', 'Burjassot', 'Mislata', 'Requena', 'Xàtiva', 'Ontinyent'],
+      'Sevilla': ['Sevilla', 'Dos Hermanas', 'Alcalá de Guadaíra', 'Utrera', 'Mairena', 'Écija', 'La Rinconada', 'Carmona', 'Lebrija', 'Coria del Río', 'Los Palacios', 'Osuna'],
+      'Málaga': ['Málaga', 'Marbella', 'Mijas', 'Vélez-Málaga', 'Fuengirola', 'Torremolinos', 'Estepona', 'Benalmádena', 'Ronda', 'Antequera', 'Nerja', 'Torrox'],
+      'Granada': ['Granada', 'Motril', 'Almuñécar', 'Baza', 'Guadix', 'Loja', 'Armilla', 'Albolote', 'Maracena', 'Salobreña', 'Huétor Vega', 'Atarfe'],
+      'Cádiz': ['Cádiz', 'Jerez de la Frontera', 'Algeciras', 'San Fernando', 'El Puerto de Santa María', 'Chiclana', 'La Línea', 'Sanlúcar', 'Barbate', 'Rota', 'Conil', 'Tarifa'],
+      'Córdoba': ['Córdoba', 'Lucena', 'Puente Genil', 'Montilla', 'Priego', 'Palma del Río', 'Pozoblanco', 'Baena', 'Cabra', 'Aguilar', 'Rute', 'Fernán Núñez'],
+      'A Coruña': ['A Coruña', 'Santiago de Compostela', 'Ferrol', 'Carballo', 'Oleiros', 'Culleredo', 'Arteixo', 'Betanzos', 'Narón', 'Ames', 'Cambre', 'Ribeira'],
+      'Albacete': ['Albacete', 'Hellín', 'Villarrobledo', 'Almansa', 'La Roda', 'Caudete', 'Yeste', 'Tobarra', 'Tarazona', 'Chinchilla', 'Madrigueras', 'Alcalá del Júcar'],
     };
 
     // ==========================================
@@ -85,19 +87,20 @@ export async function startFastIndexation(
 
     for (const province of params.provinces) {
       for (const category of params.categories) {
-        // SOLO 4 CATEGORÍAS PERMITIDAS
-        const searchTerms: Record<string, string> = {
-          'restaurante': 'restaurantes',
-          'bar': 'bares tapas',
-          'cafe': 'cafeterías coffee',
-          'hotel': 'hoteles alojamiento',
-        };
+        try {
+          // SOLO 4 CATEGORÍAS PERMITIDAS
+          const searchTerms: Record<string, string> = {
+            'restaurante': 'restaurantes',
+            'bar': 'bares tapas',
+            'cafe': 'cafeterías coffee',
+            'hotel': 'hoteles alojamiento',
+          };
 
-        const searchTerm = searchTerms[category] || category;
-        const cities = mainCities[province] || [province];
+          const searchTerm = searchTerms[category] || category;
+          const cities = mainCities[province] || [province];
 
-        console.log(`\n[FAST-INDEX] 📍 ${province} - ${category.toUpperCase()}`);
-        console.log(`[FAST-INDEX] Buscando en ${cities.length} ciudades...\n`);
+          console.log(`\n[FAST-INDEX] 📍 ${province} - ${category.toUpperCase()}`);
+          console.log(`[FAST-INDEX] Buscando en ${cities.length} ciudades...\n`);
 
         for (let i = 0; i < cities.length; i++) {
           const city = cities[i];
@@ -121,13 +124,19 @@ export async function startFastIndexation(
               .update({ total_places: allPlaceIds.size })
               .eq('id', jobId);
 
-            await new Promise(r => setTimeout(r, 500));
+            await new Promise(r => setTimeout(r, 200)); // Reducido de 500ms a 200ms
           } catch (error) {
             console.error(`[FAST-INDEX] Error en ${city}:`, error);
+            // Continuar con la siguiente ciudad aunque falle una
           }
         }
 
         console.log(`[FAST-INDEX] ✅ ${category}: ${allPlaceIds.size} lugares únicos acumulados\n`);
+        
+        } catch (categoryError) {
+          console.error(`[FAST-INDEX] ❌ Error fatal en ${province} - ${category}:`, categoryError);
+          // Continuar con la siguiente categoría aunque falle una
+        }
       }
     }
 

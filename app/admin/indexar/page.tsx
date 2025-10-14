@@ -1,5 +1,9 @@
 'use client';
 
+// Sin caché para admin - ver cambios al instante
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 import { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -247,6 +251,16 @@ export default function IndexarPage() {
                 </select>
               </div>
 
+              {/* Advertencia para múltiples provincias */}
+              {selectedProvinces.length > 1 && (
+                <div className="p-3 bg-amber-50 border border-amber-300 rounded-lg">
+                  <p className="text-xs text-amber-800">
+                    <strong>⚠️ Recomendación:</strong> Para mejor estabilidad, indexa <strong>UNA provincia a la vez</strong>.
+                    Múltiples provincias pueden tardar 1-2 horas.
+                  </p>
+                </div>
+              )}
+
               {/* Botón de indexación */}
               <div className="pt-4">
                 <Button
@@ -260,6 +274,12 @@ export default function IndexarPage() {
                 {(selectedProvinces.length === 0 || selectedCategories.length === 0) && (
                   <p className="text-xs text-red-500 mt-2 text-center">
                     Selecciona al menos una provincia y una categoría
+                  </p>
+                )}
+                
+                {selectedProvinces.length === 1 && selectedCategories.length > 0 && (
+                  <p className="text-xs text-green-600 mt-2 text-center">
+                    ✅ Configuración óptima: 1 provincia × {selectedCategories.length} categoría(s) = {selectedCategories.length * 12} ciudades
                   </p>
                 )}
               </div>

@@ -33,32 +33,6 @@ export async function enrichPendingPlaces(
   console.log('\n[ENRICHER] 🎨 INICIANDO ENRIQUECIMIENTO CON IA');
   console.log(`[ENRICHER] Tamaño de lote: ${batchSize}\n`);
 
-  // Crear job de enriquecimiento
-  const { data: job, error: jobError } = await supabase
-    .from('enrichment_jobs')
-    .insert({
-      admin_user_id: adminUserId,
-      status: 'pending',
-      batch_size: batchSize,
-      total_places: 0,
-    })
-    .select()
-    .single();
-
-  if (jobError || !job) {
-    console.error('[ENRICHER] Error creando job:', jobError);
-  }
-
-  const jobId = job?.id;
-
-  // Marcar job como running
-  if (jobId) {
-    await supabase
-      .from('enrichment_jobs')
-      .update({ status: 'running', started_at: new Date().toISOString() })
-      .eq('id', jobId);
-  }
-
   // Obtener lugares pendientes
   const { data: pendingPlaces, error: fetchError } = await supabase
     .from('places')
@@ -66,13 +40,6 @@ export async function enrichPendingPlaces(
     .eq('needs_enrichment', true)
     .eq('enrichment_status', 'pending')
     .limit(batchSize);
-
-  if (jobId && pendingPlaces) {
-    await supabase
-      .from('enrichment_jobs')
-      .update({ total_places: pendingPlaces.length })
-      .eq('id', jobId);
-  }
 
   if (fetchError) {
     throw new Error(`Error obteniendo lugares pendientes: ${fetchError.message}`);
@@ -103,17 +70,9 @@ export async function enrichPendingPlaces(
     try {
       console.log(`[ENRICHER] [${processed}/${pendingPlaces.length}] Enriqueciendo "${place.name}"...`);
 
-      // Actualizar progreso en enrichment_jobs cada 5 lugares
-      if (jobId && processed % 5 === 0) {
-        await supabase
-          .from('enrichment_jobs')
-          .update({
-            processed_places: processed,
-            successful_places: successful,
-            failed_places: failed,
-            discarded_by_ai: discardedByAI,
-          })
-          .eq('id', jobId);
+      // Log cada 10 lugares para no saturar
+      if (processed % 10 === 0) {
+        console.log(`[ENRICHER] 📊 Progreso: ${processed}/${pendingPlaces.length} (${successful} publicados, ${discardedByAI} descartados)`);
       }
 
       // Marcar como "processing"
@@ -226,25 +185,6 @@ export async function enrichPendingPlaces(
 
   console.log(`\n[ENRICHER] ✅ ENRIQUECIMIENTO COMPLETADO`);
   console.log(`[ENRICHER] 📊 Procesados: ${processed} | Exitosos: ${successful} | Descartados IA: ${discardedByAI} | Fallidos: ${failed}\n`);
-
-  // Finalizar job
-  if (jobId) {
-    await supabase
-      .from('enrichment_jobs')
-      .update({
-        status: 'completed',
-        completed_at: new Date().toISOString(),
-        processed_places: processed,
-        successful_places: successful,
-        failed_places: failed,
-        discarded_by_ai: discardedByAI,
-        error_log: {
-          summary: `${successful} enriquecidos | ${discardedByAI} descartados por IA | ${failed} errores`,
-          errors: errors.slice(0, 10), // Solo primeros 10 errores
-        }
-      })
-      .eq('id', jobId);
-  }
 
   return {
     totalPending: pendingPlaces.length,

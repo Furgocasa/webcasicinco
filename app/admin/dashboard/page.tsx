@@ -1,5 +1,9 @@
 'use client';
 
+// Sin caché para admin - ver cambios al instante
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 import { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
 import { 
@@ -786,24 +790,12 @@ export default function DashboardPage() {
             <CardTitle>Accesos Rápidos</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <Link href="/admin/indexar">
                 <Button variant="outline" className="h-auto w-full flex-col gap-2 py-6 hover:border-indigo-500 hover:bg-indigo-50 transition">
                   <Plus className="h-8 w-8 text-indigo-600" />
                   <span className="font-semibold">Buscar Lugares</span>
-                  <span className="text-xs text-gray-500">Indexación rápida</span>
-                </Button>
-              </Link>
-
-              <Link href="/admin/enriquecer">
-                <Button 
-                  variant="outline" 
-                  className="h-auto w-full flex-col gap-2 py-6 hover:border-amber-500 hover:bg-amber-50 transition"
-                  disabled={stats.needsEnrichment === 0}
-                >
-                  <Target className="h-8 w-8 text-amber-600" />
-                  <span className="font-semibold">Enriquecer con IA</span>
-                  <Badge className="bg-amber-500 text-white">{stats.needsEnrichment}</Badge>
+                  <span className="text-xs text-gray-500">Indexación rápida (FASE 1)</span>
                 </Button>
               </Link>
 
@@ -812,6 +804,11 @@ export default function DashboardPage() {
                   <MapPin className="h-8 w-8 text-cyan-600" />
                   <span className="font-semibold">Gestionar Lugares</span>
                   <Badge className="bg-cyan-500 text-white">{stats.totalPlaces.toLocaleString()}</Badge>
+                  {stats.needsEnrichment > 0 && (
+                    <Badge className="bg-amber-500 text-white text-xs">
+                      {stats.needsEnrichment} pendientes IA
+                    </Badge>
+                  )}
                 </Button>
               </Link>
             </div>

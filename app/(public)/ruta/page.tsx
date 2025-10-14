@@ -59,6 +59,10 @@ export default function RutaPage() {
   const originAutocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
   const destinationAutocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
   
+  // Refs para persistir valores (evita que Google Autocomplete los borre)
+  const originValueRef = useRef('');
+  const destinationValueRef = useRef('');
+  
   const [directionsResponse, setDirectionsResponse] = useState<google.maps.DirectionsResult | null>(null);
   
   // Inputs de ruta
@@ -356,20 +360,22 @@ export default function RutaPage() {
               </label>
               {isLoaded && (
                 <Autocomplete
+                  key="origin-autocomplete"
                   onLoad={(autocomplete) => {
                     originAutocompleteRef.current = autocomplete;
                   }}
                   onPlaceChanged={() => {
                     if (originAutocompleteRef.current) {
                       const place = originAutocompleteRef.current.getPlace();
-                      // Solo actualizar si hay dirección válida
                       if (place && place.formatted_address) {
-                        setOrigin(place.formatted_address);
+                        const value = place.formatted_address;
+                        setOrigin(value);
+                        originValueRef.current = value;
                       }
                     }
                   }}
                   options={{
-                    componentRestrictions: { country: 'es' }, // Solo España
+                    componentRestrictions: { country: 'es' },
                     fields: ['formatted_address', 'geometry'],
                   }}
                 >
@@ -377,7 +383,17 @@ export default function RutaPage() {
                     type="text"
                     placeholder="Ej: Madrid, Puerta del Sol"
                     value={origin}
-                    onChange={(e) => setOrigin(e.target.value)}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setOrigin(value);
+                      originValueRef.current = value;
+                    }}
+                    onBlur={() => {
+                      // Restaurar valor si Google lo borró
+                      if (!origin && originValueRef.current) {
+                        setOrigin(originValueRef.current);
+                      }
+                    }}
                     onKeyPress={(e) => e.key === 'Enter' && calculateRoute()}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-base"
                   />
@@ -392,20 +408,22 @@ export default function RutaPage() {
               </label>
               {isLoaded && (
                 <Autocomplete
+                  key="destination-autocomplete"
                   onLoad={(autocomplete) => {
                     destinationAutocompleteRef.current = autocomplete;
                   }}
                   onPlaceChanged={() => {
                     if (destinationAutocompleteRef.current) {
                       const place = destinationAutocompleteRef.current.getPlace();
-                      // Solo actualizar si hay dirección válida
                       if (place && place.formatted_address) {
-                        setDestination(place.formatted_address);
+                        const value = place.formatted_address;
+                        setDestination(value);
+                        destinationValueRef.current = value;
                       }
                     }
                   }}
                   options={{
-                    componentRestrictions: { country: 'es' }, // Solo España
+                    componentRestrictions: { country: 'es' },
                     fields: ['formatted_address', 'geometry'],
                   }}
                 >
@@ -413,7 +431,17 @@ export default function RutaPage() {
                     type="text"
                     placeholder="Ej: Barcelona, Sagrada Familia"
                     value={destination}
-                    onChange={(e) => setDestination(e.target.value)}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setDestination(value);
+                      destinationValueRef.current = value;
+                    }}
+                    onBlur={() => {
+                      // Restaurar valor si Google lo borró
+                      if (!destination && destinationValueRef.current) {
+                        setDestination(destinationValueRef.current);
+                      }
+                    }}
                     onKeyPress={(e) => e.key === 'Enter' && calculateRoute()}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-base"
                   />
@@ -966,15 +994,17 @@ export default function RutaPage() {
               </label>
               {isLoaded && (
                 <Autocomplete
+                  key="origin-autocomplete-mobile"
                   onLoad={(autocomplete) => {
                     originAutocompleteRef.current = autocomplete;
                   }}
                   onPlaceChanged={() => {
                     if (originAutocompleteRef.current) {
                       const place = originAutocompleteRef.current.getPlace();
-                      // Solo actualizar si hay dirección válida
                       if (place && place.formatted_address) {
-                        setOrigin(place.formatted_address);
+                        const value = place.formatted_address;
+                        setOrigin(value);
+                        originValueRef.current = value;
                       }
                     }
                   }}
@@ -987,7 +1017,16 @@ export default function RutaPage() {
                     type="text"
                     placeholder="Ej: Madrid, Puerta del Sol"
                     value={origin}
-                    onChange={(e) => setOrigin(e.target.value)}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setOrigin(value);
+                      originValueRef.current = value;
+                    }}
+                    onBlur={() => {
+                      if (!origin && originValueRef.current) {
+                        setOrigin(originValueRef.current);
+                      }
+                    }}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-base"
                   />
                 </Autocomplete>
@@ -1000,15 +1039,17 @@ export default function RutaPage() {
               </label>
               {isLoaded && (
                 <Autocomplete
+                  key="destination-autocomplete-mobile"
                   onLoad={(autocomplete) => {
                     destinationAutocompleteRef.current = autocomplete;
                   }}
                   onPlaceChanged={() => {
                     if (destinationAutocompleteRef.current) {
                       const place = destinationAutocompleteRef.current.getPlace();
-                      // Solo actualizar si hay dirección válida
                       if (place && place.formatted_address) {
-                        setDestination(place.formatted_address);
+                        const value = place.formatted_address;
+                        setDestination(value);
+                        destinationValueRef.current = value;
                       }
                     }
                   }}
@@ -1021,7 +1062,16 @@ export default function RutaPage() {
                     type="text"
                     placeholder="Ej: Barcelona, Sagrada Familia"
                     value={destination}
-                    onChange={(e) => setDestination(e.target.value)}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setDestination(value);
+                      destinationValueRef.current = value;
+                    }}
+                    onBlur={() => {
+                      if (!destination && destinationValueRef.current) {
+                        setDestination(destinationValueRef.current);
+                      }
+                    }}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-base"
                   />
                 </Autocomplete>

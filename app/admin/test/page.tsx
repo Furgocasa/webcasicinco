@@ -1,5 +1,8 @@
 'use client';
 
+// Sin caché
+export const dynamic = 'force-dynamic';
+
 import { useState } from 'react';
 
 export default function TestPage() {
