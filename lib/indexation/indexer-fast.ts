@@ -231,6 +231,8 @@ async function processPlacesFromZone(
         province: normalizedProvince,
         city: city,
         address: details.formatted_address,
+        latitude: details.geometry?.location?.lat || 0, // ✅ AGREGADO - latitude requerido
+        longitude: details.geometry?.location?.lng || 0, // ✅ AGREGADO - longitude requerido
         rating: details.rating,
         review_count: details.user_ratings_total,
         photos: details.photos ? details.photos.map((p: any) => p.photo_reference) : [],
