@@ -326,10 +326,21 @@ export default function IndexarPage() {
           {jobStatus && (
             <Card className="mt-6">
               <CardHeader>
-                <CardTitle>Estado de la Indexación</CardTitle>
-                <CardDescription>
-                  Job ID: {jobId}
-                </CardDescription>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Estado de la Indexación</CardTitle>
+                    <CardDescription className="font-mono text-xs mt-1">
+                      Job ID: {jobId}
+                    </CardDescription>
+                  </div>
+                  <Button
+                    onClick={() => window.open(`/admin/trabajos`, '_blank')}
+                    variant="outline"
+                    size="sm"
+                  >
+                    Ver en Historial →
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
