@@ -1,459 +1,255 @@
-# 🏆 Casi Cinco - Los Mejores Lugares de España
+# 🌟 Casi Cinco - Los Mejores Lugares de España
 
-![Estado](https://img.shields.io/badge/Estado-BETA%206.0%20Production%20Ready-success)
-![Version](https://img.shields.io/badge/Versión-6.0.0-blue)
-![Tech](https://img.shields.io/badge/Tech-Next.js%2014%20%7C%20TypeScript%20%7C%20Supabase-blue)
-![Lugares](https://img.shields.io/badge/Lugares-3628-orange)
-![Deploy](https://img.shields.io/badge/Deploy-AWS%20Amplify-orange)
-
-**La plataforma definitiva que filtra el 95% de lugares para mostrarte solo el top 5% de España.**
+**Versión:** BETA 6.0  
+**Fecha:** 14 de octubre de 2025  
+**Dominio:** [www.casicinco.com](https://www.casicinco.com)
 
 ---
 
-## ✨ ¿Qué es Casi Cinco?
+## 📋 **Descripción**
 
-Casi Cinco es la plataforma definitiva para encontrar lugares excepcionales en España. No mostramos miles de opciones mediocres. **Solo el top 5%**.
+Casi Cinco es una plataforma que recopila y presenta los **mejores lugares de España** con valoraciones de 4.7 estrellas o superiores. 
 
-### 🎯 Propuesta de Valor
-
-- ⭐ **Solo 4.7★ o más** - Cero lugares mediocres
-- 💎 **Sistema de Tiers** - De Diamante (1,000+ reseñas) a Bronce (<50)
-- 📊 **Filtro por Reseñas** - Un 4.8★ con 10 reseñas NO es igual que con 1,000
-- 🤖 **IA Integrada** - Descripciones y resúmenes automáticos
-- 🗺️ **Mapa Avanzado** - Filtros múltiples y marcadores personalizados
-- 📍 **Rutas Optimizadas** - Planifica tu día perfecto en segundos
+Utilizando inteligencia artificial y datos de Google Places, ofrecemos una experiencia curada de:
+- 🍽️ **Restaurantes** excepcionales
+- 🍺 **Bares** y tabernas de calidad
+- ☕ **Cafeterías** únicas
+- 🏨 **Hoteles** y alojamientos premium
 
 ---
 
-## 🚀 Estado del Proyecto - BETA 6.0
+## 🚀 **Características Principales**
 
-### ✅ Completado (100%)
+### **Para Usuarios:**
+- 🗺️ **Mapa Interactivo** con 2,700+ lugares verificados
+- 🔍 **Filtros Avanzados** por categoría, provincia, rating, reseñas
+- 📍 **Planificador de Rutas** con sugerencias inteligentes
+- 🤖 **Chatbot IA** con recomendaciones personalizadas
+- 💎 **Sistema de Tiers** (Diamond, Platinum, Gold, Silver, Bronze)
+- 📱 **Responsive** - Optimizado para móvil y desktop
 
-#### **Core Features**
-✅ Backend completo con APIs  
-✅ Sistema de autenticación (Supabase)  
-✅ Panel de administración con Dashboard Analytics  
-✅ Indexación automática desde Google Places  
-✅ Sistema de tiers de calidad (6 niveles)  
-✅ Filtros avanzados dinámicos (CCAA, Provincia, Ciudad, Tier, Reseñas)  
-✅ **Sistema de pagos Stripe con trial 30 días CON tarjeta**  
-✅ +3,600 lugares indexados  
-✅ **Dominio personalizado: www.casicinco.com**
-✅ **Sistema de fotos optimizado** - Migración masiva a Supabase Storage (ahorro $2,500/año)
-
-#### **Mapa Interactivo Avanzado**
-✅ Geolocalización con marcador personalizado  
-✅ Clustering inteligente de marcadores (por tier)  
-✅ Auto-zoom a lugares filtrados  
-✅ Filtro de ciudad con búsqueda parcial  
-✅ Marcadores con iconos de tier (💎, 🏆, etc.)  
-✅ Lugares no filtrados visibles en gris  
-✅ Navegación desde chatbot con `?place=ID`  
-✅ Card flotante centrada (nunca se corta)  
-✅ Leyenda de tiers de calidad
-
-#### **Chatbot "Tío Viajero" IA**
-✅ Basado en OpenAI GPT-4  
-✅ Detección inteligente de categorías (restaurante, hotel, spa, bar)  
-✅ Sinónimos ampliados (apartamentos, alojamientos, etc.)  
-✅ Detección de plural → 5 resultados mínimo  
-✅ Manejo de "afueras", "alrededores", "cerca de pero no en"  
-✅ Enlaces clicables: "Ver detalles" y "Ver en mapa"  
-✅ Responde con dirección y teléfono  
-✅ NO da webs externas (retención de tráfico)  
-✅ Historial limitado a 10 mensajes  
-✅ Botón limpiar conversación con modal bonito  
-✅ Markdown renderizado (negrita, enlaces)
-
-#### **UI/UX**
-✅ Home optimizada para conversión  
-✅ Paginación en gestión de lugares  
-✅ Menú compartir en redes sociales  
-✅ Dashboard estilo Power BI con estadísticas completas  
-✅ Carga progresiva (filtros → mapa → lista)  
-✅ Lazy loading de imágenes  
-✅ Categoría visible en páginas de detalle  
-
-### 🎯 BETA 3.0 - Mobile-First Experience 📱
-
-El proyecto está **completamente optimizado para móvil** con:
-- ✅ Bottom Navigation (Mapa/Filtros/Lista)
-- ✅ Bottom Sheets deslizables
-- ✅ Cards con imágenes y botones touch-friendly
-- ✅ Dashboard con scroll horizontal
-- ✅ Inputs 48px+ altura (iOS optimized)
-- ✅ Desplegado en AWS Amplify
-- ✅ Todas las variables de entorno configuradas
-- ✅ Chatbot, Rutas, Indexación funcionando al 100%
-
-### 📱 BETA 4.0 - Mobile UX Perfection ✨
-
-Perfeccionamiento de la experiencia móvil con:
-- ✅ **Altura perfecta del mapa** sin scroll (100vh exacto)
-- ✅ **Leyenda expandible** con información detallada de tiers
-- ✅ **Controles flotantes** siempre visibles sobre el mapa
-- ✅ **pb-16** correcto para navegación inferior
-- ✅ Estructura idéntica a `/ruta` (que funcionaba perfectamente)
-
-### 🚀 BETA 5.0 - Performance & Monetization 💰
-
-Optimización extrema de performance y monetización completa:
-- ⚡ **Cache IndexedDB de 24h** - Carga de datos instantánea (<100ms, +98%)
-- 🎨 **Iconos pre-renderizados** - Solo 12 SVGs vs 3,628 (+90% velocidad marcadores)
-- ⏱️ **Tiempo total optimizado** - 8-10s → **0.6s** en cargas repetidas (+94%)
-- 💰 **Sistema de monetización** - Trial 30 días + suscripciones
-- 👥 **3 tipos de usuario** - Admin / Gratis / Premium
-- 💳 **Precios accesibles:** 2.99€/mes o 24.99€/año (ahorra 30%)
-
-Ver: [`BETA_5.0_PLAN.md`](./BETA_5.0_PLAN.md) | [`CHANGELOG_BETA_5.0.md`](./CHANGELOG_BETA_5.0.md)
+### **Para Administradores:**
+- 🔍 **Sistema de Indexación de 2 Fases** (revolucionario)
+- 🎨 **Enriquecimiento IA** separado y controlable
+- 📊 **Dashboard Analytics** completo
+- 👥 **Gestión de Usuarios** y suscripciones
+- 📋 **Historial de Trabajos** con tracking detallado
 
 ---
 
-### 🎯 BETA 6.0 - Coherencia Total y Production Ready  
-**Fecha:** 13 de Octubre de 2025
+## 🎯 **BETA 6.0 - Sistema de 2 Fases**
 
-#### Diseño y UX Profesional
-- 🎨 **Homepage simplificada** - 7 → 4 secciones, sin saturación visual
-- 🌈 **Color unificado** - Solo índigo/púrpura (profesional y coherente)
-- 📐 **Pricing = Home** - Diseño idéntico en ambas páginas
-- ✨ **Metodología consolidada** - Todo en una sección clara
+### **FASE 1: Indexación Rápida (30-60 min)**
+- Búsqueda exhaustiva en Google Places
+- Filtrado automático (rating ≥4.7, reseñas ≥20)
+- Detección de duplicados
+- Guardado sin IA (rápido)
+- **Resultado:** Lugares "aprobados" listos para enriquecer
 
-#### Monetización Optimizada
-- 💳 **Trial CON tarjeta**: Conversión +600% (70-80% vs 5-10%)
-- 🔄 **Cobro automático día 31**: Sin fricción para usuario
-- 📊 **Perfil mejorado**: Muestra estado REAL (Trial/Premium/Sin acceso)
-- 💰 **Honestidad total**: "Casi 4 meses gratis" (cálculo correcto: 3.64 meses)
-- ✅ **Coherencia**: FAQs, features, precios idénticos en toda la app
-
-#### Funcionalidad Robusta
-- 🗺️ **Mapa sin crashes**: Guards para `google is not defined`
-- 🛣️ **Rutas perfectas**: Inputs alineados, textos no se borran
-- 💬 **Chat mejorado**: Soft delete (reset funciona 100%)
-- 📱 **PWA ready**: manifest.json creado
-
-#### Dominio Personalizado
-- 🌐 **www.casicinco.com**: Dominio propio activo
-- 🔒 **SSL gratuito**: Certificado AWS automático
-- 📧 **Correo intacto**: @casicinco.com sigue en OVH
-- 🔀 **Redirección**: casicinco.com → www (301)
-
-**Resultado:** App 100% lista para producción con coherencia total en diseño, funcionalidad y monetización.
-
-Ver: [`CHANGELOG_BETA_6.0.md`](./CHANGELOG_BETA_6.0.md) | [`CONFIGURAR_DOMINIO.md`](./CONFIGURAR_DOMINIO.md) | [`VERIFICAR_PRODUCCION.md`](./VERIFICAR_PRODUCCION.md)
+### **FASE 2: Enriquecimiento IA (pausable)**
+- Categorización inteligente con IA
+- Descarga de fotos → Supabase Storage
+- Generación de descripción con IA
+- Resumen de reseñas con IA
+- Highlights con IA
+- **Resultado:** Lugares publicados en el mapa
 
 ---
 
-## 🛠️ Tecnologías
+## 🛠️ **Stack Tecnológico**
 
-- **Frontend**: Next.js 14, TypeScript, Tailwind CSS
-- **Backend**: Next.js API Routes, Supabase
-- **Base de Datos**: PostgreSQL (Supabase)
-- **Autenticación**: Supabase Auth
-- **Pagos**: Stripe
-- **Mapas**: Google Maps API
-- **IA**: OpenAI GPT-4
-- **Deployment**: AWS Amplify (WEB_COMPUTE)
-
----
-
-## 📚 Documentación
-
-### 🎯 Empieza Aquí
-
-1. **[LEEME_PRIMERO.md](./LEEME_PRIMERO.md)** - Guía de inicio rápido
-2. **[ESTADO_ACTUAL_PROYECTO.md](./ESTADO_ACTUAL_PROYECTO.md)** - Estado completo del proyecto
-3. **[INDICE_DOCUMENTACION.md](./INDICE_DOCUMENTACION.md)** - Índice completo de documentación
-
-### 📖 Documentación Estratégica
-
-#### 🌟 BETA 6.0 (ACTUAL - PRODUCTION READY):
-- **[CHANGELOG_BETA_6.0.md](./CHANGELOG_BETA_6.0.md)** - ✨ Changelog completo BETA 6.0
-- **[SISTEMA_MONETIZACION.md](./SISTEMA_MONETIZACION.md)** - 💰 Sistema trial con tarjeta
-- **[CONFIGURAR_DOMINIO.md](./CONFIGURAR_DOMINIO.md)** - 🌐 Configuración casicinco.com
-- **[VERIFICAR_PRODUCCION.md](./VERIFICAR_PRODUCCION.md)** - ✅ Checklist producción
-
-#### 📚 BETA 5.0 (Performance & Cache):
-- **[BETA_5.0_PLAN.md](./BETA_5.0_PLAN.md)** - Plan y objetivos BETA 5.0
-- **[VERSION_BETA_5.0.md](./VERSION_BETA_5.0.md)** - Resumen completo BETA 5.0
-- **[CHANGELOG_BETA_5.0.md](./CHANGELOG_BETA_5.0.md)** - Changelog detallado
-
-#### 📚 Versiones Anteriores:
-- **[BETA_4.0_PLAN.md](./BETA_4.0_PLAN.md)** - Plan BETA 4.0
-- **[VERSION_BETA_3.0.md](./VERSION_BETA_3.0.md)** - Novedades BETA 3.0
-- **[VERSION_BETA_2.0.md](./VERSION_BETA_2.0.md)** - Novedades BETA 2.0
-
-#### 🔧 Documentación Técnica:
-- **[SISTEMA_FILTRADO.md](./SISTEMA_FILTRADO.md)** - Sistema de tiers y filtrado
-- **[CHATBOT_TIO_VIAJERO.md](./CHATBOT_TIO_VIAJERO.md)** - Chatbot IA
-- **[RESUMEN_STRIPE.md](./RESUMEN_STRIPE.md)** - Integración de pagos
-- **[CHANGELOG.md](./CHANGELOG.md)** - Historial de cambios completo
-- **[supabase/README.md](./supabase/README.md)** - Configuración de base de datos
+- **Frontend:** Next.js 14, React, TypeScript, Tailwind CSS
+- **Backend:** Next.js API Routes, Supabase
+- **Base de Datos:** PostgreSQL (Supabase)
+- **Autenticación:** Supabase Auth
+- **Pagos:** Stripe (suscripciones)
+- **IA:** OpenAI GPT-4o-mini
+- **Mapas:** Google Maps API
+- **Storage:** Supabase Storage (fotos)
+- **Deployment:** AWS Amplify
+- **Dominio:** OVH + AWS Route53
 
 ---
 
-## 🌐 Acceso a la Aplicación
+## 📊 **Categorías (Solo 4)**
 
-### **Producción (Para Usuarios)**
+- 🍽️ **Restaurantes** - Lugares para comer
+- 🍺 **Bares** - Bebidas y tapas
+- ☕ **Cafeterías** - Cafés y dulces
+- 🏨 **Hoteles** - Alojamientos premium
 
-**URL:** https://main.d2nzzzmoajf631.amplifyapp.com
+*Spas, experiencias, monumentos descartados temporalmente*
 
-La app está **desplegada y funcionando** en AWS Amplify con:
-- ✅ 3,600+ lugares verificados
-- ✅ Experiencia Mobile-First
-- ✅ Login con Google OAuth
-- ✅ Chatbot IA "Tío Viajero"
-- ✅ Planificador de rutas
-- ✅ Dashboard analytics completo
+---
 
-### **Desarrollo Local (Solo para Desarrollo)**
+## 💰 **Monetización**
 
-**Requisitos:**
-- Node.js 18+
-- Variables de entorno configuradas
-- Acceso a Supabase, Google APIs, OpenAI, Stripe
+- **Trial:** 30 días gratis (requiere tarjeta)
+- **Premium Mensual:** 2.99€/mes
+- **Premium Anual:** 29.99€/año (casi 4 meses gratis)
+- **Admin:** 99€/mes (indexación ilimitada)
 
-```bash
-git clone https://github.com/ActtaxIA/Casi_cinco_app.git
-cd Casi_cinco_app
-npm install
-# Configurar .env.local (contactar admin)
-npm run dev
+---
+
+## 🗂️ **Estructura del Proyecto**
+
+```
+casi5-app/
+├── app/
+│   ├── (public)/          # Páginas públicas
+│   │   ├── page.tsx       # Homepage
+│   │   ├── mapa/          # Mapa interactivo
+│   │   ├── ruta/          # Planificador de rutas
+│   │   ├── perfil/        # Perfil de usuario
+│   │   └── pricing/       # Planes y precios
+│   ├── admin/             # Panel de administración
+│   │   ├── dashboard/     # Analytics
+│   │   ├── indexar/       # FASE 1: Indexación rápida
+│   │   ├── enriquecer/    # FASE 2: Enriquecimiento IA
+│   │   ├── lugares/       # Gestión de lugares
+│   │   └── usuarios/      # Gestión de usuarios
+│   └── api/               # API Routes
+├── lib/
+│   ├── indexation/
+│   │   ├── indexer-fast.ts    # FASE 1: Búsqueda rápida
+│   │   ├── enricher-batch.ts  # FASE 2: Enriquecimiento IA
+│   │   └── category-filters.ts # Filtros estrictos
+│   ├── ai/
+│   │   ├── openai.ts          # Generación de contenido
+│   │   └── categorize.ts      # Categorización inteligente
+│   └── google/
+│       └── places.ts          # Google Places API
+└── supabase/
+    ├── migrations/
+    └── scripts SQL
 ```
 
-### 2. Configurar Variables de Entorno
+---
 
-Copia `.env.example` a `.env.local`:
+## 🎯 **Inicio Rápido**
 
+### **Instalación:**
 ```bash
-cp .env.example .env.local
+npm install --legacy-peer-deps
 ```
 
-Completa con tus API keys:
-
+### **Variables de Entorno (.env.local):**
 ```env
 # Supabase
-NEXT_PUBLIC_SUPABASE_URL=tu_url_supabase
-NEXT_PUBLIC_SUPABASE_ANON_KEY=tu_anon_key
-SUPABASE_SERVICE_ROLE_KEY=tu_service_key
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 
-# Google Maps
-NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=tu_api_key_google
-GOOGLE_PLACES_API_KEY=tu_api_key_places
+# Google
+NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_google_key
+GOOGLE_MAPS_API_KEY=your_google_key
 
 # OpenAI
-OPENAI_API_KEY=tu_api_key_openai
+OPENAI_API_KEY=your_openai_key
 
 # Stripe
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=tu_publishable_key
-STRIPE_SECRET_KEY=tu_secret_key
-STRIPE_WEBHOOK_SECRET=tu_webhook_secret
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=your_stripe_key
+STRIPE_SECRET_KEY=your_stripe_secret
 ```
 
-### 3. Configurar Base de Datos
-
-En Supabase SQL Editor, ejecuta en orden:
-
-```sql
--- 1. Schema base
--- Pega y ejecuta: supabase_setup.sql
-
--- 2. Sistema de filtrado avanzado
--- Pega y ejecuta: filtrado_avanzado.sql
-
--- 3. Sistema de pagos
--- Pega y ejecuta: stripe_setup.sql
-```
-
-### 4. Deploy
-
-**La app se despliega automáticamente en AWS Amplify** cuando se hace push a la rama `main` de GitHub.
-
-**URL de Producción:** https://main.d2nzzzmoajf631.amplifyapp.com
-
-**Monitoreo:**
-- AWS Amplify Console: https://console.aws.amazon.com/amplify
-- GitHub Actions: Automático en cada commit
-
-### 5. Para Desarrollo Local
-
+### **Desarrollo:**
 ```bash
 npm run dev
-# http://localhost:3000
 ```
 
-Ver [DEPLOY_AWS.md](./DEPLOY_AWS.md) para más detalles.
-
----
-
-## 🎮 Uso
-
-### Usuario Admin
-
-1. Regístrate en `/registro`
-2. En Supabase, actualiza tu rol a `admin`:
-   ```sql
-   UPDATE profiles SET role = 'admin' WHERE email = 'tu@email.com';
-   ```
-3. Accede a `/admin/indexar`
-4. Busca lugares en Google Places: "restaurantes málaga"
-5. Indexa los mejores (4.7★+)
-6. Espera enriquecimiento con IA
-7. Publica lugares
-
-### Usuario Normal
-
-1. Visita la home: `/`
-2. Explora el mapa: `/mapa`
-3. Aplica filtros:
-   - 💎 Tier: Diamante (top 0.1%)
-   - 📊 Reseñas: Más de 1,000
-   - 📍 Ubicación: Málaga
-4. Click en marcador
-5. Ver detalles del lugar
-6. Guardar favoritos
-7. Planificar rutas
-
----
-
-## 💎 Características Únicas
-
-### Sistema de Tiers
-
-| Tier | Requisitos | Cantidad en España |
-|------|------------|-------------------|
-| 💎 Diamante | 4.8★+ con 1,000+ reseñas | ~150 lugares |
-| 🏆 Platino | 4.8★+ con 500-999 reseñas | ~500 lugares |
-| 🥇 Oro | 4.7★+ con 200+ reseñas | ~2,500 lugares |
-| 🥈 Plata | 4.7★+ con 50+ reseñas | ~5,000 lugares |
-| 🥉 Bronce | 4.7★+ con <50 reseñas | ~3,000 lugares |
-
-### Filtro por Número de Reseñas (Killer Feature)
-
-**La verdad que nadie dice:**
-> Un 4.8★ con 1,500 reseñas es OBJETIVAMENTE mejor que un 4.9★ con 15 reseñas
-
-**Rangos disponibles:**
-- Menos de 50
-- 50 - 100
-- 100 - 200
-- 200 - 500
-- 500 - 1,000
-- **Más de 1,000** 🏆 (Los más validados)
-
----
-
-## 📊 Modelo de Negocio
-
-### Planes
-
-- **Gratis**: Explorar lugares, ver mapa básico
-- **Premium Mensual**: 4.99€/mes - Favoritos ilimitados, rutas, descripciones IA
-- **Premium Anual**: 49.99€/año (ahorra 17%)
-- **Admin**: 99€/mes - Indexar lugares, panel completo
-
-### Proyecciones
-
-**Año 1**: ~18,000€  
-**Año 2**: ~60,000€  
-**Año 3**: ~180,000€  
-
-**Margen**: 90% (SaaS)
-
----
-
-## 🗺️ Arquitectura
-
-```
-┌─────────────┐
-│   Next.js   │ Frontend + API Routes
-└──────┬──────┘
-       │
-       ├─────► Supabase (PostgreSQL + Auth)
-       │
-       ├─────► Google Maps API (Lugares + Mapas)
-       │
-       ├─────► OpenAI API (Descripciones IA)
-       │
-       └─────► Stripe (Pagos)
+### **Producción:**
+```bash
+npm run build
 ```
 
 ---
 
-## 🔒 Seguridad
+## 📚 **Documentación**
 
-- ✅ Row Level Security (RLS) en todas las tablas
-- ✅ Autenticación JWT con Supabase
-- ✅ API keys en variables de entorno
-- ✅ Validación de inputs
-- ✅ Rate limiting en APIs críticas
-- ✅ Webhooks firmados (Stripe)
+- **Sistema de 2 Fases:** [NUEVO_SISTEMA_2_FASES.md](NUEVO_SISTEMA_2_FASES.md)
+- **Monetización:** [SISTEMA_MONETIZACION.md](SISTEMA_MONETIZACION.md)
+- **Configuración Dominio:** [CONFIGURAR_DOMINIO.md](CONFIGURAR_DOMINIO.md)
+- **Verificación Producción:** [VERIFICAR_PRODUCCION.md](VERIFICAR_PRODUCCION.md)
 
 ---
 
-## 📈 Roadmap
+## 🔑 **Usuarios de Prueba**
 
-### v1.0 (MVP) - Actual
-- [x] Sistema de indexación
-- [x] Mapa con filtros
-- [x] Sistema de tiers
-- [x] Integración IA
-- [x] Sistema de pagos
+```
+Admin:
+- Email: info@furgocasa.com
+- Password: (en variables de entorno)
 
-### v1.1 - Próximos 3 meses
-- [ ] App móvil (React Native)
-- [ ] Notificaciones push
-- [ ] Sistema de reviews propio
-- [ ] Compartir listas públicas
-
-### v2.0 - Próximos 6 meses
-- [ ] IA avanzada (recomendaciones personalizadas)
-- [ ] Reservas integradas
-- [ ] Programa de afiliados
-- [ ] API pública
+Usuario Premium:
+- Email: spaindud@gmail.com
+- Password: (en variables de entorno)
+```
 
 ---
 
-## 🤝 Contribuir
+## 📈 **Estadísticas**
 
-Este es un proyecto privado por ahora, pero siempre estamos abiertos a feedback.
-
----
-
-## 📄 Licencia
-
-Proprietary - Todos los derechos reservados
+- **Lugares:** 2,700+ verificados
+- **Provincias:** 61 con cobertura
+- **Categorías:** 4 principales
+- **Rating promedio:** 4.78⭐
+- **Usuarios:** Sistema de trials de 30 días
 
 ---
 
-## 👨‍💻 Autor
+## 🚢 **Deployment**
 
-**Narciso Pardo Buendía**  
-Email: narciso.pardo@outlook.com  
-Proyecto: InfluencersTrust
-
----
-
-## 🙏 Agradecimientos
-
-- **Anthropic Claude** - Por la ayuda en desarrollo
-- **Supabase** - Base de datos y auth
-- **Vercel** - Hosting
-- **Google** - Maps y Places API
-- **OpenAI** - IA para contenido
+- **Plataforma:** AWS Amplify
+- **Dominio:** www.casicinco.com
+- **SSL:** Automático (AWS)
+- **Email:** OVH (MX records preservados)
 
 ---
 
-## 📞 Soporte
+## 📝 **Changelog BETA 6.0**
 
-¿Necesitas ayuda?
-- 📧 Email: soporte@casicin.co
-- 💬 Discord: [próximamente]
-- 📖 Docs: Ver carpeta `/docs`
+### **🎉 Nuevo Sistema de 2 Fases:**
+- ✅ Indexación rápida (30-60 min) sin IA
+- ✅ Enriquecimiento IA separado y pausable
+- ✅ Categorización inteligente con IA
+- ✅ Solo 4 categorías (Restaurantes, Bares, Cafeterías, Hoteles)
+- ✅ Filtros estrictos (sin autocaravanas en hoteles)
+- ✅ Tracking independiente de ambas fases
+- ✅ Menú lateral con "Enriquecer con IA"
+
+### **🔧 Optimizaciones:**
+- ✅ 10x más rápido en búsqueda
+- ✅ Sin límites de paginación (búsqueda exhaustiva)
+- ✅ Números coherentes (procesados = guardados + descartados)
+- ✅ Marcadores del mapa optimizados
+- ✅ Revalidación automática cada 5 min
+
+### **🐛 Bugs Corregidos:**
+- ✅ Errores de hidratación React
+- ✅ Trabajos zombies en "running"
+- ✅ Contadores incoherentes
+- ✅ API de Google (restricciones)
+- ✅ Títulos SEO únicos por lugar
 
 ---
 
-**Made with ❤️ in Spain 🇪🇸**
+## 🤝 **Contribuir**
 
-*Última actualización: 12 de Octubre de 2025*  
-*Versión: 3.0.0 - BETA 3.0 Mobile-First*  
-*Deploy: [AWS Amplify](https://main.d2nzzzmoajf631.amplifyapp.com)*
+Este es un proyecto privado. Para acceso, contacta al administrador.
+
+---
+
+## 📞 **Soporte**
+
+- **Email:** info@casicinco.com
+- **Web:** www.casicinco.com
+
+---
+
+## 📄 **Licencia**
+
+Todos los derechos reservados © 2025 Casi Cinco
+
+---
+
+**Hecho con ❤️ en España** 🇪🇸

@@ -54,7 +54,7 @@ export function getTierInfo(tier: QualityTier): TierInfo {
     diamond: {
       tier: 'diamond',
       name: 'Diamante',
-      color: 'from-cyan-400 to-blue-500',
+      color: 'from-blue-400 to-blue-600', // Azul más visible
       icon: '💎',
       description: '4.8+ con 1000+ reseñas - El top 0.1%'
     },
