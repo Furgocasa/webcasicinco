@@ -144,7 +144,7 @@ async function processPlacesFromZone(
       }
 
       // Categorizar
-      const category = categorizePlace(details);
+      const category = strictCategorizePlaceByTypes(details.types, details.name);
       if (!category || !['restaurante', 'bar', 'cafe', 'hotel'].includes(category)) {
         discarded++; // Contar como categoría inválida
         await logger.warning(`⚠️ Descartado (categoría inválida): ${details.name} - ${category}`);
@@ -314,7 +314,7 @@ export async function startFastIndexation(
       // Asturias
       'Asturias': ['Oviedo', 'Gijón', 'Avilés', 'Siero', 'Langreo', 'Mieres', 'Castrillón', 'Llanera', 'Llanes', 'Cangas de Onís', 'Ribadesella'],
       // Baleares
-      'Baleares': ['Palma', 'Calvià', 'Manacor', 'Ibiza', 'Alcúdia', 'Mahón', 'Ciutadella', 'Sóller', 'Pollença'],
+      'Baleares': ['Palma', 'Calvià', 'Manacor', 'Ibiza', 'Alcúdia', 'Mahón', 'Ciutadella', 'Sóller', 'Pollensa'],
       // Canarias
       'Las Palmas': ['Las Palmas', 'Telde', 'Santa Lucía', 'Arucas', 'Agüimes', 'Ingenio', 'Puerto del Rosario', 'Arrecife', 'Maspalomas'],
       'Santa Cruz de Tenerife': ['Santa Cruz de Tenerife', 'San Cristóbal de La Laguna', 'Arona', 'Adeje', 'Los Realejos', 'Puerto de la Cruz', 'La Orotava', 'Los Llanos de Aridane'],
@@ -616,233 +616,6 @@ export async function startFastIndexation(
       .eq('id', jobId);
   }
 }
-          .eq('google_place_id', placeId)
-          .single();
-
-        if (existing) {
-          duplicates++;
-          continue;
-        }
-
-        // Obtener detalles básicos con reintentos y timeout
-        const details = await withRetry(
-          () => getPlaceDetails(placeId),
-          3, // 3 intentos
-          8000, // 8 segundos por intento (más rápido)
-          logger,
-          `Obtener detalles del lugar`
-        );
-
-        // Verificar cadena
-        if (shouldExcludeChain(details.name, true)) {
-          chains++;
-          continue;
-        }
-
-        // Filtrar por rating
-        if (!details.rating || details.rating < 4.7) {
-          lowRating++;
-          continue;
-        }
-
-        // Filtrar por reseñas
-        if (!details.user_ratings_total || details.user_ratings_total < 20) {
-          lowReviews++;
-          continue;
-        }
-
-        // ✅ LUGAR APROBADO - Categorizar con filtro estricto
-        const category = strictCategorizePlaceByTypes(details.types, details.name);
-        
-        // Si no encaja en ninguna de las 4 categorías, descartar
-        if (!category) {
-          chains++; // Contar como "descartado - categoría no válida"
-          continue;
-        }
-
-        // Verificar filtro específico de categoría (ej: evitar autocaravanas en hoteles)
-        if (shouldExcludeFromCategory(details.name, details.types, category)) {
-          chains++; // Contar como "descartado - no cumple criterios de categoría"
-          continue;
-        }
-
-        const province = extractProvinceFromPlaceData(details);
-        const city = extractCityFromPlaceData(details);
-
-        // 🛡️ VALIDACIÓN CRÍTICA: Verificar que sea provincia española
-        // Función para normalizar nombres de provincias (acepta tildes y variantes)
-        const normalizeProvinceName = (name: string): string => {
-          // Mapa de variantes (euskera/gallego → castellano estándar)
-          const variants: Record<string, string> = {
-            'Gipuzkoa': 'Guipúzcoa',
-            'Bizkaia': 'Vizcaya',
-            'Araba': 'Álava',
-            'La Coruña': 'A Coruña',
-            'Orense': 'Ourense',
-          };
-          
-          // Buscar en el mapa de variantes (comparación sin tildes, case-insensitive)
-          const normalizedInput = name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-          const variantKey = Object.keys(variants).find(
-            key => key.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase() === normalizedInput
-          );
-          
-          return variantKey ? variants[variantKey] : name;
-        };
-
-        const spanishProvinces = [
-          'Albacete', 'Alicante', 'Almería', 'Álava', 'Asturias', 'Ávila', 'Badajoz', 'Baleares',
-          'Barcelona', 'Burgos', 'Cáceres', 'Cádiz', 'Cantabria', 'Castellón', 'Ciudad Real',
-          'Córdoba', 'Cuenca', 'Girona', 'Granada', 'Guadalajara', 'Huelva', 'Huesca',
-          'Jaén', 'A Coruña', 'La Rioja', 'Las Palmas', 'León', 'Lleida', 'Lugo', 'Madrid', 'Málaga',
-          'Murcia', 'Navarra', 'Ourense', 'Palencia', 'Pontevedra', 'Salamanca', 'Segovia', 'Sevilla',
-          'Soria', 'Tarragona', 'Santa Cruz de Tenerife', 'Teruel', 'Toledo', 'Valencia', 'Valladolid',
-          'Zamora', 'Zaragoza', 'Ceuta', 'Melilla',
-          'Guipúzcoa', 'Vizcaya' // Añadir variantes castellanas explícitas
-        ];
-
-        // Normalizar provincia y comparar sin tildes (case-insensitive)
-        const normalizedProvince = normalizeProvinceName(province);
-        const normalizedProvinceNoAccents = normalizedProvince
-          .normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, '')
-          .toLowerCase();
-
-        const isSpanishProvince = spanishProvinces.some(sp => 
-          sp.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase() === normalizedProvinceNoAccents
-        );
-
-        if (!isSpanishProvince) {
-          chains++; // Contar como descartado - fuera de España
-          await logger.warning(`⚠️ Descartado (fuera de España): ${details.name} - ${province} (normalizado: ${normalizedProvince})`);
-          continue;
-        }
-
-        const slug = generatePlaceSlug(details.name, city);
-
-        const placeData = {
-          google_place_id: details.place_id,
-          slug,
-          name: details.name,
-          category,
-          rating: details.rating,
-          review_count: details.user_ratings_total,
-          country: 'España',
-          region: extractRegionFromProvince(province),
-          province,
-          city,
-          address: details.formatted_address,
-          latitude: details.geometry.location.lat,
-          longitude: details.geometry.location.lng,
-          phone: details.formatted_phone_number,
-          website: details.website,
-          price_level: details.price_level,
-          google_maps_url: details.url,
-          photos: details.photos ? JSON.stringify(details.photos.slice(0, 5)) : null,
-          published: false, // ← No publicar aún
-          needs_enrichment: true, // ← Marcar para enriquecer después
-          enrichment_status: 'pending',
-        };
-
-        const { error: saveError } = await supabase
-          .from('places')
-          .upsert(placeData, { onConflict: 'google_place_id' });
-
-        if (saveError) {
-          if (saveError.code === '23505') {
-            duplicates++;
-          } else {
-            errors++;
-            console.error(`[FAST-INDEX] Error: ${saveError.message}`);
-          }
-        } else {
-          approved++;
-          if (approved % 50 === 0) {
-            await logger.success(`✅ ${approved} lugares aprobados`);
-          }
-        }
-
-        // Actualizar cada 10 lugares
-        if (totalProcessed % 10 === 0) {
-          await supabase
-            .from('indexation_jobs')
-            .update({
-              total_places: allPlaceIds.size,
-              processed_places: totalProcessed,
-              successful_places: approved,
-              failed_places: errors,
-              error_log: {
-                approved,
-                lowRating,
-                lowReviews,
-                chains,
-                duplicates,
-                errors,
-                summary: `${approved} aprobados | ${lowRating} rating bajo | ${lowReviews} pocas reseñas | ${chains} cadenas | ${duplicates} duplicados | ${errors} errores`
-              }
-            })
-            .eq('id', jobId);
-        }
-
-      } catch (error: any) {
-        errors++;
-        await logger.error(`Error procesando lugar: ${error.message}`);
-      }
-    }
-
-    // Finalizar
-    await logger.success('🎉 Indexación rápida completada');
-    await logger.info(`📊 RESUMEN:`);
-    await logger.info(`   Encontrados: ${allPlaceIds.size}`);
-    await logger.info(`   Procesados: ${totalProcessed}`);
-    await logger.success(`   ✅ Aprobados: ${approved} (pendientes de enriquecimiento)`);
-    await logger.info(`   ⏭️ Descartados: ${lowRating + lowReviews + chains + duplicates}`);
-    await logger.info(`      - Rating bajo: ${lowRating}`);
-    await logger.info(`      - Pocas reseñas: ${lowReviews}`);
-    await logger.info(`      - Cadenas: ${chains}`);
-    await logger.info(`      - Duplicados: ${duplicates}`);
-    if (errors > 0) {
-      await logger.warning(`   ❌ Errores: ${errors}`);
-    }
-
-    // Guardar logs finales
-    await logger.close();
-
-    await supabase
-      .from('indexation_jobs')
-      .update({
-        status: 'completed',
-        completed_at: new Date().toISOString(),
-        processed_places: totalProcessed,
-        successful_places: approved,
-        failed_places: errors,
-        error_log: {
-          approved,
-          lowRating,
-          lowReviews,
-          chains,
-          duplicates,
-          errors,
-          summary: `${approved} aprobados (pendientes enriquecimiento) | ${lowRating + lowReviews + chains + duplicates} descartados | ${errors} errores`
-        }
-      })
-      .eq('id', jobId);
-
-  } catch (error: any) {
-    await logger.error(`ERROR FATAL: ${error.message}`, { stack: error.stack });
-    await logger.close();
-    
-    await supabase
-      .from('indexation_jobs')
-      .update({
-        status: 'failed',
-        completed_at: new Date().toISOString(),
-        error_log: { error: error.message, stack: error.stack }
-      })
-      .eq('id', jobId);
-    throw error;
-  }
-}
 
 function extractRegionFromProvince(province: string): string {
   const map: Record<string, string> = {
@@ -852,4 +625,3 @@ function extractRegionFromProvince(province: string): string {
   };
   return map[province] || 'España';
 }
-
