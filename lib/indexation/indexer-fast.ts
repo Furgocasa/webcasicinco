@@ -100,7 +100,7 @@ async function processPlacesFromZone(
         'Guipúzcoa', 'Vizcaya' // Añadir variantes castellanas explícitas
       ];
 
-      // Normalizar provincia y comparar sin tildes (case-insensitive)
+      // 🛡️ VALIDACIÓN CRÍTICA: Verificar que sea provincia española
       const normalizedProvince = normalizeProvinceName(province);
       const normalizedProvinceNoAccents = normalizedProvince
         .normalize('NFD')
@@ -111,7 +111,21 @@ async function processPlacesFromZone(
         sp.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase() === normalizedProvinceNoAccents
       );
 
-      if (!isSpanishProvince) {
+      // 🔥 VALIDACIÓN ADICIONAL: Verificar que NO sea de otros países
+      const nonSpanishIndicators = [
+        'stockholms', 'län', 'suecia', 'sweden', 'stockholm', 'estocolmo',
+        'paris', 'france', 'francia', 'london', 'england', 'reino unido',
+        'berlin', 'germany', 'alemania', 'roma', 'italy', 'italia',
+        'lisboa', 'portugal', 'madrid tapasbar', 'spansk restaurang'
+      ];
+
+      const hasNonSpanishIndicator = nonSpanishIndicators.some(indicator => 
+        normalizedProvinceNoAccents.includes(indicator.toLowerCase()) ||
+        details.name.toLowerCase().includes(indicator.toLowerCase()) ||
+        details.formatted_address.toLowerCase().includes(indicator.toLowerCase())
+      );
+
+      if (!isSpanishProvince || hasNonSpanishIndicator) {
         discarded++; // Contar como descartado - fuera de España
         await logger.warning(`⚠️ Descartado (fuera de España): ${details.name} - ${province} (normalizado: ${normalizedProvince})`);
         continue;

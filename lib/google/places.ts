@@ -74,6 +74,13 @@ export async function searchPlaces(params: SearchPlacesParams): Promise<string[]
           break;
         }
 
+        // 🔍 DEBUG: Log de la query y resultados para investigar
+        console.log(`🔍 DEBUG - Query: "${query}"`);
+        console.log(`🔍 DEBUG - Resultados: ${response.data.results.length}`);
+        if (response.data.results.length > 0) {
+          console.log(`🔍 DEBUG - Primer resultado: ${response.data.results[0].name} - ${response.data.results[0].formatted_address}`);
+        }
+
         // Agregar resultados (sin logs individuales)
         response.data.results.forEach((place: any) => {
           if (!allPlaceIds.includes(place.place_id)) {
