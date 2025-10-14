@@ -9,13 +9,14 @@ import { Card, CardContent } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { formatDate } from '@/lib/utils/formatters';
-import { Trash2 } from 'lucide-react';
+import { Trash2, ChevronDown, ChevronUp } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function TrabajosPage() {
   const [jobs, setJobs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [resuming, setResuming] = useState<string | null>(null);
+  const [expandedLogs, setExpandedLogs] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     loadJobs();
@@ -124,6 +125,18 @@ export default function TrabajosPage() {
       toast.error('Error al reanudar la indexación');
       setResuming(null);
     }
+  };
+
+  const toggleLogs = (jobId: string) => {
+    setExpandedLogs(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(jobId)) {
+        newSet.delete(jobId);
+      } else {
+        newSet.add(jobId);
+      }
+      return newSet;
+    });
   };
 
   const getStatusBadge = (status: string) => {
@@ -320,6 +333,48 @@ export default function TrabajosPage() {
                 {job.error_message && (
                   <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded text-sm text-red-700">
                     {job.error_message}
+                  </div>
+                )}
+
+                {/* Sección de logs desplegable */}
+                {job.logs && job.logs.length > 0 && (
+                  <div className="mt-4">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => toggleLogs(job.id)}
+                      className="w-full flex items-center justify-between text-gray-700 hover:bg-gray-50"
+                    >
+                      <span className="flex items-center gap-2">
+                        📜 Log del Proceso ({job.logs.length} mensajes)
+                      </span>
+                      {expandedLogs.has(job.id) ? (
+                        <ChevronUp className="h-4 w-4" />
+                      ) : (
+                        <ChevronDown className="h-4 w-4" />
+                      )}
+                    </Button>
+
+                    {expandedLogs.has(job.id) && (
+                      <div className="mt-3 bg-gray-900 text-gray-100 rounded-lg p-4 max-h-96 overflow-y-auto font-mono text-xs">
+                        {job.logs.map((log: any, index: number) => (
+                          <div
+                            key={index}
+                            className={`flex items-start gap-2 py-1 ${
+                              log.level === 'error' ? 'text-red-400' :
+                              log.level === 'success' ? 'text-green-400' :
+                              log.level === 'warning' ? 'text-yellow-400' :
+                              'text-gray-300'
+                            }`}
+                          >
+                            <span className="text-gray-500 shrink-0">
+                              {new Date(log.timestamp).toLocaleTimeString('es-ES')}
+                            </span>
+                            <span className="break-all">{log.message}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
               </CardContent>
