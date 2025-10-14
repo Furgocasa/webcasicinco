@@ -118,6 +118,7 @@ export async function startFastIndexation(
       if (!await shouldContinueJob(jobId, supabase)) {
         await logger.warning('⏸️ Indexación pausada o cancelada por el administrador');
         await logger.close();
+        // NO actualizar nada más - el estado ya fue cambiado por el API de pausa/cancel
         return;
       }
 
@@ -144,6 +145,7 @@ export async function startFastIndexation(
           if (i % 3 === 0 && !await shouldContinueJob(jobId, supabase)) {
             await logger.warning('⏸️ Indexación pausada durante búsqueda');
             await logger.close();
+            // NO actualizar nada más - el estado ya fue cambiado por el API de pausa/cancel
             return;
           }
           
@@ -197,6 +199,7 @@ export async function startFastIndexation(
       if (totalProcessed % 10 === 0 && !await shouldContinueJob(jobId, supabase)) {
         await logger.warning('⏸️ Indexación pausada durante procesamiento');
         await logger.close();
+        // NO actualizar nada más - el estado ya fue cambiado por el API de pausa/cancel
         return;
       }
 
