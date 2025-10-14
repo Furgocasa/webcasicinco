@@ -256,28 +256,27 @@ export default function LugaresPage() {
         return;
       }
 
-      const { pending, completed, totalPublished, percentage } = checkData.stats;
+      const { pending, completed, totalPlaces, percentage } = checkData.stats;
       
       if (pending === 0) {
-        toast.info(`✅ Todos los lugares publicados ya están enriquecidos (${completed}/${totalPublished} - ${percentage}%)`);
+        toast.info(`✅ Todos los lugares ya están enriquecidos (${completed}/${totalPlaces} - ${percentage}%)`);
         setEnriching(false);
         return;
       }
 
       const estimatedMinutes = Math.ceil(pending * 3 / 60);
-      if (!confirm(`¿Enriquecer ${pending} lugares publicados con IA?\n\n📊 Progreso actual: ${completed}/${totalPublished} (${percentage}%)\n⏱️ Tiempo estimado: ~${estimatedMinutes} minutos\n\n⚠️ El proceso se ejecutará en segundo plano.`)) {
+      if (!confirm(`¿Enriquecer ${pending} lugares con IA? (incluye borradores)\n\n📊 Progreso actual: ${completed}/${totalPlaces} (${percentage}%)\n⏱️ Tiempo estimado: ~${estimatedMinutes} minutos\n\n⚠️ El proceso se ejecutará en segundo plano.`)) {
         setEnriching(false);
         return;
       }
 
       setEnrichProgress({ current: 0, total: pending });
 
-      // Obtener los lugares pendientes reales desde Supabase
+      // Obtener los lugares pendientes reales desde Supabase (INCLUYENDO BORRADORES)
       const supabase = createClient();
       const { data: placesToEnrich } = await supabase
         .from('places')
-        .select('id, name')
-        .eq('published', true)
+        .select('id, name, published')
         .is('ai_description', null)
         .limit(pending);
 

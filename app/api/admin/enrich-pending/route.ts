@@ -63,31 +63,28 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    // 🎯 CONTADORES UNIFICADOS: Solo lugares PUBLICADOS sin IA
+    // 🎯 CONTADORES UNIFICADOS: TODOS los lugares sin IA (incluye borradores)
     const { count: pending } = await supabase
       .from('places')
       .select('*', { count: 'exact', head: true })
-      .eq('published', true)
       .is('ai_description', null);
 
     const { count: completed } = await supabase
       .from('places')
       .select('*', { count: 'exact', head: true })
-      .eq('published', true)
       .not('ai_description', 'is', null);
 
-    const { count: totalPublished } = await supabase
+    const { count: totalPlaces } = await supabase
       .from('places')
-      .select('*', { count: 'exact', head: true })
-      .eq('published', true);
+      .select('*', { count: 'exact', head: true });
 
     return NextResponse.json({
       success: true,
       stats: {
         pending: pending || 0,
         completed: completed || 0,
-        totalPublished: totalPublished || 0,
-        percentage: totalPublished ? Math.round(((completed || 0) / totalPublished) * 100) : 0,
+        totalPlaces: totalPlaces || 0,
+        percentage: totalPlaces ? Math.round(((completed || 0) / totalPlaces) * 100) : 0,
       }
     });
 
