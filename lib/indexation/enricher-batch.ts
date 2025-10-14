@@ -82,7 +82,7 @@ export async function enrichPendingPlaces(
       const categorization = await categorizePlaceWithAI({
         name: place.name,
         googleTypes: details.types || [],
-        description: details.editorial_summary?.overview,
+        description: undefined, // Google Places API no tiene editorial_summary en detalles básicos
         reviews: reviews.slice(0, 5).map(r => r.text || ''),
       });
 
