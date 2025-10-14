@@ -57,10 +57,10 @@ const mapContainerStyle = {
   height: '100%',
 };
 
-// Centro de España para vista inicial (Península centrada)
+// Centro de España para vista inicial (Madrid - Península centrada)
 const defaultCenter = {
-  lat: 40.2,     // Ligeramente más al norte para centrar península
-  lng: -3.7,     // Centro de España
+  lat: 40.4168,  // Madrid (centro de la península)
+  lng: -3.7038,  // Madrid
 };
 
 // Límites del mapa para mantener vista en España (incluyendo Canarias y Baleares)
