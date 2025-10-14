@@ -57,6 +57,56 @@ async function shouldContinueJob(jobId: string, supabase: ReturnType<typeof crea
 }
 
 /**
+ * Ejecuta una función con reintentos y timeout
+ * @param fn Función a ejecutar
+ * @param maxRetries Número máximo de reintentos (default: 3)
+ * @param timeoutMs Timeout en milisegundos por intento (default: 15000)
+ * @param logger Logger opcional para registrar reintentos
+ */
+async function withRetry<T>(
+  fn: () => Promise<T>,
+  maxRetries: number = 3,
+  timeoutMs: number = 15000,
+  logger?: IndexationLogger,
+  context?: string
+): Promise<T> {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      // Aplicar timeout a la función
+      const result = await Promise.race([
+        fn(),
+        new Promise<never>((_, reject) => 
+          setTimeout(() => reject(new Error(`Timeout tras ${timeoutMs/1000}s`)), timeoutMs)
+        )
+      ]);
+      
+      // Si tuvo éxito después de varios intentos, registrarlo
+      if (attempt > 1 && logger) {
+        await logger.success(`✅ ${context || 'Operación'} exitosa en intento ${attempt}`);
+      }
+      
+      return result;
+    } catch (error: any) {
+      // Si es el último intento, lanzar el error
+      if (attempt === maxRetries) {
+        throw new Error(`${context || 'Operación'} falló tras ${maxRetries} intentos: ${error.message}`);
+      }
+      
+      // Calcular delay con backoff exponencial (máximo 5 segundos)
+      const delay = Math.min(1000 * Math.pow(2, attempt - 1), 5000);
+      
+      if (logger) {
+        await logger.warning(`⚠️ ${context || 'Operación'} falló en intento ${attempt}/${maxRetries}: ${error.message}, reintentando en ${delay}ms...`);
+      }
+      
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+  
+  throw new Error(`${context || 'Operación'} falló tras ${maxRetries} intentos`);
+}
+
+/**
  * Busca lugares y los guarda como "pendientes de enriquecimiento"
  */
 export async function startFastIndexation(
@@ -150,12 +200,18 @@ export async function startFastIndexation(
           }
           
           try {
-            const placeIds = await searchPlaces({
-              location: `${city}, ${province}, España`,
-              keyword: searchTerm,
-              minRating: params.minRating,
-              radius: 50000,
-            });
+            const placeIds = await withRetry(
+              () => searchPlaces({
+                location: `${city}, ${province}, España`,
+                keyword: searchTerm,
+                minRating: params.minRating,
+                radius: 50000,
+              }),
+              3, // 3 intentos
+              20000, // 20 segundos por intento (búsquedas pueden tardar más)
+              logger,
+              `Buscar en ${city}`
+            );
 
             const newCount = allPlaceIds.size;
             placeIds.forEach(id => allPlaceIds.add(id));
@@ -207,7 +263,8 @@ export async function startFastIndexation(
         processedIds.add(placeId);
         totalProcessed++;
 
-        if (totalProcessed % 50 === 0) {
+        // Mostrar progreso cada 5 lugares para mejor visibilidad
+        if (totalProcessed % 5 === 0) {
           await logger.info(`📊 Progreso: ${totalProcessed}/${allPlaceIds.size} (${Math.round((totalProcessed/allPlaceIds.size)*100)}%)`);
         }
 
@@ -223,8 +280,14 @@ export async function startFastIndexation(
           continue;
         }
 
-        // Obtener detalles básicos
-        const details = await getPlaceDetails(placeId);
+        // Obtener detalles básicos con reintentos y timeout
+        const details = await withRetry(
+          () => getPlaceDetails(placeId),
+          3, // 3 intentos
+          15000, // 15 segundos por intento
+          logger,
+          `Obtener detalles del lugar`
+        );
 
         // Verificar cadena
         if (shouldExcludeChain(details.name, true)) {
