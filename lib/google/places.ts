@@ -56,6 +56,7 @@ export async function searchPlaces(params: SearchPlacesParams): Promise<string[]
             type,
             key: GOOGLE_MAPS_API_KEY,
             pagetoken: pageToken,
+            components: 'country:ES',  // 🔒 FORZAR SOLO ESPAÑA
           },
         });
 

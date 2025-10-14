@@ -40,13 +40,33 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Parsear search_params y formatear respuesta
-    const formattedJobs = jobs?.map(job => ({
-      ...job,
-      provinces: job.search_params?.provinces || [],
-      categories: job.search_params?.categories || [],
-      minRating: job.search_params?.minRating || 4.7,
-    }));
+    // Parsear search_params y formatear respuesta con estadísticas por categoría
+    const formattedJobs = await Promise.all(jobs?.map(async (job) => {
+      // Obtener estadísticas por categoría para trabajos completados
+      let categoryStats = null;
+      if (job.status === 'completed' && job.started_at && job.completed_at) {
+        const { data: stats } = await supabase
+          .from('places')
+          .select('category')
+          .gte('created_at', job.started_at)
+          .lte('created_at', job.completed_at);
+        
+        if (stats) {
+          categoryStats = stats.reduce((acc: any, place: any) => {
+            acc[place.category] = (acc[place.category] || 0) + 1;
+            return acc;
+          }, {});
+        }
+      }
+
+      return {
+        ...job,
+        provinces: job.search_params?.provinces || [],
+        categories: job.search_params?.categories || [],
+        minRating: job.search_params?.minRating || 4.7,
+        categoryStats,
+      };
+    }) || []);
 
     return NextResponse.json({
       success: true,

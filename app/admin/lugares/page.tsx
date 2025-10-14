@@ -78,6 +78,11 @@ export default function LugaresPage() {
     setCurrentPage(1); // Resetear a página 1 cuando cambien los filtros
   }, [places, searchTerm, categoryFilter, provinceFilter, publishedFilter, sortField, sortOrder]);
 
+  // Calcular estadísticas
+  const publishedCount = places.filter(p => p.published).length;
+  const draftCount = places.filter(p => !p.published).length;
+  const publishedPercentage = places.length > 0 ? Math.round((publishedCount / places.length) * 100) : 0;
+
   // Calcular datos paginados
   const totalPages = Math.ceil(filteredPlaces.length / (itemsPerPage === 0 ? filteredPlaces.length : itemsPerPage));
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -350,12 +355,25 @@ export default function LugaresPage() {
   return (
     <div className="space-y-6">
       {/* Header - Mobile Responsive */}
-      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-3 md:gap-4">
+      <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-3 md:gap-4">
         <div>
           <h1 className="text-xl md:text-3xl font-bold text-gray-900">Gestión de Lugares</h1>
-          <p className="text-sm md:text-base text-gray-600 mt-1">
-            {filteredPlaces.length} de {places.length} lugares
-          </p>
+          <div className="flex flex-wrap items-center gap-2 mt-2">
+            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+              ✓ {publishedCount} publicados
+            </span>
+            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+              📝 {draftCount} borradores
+            </span>
+            <span className="text-sm text-gray-500">
+              · {places.length} total ({publishedPercentage}% público)
+            </span>
+            {filteredPlaces.length !== places.length && (
+              <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                🔍 {filteredPlaces.length} filtrados
+              </span>
+            )}
+          </div>
         </div>
         <div className="grid grid-cols-3 md:flex gap-2">
           <Button onClick={loadPlaces} variant="outline" size="sm" disabled={enriching}>

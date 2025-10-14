@@ -15,6 +15,7 @@ import { toast } from 'sonner';
 export default function TrabajosPage() {
   const [jobs, setJobs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [resuming, setResuming] = useState<string | null>(null);
 
   useEffect(() => {
     loadJobs();
@@ -95,6 +96,34 @@ export default function TrabajosPage() {
     }
   };
 
+  const resumeJob = async (jobId: string) => {
+    if (!confirm('¿Reanudar esta indexación?\n\nContinuará desde donde se quedó.')) {
+      return;
+    }
+
+    setResuming(jobId);
+    try {
+      const response = await fetch(`/api/admin/resume-indexation/${jobId}`, {
+        method: 'POST',
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast.success('✅ Indexación reanudada correctamente');
+        // Redirigir a la página de indexar para ver el progreso
+        window.location.href = '/admin/indexar';
+      } else {
+        toast.error(data.error || 'Error al reanudar');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error('Error al reanudar la indexación');
+    } finally {
+      setResuming(null);
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     const variants: Record<string, any> = {
       completed: 'success',
@@ -102,6 +131,7 @@ export default function TrabajosPage() {
       failed: 'destructive',
       paused: 'secondary',
       pending: 'secondary',
+      cancelled: 'secondary',
     };
 
     const labels: Record<string, string> = {
@@ -110,6 +140,7 @@ export default function TrabajosPage() {
       failed: 'Error',
       paused: 'Pausado',
       pending: 'Pendiente',
+      cancelled: 'Cancelado',
     };
 
     return (
@@ -166,6 +197,20 @@ export default function TrabajosPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     {getStatusBadge(job.status)}
+                    
+                    {/* Botón Reanudar para trabajos pausados */}
+                    {job.status === 'paused' && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => resumeJob(job.id)}
+                        disabled={resuming === job.id}
+                        className="text-green-600 hover:text-green-700 border-green-500"
+                      >
+                        {resuming === job.id ? '...' : '▶️ Reanudar'}
+                      </Button>
+                    )}
+                    
                     <Button
                       variant="outline"
                       size="sm"
@@ -179,22 +224,91 @@ export default function TrabajosPage() {
 
                 <div className="grid grid-cols-4 gap-4 mb-4">
                   <div>
-                    <p className="text-xs text-gray-500">Total</p>
+                    <p className="text-xs text-gray-500">🔍 Encontrados</p>
                     <p className="text-lg font-semibold">{job.total_places}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500">Procesados</p>
+                    <p className="text-xs text-gray-500">🔄 Procesados</p>
                     <p className="text-lg font-semibold">{job.processed_places}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500">Exitosos</p>
+                    <p className="text-xs text-gray-500">✅ Guardados</p>
                     <p className="text-lg font-semibold text-green-600">{job.successful_places}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500">Fallidos</p>
-                    <p className="text-lg font-semibold text-red-600">{job.failed_places}</p>
+                    <p className="text-xs text-gray-500">⏭️ Descartados</p>
+                    <p className="text-lg font-semibold text-yellow-600">
+                      {((job.error_log?.lowRating || 0) + (job.error_log?.lowReviews || 0) + (job.error_log?.chains || 0) + (job.error_log?.duplicates || job.error_log?.skipped || 0))}
+                    </p>
                   </div>
                 </div>
+
+                {/* Desglose de descartados */}
+                {job.error_log && (job.error_log.lowRating > 0 || job.error_log.lowReviews > 0 || job.error_log.chains > 0 || job.error_log.duplicates > 0 || job.error_log.skipped > 0) && (
+                  <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                    <div className="text-xs font-semibold text-amber-900 mb-2">📋 Desglose de descartados:</div>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                      {job.error_log.lowRating > 0 && (
+                        <div className="text-amber-800">
+                          📉 Rating bajo: <strong>{job.error_log.lowRating}</strong>
+                        </div>
+                      )}
+                      {job.error_log.lowReviews > 0 && (
+                        <div className="text-amber-800">
+                          📊 Pocas reseñas: <strong>{job.error_log.lowReviews}</strong>
+                        </div>
+                      )}
+                      {job.error_log.chains > 0 && (
+                        <div className="text-amber-800">
+                          🏪 Cadenas/Cat. inválida: <strong>{job.error_log.chains}</strong>
+                        </div>
+                      )}
+                      {(job.error_log.duplicates > 0 || job.error_log.skipped > 0) && (
+                        <div className="text-amber-800">
+                          🔄 Duplicados: <strong>{job.error_log.duplicates || job.error_log.skipped}</strong>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Errores técnicos */}
+                {job.failed_places > 0 && (
+                  <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                    <div className="text-xs font-semibold text-red-900">
+                      ❌ Errores técnicos (fallos de API): <strong>{job.failed_places}</strong>
+                    </div>
+                  </div>
+                )}
+
+                {/* Desglose por categorías */}
+                {job.categoryStats && Object.keys(job.categoryStats).length > 0 && (
+                  <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                    <div className="text-xs font-semibold text-green-900 mb-2">✅ Lugares guardados por categoría:</div>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                      {job.categoryStats.restaurante > 0 && (
+                        <div className="text-green-800">
+                          🍽️ Restaurantes: <strong>{job.categoryStats.restaurante}</strong>
+                        </div>
+                      )}
+                      {job.categoryStats.bar > 0 && (
+                        <div className="text-green-800">
+                          🍺 Bares: <strong>{job.categoryStats.bar}</strong>
+                        </div>
+                      )}
+                      {job.categoryStats.cafe > 0 && (
+                        <div className="text-green-800">
+                          ☕ Cafés: <strong>{job.categoryStats.cafe}</strong>
+                        </div>
+                      )}
+                      {job.categoryStats.hotel > 0 && (
+                        <div className="text-green-800">
+                          🏨 Hoteles: <strong>{job.categoryStats.hotel}</strong>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
 
                 <div className="text-sm text-gray-500">
                   Iniciado: {formatDate(job.created_at)}

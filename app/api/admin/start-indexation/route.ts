@@ -42,12 +42,35 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // 🆕 PASO CRÍTICO: Cancelar trabajos previos del admin
+    console.log(`🔄 Cancelando trabajos previos del admin ${user.id}...`);
+    const { data: cancelledJobs } = await supabase
+      .from('indexation_jobs')
+      .update({
+        status: 'cancelled',
+        completed_at: new Date().toISOString(),
+        should_continue: false,
+        error_log: { 
+          cancelled: true, 
+          reason: 'Nueva indexación iniciada - trabajo previo cancelado automáticamente',
+          cancelled_at: new Date().toISOString()
+        }
+      })
+      .eq('admin_user_id', user.id)
+      .in('status', ['running', 'pending', 'paused'])
+      .select();
+
+    if (cancelledJobs && cancelledJobs.length > 0) {
+      console.log(`✅ ${cancelledJobs.length} trabajo(s) previo(s) cancelado(s)`);
+    }
+
     // Crear trabajo de indexación
     const { data: job, error: jobError } = await supabase
       .from('indexation_jobs')
       .insert({
         admin_user_id: user.id,
         status: 'pending',
+        should_continue: true, // Iniciar como true
         search_params: {
           provinces,
           categories,
@@ -57,6 +80,7 @@ export async function POST(request: NextRequest) {
         processed_places: 0,
         successful_places: 0,
         failed_places: 0,
+        logs: [], // Iniciar array de logs vacío
       })
       .select()
       .single();

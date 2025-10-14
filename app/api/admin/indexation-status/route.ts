@@ -59,8 +59,8 @@ export async function GET(request: NextRequest) {
       job: {
         id: job.id,
         status: job.status,
-        provinces: job.provinces,
-        categories: job.categories,
+        provinces: job.search_params?.provinces || job.provinces,
+        categories: job.search_params?.categories || job.categories,
         total_places: job.total_places,
         processed_places: job.processed_places,
         successful_places: job.successful_places,
@@ -70,6 +70,7 @@ export async function GET(request: NextRequest) {
         started_at: job.started_at,
         completed_at: job.completed_at,
         error_message: job.error_message,
+        error_log: job.error_log, // ← CRÍTICO: incluir error_log con estadísticas de descartados
       },
     });
 

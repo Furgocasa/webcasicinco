@@ -1,7 +1,12 @@
 /**
- * INDEXER RÁPIDO - FASE 1
+ * INDEXER RÁPIDO - FASE 1 (VERSIÓN PROFESIONAL)
  * Solo busca, filtra y guarda datos básicos (SIN IA, SIN fotos)
  * Los lugares se marcan como "needs_enrichment = true" para procesarlos después
+ * 
+ * MEJORAS PROFESIONALES:
+ * - Logs en tiempo real guardados en BD
+ * - Control de pausa/cancelación con should_continue
+ * - Verificación cada N iteraciones para poder detener el proceso
  */
 
 import { createAdminClient } from '@/lib/supabase/server';
@@ -9,6 +14,7 @@ import { searchPlaces, getPlaceDetails, extractProvinceFromPlaceData, extractCit
 import { shouldExcludeChain } from './searcher';
 import { generatePlaceSlug } from '../utils/slugify';
 import { strictCategorizePlaceByTypes, shouldExcludeFromCategory } from './category-filters';
+import { IndexationLogger } from './logger';
 
 interface IndexationParams {
   provinces: string[];
@@ -31,6 +37,26 @@ interface IndexationResult {
 }
 
 /**
+ * Verifica si el trabajo debe continuar ejecutándose
+ * Consulta el campo should_continue en la BD
+ */
+async function shouldContinueJob(jobId: string, supabase: ReturnType<typeof createAdminClient>): Promise<boolean> {
+  try {
+    const { data } = await supabase
+      .from('indexation_jobs')
+      .select('should_continue, status')
+      .eq('id', jobId)
+      .single();
+    
+    // Si should_continue es false o el status cambió, detener
+    return data?.should_continue === true && data?.status === 'running';
+  } catch (error) {
+    console.error('Error verificando should_continue:', error);
+    return true; // En caso de error, continuar para no interrumpir sin motivo
+  }
+}
+
+/**
  * Busca lugares y los guarda como "pendientes de enriquecimiento"
  */
 export async function startFastIndexation(
@@ -38,19 +64,21 @@ export async function startFastIndexation(
   params: IndexationParams
 ): Promise<void> {
   const supabase = createAdminClient();
+  const logger = new IndexationLogger(jobId);
 
-  console.log(`\n[FAST-INDEX] ${'='.repeat(70)}`);
-  console.log(`[FAST-INDEX] 🚀 INDEXACIÓN RÁPIDA INICIADA`);
-  console.log(`[FAST-INDEX]    Job ID: ${jobId}`);
-  console.log(`[FAST-INDEX]    Provincias: ${params.provinces.join(', ')}`);
-  console.log(`[FAST-INDEX]    Categorías: ${params.categories.join(', ')}`);
-  console.log(`[FAST-INDEX]    Rating mínimo: ${params.minRating}`);
-  console.log(`[FAST-INDEX] ${'='.repeat(70)}\n`);
+  await logger.info('🚀 Indexación rápida iniciada');
+  await logger.info(`Provincias: ${params.provinces.join(', ')}`);
+  await logger.info(`Categorías: ${params.categories.join(', ')}`);
+  await logger.info(`Rating mínimo: ${params.minRating}`);
 
   try {
     await supabase
       .from('indexation_jobs')
-      .update({ status: 'running', started_at: new Date().toISOString() })
+      .update({ 
+        status: 'running', 
+        started_at: new Date().toISOString(),
+        should_continue: true // Asegurar que comienza en true
+      })
       .eq('id', jobId);
 
     const allPlaceIds = new Set<string>();
@@ -83,9 +111,16 @@ export async function startFastIndexation(
     // ==========================================
     // FASE 1: BÚSQUEDA EXHAUSTIVA
     // ==========================================
-    console.log('[FAST-INDEX] 🔍 FASE 1: BÚSQUEDA EXHAUSTIVA\n');
+    await logger.info('🔍 FASE 1: Búsqueda exhaustiva iniciada');
 
     for (const province of params.provinces) {
+      // Verificar si debe continuar antes de cada provincia
+      if (!await shouldContinueJob(jobId, supabase)) {
+        await logger.warning('⏸️ Indexación pausada o cancelada por el administrador');
+        await logger.close();
+        return;
+      }
+
       for (const category of params.categories) {
         try {
           // SOLO 4 CATEGORÍAS PERMITIDAS
@@ -99,11 +134,18 @@ export async function startFastIndexation(
           const searchTerm = searchTerms[category] || category;
           const cities = mainCities[province] || [province];
 
-          console.log(`\n[FAST-INDEX] 📍 ${province} - ${category.toUpperCase()}`);
-          console.log(`[FAST-INDEX] Buscando en ${cities.length} ciudades...\n`);
+          await logger.info(`📍 ${province} - ${category.toUpperCase()}`);
+          await logger.info(`   Buscando en ${cities.length} ciudades...`);
 
         for (let i = 0; i < cities.length; i++) {
           const city = cities[i];
+          
+          // Verificar si debe continuar cada 3 ciudades
+          if (i % 3 === 0 && !await shouldContinueJob(jobId, supabase)) {
+            await logger.warning('⏸️ Indexación pausada durante búsqueda');
+            await logger.close();
+            return;
+          }
           
           try {
             const placeIds = await searchPlaces({
@@ -117,47 +159,53 @@ export async function startFastIndexation(
             placeIds.forEach(id => allPlaceIds.add(id));
             const added = allPlaceIds.size - newCount;
 
-            console.log(`[FAST-INDEX]   [${i+1}/${cities.length}] ${city}: ${placeIds.length} resultados (${added} nuevos)`);
+            await logger.info(`   [${i+1}/${cities.length}] ${city}: ${placeIds.length} resultados (${added} nuevos)`);
 
             await supabase
               .from('indexation_jobs')
               .update({ total_places: allPlaceIds.size })
               .eq('id', jobId);
 
-            await new Promise(r => setTimeout(r, 200)); // Reducido de 500ms a 200ms
-          } catch (error) {
-            console.error(`[FAST-INDEX] Error en ${city}:`, error);
+            await new Promise(r => setTimeout(r, 200));
+          } catch (error: any) {
+            await logger.error(`   Error en ${city}: ${error.message}`);
             // Continuar con la siguiente ciudad aunque falle una
           }
         }
 
-        console.log(`[FAST-INDEX] ✅ ${category}: ${allPlaceIds.size} lugares únicos acumulados\n`);
+        await logger.success(`✅ ${category}: ${allPlaceIds.size} lugares únicos acumulados`);
         
-        } catch (categoryError) {
-          console.error(`[FAST-INDEX] ❌ Error fatal en ${province} - ${category}:`, categoryError);
+        } catch (categoryError: any) {
+          await logger.error(`❌ Error fatal en ${province} - ${category}: ${categoryError.message}`);
           // Continuar con la siguiente categoría aunque falle una
         }
       }
     }
 
-    console.log(`\n[FAST-INDEX] ✅ BÚSQUEDA COMPLETADA: ${allPlaceIds.size} lugares encontrados`);
-    console.log(`[FAST-INDEX] ${'='.repeat(70)}\n`);
+    await logger.success(`✅ Búsqueda completada: ${allPlaceIds.size} lugares encontrados`);
 
     // ==========================================
     // FASE 2: PROCESAMIENTO RÁPIDO (solo detalles básicos)
     // ==========================================
-    console.log('[FAST-INDEX] 🔄 FASE 2: FILTRADO Y GUARDADO RÁPIDO\n');
+    await logger.info('🔄 FASE 2: Filtrado y guardado rápido iniciado');
 
     const placesToProcess = Array.from(allPlaceIds).filter(id => !processedIds.has(id));
-    console.log(`[FAST-INDEX] Procesando ${placesToProcess.length} lugares...\n`);
+    await logger.info(`Procesando ${placesToProcess.length} lugares...`);
 
     for (const placeId of placesToProcess) {
+      // Verificar si debe continuar cada 10 lugares
+      if (totalProcessed % 10 === 0 && !await shouldContinueJob(jobId, supabase)) {
+        await logger.warning('⏸️ Indexación pausada durante procesamiento');
+        await logger.close();
+        return;
+      }
+
       try {
         processedIds.add(placeId);
         totalProcessed++;
 
         if (totalProcessed % 50 === 0) {
-          console.log(`[FAST-INDEX] 📊 ${totalProcessed}/${allPlaceIds.size} (${Math.round((totalProcessed/allPlaceIds.size)*100)}%)`);
+          await logger.info(`📊 Progreso: ${totalProcessed}/${allPlaceIds.size} (${Math.round((totalProcessed/allPlaceIds.size)*100)}%)`);
         }
 
         // Verificar si ya existe
@@ -210,6 +258,24 @@ export async function startFastIndexation(
 
         const province = extractProvinceFromPlaceData(details);
         const city = extractCityFromPlaceData(details);
+
+        // 🛡️ VALIDACIÓN CRÍTICA: Verificar que sea provincia española
+        const spanishProvinces = [
+          'Albacete', 'Alicante', 'Almería', 'Álava', 'Asturias', 'Ávila', 'Badajoz', 'Baleares',
+          'Barcelona', 'Bizkaia', 'Burgos', 'Cáceres', 'Cádiz', 'Cantabria', 'Castellón', 'Ciudad Real',
+          'Córdoba', 'Cuenca', 'Gipuzkoa', 'Girona', 'Granada', 'Guadalajara', 'Huelva', 'Huesca',
+          'Jaén', 'A Coruña', 'La Rioja', 'Las Palmas', 'León', 'Lleida', 'Lugo', 'Madrid', 'Málaga',
+          'Murcia', 'Navarra', 'Ourense', 'Palencia', 'Pontevedra', 'Salamanca', 'Segovia', 'Sevilla',
+          'Soria', 'Tarragona', 'Santa Cruz de Tenerife', 'Teruel', 'Toledo', 'Valencia', 'Valladolid',
+          'Zamora', 'Zaragoza', 'Ceuta', 'Melilla'
+        ];
+
+        if (!spanishProvinces.includes(province)) {
+          chains++; // Contar como descartado - fuera de España
+          await logger.warning(`⚠️ Descartado (fuera de España): ${details.name} - ${province}`);
+          continue;
+        }
+
         const slug = generatePlaceSlug(details.name, city);
 
         const placeData = {
@@ -250,7 +316,7 @@ export async function startFastIndexation(
         } else {
           approved++;
           if (approved % 50 === 0) {
-            console.log(`[FAST-INDEX] ✅ ${approved} lugares aprobados`);
+            await logger.success(`✅ ${approved} lugares aprobados`);
           }
         }
 
@@ -278,23 +344,27 @@ export async function startFastIndexation(
 
       } catch (error: any) {
         errors++;
-        console.error(`[FAST-INDEX] Error procesando ${placeId}:`, error.message);
+        await logger.error(`Error procesando lugar: ${error.message}`);
       }
     }
 
     // Finalizar
-    console.log(`\n[FAST-INDEX] ✅ INDEXACIÓN RÁPIDA COMPLETADA`);
-    console.log(`[FAST-INDEX] 📊 RESUMEN:`);
-    console.log(`[FAST-INDEX]    Encontrados: ${allPlaceIds.size}`);
-    console.log(`[FAST-INDEX]    Procesados: ${totalProcessed}`);
-    console.log(`[FAST-INDEX]    ✅ Aprobados: ${approved} (pendientes de enriquecimiento)`);
-    console.log(`[FAST-INDEX]    ⏭️  Descartados: ${lowRating + lowReviews + chains + duplicates}`);
-    console.log(`[FAST-INDEX]       - Rating bajo: ${lowRating}`);
-    console.log(`[FAST-INDEX]       - Pocas reseñas: ${lowReviews}`);
-    console.log(`[FAST-INDEX]       - Cadenas: ${chains}`);
-    console.log(`[FAST-INDEX]       - Duplicados: ${duplicates}`);
-    console.log(`[FAST-INDEX]    ❌ Errores: ${errors}`);
-    console.log(`[FAST-INDEX] ${'='.repeat(70)}\n`);
+    await logger.success('🎉 Indexación rápida completada');
+    await logger.info(`📊 RESUMEN:`);
+    await logger.info(`   Encontrados: ${allPlaceIds.size}`);
+    await logger.info(`   Procesados: ${totalProcessed}`);
+    await logger.success(`   ✅ Aprobados: ${approved} (pendientes de enriquecimiento)`);
+    await logger.info(`   ⏭️ Descartados: ${lowRating + lowReviews + chains + duplicates}`);
+    await logger.info(`      - Rating bajo: ${lowRating}`);
+    await logger.info(`      - Pocas reseñas: ${lowReviews}`);
+    await logger.info(`      - Cadenas: ${chains}`);
+    await logger.info(`      - Duplicados: ${duplicates}`);
+    if (errors > 0) {
+      await logger.warning(`   ❌ Errores: ${errors}`);
+    }
+
+    // Guardar logs finales
+    await logger.close();
 
     await supabase
       .from('indexation_jobs')
@@ -317,13 +387,15 @@ export async function startFastIndexation(
       .eq('id', jobId);
 
   } catch (error: any) {
-    console.error('[FAST-INDEX] ERROR FATAL:', error);
+    await logger.error(`ERROR FATAL: ${error.message}`, { stack: error.stack });
+    await logger.close();
+    
     await supabase
       .from('indexation_jobs')
       .update({
         status: 'failed',
         completed_at: new Date().toISOString(),
-        error_log: { error: error.message }
+        error_log: { error: error.message, stack: error.stack }
       })
       .eq('id', jobId);
     throw error;
