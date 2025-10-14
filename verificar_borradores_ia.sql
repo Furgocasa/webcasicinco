@@ -16,6 +16,7 @@ DECLARE
   total_sin_ia_count INTEGER;
   total_con_ia_count INTEGER;
   total_places_count INTEGER;
+  r RECORD; -- ✅ Declarar variable para el loop
 BEGIN
   RAISE NOTICE '📊 Verificando estado de enriquecimiento IA en BORRADORES vs PUBLICADOS...';
   RAISE NOTICE '================================================================================';

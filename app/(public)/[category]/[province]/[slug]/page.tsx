@@ -321,18 +321,31 @@ export default function PlaceDetailPage() {
               }
               
               // Rellenar con fotos de Google si no hay suficientes de Supabase
-              if (photos.length < maxPhotos && place.photos?.length) {
-                const remainingSlots = maxPhotos - photos.length;
-                const googlePhotos = place.photos.slice(0, remainingSlots).map((photoRef: string, index: number) => {
-                  const googleUrl = getPlacePhotoUrl(place, photos.length + index, 600);
-                  return googleUrl ? {
-                    src: googleUrl,
-                    index: photos.length + index,
-                    alt: `${place.name} - Foto ${photos.length + index + 1}`
-                  } : null;
-                }).filter(Boolean);
+              if (photos.length < maxPhotos && place.photos) {
+                // Parsear photos si es string JSON
+                let parsedPhotos = place.photos;
+                if (typeof place.photos === 'string') {
+                  try {
+                    parsedPhotos = JSON.parse(place.photos);
+                  } catch (error) {
+                    console.error('Error parsing photos JSON:', error);
+                    parsedPhotos = [];
+                  }
+                }
                 
-                photos.push(...googlePhotos);
+                if (Array.isArray(parsedPhotos) && parsedPhotos.length > 0) {
+                  const remainingSlots = maxPhotos - photos.length;
+                  const googlePhotos = parsedPhotos.slice(0, remainingSlots).map((photoRef: string, index: number) => {
+                    const googleUrl = getPlacePhotoUrl(place, photos.length + index, 600);
+                    return googleUrl ? {
+                      src: googleUrl,
+                      index: photos.length + index,
+                      alt: `${place.name} - Foto ${photos.length + index + 1}`
+                    } : null;
+                  }).filter(Boolean);
+                  
+                  photos.push(...googlePhotos);
+                }
               }
               
               return photos.length > 0 ? (
