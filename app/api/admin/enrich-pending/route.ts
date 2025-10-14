@@ -63,24 +63,36 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    // Obtener estadísticas de enriquecimiento
-    const { data: stats } = await supabase
+    // Obtener estadísticas de enriquecimiento (usando agregación en BD, no JS)
+    const { count: pending } = await supabase
       .from('places')
-      .select('enrichment_status', { count: 'exact' });
+      .select('*', { count: 'exact', head: true })
+      .eq('needs_enrichment', true)
+      .eq('enrichment_status', 'pending');
 
-    const pending = stats?.filter(s => s.enrichment_status === 'pending').length || 0;
-    const processing = stats?.filter(s => s.enrichment_status === 'processing').length || 0;
-    const completed = stats?.filter(s => s.enrichment_status === 'completed').length || 0;
-    const failed = stats?.filter(s => s.enrichment_status === 'failed').length || 0;
+    const { count: processing } = await supabase
+      .from('places')
+      .select('*', { count: 'exact', head: true })
+      .eq('enrichment_status', 'processing');
+
+    const { count: completed } = await supabase
+      .from('places')
+      .select('*', { count: 'exact', head: true })
+      .eq('enrichment_status', 'completed');
+
+    const { count: failed } = await supabase
+      .from('places')
+      .select('*', { count: 'exact', head: true })
+      .eq('enrichment_status', 'failed');
 
     return NextResponse.json({
       success: true,
       stats: {
-        pending,
-        processing,
-        completed,
-        failed,
-        total: stats?.length || 0,
+        pending: pending || 0,
+        processing: processing || 0,
+        completed: completed || 0,
+        failed: failed || 0,
+        total: (pending || 0) + (processing || 0) + (completed || 0) + (failed || 0),
       }
     });
 

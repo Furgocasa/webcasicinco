@@ -63,6 +63,11 @@ interface CategoryStats {
 }
 
 export default function DashboardPage() {
+  // Título del navegador
+  useEffect(() => {
+    document.title = 'Dashboard - Admin | Casi Cinco';
+  }, []);
+
   const [stats, setStats] = useState<DashboardStats>({
     totalPlaces: 0,
     published: 0,
@@ -168,7 +173,11 @@ export default function DashboardPage() {
           : 0;
         const withAI = places.filter((p: any) => p.ai_description).length;
         const withoutAI = places.filter((p: any) => !p.ai_description).length;
-        const needsEnrichment = places.filter((p: any) => p.needs_enrichment === true).length; // ✅ NUEVO
+        // ✅ CONTADOR COHERENTE: igual que en /admin/enriquecer
+        const needsEnrichment = places.filter((p: any) => 
+          p.needs_enrichment === true && 
+          p.enrichment_status === 'pending'
+        ).length;
         const totalReviews = places.reduce((sum: number, p: any) => sum + (p.review_count || 0), 0);
         const avgReviews = places.length > 0 ? Math.round(totalReviews / places.length) : 0;
 

@@ -8,6 +8,11 @@ import { Loader2, CheckCircle, XCircle, Clock, Target } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function EnriquecerPage() {
+  // Título del navegador
+  useEffect(() => {
+    document.title = 'Enriquecer con IA - Admin | Casi Cinco';
+  }, []);
+
   const [pendingCount, setPendingCount] = useState(0);
   const [enriching, setEnriching] = useState(false);
   const [jobStatus, setJobStatus] = useState<any>(null);

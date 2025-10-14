@@ -8,6 +8,11 @@ import { PROVINCES, PLACE_CATEGORIES } from '@/lib/utils/constants';
 import { toast } from 'sonner';
 
 export default function IndexarPage() {
+  // Título del navegador
+  useEffect(() => {
+    document.title = 'Indexar Lugares - Admin | Casi Cinco';
+  }, []);
+
   const [selectedProvinces, setSelectedProvinces] = useState<string[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [minRating, setMinRating] = useState('4.7');
