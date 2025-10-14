@@ -222,7 +222,8 @@ export default function RutaPage() {
       }
       
       console.log(`📡 Llamando a API: /api/places?${queryParams}`);
-      const response = await fetch(`/api/places?${queryParams}`);
+      // Agregar timestamp para forzar recarga de lugares frescos (sin caché)
+      const response = await fetch(`/api/places?${queryParams}&t=${Date.now()}`);
       const data = await response.json();
       
       console.log('📦 Respuesta de API:', {

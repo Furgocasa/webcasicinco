@@ -133,7 +133,8 @@ export default function DashboardPage() {
       const maxPages = 40; // Máximo 4000 lugares (40 páginas × 100)
       
         while (page <= maxPages) {
-        const placesResponse = await fetch(`/api/admin/places?page=${page}&limit=100`);
+        // Agregar timestamp para forzar bypass de caché
+        const placesResponse = await fetch(`/api/admin/places?page=${page}&limit=100&t=${Date.now()}`);
         
         if (!placesResponse.ok) {
           console.error(`[DASHBOARD] ❌ Error HTTP ${placesResponse.status} en página ${page}`);
@@ -177,19 +178,26 @@ export default function DashboardPage() {
           : 0;
         const withAI = places.filter((p: any) => p.ai_description).length;
         const withoutAI = places.filter((p: any) => !p.ai_description).length;
-        // ✅ CONTADOR COHERENTE: igual que en /admin/enriquecer
-        const needsEnrichment = places.filter((p: any) => 
-          p.needs_enrichment === true && 
-          p.enrichment_status === 'pending'
-        ).length;
         const totalReviews = places.reduce((sum: number, p: any) => sum + (p.review_count || 0), 0);
         const avgReviews = places.length > 0 ? Math.round(totalReviews / places.length) : 0;
+
+        // ✅ OBTENER contador de pendientes desde el MISMO endpoint que usa Gestión de Lugares
+        let needsEnrichment = 0;
+        try {
+          const enrichResponse = await fetch(`/api/admin/enrich-pending?t=${Date.now()}`);
+          const enrichData = await enrichResponse.json();
+          if (enrichData.success && enrichData.stats) {
+            needsEnrichment = enrichData.stats.pending || 0;
+          }
+        } catch (error) {
+          console.error('[DASHBOARD] Error obteniendo pendientes IA:', error);
+        }
 
         setStats({
           totalPlaces: places.length,
           published,
           pending,
-          needsEnrichment, // ✅ NUEVO
+          needsEnrichment,
           provinces: uniqueProvinces,
           communities: uniqueCommunities,
           cities: uniqueCities,
