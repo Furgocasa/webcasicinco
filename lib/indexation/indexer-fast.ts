@@ -142,20 +142,98 @@ export async function startFastIndexation(
     let duplicates = 0;
     let errors = 0;
 
-    // Ciudades principales por provincia (COBERTURA MÁXIMA - 12 ciudades)
+    // Ciudades principales por provincia (COBERTURA COMPLETA - Todas las provincias españolas)
     const mainCities: Record<string, string[]> = {
-      'Murcia': ['Murcia', 'Cartagena', 'Lorca', 'Molina de Segura', 'Mazarrón', 'Yecla', 'Jumilla', 'Cieza', 'Águilas', 'San Javier', 'Totana', 'Alcantarilla'],
-      'Alicante': ['Alicante', 'Elche', 'Torrevieja', 'Benidorm', 'Orihuela', 'Alcoy', 'Dénia', 'Jávea', 'Calpe', 'Altea', 'Villena', 'Elda'],
-      'Madrid': ['Madrid', 'Móstoles', 'Alcalá de Henares', 'Fuenlabrada', 'Leganés', 'Getafe', 'Torrejón', 'Parla', 'Coslada', 'Pozuelo', 'Las Rozas', 'Majadahonda'],
-      'Barcelona': ['Barcelona', 'Hospitalet', 'Terrassa', 'Badalona', 'Sabadell', 'Mataró', 'Granollers', 'Sitges', 'Vic', 'Manresa', 'Rubí', 'Cornellà'],
-      'Valencia': ['Valencia', 'Gandía', 'Torrent', 'Paterna', 'Sagunto', 'Alzira', 'Cullera', 'Burjassot', 'Mislata', 'Requena', 'Xàtiva', 'Ontinyent'],
-      'Sevilla': ['Sevilla', 'Dos Hermanas', 'Alcalá de Guadaíra', 'Utrera', 'Mairena', 'Écija', 'La Rinconada', 'Carmona', 'Lebrija', 'Coria del Río', 'Los Palacios', 'Osuna'],
-      'Málaga': ['Málaga', 'Marbella', 'Mijas', 'Vélez-Málaga', 'Fuengirola', 'Torremolinos', 'Estepona', 'Benalmádena', 'Ronda', 'Antequera', 'Nerja', 'Torrox'],
-      'Granada': ['Granada', 'Motril', 'Almuñécar', 'Baza', 'Guadix', 'Loja', 'Armilla', 'Albolote', 'Maracena', 'Salobreña', 'Huétor Vega', 'Atarfe'],
+      // Andalucía
+      'Almería': ['Almería', 'Roquetas de Mar', 'El Ejido', 'Níjar', 'Vícar', 'Huércal-Overa', 'Adra', 'Vera', 'Mojácar'],
       'Cádiz': ['Cádiz', 'Jerez de la Frontera', 'Algeciras', 'San Fernando', 'El Puerto de Santa María', 'Chiclana', 'La Línea', 'Sanlúcar', 'Barbate', 'Rota', 'Conil', 'Tarifa'],
-      'Córdoba': ['Córdoba', 'Lucena', 'Puente Genil', 'Montilla', 'Priego', 'Palma del Río', 'Pozoblanco', 'Baena', 'Cabra', 'Aguilar', 'Rute', 'Fernán Núñez'],
+      'Córdoba': ['Córdoba', 'Lucena', 'Puente Genil', 'Montilla', 'Priego', 'Palma del Río', 'Pozoblanco', 'Baena', 'Cabra', 'Aguilar', 'Rute'],
+      'Granada': ['Granada', 'Motril', 'Almuñécar', 'Baza', 'Guadix', 'Loja', 'Armilla', 'Albolote', 'Maracena', 'Salobreña', 'Huétor Vega'],
+      'Huelva': ['Huelva', 'Lepe', 'Almonte', 'Moguer', 'Isla Cristina', 'Ayamonte', 'Punta Umbría', 'Cartaya', 'Aracena'],
+      'Jaén': ['Jaén', 'Linares', 'Andújar', 'Úbeda', 'Martos', 'Alcalá la Real', 'Baeza', 'Villacarrillo', 'Bailén'],
+      'Málaga': ['Málaga', 'Marbella', 'Mijas', 'Vélez-Málaga', 'Fuengirola', 'Torremolinos', 'Estepona', 'Benalmádena', 'Ronda', 'Antequera', 'Nerja', 'Torrox'],
+      'Sevilla': ['Sevilla', 'Dos Hermanas', 'Alcalá de Guadaíra', 'Utrera', 'Mairena', 'Écija', 'La Rinconada', 'Carmona', 'Lebrija', 'Coria del Río', 'Los Palacios'],
+      // Aragón
+      'Huesca': ['Huesca', 'Monzón', 'Barbastro', 'Jaca', 'Sabiñánigo', 'Binéfar', 'Fraga', 'Ainsa'],
+      'Teruel': ['Teruel', 'Alcañiz', 'Andorra', 'Calamocha', 'Albarracín', 'Mora de Rubielos'],
+      'Zaragoza': ['Zaragoza', 'Calatayud', 'Utebo', 'Ejea de los Caballeros', 'Cuarte de Huerva', 'Tarazona', 'Caspe', 'Borja'],
+      // Asturias
+      'Asturias': ['Oviedo', 'Gijón', 'Avilés', 'Siero', 'Langreo', 'Mieres', 'Castrillón', 'Llanera', 'Llanes', 'Cangas de Onís', 'Ribadesella'],
+      // Baleares
+      'Baleares': ['Palma', 'Calvià', 'Manacor', 'Ibiza', 'Alcúdia', 'Mahón', 'Ciutadella', 'Sóller', 'Pollença'],
+      // Canarias
+      'Las Palmas': ['Las Palmas', 'Telde', 'Santa Lucía', 'Arucas', 'Agüimes', 'Ingenio', 'Puerto del Rosario', 'Arrecife', 'Maspalomas'],
+      'Santa Cruz de Tenerife': ['Santa Cruz de Tenerife', 'San Cristóbal de La Laguna', 'Arona', 'Adeje', 'Los Realejos', 'Puerto de la Cruz', 'La Orotava', 'Los Llanos de Aridane'],
+      // Cantabria
+      'Cantabria': ['Santander', 'Torrelavega', 'Castro Urdiales', 'Camargo', 'El Astillero', 'Laredo', 'Santoña', 'Comillas', 'Potes'],
+      // Castilla-La Mancha
+      'Albacete': ['Albacete', 'Hellín', 'Villarrobledo', 'Almansa', 'La Roda', 'Caudete', 'Yeste', 'Tobarra', 'Chinchilla'],
+      'Ciudad Real': ['Ciudad Real', 'Puertollano', 'Tomelloso', 'Alcázar de San Juan', 'Valdepeñas', 'Manzanares', 'Daimiel', 'Almagro'],
+      'Cuenca': ['Cuenca', 'Tarancón', 'Quintanar del Rey', 'San Clemente', 'Motilla del Palancar', 'Las Pedroñeras'],
+      'Guadalajara': ['Guadalajara', 'Azuqueca de Henares', 'Sigüenza', 'Molina de Aragón', 'Yunquera de Henares', 'Brihuega'],
+      'Toledo': ['Toledo', 'Talavera de la Reina', 'Illescas', 'Seseña', 'Torrijos', 'Ocaña', 'Mora', 'Consuegra'],
+      // Castilla y León
+      'Ávila': ['Ávila', 'Arévalo', 'Arenas de San Pedro', 'El Barco de Ávila', 'Sotillo de la Adrada'],
+      'Burgos': ['Burgos', 'Aranda de Duero', 'Miranda de Ebro', 'Briviesca', 'Lerma', 'Belorado'],
+      'León': ['León', 'Ponferrada', 'San Andrés del Rabanedo', 'Astorga', 'La Bañeza', 'Villablino', 'Sahagún'],
+      'Palencia': ['Palencia', 'Guardo', 'Aguilar de Campoo', 'Venta de Baños', 'Cervera de Pisuerga'],
+      'Salamanca': ['Salamanca', 'Béjar', 'Ciudad Rodrigo', 'Peñaranda de Bracamonte', 'Alba de Tormes', 'La Alberca'],
+      'Segovia': ['Segovia', 'Cuéllar', 'San Ildefonso', 'El Espinar', 'Cantalejo', 'Sepúlveda'],
+      'Soria': ['Soria', 'Almazán', 'El Burgo de Osma', 'Ágreda', 'San Leonardo de Yagüe'],
+      'Valladolid': ['Valladolid', 'Medina del Campo', 'Laguna de Duero', 'Arroyo de la Encomienda', 'Tordesillas', 'Peñafiel'],
+      'Zamora': ['Zamora', 'Benavente', 'Toro', 'Villalpando', 'Puebla de Sanabria'],
+      // Cataluña
+      'Barcelona': ['Barcelona', 'Hospitalet', 'Terrassa', 'Badalona', 'Sabadell', 'Mataró', 'Granollers', 'Sitges', 'Vic', 'Manresa', 'Rubí', 'Cornellà'],
+      'Girona': ['Girona', 'Figueres', 'Lloret de Mar', 'Blanes', 'Olot', 'Salt', 'Platja d\'Aro', 'Roses', 'Cadaqués', 'Tossa de Mar'],
+      'Lleida': ['Lleida', 'Balaguer', 'Tàrrega', 'Mollerussa', 'La Seu d\'Urgell', 'Vielha'],
+      'Tarragona': ['Tarragona', 'Reus', 'Salou', 'Cambrils', 'El Vendrell', 'Valls', 'Torredembarra', 'Amposta', 'Calafell'],
+      // Comunidad Valenciana
+      'Alicante': ['Alicante', 'Elche', 'Torrevieja', 'Benidorm', 'Orihuela', 'Alcoy', 'Dénia', 'Jávea', 'Calpe', 'Altea', 'Villena', 'Elda'],
+      'Castellón': ['Castellón', 'Vila-real', 'Burriana', 'Vinaròs', 'Onda', 'Benicarló', 'Peñíscola', 'Benicàssim', 'Morella'],
+      'Valencia': ['Valencia', 'Gandía', 'Torrent', 'Paterna', 'Sagunto', 'Alzira', 'Cullera', 'Burjassot', 'Mislata', 'Requena', 'Xàtiva', 'Ontinyent'],
+      // Extremadura
+      'Badajoz': ['Badajoz', 'Mérida', 'Don Benito', 'Almendralejo', 'Villanueva de la Serena', 'Zafra', 'Olivenza', 'Jerez de los Caballeros'],
+      'Cáceres': ['Cáceres', 'Plasencia', 'Navalmoral de la Mata', 'Coria', 'Trujillo', 'Jaraíz de la Vera'],
+      // Galicia
       'A Coruña': ['A Coruña', 'Santiago de Compostela', 'Ferrol', 'Carballo', 'Oleiros', 'Culleredo', 'Arteixo', 'Betanzos', 'Narón', 'Ames', 'Cambre', 'Ribeira'],
-      'Albacete': ['Albacete', 'Hellín', 'Villarrobledo', 'Almansa', 'La Roda', 'Caudete', 'Yeste', 'Tobarra', 'Tarazona', 'Chinchilla', 'Madrigueras', 'Alcalá del Júcar'],
+      'Lugo': ['Lugo', 'Viveiro', 'Monforte de Lemos', 'Vilalba', 'Sarria', 'Foz', 'Ribadeo'],
+      'Ourense': ['Ourense', 'Verín', 'O Carballiño', 'Ribadavia', 'Xinzo de Limia', 'Celanova', 'Allariz'],
+      'Pontevedra': ['Vigo', 'Pontevedra', 'Vilagarcía de Arousa', 'Redondela', 'Cangas', 'Marín', 'Sanxenxo', 'O Grove', 'Cambados', 'Baiona'],
+      // La Rioja
+      'La Rioja': ['Logroño', 'Calahorra', 'Arnedo', 'Haro', 'Alfaro', 'Nájera', 'Santo Domingo de la Calzada'],
+      // Madrid
+      'Madrid': ['Madrid', 'Móstoles', 'Alcalá de Henares', 'Fuenlabrada', 'Leganés', 'Getafe', 'Torrejón', 'Parla', 'Coslada', 'Pozuelo', 'Las Rozas', 'Majadahonda'],
+      // Murcia
+      'Murcia': ['Murcia', 'Cartagena', 'Lorca', 'Molina de Segura', 'Mazarrón', 'Yecla', 'Jumilla', 'Cieza', 'Águilas', 'San Javier', 'Totana', 'Alcantarilla'],
+      // Navarra
+      'Navarra': ['Pamplona', 'Tudela', 'Barañáin', 'Burlada', 'Estella', 'Tafalla', 'Villava', 'Sangüesa'],
+      // País Vasco
+      'Álava': ['Vitoria-Gasteiz', 'Llodio', 'Amurrio', 'Salvatierra', 'Laguardia'],
+      'Araba': ['Vitoria-Gasteiz', 'Llodio', 'Amurrio', 'Salvatierra', 'Laguardia'], // Variante euskera
+      'Guipúzcoa': ['San Sebastián', 'Irún', 'Éibar', 'Rentería', 'Zarautz', 'Mondragón', 'Hernani', 'Hondarribia', 'Tolosa', 'Azpeitia', 'Pasaia'],
+      'Gipuzkoa': ['San Sebastián', 'Irún', 'Éibar', 'Rentería', 'Zarautz', 'Mondragón', 'Hernani', 'Hondarribia', 'Tolosa', 'Azpeitia', 'Pasaia'], // Variante euskera
+      'Vizcaya': ['Bilbao', 'Barakaldo', 'Getxo', 'Portugalete', 'Sestao', 'Durango', 'Basauri', 'Santurce', 'Bermeo', 'Gernika'],
+      'Bizkaia': ['Bilbao', 'Barakaldo', 'Getxo', 'Portugalete', 'Sestao', 'Durango', 'Basauri', 'Santurce', 'Bermeo', 'Gernika'], // Variante euskera
+      // Ceuta y Melilla
+      'Ceuta': ['Ceuta'],
+      'Melilla': ['Melilla'],
+    };
+
+    // 🔥 IMPORTANTE: Si una provincia no tiene ciudades definidas, usar fallback inteligente
+    // En lugar de solo [provincia], buscar en la provincia + "principales ciudades"
+    const getCitiesForProvince = (province: string): string[] => {
+      // Si está en mainCities, usar esa lista
+      if (mainCities[province]) {
+        return mainCities[province];
+      }
+      
+      // Si no está definida, usar estrategia de búsqueda amplia
+      // Esto cubre provincias pequeñas que no están en mainCities
+      return [
+        province, // Capital/provincia
+        `${province} centro`,
+        `${province} ciudad`,
+      ];
     };
 
     // ==========================================
@@ -183,7 +261,7 @@ export async function startFastIndexation(
           };
 
           const searchTerm = searchTerms[category] || category;
-          const cities = mainCities[province] || [province];
+          const cities = getCitiesForProvince(province);
 
           await logger.info(`📍 ${province} - ${category.toUpperCase()}`);
           await logger.info(`   Buscando en ${cities.length} ciudades...`);
