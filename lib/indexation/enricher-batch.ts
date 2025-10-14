@@ -11,6 +11,7 @@
 import { createAdminClient } from '../supabase/server';
 import { getPlaceDetails, downloadAndUploadPhotosToSupabase, extractReviews } from '../google/places';
 import { generatePlaceDescription, summarizeReviews, generateHighlights } from '../ai/openai';
+import { categorizePlaceWithAI } from '../ai/categorize';
 
 export interface EnrichmentResult {
   totalPending: number;
@@ -77,6 +78,29 @@ export async function enrichPendingPlaces(
       const details = await getPlaceDetails(place.google_place_id);
       const reviews = extractReviews(details);
 
+      // 1.5. CATEGORIZACIÓN INTELIGENTE CON IA
+      const categorization = await categorizePlaceWithAI({
+        name: place.name,
+        googleTypes: details.types || [],
+        description: details.editorial_summary?.overview,
+        reviews: reviews.slice(0, 5).map(r => r.text || ''),
+      });
+
+      // Si la IA lo marca como "descartado", no procesar
+      if (categorization.category === 'descartado') {
+        console.log(`[ENRICHER] ⏭️  "${place.name}" descartado por IA: ${categorization.reason}`);
+        
+        await supabase
+          .from('places')
+          .update({ enrichment_status: 'failed' })
+          .eq('id', place.id);
+        
+        failed++;
+        continue;
+      }
+
+      console.log(`[ENRICHER]   Categoría IA: ${categorization.category} (confianza: ${categorization.confidence})`);
+
       // 2. Descargar fotos a Supabase
       const { supabaseUrls } = await downloadAndUploadPhotosToSupabase(
         details.photos || [],
@@ -85,10 +109,10 @@ export async function enrichPendingPlaces(
         5
       );
 
-      // 3. Generar contenido con IA
+      // 3. Generar contenido con IA (usar la categoría correcta de la IA)
       const description = await generatePlaceDescription({
         name: place.name,
-        category: place.category,
+        category: categorization.category, // ✅ Usar categoría de la IA
         city: place.city,
         province: place.province,
         rating: place.rating,
@@ -103,16 +127,17 @@ export async function enrichPendingPlaces(
 
       const highlights = await generateHighlights({
         name: place.name,
-        category: place.category,
+        category: categorization.category, // ✅ Usar categoría de la IA
         rating: place.rating,
         reviews: reviews.map(r => r.text || '').filter(Boolean),
         description,
       });
 
-      // 4. Actualizar lugar con toda la info
+      // 4. Actualizar lugar con toda la info (incluyendo categoría correcta)
       const { error: updateError } = await supabase
         .from('places')
         .update({
+          category: categorization.category, // ✅ ACTUALIZAR categoría con la correcta de IA
           photo_urls: supabaseUrls,
           ai_description: description,
           ai_review_summary: reviewSummary,
