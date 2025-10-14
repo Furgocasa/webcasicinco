@@ -175,6 +175,7 @@ async function processPlacesFromZone(
         slug: slug, // ✅ AGREGADO - slug requerido
         name: details.name,
         category: category,
+        country: 'España', // ✅ AGREGADO - country requerido
         province: normalizedProvince,
         city: city,
         address: details.formatted_address,
