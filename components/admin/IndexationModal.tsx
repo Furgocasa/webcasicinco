@@ -233,7 +233,7 @@ export function IndexationModal({ jobId, onClose }: IndexationModalProps) {
               <h3 className="font-semibold text-lg flex items-center gap-2">
                 📜 Log en Tiempo Real
                 {job.logs && job.logs.length > 0 && (
-                  <Badge variant="outline" className="text-xs">
+                  <Badge variant="info" className="text-xs">
                     {job.logs.length} mensajes
                   </Badge>
                 )}
