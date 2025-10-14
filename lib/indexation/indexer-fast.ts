@@ -260,19 +260,51 @@ export async function startFastIndexation(
         const city = extractCityFromPlaceData(details);
 
         // 🛡️ VALIDACIÓN CRÍTICA: Verificar que sea provincia española
+        // Función para normalizar nombres de provincias (acepta tildes y variantes)
+        const normalizeProvinceName = (name: string): string => {
+          // Mapa de variantes (euskera/gallego → castellano estándar)
+          const variants: Record<string, string> = {
+            'Gipuzkoa': 'Guipúzcoa',
+            'Bizkaia': 'Vizcaya',
+            'Araba': 'Álava',
+            'La Coruña': 'A Coruña',
+            'Orense': 'Ourense',
+          };
+          
+          // Buscar en el mapa de variantes (comparación sin tildes, case-insensitive)
+          const normalizedInput = name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+          const variantKey = Object.keys(variants).find(
+            key => key.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase() === normalizedInput
+          );
+          
+          return variantKey ? variants[variantKey] : name;
+        };
+
         const spanishProvinces = [
           'Albacete', 'Alicante', 'Almería', 'Álava', 'Asturias', 'Ávila', 'Badajoz', 'Baleares',
-          'Barcelona', 'Bizkaia', 'Burgos', 'Cáceres', 'Cádiz', 'Cantabria', 'Castellón', 'Ciudad Real',
-          'Córdoba', 'Cuenca', 'Gipuzkoa', 'Girona', 'Granada', 'Guadalajara', 'Huelva', 'Huesca',
+          'Barcelona', 'Burgos', 'Cáceres', 'Cádiz', 'Cantabria', 'Castellón', 'Ciudad Real',
+          'Córdoba', 'Cuenca', 'Girona', 'Granada', 'Guadalajara', 'Huelva', 'Huesca',
           'Jaén', 'A Coruña', 'La Rioja', 'Las Palmas', 'León', 'Lleida', 'Lugo', 'Madrid', 'Málaga',
           'Murcia', 'Navarra', 'Ourense', 'Palencia', 'Pontevedra', 'Salamanca', 'Segovia', 'Sevilla',
           'Soria', 'Tarragona', 'Santa Cruz de Tenerife', 'Teruel', 'Toledo', 'Valencia', 'Valladolid',
-          'Zamora', 'Zaragoza', 'Ceuta', 'Melilla'
+          'Zamora', 'Zaragoza', 'Ceuta', 'Melilla',
+          'Guipúzcoa', 'Vizcaya' // Añadir variantes castellanas explícitas
         ];
 
-        if (!spanishProvinces.includes(province)) {
+        // Normalizar provincia y comparar sin tildes (case-insensitive)
+        const normalizedProvince = normalizeProvinceName(province);
+        const normalizedProvinceNoAccents = normalizedProvince
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .toLowerCase();
+
+        const isSpanishProvince = spanishProvinces.some(sp => 
+          sp.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase() === normalizedProvinceNoAccents
+        );
+
+        if (!isSpanishProvince) {
           chains++; // Contar como descartado - fuera de España
-          await logger.warning(`⚠️ Descartado (fuera de España): ${details.name} - ${province}`);
+          await logger.warning(`⚠️ Descartado (fuera de España): ${details.name} - ${province} (normalizado: ${normalizedProvince})`);
           continue;
         }
 

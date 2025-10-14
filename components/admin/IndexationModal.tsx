@@ -74,8 +74,8 @@ export function IndexationModal({ jobId, onClose }: IndexationModalProps) {
     // Fetch inmediato
     fetchStatus();
 
-    // Polling cada 2 segundos
-    const interval = setInterval(fetchStatus, 2000);
+    // Polling cada 1 segundo para ver logs en tiempo real
+    const interval = setInterval(fetchStatus, 1000);
 
     return () => clearInterval(interval);
   }, [jobId, autoClose, onClose]);
@@ -240,7 +240,7 @@ export function IndexationModal({ jobId, onClose }: IndexationModalProps) {
               </h3>
               {job.status === 'running' && (
                 <Badge className="bg-green-600 text-white animate-pulse">
-                  ● Actualizando cada 2s
+                  ● Actualizando en tiempo real
                 </Badge>
               )}
             </div>

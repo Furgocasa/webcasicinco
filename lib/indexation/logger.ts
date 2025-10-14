@@ -20,7 +20,7 @@ export class IndexationLogger {
   private jobId: string;
   private logs: IndexationLog[] = [];
   private supabase = createAdminClient();
-  private flushThreshold = 5; // Guardar cada 5 logs
+  private flushThreshold = 1; // 🔥 Guardar CADA log inmediatamente para ver en tiempo real
 
   constructor(jobId: string) {
     this.jobId = jobId;
