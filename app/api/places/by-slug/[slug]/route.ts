@@ -13,7 +13,7 @@ export async function GET(
       .from('places')
       .select('*')
       .eq('slug', params.slug)
-      .eq('published', true) // Solo lugares publicados
+      .or('published.eq.true,ai_description.not.is.null') // ✅ Mostrar publicados O con IA (incluso borradores)
       .single();
 
     if (error || !place) {
