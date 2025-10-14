@@ -25,6 +25,20 @@ export default function IndexarPage() {
   const [jobId, setJobId] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false); // 🆕 Control del modal
 
+  // 🆕 Detectar si se debe abrir el modal automáticamente (reanudación desde historial)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const urlJobId = params.get('jobId');
+    const autoOpen = params.get('autoOpen');
+
+    if (urlJobId && autoOpen === 'true') {
+      setJobId(urlJobId);
+      setShowModal(true);
+      // Limpiar los parámetros de la URL sin recargar la página
+      window.history.replaceState({}, '', '/admin/indexar');
+    }
+  }, []);
+
 
   const handleStartIndexation = async () => {
     setIsIndexing(true);

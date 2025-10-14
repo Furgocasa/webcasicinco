@@ -53,7 +53,7 @@ export async function POST(
       })
       .eq('id', jobId)
       .eq('admin_user_id', user.id) // Solo puede pausar sus propios trabajos
-      .eq('status', 'running') // Solo pausar si está corriendo
+      .in('status', ['running', 'pending']) // Permitir pausar si está corriendo o pendiente
       .select()
       .single();
 

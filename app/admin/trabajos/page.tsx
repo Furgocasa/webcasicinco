@@ -97,7 +97,7 @@ export default function TrabajosPage() {
   };
 
   const resumeJob = async (jobId: string) => {
-    if (!confirm('¿Reanudar esta indexación?\n\nContinuará desde donde se quedó.')) {
+    if (!confirm('¿Reanudar esta indexación?\n\nContinuará desde donde se quedó y se abrirá el monitor en tiempo real.')) {
       return;
     }
 
@@ -110,16 +110,18 @@ export default function TrabajosPage() {
       const data = await response.json();
 
       if (data.success) {
-        toast.success('✅ Indexación reanudada correctamente');
-        // Redirigir a la página de indexar para ver el progreso
-        window.location.href = '/admin/indexar';
+        toast.success('✅ Indexación reanudada correctamente', { duration: 2000 });
+        // Redirigir a la página de indexar con el jobId para abrir el modal automáticamente
+        setTimeout(() => {
+          window.location.href = `/admin/indexar?jobId=${jobId}&autoOpen=true`;
+        }, 500);
       } else {
         toast.error(data.error || 'Error al reanudar');
+        setResuming(null);
       }
     } catch (error) {
       console.error('Error:', error);
       toast.error('Error al reanudar la indexación');
-    } finally {
       setResuming(null);
     }
   };
