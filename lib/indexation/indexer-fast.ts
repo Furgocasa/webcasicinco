@@ -101,7 +101,7 @@ async function processPlacesFromZone(
       if (onProgress) {
         await onProgress(processed, total);
       }
-      
+
       const province = extractProvinceFromPlaceData(details);
       const city = extractCityFromPlaceData(details);
 
@@ -581,11 +581,11 @@ export async function startFastIndexation(
                   () => searchPlaces({
                     location: search.query,
                     keyword: searchTerm,
-                    minRating: params.minRating,
-                    radius: 50000,
+                    minRating: 4.5, // Bajamos a 4.5 para obtener más, filtraremos en código
+                    radius: 25000, // 25km radio por ciudad
                   }),
-                  3,
-                  20000,
+                  2, // 2 intentos (optimizado)
+                  15000, // 15 segundos timeout
                   logger,
                   search.description
                 );
@@ -685,27 +685,27 @@ export async function startFastIndexation(
             invalidCategory += searchResults.breakdown.invalidCategory;
             
             // Actualizar contadores finales
-            await supabase
-              .from('indexation_jobs')
-              .update({
-                processed_places: totalProcessed,
-                successful_places: approved,
+                await supabase
+                  .from('indexation_jobs')
+                  .update({
+                    processed_places: totalProcessed,
+                    successful_places: approved,
                 failed_places: errors,
-                error_log: {
-                  approved,
-                  lowRating,
-                  lowReviews,
+                    error_log: {
+                      approved,
+                      lowRating,
+                      lowReviews,
                   chains, // Siempre 0 por ahora (no detectamos cadenas aún)
-                  duplicates,
+                      duplicates,
                   noRating,
                   outOfSpain,
                   invalidCategory,
-                  errors,
+                      errors,
                   summary: `${approved} aprobados | ${lowRating + lowReviews + duplicates + noRating + outOfSpain + invalidCategory} descartados | ${errors} errores`
-                }
-              })
-              .eq('id', jobId);
-            
+                    }
+                  })
+                  .eq('id', jobId);
+                
             await logger.info(`   📊 ${cityData.name}: ${searchResults.saved} guardados, ${searchResults.discarded} descartados`);
 
             // Marcar esta ciudad como completada en el progreso

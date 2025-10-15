@@ -163,15 +163,15 @@ export default function IndexarPage() {
               {selectedProvinces.length > 0 && selectedCategories.length > 0 && (
                 <div className="p-3 bg-blue-50 border border-blue-300 rounded-lg space-y-2">
                   <p className="text-xs font-bold text-blue-900">
-                    🎯 Sistema Nearby Search por Cuadrantes
+                    🎯 Sistema Text Search Optimizado por Ciudad
                   </p>
                   <div className="text-xs text-blue-800 space-y-1">
-                    <p>✅ Solo búsquedas geográficas (Nearby = 20 resultados, pausas 10s)</p>
-                    <p>• Ciudades grandes (&gt;200k): <strong>5 búsquedas × 9-10km</strong> (optimizado -44%)</p>
-                    <p>• Ciudades medianas (50k-200k): 3 búsquedas × 15km</p>
-                    <p>• Ciudades pequeñas (&lt;50k): 3 búsquedas × 12-15km</p>
+                    <p>✅ Text Search por ciudad (hasta 60 resultados/búsqueda, pausas 10s)</p>
+                    <p>• Ciudades grandes (&gt;200k): <strong>2 búsquedas</strong> (general + calidad)</p>
+                    <p>• Ciudades medianas (50k-200k): <strong>1 búsqueda</strong></p>
+                    <p>• Ciudades pequeñas (&lt;50k): <strong>1 búsqueda</strong></p>
                     <p className="font-bold text-green-700 pt-1">
-                      ⚡ Balance óptimo: velocidad + cobertura + anti-rate-limit
+                      ⚡ Máxima eficiencia: 380 ciudades × 1-2 búsquedas = cobertura nacional
                     </p>
                   </div>
                 </div>
@@ -219,18 +219,21 @@ export default function IndexarPage() {
                     🔍 FASE 1: Indexación Rápida <Badge className="bg-blue-600">Este Proceso</Badge>
                   </h3>
                   <div className="space-y-2 text-sm text-blue-800">
-                    <p>1️⃣ <strong>Búsqueda por cuadrantes</strong> en Google Maps (Nearby Search geográfico)</p>
+                    <p>1️⃣ <strong>Text Search por ciudad</strong> (hasta 60 resultados por búsqueda)</p>
                     <p>2️⃣ <strong>Obtener detalles básicos</strong> (rating, reseñas, ubicación)</p>
-                    <p>3️⃣ <strong>Filtrar</strong> rating ≥4.7, reseñas ≥20, detectar duplicados</p>
+                    <p>3️⃣ <strong>Filtrar estricto</strong> rating ≥4.7, reseñas ≥50, detectar duplicados</p>
                     <p>4️⃣ <strong>Guardar</strong> como "Pendientes de Enriquecer"</p>
                     <p className="font-bold mt-3 pt-3 border-t border-blue-300">
-                      ⏱️ Tiempo: 15-25 min por provincia (optimizado -50%)
+                      ⏱️ Tiempo: 5-15 min por provincia (ultra-optimizado -75%)
                     </p>
                     <p className="font-bold text-green-700">
-                      ✅ Resultado: ~200-250 lugares por provincia (SIN IA aún)
+                      ✅ Resultado: ~150-250 lugares por provincia con 4.7★
                     </p>
                     <p className="text-xs text-blue-700 pt-1">
-                      🗺️ Ciudades desde Supabase: 380 ciudades en 52 provincias
+                      🗺️ 380 ciudades desde Supabase | 🇪🇸 Cobertura nacional completa
+                    </p>
+                    <p className="text-xs font-bold text-purple-700 pt-1">
+                      🚀 TODA ESPAÑA: ~65 min/categoría = 4-5 horas para 4 categorías
                     </p>
                   </div>
                 </div>
