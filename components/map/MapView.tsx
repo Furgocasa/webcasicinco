@@ -30,11 +30,12 @@ export function MapView({ places, center, zoom = 10, onPlaceClick }: MapViewProp
   useEffect(() => {
     if (!mapRef.current || map) return;
 
-    const defaultCenter = center || { lat: 40.4168, lng: -3.7038 }; // Madrid por defecto
+    const defaultCenter = center || { lat: 41.8, lng: -3.7038 }; // Más al norte para mejor vista
 
     const newMap = new google.maps.Map(mapRef.current, {
       center: defaultCenter,
       zoom: zoom,
+      gestureHandling: 'greedy', // Permite desplazar con 1 dedo y zoom con 2 dedos en móvil
       styles: [
         {
           featureType: 'poi',

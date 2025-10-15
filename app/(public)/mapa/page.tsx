@@ -59,7 +59,7 @@ const mapContainerStyle = {
 
 // Centro de España para vista inicial (Madrid - Península centrada)
 const defaultCenter = {
-  lat: 40.4168,  // Madrid (centro de la península)
+  lat: 41.8,  // Más al norte para mostrar mejor el norte de España y menos Marruecos
   lng: -3.7038,  // Madrid
 };
 
@@ -1626,6 +1626,7 @@ export default function MapPage() {
                 latLngBounds: SPAIN_BOUNDS,
                 strictBounds: false, // Permite ver toda España incluyendo Canarias y Baleares
               },
+              gestureHandling: 'greedy', // Permite desplazar con 1 dedo y zoom con 2 dedos en móvil
             }}
           >
             {/* Marcador de ubicación del usuario - Diseño especial */}
