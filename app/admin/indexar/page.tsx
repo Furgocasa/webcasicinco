@@ -166,12 +166,12 @@ export default function IndexarPage() {
                     🎯 Sistema Nearby Search por Cuadrantes
                   </p>
                   <div className="text-xs text-blue-800 space-y-1">
-                    <p>✅ Solo búsquedas geográficas (Nearby Search = 20 resultados/búsqueda)</p>
-                    <p>• Ciudades grandes (&gt;200k): 9 búsquedas × 7-8km por cuadrante</p>
-                    <p>• Ciudades medianas (50k-200k): 5 búsquedas × 10km</p>
+                    <p>✅ Solo búsquedas geográficas (Nearby = 20 resultados, pausas 12s anti-rate-limit)</p>
+                    <p>• Ciudades grandes (&gt;200k): 9 búsquedas × 7-8km</p>
+                    <p>• Ciudades medianas (50k-200k): 3 búsquedas × 15km (optimizado)</p>
                     <p>• Ciudades pequeñas (&lt;50k): 3 búsquedas × 12-15km</p>
                     <p className="font-bold text-green-700 pt-1">
-                      ⚡ Cobertura máxima optimizada para rating 4.7★
+                      ⚡ Optimizado para evitar bloqueos de Google API
                     </p>
                   </div>
                 </div>

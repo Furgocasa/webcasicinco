@@ -139,38 +139,27 @@ export function generateSearchStrategy(
     };
   }
 
-  // 🏘️ CIUDADES MEDIANAS (50k-200k habitantes): 5 búsquedas
+  // 🏘️ CIUDADES MEDIANAS (50k-200k habitantes): 3 búsquedas con radios grandes
+  // Reducido de 5 a 3 para evitar rate limiting, compensado con radios mayores
   if (population > 50000) {
     searches.push(
       {
         type: 'nearby',
         coords: coords,
-        radius: 10000, // 10km centro (aumentado)
-        description: `Centro ${name} (10km)`,
+        radius: 15000, // 15km centro (aumentado de 10km)
+        description: `Centro ${name} (15km)`,
       },
       {
         type: 'nearby',
-        coords: offsetCoords(coords, 5, 'north'),
-        radius: 10000,
-        description: `Norte/Pedanías ${name} (10km)`,
+        coords: offsetCoords(coords, 7, 'north'),
+        radius: 15000, // 15km norte
+        description: `Norte/Pedanías ${name} (15km)`,
       },
       {
         type: 'nearby',
-        coords: offsetCoords(coords, 5, 'south'),
-        radius: 10000,
-        description: `Sur/Alrededores ${name} (10km)`,
-      },
-      {
-        type: 'nearby',
-        coords: offsetCoords(coords, 5, 'east'),
-        radius: 10000,
-        description: `Este ${name} (10km)`,
-      },
-      {
-        type: 'nearby',
-        coords: offsetCoords(coords, 5, 'west'),
-        radius: 10000,
-        description: `Oeste ${name} (10km)`,
+        coords: offsetCoords(coords, 7, 'south'),
+        radius: 15000, // 15km sur
+        description: `Sur/Alrededores ${name} (15km)`,
       }
     );
 
@@ -179,8 +168,8 @@ export function generateSearchStrategy(
       cityPopulation: population,
       strategyLevel: 'MEDIA',
       searches,
-      estimatedResults: 50, // 5 búsquedas × ~10 guardados (con 4.7★)
-      estimatedTimeMinutes: 10, // 5 búsquedas × ~2min
+      estimatedResults: 45, // 3 búsquedas × ~15 guardados (con 4.7★)
+      estimatedTimeMinutes: 7, // 3 búsquedas × ~2.3min (con pausas 12s)
     };
   }
 

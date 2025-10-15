@@ -552,10 +552,10 @@ export async function startFastIndexation(
                 .update({ total_places: allPlaceIds.size })
                 .eq('id', jobId);
               
-              // Pausa entre búsquedas (aumentada para evitar rate limiting)
+              // Pausa entre búsquedas (aumentada para evitar rate limiting severo)
               if (searchIndex < strategy.searches.length - 1) {
-                await logger.info(`   ⏸️ Pausa de 8 segundos antes de siguiente búsqueda...`);
-                await new Promise(r => setTimeout(r, 8000)); // 8 segundos (antes 5s)
+                await logger.info(`   ⏸️ Pausa de 12 segundos antes de siguiente búsqueda...`);
+                await new Promise(r => setTimeout(r, 12000)); // 12 segundos (antes 8s)
               }
             }
 
