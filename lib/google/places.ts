@@ -66,6 +66,13 @@ export async function searchPlaces(params: SearchPlacesParams): Promise<string[]
         }
 
         if (response.data.status !== 'OK' && response.data.status !== 'ZERO_RESULTS') {
+          // Manejo especial de límites de cuota para esperar y reintentar
+          const status = response.data.status as string;
+          if (status === 'OVER_QUERY_LIMIT' || status === 'RESOURCE_EXHAUSTED') {
+            console.warn('⏳ Límite de cuota alcanzado. Esperando 60s antes de continuar...');
+            await new Promise(resolve => setTimeout(resolve, 60000));
+            continue; // reintentar misma página
+          }
           console.log(`⚠️ Status: ${response.data.status} - Terminando búsqueda`);
           break;
         }

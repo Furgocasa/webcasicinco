@@ -46,10 +46,11 @@ async function processPlacesFromZone(
   jobId: string, 
   supabase: ReturnType<typeof createAdminClient>,
   logger: IndexationLogger
-): Promise<{processed: number, saved: number, discarded: number}> {
+): Promise<{processed: number, saved: number, discarded: number, errors: number}> {
   let processed = 0;
   let saved = 0;
   let discarded = 0;
+  let errorsCount = 0;
   
   for (const placeId of placeIds) {
     if (!await shouldContinueJob(jobId, supabase)) {
@@ -61,7 +62,7 @@ async function processPlacesFromZone(
       const details = await withRetry(
         () => getPlaceDetails(placeId),
         3, // 3 intentos
-        8000, // 8 segundos por intento (más rápido)
+        6000, // 6 segundos por intento (más rápido)
         logger,
         `Obtener detalles del lugar`
       );
@@ -249,7 +250,8 @@ async function processPlacesFromZone(
         .insert(placeData);
 
       if (insertError) {
-        discarded++; // Contar como error
+        discarded++; // Contar como error de guardado
+        errorsCount++;
         await logger.error(`❌ Error guardando: ${details.name} - ${insertError.message}`);
         continue;
       }
@@ -258,14 +260,15 @@ async function processPlacesFromZone(
       await logger.success(`✅ Guardado: ${details.name} (${category}, ${normalizedProvince})`);
 
     } catch (error: any) {
-      discarded++; // Contar como error
+      discarded++; // Contar como error de procesamiento
+      errorsCount++;
       await logger.error(`❌ Error procesando lugar ${placeId}: ${error.message}`);
     }
     
     processed++;
   }
   
-  return { processed, saved, discarded };
+  return { processed, saved, discarded, errors: errorsCount };
 }
 
 async function shouldContinueJob(jobId: string, supabase: ReturnType<typeof createAdminClient>): Promise<boolean> {
@@ -600,7 +603,10 @@ export async function startFastIndexation(
               // Acumular en contadores globales
               totalProcessed += zoneResults.processed;
               approved += zoneResults.saved;
-              lowRating += zoneResults.discarded; // Simplificado - todos van a lowRating por ahora
+              // Los errores técnicos reales suman a "errors"
+              errors += zoneResults.errors;
+              // Los descartes por reglas siguen en lowRating como total simplificado
+              lowRating += zoneResults.discarded;
               
               // 🔥 ACTUALIZAR CONTADORES EN TIEMPO REAL
           await supabase
