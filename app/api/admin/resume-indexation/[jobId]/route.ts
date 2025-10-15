@@ -106,16 +106,17 @@ export async function POST(
     // Ejecutar en background sin esperar
     Promise.resolve().then(async () => {
       try {
-        // Pequeño delay para asegurar que el estado se actualice
-        await new Promise(resolve => setTimeout(resolve, 500));
+        // Delay mínimo para que la BD se actualice
+        await new Promise(resolve => setTimeout(resolve, 200));
         await startFastIndexation(jobId, searchParams);
       } catch (err) {
         console.error('Error reanudando indexación:', err);
       }
     });
 
-    // Delay antes de retornar para dar tiempo a que se actualice el estado
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    // Delay antes de retornar para asegurar que el proceso YA esté iniciado
+    // Esto garantiza que cuando el frontend haga el primer fetch, ya haya logs
+    await new Promise(resolve => setTimeout(resolve, 3000));
 
     return NextResponse.json({
       success: true,
