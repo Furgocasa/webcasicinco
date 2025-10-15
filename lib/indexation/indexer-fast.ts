@@ -158,6 +158,13 @@ async function processPlacesFromZone(
         continue;
       }
 
+      // Validar que tenga rating (algunos lugares no tienen)
+      if (!details.rating || details.rating === null || details.rating === undefined) {
+        discarded++; // Contar como sin rating
+        await logger.warning(`⚠️ Descartado (sin rating): ${details.name}`);
+        continue;
+      }
+
       // Validar rating y reseñas
       if (details.rating < minRating) {
         discarded++; // Contar como rating bajo
