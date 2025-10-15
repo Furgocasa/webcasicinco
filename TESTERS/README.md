@@ -16,7 +16,22 @@ Prueba completa de todo el sistema de autenticación:
 - ✅ Experiencia de usuario
 - ✅ Accesibilidad
 
-**Total:** 27 tests (actualizado con verificaciones de localhost:3000)
+**Total:** 27 tests
+
+### ✅ `indexacion.test.ts` - Sistema de Indexación
+Prueba completa de todo el sistema de indexación de lugares:
+- ✅ Acceso admin a panel de indexación
+- ✅ Formulario con provincias, categorías y rating
+- ✅ Inicio de proceso de indexación
+- ✅ Monitoreo en tiempo real con logs
+- ✅ Pausar y cancelar trabajos
+- ✅ Historial de trabajos
+- ✅ Gestión de lugares indexados
+- ✅ Cambio de categorías
+- ✅ Publicación de lugares
+- ✅ Validaciones y seguridad
+
+**Total:** 21 tests
 
 ---
 
@@ -35,6 +50,11 @@ npm run test
 ### Ejecutar solo tests de autenticación (localhost)
 ```bash
 npm run test:auth
+```
+
+### Ejecutar solo tests de indexación (localhost)
+```bash
+npm run test:indexacion
 ```
 
 ### ⭐ Ejecutar tests en PRODUCCIÓN (detecta problema localhost:3000)
@@ -201,13 +221,15 @@ Los tests se ejecutarán en modo headless automáticamente en CI.
 - [ ] `favoritos.test.ts` - Gestión de favoritos
 - [ ] `perfil.test.ts` - Página de perfil de usuario
 - [ ] `admin.test.ts` - Panel de administración
-- [ ] `indexacion.test.ts` - Sistema de indexación
+- [x] `indexacion.test.ts` - Sistema de indexación ✅
+- [ ] `enriquecimiento.test.ts` - Sistema de enriquecimiento IA
 - [ ] `chatbot.test.ts` - Tío Viajero (chatbot)
 - [ ] `responsive.test.ts` - Diseño responsive
 - [ ] `performance.test.ts` - Tests de rendimiento
 
 ---
 
-**Última actualización:** 12 de octubre de 2025  
-**Versión:** Beta 3.0
+**Última actualización:** 15 de octubre de 2025  
+**Versión:** Beta 3.0  
+**Tests totales:** 48 (27 auth + 21 indexación)
 

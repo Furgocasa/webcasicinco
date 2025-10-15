@@ -11,6 +11,7 @@
     "type-check": "tsc --noEmit",
     "test": "playwright test",
     "test:auth": "playwright test TESTERS/auth.test.ts",
+    "test:indexacion": "playwright test TESTERS/indexacion.test.ts",
     "test:ui": "playwright test --ui",
     "test:debug": "playwright test --debug",
     "test:report": "playwright show-report TESTERS/reports"

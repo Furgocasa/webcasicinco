@@ -163,15 +163,15 @@ export default function IndexarPage() {
               {selectedProvinces.length > 0 && selectedCategories.length > 0 && (
                 <div className="p-3 bg-blue-50 border border-blue-300 rounded-lg space-y-2">
                   <p className="text-xs font-bold text-blue-900">
-                    🚀 Sistema Optimizado Dinámico
+                    🎯 Sistema Nearby Search por Cuadrantes
                   </p>
                   <div className="text-xs text-blue-800 space-y-1">
-                    <p>✅ Búsquedas adaptadas al tamaño de cada ciudad</p>
-                    <p>• Ciudades grandes (&gt;200k): 4 búsquedas (máxima cobertura)</p>
-                    <p>• Ciudades medianas (50k-200k): 3 búsquedas</p>
-                    <p>• Ciudades pequeñas (&lt;50k): 2 búsquedas</p>
+                    <p>✅ Solo búsquedas geográficas (mejor ratio guardados/descartados)</p>
+                    <p>• Ciudades grandes (&gt;200k): 5 búsquedas × 5-6km por cuadrante</p>
+                    <p>• Ciudades medianas (50k-200k): 3 búsquedas × 7km</p>
+                    <p>• Ciudades pequeñas (&lt;50k): 1 búsqueda × 15km</p>
                     <p className="font-bold text-green-700 pt-1">
-                      ⚡ 3x más rápido que el sistema anterior
+                      ⚡ Mayor cobertura + menos timeouts
                     </p>
                   </div>
                 </div>
@@ -219,15 +219,15 @@ export default function IndexarPage() {
                     🔍 FASE 1: Indexación Rápida <Badge className="bg-blue-600">Este Proceso</Badge>
                   </h3>
                   <div className="space-y-2 text-sm text-blue-800">
-                    <p>1️⃣ <strong>Búsqueda inteligente</strong> en Google Maps (adaptada a cada ciudad)</p>
+                    <p>1️⃣ <strong>Búsqueda por cuadrantes</strong> en Google Maps (Nearby Search geográfico)</p>
                     <p>2️⃣ <strong>Obtener detalles básicos</strong> (rating, reseñas, ubicación)</p>
                     <p>3️⃣ <strong>Filtrar</strong> rating ≥4.7, reseñas ≥20, detectar duplicados</p>
                     <p>4️⃣ <strong>Guardar</strong> como "Pendientes de Enriquecer"</p>
                     <p className="font-bold mt-3 pt-3 border-t border-blue-300">
-                      ⏱️ Tiempo: 15-30 min por provincia (sistema optimizado)
+                      ⏱️ Tiempo: 30-40 min por provincia (cobertura completa)
                     </p>
                     <p className="font-bold text-green-700">
-                      ✅ Resultado: ~200-400 lugares por provincia (SIN IA aún)
+                      ✅ Resultado: ~250-300 lugares por provincia (SIN IA aún)
                     </p>
                   </div>
                 </div>

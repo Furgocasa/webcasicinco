@@ -54,6 +54,8 @@ function offsetCoords(
 
 /**
  * Generar estrategia de búsqueda óptima según tamaño de ciudad
+ * OPTIMIZADO: Solo Nearby Search por cuadrantes geográficos
+ * Elimina Text Search para mejor ratio guardados/descartados
  */
 export function generateSearchStrategy(
   city: CityData,
@@ -63,32 +65,40 @@ export function generateSearchStrategy(
   const { name, coords, population } = city;
   const searches: SearchQuery[] = [];
 
-  // ESTRATEGIA SEGÚN POBLACIÓN
+  // ESTRATEGIA SOLO NEARBY POR CUADRANTES
   
-  // 🏙️ CIUDADES GRANDES (>200k habitantes): Cobertura MÁXIMA
+  // 🏙️ CIUDADES GRANDES (>200k habitantes): 5 búsquedas por cuadrantes
   if (population > 200000) {
     searches.push(
       {
-        type: 'text',
-        query: `${category} ${name} ${province} España`,
-        description: `Búsqueda general en ${name}`,
-      },
-      {
-        type: 'text',
-        query: `${category} ${name} centro ${province} España`,
-        description: `Búsqueda en centro de ${name}`,
-      },
-      {
         type: 'nearby',
         coords: coords,
-        radius: 15000, // 15km desde el centro
-        description: `Nearby desde centro (15km)`,
+        radius: 5000, // 5km centro
+        description: `Centro de ${name} (5km)`,
       },
       {
         type: 'nearby',
-        coords: offsetCoords(coords, 5, 'north'),
-        radius: 15000,
-        description: `Nearby desde zona norte (15km)`,
+        coords: offsetCoords(coords, 3, 'north'),
+        radius: 6000, // 6km zona norte
+        description: `Zona Norte ${name} (6km)`,
+      },
+      {
+        type: 'nearby',
+        coords: offsetCoords(coords, 3, 'south'),
+        radius: 6000, // 6km zona sur
+        description: `Zona Sur ${name} (6km)`,
+      },
+      {
+        type: 'nearby',
+        coords: offsetCoords(coords, 3, 'east'),
+        radius: 6000, // 6km zona este
+        description: `Zona Este ${name} (6km)`,
+      },
+      {
+        type: 'nearby',
+        coords: offsetCoords(coords, 3, 'west'),
+        radius: 6000, // 6km zona oeste
+        description: `Zona Oeste ${name} (6km)`,
       }
     );
 
@@ -97,29 +107,31 @@ export function generateSearchStrategy(
       cityPopulation: population,
       strategyLevel: 'MAXIMA',
       searches,
-      estimatedResults: 180, // ~240 brutos, ~180 después de deduplicar
-      estimatedTimeMinutes: 6, // 4 búsquedas × ~1.5min
+      estimatedResults: 100, // 5 búsquedas × ~20 guardados
+      estimatedTimeMinutes: 10, // 5 búsquedas × ~2min
     };
   }
 
-  // 🏘️ CIUDADES MEDIANAS (50k-200k habitantes): Cobertura MEDIA
+  // 🏘️ CIUDADES MEDIANAS (50k-200k habitantes): 3 búsquedas
   if (population > 50000) {
     searches.push(
       {
-        type: 'text',
-        query: `${category} ${name} ${province} España`,
-        description: `Búsqueda general en ${name}`,
-      },
-      {
-        type: 'text',
-        query: `${category} ${name} centro ${province} España`,
-        description: `Búsqueda en centro de ${name}`,
+        type: 'nearby',
+        coords: coords,
+        radius: 7000, // 7km centro
+        description: `Centro ${name} (7km)`,
       },
       {
         type: 'nearby',
-        coords: coords,
-        radius: 20000, // 20km (radio mayor para cubrir más)
-        description: `Nearby desde centro (20km)`,
+        coords: offsetCoords(coords, 4, 'north'),
+        radius: 7000, // 7km norte/pedanías
+        description: `Norte/Pedanías ${name} (7km)`,
+      },
+      {
+        type: 'nearby',
+        coords: offsetCoords(coords, 4, 'south'),
+        radius: 7000, // 7km sur/alrededores
+        description: `Sur/Alrededores ${name} (7km)`,
       }
     );
 
@@ -128,23 +140,18 @@ export function generateSearchStrategy(
       cityPopulation: population,
       strategyLevel: 'MEDIA',
       searches,
-      estimatedResults: 120, // ~180 brutos, ~120 después de deduplicar
-      estimatedTimeMinutes: 4, // 3 búsquedas × ~1.3min
+      estimatedResults: 60, // 3 búsquedas × ~20 guardados
+      estimatedTimeMinutes: 6, // 3 búsquedas × ~2min
     };
   }
 
-  // 🏡 CIUDADES PEQUEÑAS (<50k habitantes): Cobertura BÁSICA
+  // 🏡 CIUDADES PEQUEÑAS (<50k habitantes): 1 búsqueda con radio amplio
   searches.push(
-    {
-      type: 'text',
-      query: `${category} ${name} ${province} España`,
-      description: `Búsqueda general en ${name}`,
-    },
     {
       type: 'nearby',
       coords: coords,
-      radius: 25000, // 25km (radio muy amplio)
-      description: `Nearby desde centro (25km)`,
+      radius: 15000, // 15km radio amplio
+      description: `${name} + alrededores (15km)`,
     }
   );
 
@@ -153,8 +160,8 @@ export function generateSearchStrategy(
     cityPopulation: population,
     strategyLevel: 'BASICA',
     searches,
-    estimatedResults: 80, // ~120 brutos, ~80 después de deduplicar
-    estimatedTimeMinutes: 3, // 2 búsquedas × ~1.5min
+    estimatedResults: 15, // 1 búsqueda × ~15 guardados
+    estimatedTimeMinutes: 2, // 1 búsqueda × ~2min
   };
 }
 

@@ -490,7 +490,7 @@ export async function startFastIndexation(
                     radius: 50000, // Radio grande para text search
                   }),
                   3, // 3 intentos
-                  6000, // 6s por intento
+                  20000, // 20s por intento (antes 6s) - evita timeouts
                   logger,
                   search.description
                 );
@@ -512,7 +512,7 @@ export async function startFastIndexation(
                     nearbyType
                   ),
                   3,
-                  6000,
+                  20000, // 20s por intento (antes 6s) - evita timeouts
                   logger,
                   search.description
                 );
@@ -564,8 +564,8 @@ export async function startFastIndexation(
               
               await logger.info(`   ✅ Búsqueda ${searchIndex + 1}: ${searchResults.saved} guardados, ${searchResults.discarded} descartados`);
               
-              // Pequeña pausa entre búsquedas
-              await new Promise(r => setTimeout(r, 500));
+              // Pausa entre búsquedas para evitar rate limiting de Google API
+              await new Promise(r => setTimeout(r, 5000)); // 5 segundos (antes 500ms)
             }
 
             await logger.info(`   📊 Total ${cityData.name}: ${cityProcessed} procesados, ${citySaved} guardados, ${cityDiscarded} descartados`);
