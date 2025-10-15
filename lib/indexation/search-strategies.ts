@@ -80,7 +80,7 @@ export function generateSearchStrategy(
       },
       {
         type: 'text',
-        query: `mejores ${category} ${name} ${province}`,
+        query: `mejores ${category} ${name} ${province} España`,
         description: `Mejores ${category} de ${name} (búsqueda calidad)`,
       },
     );
