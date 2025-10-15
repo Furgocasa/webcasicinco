@@ -47,12 +47,15 @@ async function processPlacesFromZone(
   placeIds: string[], 
   jobId: string, 
   supabase: ReturnType<typeof createAdminClient>,
-  logger: IndexationLogger
+  logger: IndexationLogger,
+  minRating: number = 4.7, // ← Añadido parámetro minRating
+  onProgress?: (processed: number, total: number) => Promise<void> // ← Callback de progreso
 ): Promise<{processed: number, saved: number, discarded: number, errors: number}> {
   let processed = 0;
   let saved = 0;
   let discarded = 0;
   let errorsCount = 0;
+  const total = placeIds.length;
   
   for (const placeId of placeIds) {
     if (!await shouldContinueJob(jobId, supabase)) {
@@ -64,11 +67,18 @@ async function processPlacesFromZone(
       const details = await withRetry(
         () => getPlaceDetails(placeId),
         3, // 3 intentos
-        6000, // 6 segundos por intento (más rápido)
+        20000, // 20 segundos por intento (aumentado de 6s)
         logger,
         `Obtener detalles del lugar`
       );
 
+      processed++; // Incrementar contador de procesados
+      
+      // Llamar callback de progreso si existe
+      if (onProgress) {
+        await onProgress(processed, total);
+      }
+      
       const province = extractProvinceFromPlaceData(details);
       const city = extractCityFromPlaceData(details);
 
@@ -149,7 +159,7 @@ async function processPlacesFromZone(
       }
 
       // Validar rating y reseñas
-      if (details.rating < 4.7) {
+      if (details.rating < minRating) {
         discarded++; // Contar como rating bajo
         await logger.warning(`⚠️ Descartado (rating bajo): ${details.name} - ${details.rating}`);
         continue;
@@ -472,7 +482,12 @@ export async function startFastIndexation(
             let citySaved = 0;
             let cityDiscarded = 0;
             
-            // 🔥 EJECUTAR BÚSQUEDAS SEGÚN ESTRATEGIA
+            // Array para acumular IDs únicos de esta ciudad
+            const cityPlaceIds: string[] = [];
+            
+            // 📍 FASE 1: EJECUTAR TODAS LAS BÚSQUEDAS (RÁPIDO)
+            await logger.info(`\n📍 FASE 1: Ejecutando ${strategy.searches.length} búsquedas...`);
+            
             for (let searchIndex = 0; searchIndex < strategy.searches.length; searchIndex++) {
               const search = strategy.searches[searchIndex];
               
@@ -487,15 +502,14 @@ export async function startFastIndexation(
                     location: search.query,
                     keyword: searchTerm,
                     minRating: params.minRating,
-                    radius: 50000, // Radio grande para text search
+                    radius: 50000,
                   }),
-                  3, // 3 intentos
-                  20000, // 20s por intento (antes 6s) - evita timeouts
+                  3,
+                  20000,
                   logger,
                   search.description
                 );
               } else if (search.type === 'nearby' && search.coords) {
-                // Nearby search con coordenadas
                 const typeMap: Record<string, string> = {
                   'restaurantes': 'restaurant',
                   'bares tapas': 'bar',
@@ -512,63 +526,86 @@ export async function startFastIndexation(
                     nearbyType
                   ),
                   3,
-                  20000, // 20s por intento (antes 6s) - evita timeouts
+                  20000,
                   logger,
                   search.description
                 );
               }
 
-              // Acumular IDs únicos y actualizar total_places
+              // Acumular IDs únicos para esta ciudad
               for (const id of placeIds) {
+                if (!cityPlaceIds.includes(id)) {
+                  cityPlaceIds.push(id);
+                }
                 if (!allPlaceIds.has(id)) {
                   allPlaceIds.add(id);
                 }
               }
+              
+              await logger.info(`   ✅ Búsqueda ${searchIndex + 1}: ${placeIds.length} encontrados (${cityPlaceIds.length} únicos acumulados)`);
+              
+              // Actualizar total_places encontrados
               await supabase
                 .from('indexation_jobs')
                 .update({ total_places: allPlaceIds.size })
                 .eq('id', jobId);
               
-              await logger.info(`   📍 Búsqueda ${searchIndex + 1}: ${placeIds.length} resultados → Procesando...`);
-              
-              // Procesar inmediatamente los lugares encontrados
-              const searchResults = await processPlacesFromZone(placeIds, jobId, supabase, logger);
-              cityProcessed += searchResults.processed;
-              citySaved += searchResults.saved;
-              cityDiscarded += searchResults.discarded;
-              
-              // Acumular en contadores globales
-              totalProcessed += searchResults.processed;
-              approved += searchResults.saved;
-              errors += searchResults.errors;
-              lowRating += searchResults.discarded;
-              
-              // Actualizar contadores en tiempo real
-              await supabase
-                .from('indexation_jobs')
-                .update({
-                  processed_places: totalProcessed,
-                  successful_places: approved,
-                  failed_places: errors,
-                  error_log: {
-                    approved,
-                    lowRating,
-                    lowReviews,
-                    chains,
-                    duplicates,
-                    errors,
-                    summary: `${approved} aprobados | ${lowRating + lowReviews + chains + duplicates} descartados | ${errors} errores`
-                  }
-                })
-                .eq('id', jobId);
-              
-              await logger.info(`   ✅ Búsqueda ${searchIndex + 1}: ${searchResults.saved} guardados, ${searchResults.discarded} descartados`);
-              
-              // Pausa entre búsquedas para evitar rate limiting de Google API
-              await new Promise(r => setTimeout(r, 5000)); // 5 segundos (antes 500ms)
+              // Pausa entre búsquedas
+              await new Promise(r => setTimeout(r, 5000));
             }
 
-            await logger.info(`   📊 Total ${cityData.name}: ${cityProcessed} procesados, ${citySaved} guardados, ${cityDiscarded} descartados`);
+            // ✅ FASE 2: PROCESAR TODOS LOS LUGARES DE ESTA CIUDAD
+            await logger.info(`\n✅ FASE 2: Procesando ${cityPlaceIds.length} lugares únicos de ${cityData.name}...`);
+            
+            const searchResults = await processPlacesFromZone(
+              cityPlaceIds, 
+              jobId, 
+              supabase, 
+              logger,
+              params.minRating, // Pasar el rating del usuario
+              async (processed, total) => {
+                // Callback de progreso: actualizar en tiempo real
+                const progressPercent = Math.round((processed / total) * 100);
+                await supabase
+                  .from('indexation_jobs')
+                  .update({
+                    processed_places: totalProcessed + processed,
+                    // El progreso se calcula: lugares procesados / total encontrados
+                  })
+                  .eq('id', jobId);
+              }
+            );
+            
+            cityProcessed += searchResults.processed;
+            citySaved += searchResults.saved;
+            cityDiscarded += searchResults.discarded;
+            
+            // Acumular en contadores globales
+            totalProcessed += searchResults.processed;
+            approved += searchResults.saved;
+            errors += searchResults.errors;
+            lowRating += searchResults.discarded;
+            
+            // Actualizar contadores finales
+            await supabase
+              .from('indexation_jobs')
+              .update({
+                processed_places: totalProcessed,
+                successful_places: approved,
+                failed_places: errors,
+                error_log: {
+                  approved,
+                  lowRating,
+                  lowReviews,
+                  chains,
+                  duplicates,
+                  errors,
+                  summary: `${approved} aprobados | ${lowRating + lowReviews + chains + duplicates} descartados | ${errors} errores`
+                }
+              })
+              .eq('id', jobId);
+            
+            await logger.info(`   📊 ${cityData.name}: ${searchResults.saved} guardados, ${searchResults.discarded} descartados`);
 
             // Marcar esta ciudad como completada en el progreso
             processedProgress[cityKey] = 'completed';

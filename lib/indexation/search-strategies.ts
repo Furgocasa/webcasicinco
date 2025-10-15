@@ -67,38 +67,65 @@ export function generateSearchStrategy(
 
   // ESTRATEGIA SOLO NEARBY POR CUADRANTES
   
-  // 🏙️ CIUDADES GRANDES (>200k habitantes): 5 búsquedas por cuadrantes
+  // 🏙️ CIUDADES GRANDES (>200k habitantes): 9 búsquedas por cuadrantes
+  // Nearby Search solo devuelve 20 resultados/búsqueda (no 60 como Text Search)
+  // Necesitamos más búsquedas para compensar
   if (population > 200000) {
     searches.push(
       {
         type: 'nearby',
         coords: coords,
-        radius: 5000, // 5km centro
-        description: `Centro de ${name} (5km)`,
+        radius: 8000, // 8km centro (aumentado)
+        description: `Centro de ${name} (8km)`,
       },
       {
         type: 'nearby',
-        coords: offsetCoords(coords, 3, 'north'),
-        radius: 6000, // 6km zona norte
-        description: `Zona Norte ${name} (6km)`,
+        coords: offsetCoords(coords, 4, 'north'),
+        radius: 8000,
+        description: `Zona Norte ${name} (8km)`,
       },
       {
         type: 'nearby',
-        coords: offsetCoords(coords, 3, 'south'),
-        radius: 6000, // 6km zona sur
-        description: `Zona Sur ${name} (6km)`,
+        coords: offsetCoords(coords, 4, 'south'),
+        radius: 8000,
+        description: `Zona Sur ${name} (8km)`,
       },
       {
         type: 'nearby',
-        coords: offsetCoords(coords, 3, 'east'),
-        radius: 6000, // 6km zona este
-        description: `Zona Este ${name} (6km)`,
+        coords: offsetCoords(coords, 4, 'east'),
+        radius: 8000,
+        description: `Zona Este ${name} (8km)`,
       },
       {
         type: 'nearby',
-        coords: offsetCoords(coords, 3, 'west'),
-        radius: 6000, // 6km zona oeste
-        description: `Zona Oeste ${name} (6km)`,
+        coords: offsetCoords(coords, 4, 'west'),
+        radius: 8000,
+        description: `Zona Oeste ${name} (8km)`,
+      },
+      // Búsquedas adicionales en zonas intermedias
+      {
+        type: 'nearby',
+        coords: offsetCoords(coords, 6, 'north'),
+        radius: 7000,
+        description: `Norte Externo ${name} (7km)`,
+      },
+      {
+        type: 'nearby',
+        coords: offsetCoords(coords, 6, 'south'),
+        radius: 7000,
+        description: `Sur Externo ${name} (7km)`,
+      },
+      {
+        type: 'nearby',
+        coords: offsetCoords(coords, 6, 'east'),
+        radius: 7000,
+        description: `Este Externo ${name} (7km)`,
+      },
+      {
+        type: 'nearby',
+        coords: offsetCoords(coords, 6, 'west'),
+        radius: 7000,
+        description: `Oeste Externo ${name} (7km)`,
       }
     );
 
@@ -107,31 +134,43 @@ export function generateSearchStrategy(
       cityPopulation: population,
       strategyLevel: 'MAXIMA',
       searches,
-      estimatedResults: 100, // 5 búsquedas × ~20 guardados
-      estimatedTimeMinutes: 10, // 5 búsquedas × ~2min
+      estimatedResults: 90, // 9 búsquedas × ~10 guardados (con 4.7★)
+      estimatedTimeMinutes: 18, // 9 búsquedas × ~2min
     };
   }
 
-  // 🏘️ CIUDADES MEDIANAS (50k-200k habitantes): 3 búsquedas
+  // 🏘️ CIUDADES MEDIANAS (50k-200k habitantes): 5 búsquedas
   if (population > 50000) {
     searches.push(
       {
         type: 'nearby',
         coords: coords,
-        radius: 7000, // 7km centro
-        description: `Centro ${name} (7km)`,
+        radius: 10000, // 10km centro (aumentado)
+        description: `Centro ${name} (10km)`,
       },
       {
         type: 'nearby',
-        coords: offsetCoords(coords, 4, 'north'),
-        radius: 7000, // 7km norte/pedanías
-        description: `Norte/Pedanías ${name} (7km)`,
+        coords: offsetCoords(coords, 5, 'north'),
+        radius: 10000,
+        description: `Norte/Pedanías ${name} (10km)`,
       },
       {
         type: 'nearby',
-        coords: offsetCoords(coords, 4, 'south'),
-        radius: 7000, // 7km sur/alrededores
-        description: `Sur/Alrededores ${name} (7km)`,
+        coords: offsetCoords(coords, 5, 'south'),
+        radius: 10000,
+        description: `Sur/Alrededores ${name} (10km)`,
+      },
+      {
+        type: 'nearby',
+        coords: offsetCoords(coords, 5, 'east'),
+        radius: 10000,
+        description: `Este ${name} (10km)`,
+      },
+      {
+        type: 'nearby',
+        coords: offsetCoords(coords, 5, 'west'),
+        radius: 10000,
+        description: `Oeste ${name} (10km)`,
       }
     );
 
@@ -140,18 +179,30 @@ export function generateSearchStrategy(
       cityPopulation: population,
       strategyLevel: 'MEDIA',
       searches,
-      estimatedResults: 60, // 3 búsquedas × ~20 guardados
-      estimatedTimeMinutes: 6, // 3 búsquedas × ~2min
+      estimatedResults: 50, // 5 búsquedas × ~10 guardados (con 4.7★)
+      estimatedTimeMinutes: 10, // 5 búsquedas × ~2min
     };
   }
 
-  // 🏡 CIUDADES PEQUEÑAS (<50k habitantes): 1 búsqueda con radio amplio
+  // 🏡 CIUDADES PEQUEÑAS (<50k habitantes): 3 búsquedas con radios amplios
   searches.push(
     {
       type: 'nearby',
       coords: coords,
-      radius: 15000, // 15km radio amplio
-      description: `${name} + alrededores (15km)`,
+      radius: 15000, // 15km centro
+      description: `${name} centro (15km)`,
+    },
+    {
+      type: 'nearby',
+      coords: offsetCoords(coords, 8, 'north'),
+      radius: 12000,
+      description: `${name} norte (12km)`,
+    },
+    {
+      type: 'nearby',
+      coords: offsetCoords(coords, 8, 'south'),
+      radius: 12000,
+      description: `${name} sur (12km)`,
     }
   );
 
@@ -160,8 +211,8 @@ export function generateSearchStrategy(
     cityPopulation: population,
     strategyLevel: 'BASICA',
     searches,
-    estimatedResults: 15, // 1 búsqueda × ~15 guardados
-    estimatedTimeMinutes: 2, // 1 búsqueda × ~2min
+    estimatedResults: 30, // 3 búsquedas × ~10 guardados (con 4.7★)
+    estimatedTimeMinutes: 6, // 3 búsquedas × ~2min
   };
 }
 
