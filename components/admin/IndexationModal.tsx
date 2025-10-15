@@ -42,8 +42,26 @@ export function IndexationModal({ jobId, onClose }: IndexationModalProps) {
   const [isPausing, setIsPausing] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
   const logsEndRef = useRef<HTMLDivElement>(null);
+  const logsContainerRef = useRef<HTMLDivElement>(null);
   const [autoClose, setAutoClose] = useState(false);
   const [isResuming, setIsResuming] = useState(false);
+  const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
+
+  // Detectar si el usuario está al final del scroll
+  const checkIfAtBottom = () => {
+    if (!logsContainerRef.current) return true;
+    
+    const { scrollTop, scrollHeight, clientHeight } = logsContainerRef.current;
+    // Si está a menos de 50px del final, consideramos que está al final
+    const isAtBottom = scrollHeight - scrollTop - clientHeight < 50;
+    return isAtBottom;
+  };
+
+  // Handler para cuando el usuario hace scroll manualmente
+  const handleScroll = () => {
+    const isAtBottom = checkIfAtBottom();
+    setShouldAutoScroll(isAtBottom);
+  };
 
   // Polling cada 2s para actualizar estado
   useEffect(() => {
@@ -59,10 +77,12 @@ export function IndexationModal({ jobId, onClose }: IndexationModalProps) {
             setIsResuming(false);
           }
           
-          // Auto-scroll al final del log
-          setTimeout(() => {
-            logsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-          }, 100);
+          // Auto-scroll SOLO si el usuario está al final
+          if (shouldAutoScroll) {
+            setTimeout(() => {
+              logsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+          }
           
           // Si terminó, auto-cerrar después de 5 segundos
           if (['completed', 'failed', 'cancelled'].includes(data.job.status) && !autoClose) {
@@ -103,7 +123,7 @@ export function IndexationModal({ jobId, onClose }: IndexationModalProps) {
       clearInterval(interval);
       clearTimeout(initialTimeout);
     };
-  }, [jobId, autoClose, onClose, isResuming]);
+  }, [jobId, autoClose, onClose, isResuming, shouldAutoScroll]);
 
   const handlePause = async () => {
     if (!confirm('¿Pausar la indexación? Podrás reanudarla más tarde desde el historial.')) return;
@@ -242,22 +262,26 @@ export function IndexationModal({ jobId, onClose }: IndexationModalProps) {
           </div>
 
           {/* Estadísticas en cuadrícula */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
-            <div className="bg-blue-50 p-2 sm:p-4 rounded-lg border-2 border-blue-200">
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-3">
+            <div className="bg-blue-50 p-2 sm:p-3 rounded-lg border-2 border-blue-200">
               <div className="text-xs text-blue-700 font-semibold mb-1">🔍 Encontrados</div>
               <div className="text-xl sm:text-3xl font-bold text-blue-700">{job.total_places}</div>
             </div>
-            <div className="bg-gray-50 p-2 sm:p-4 rounded-lg border-2 border-gray-200">
+            <div className="bg-gray-50 p-2 sm:p-3 rounded-lg border-2 border-gray-200">
               <div className="text-xs text-gray-600 font-semibold mb-1">🔄 Procesados</div>
               <div className="text-xl sm:text-3xl font-bold text-gray-700">{job.processed_places}</div>
             </div>
-            <div className="bg-green-50 p-2 sm:p-4 rounded-lg border-2 border-green-200">
+            <div className="bg-green-50 p-2 sm:p-3 rounded-lg border-2 border-green-200">
               <div className="text-xs text-green-700 font-semibold mb-1">✅ Guardados</div>
               <div className="text-xl sm:text-3xl font-bold text-green-700">{job.successful_places}</div>
             </div>
-            <div className="bg-yellow-50 p-2 sm:p-4 rounded-lg border-2 border-yellow-200">
+            <div className="bg-yellow-50 p-2 sm:p-3 rounded-lg border-2 border-yellow-200">
               <div className="text-xs text-yellow-700 font-semibold mb-1">⏭️ Descartados</div>
               <div className="text-xl sm:text-3xl font-bold text-yellow-700">{descartados}</div>
+            </div>
+            <div className="bg-red-50 p-2 sm:p-3 rounded-lg border-2 border-red-200">
+              <div className="text-xs text-red-700 font-semibold mb-1">❌ Errores</div>
+              <div className="text-xl sm:text-3xl font-bold text-red-700">{job.failed_places || 0}</div>
             </div>
           </div>
 
@@ -279,7 +303,11 @@ export function IndexationModal({ jobId, onClose }: IndexationModalProps) {
               )}
             </div>
             
-            <div className="bg-gray-900 text-gray-100 rounded-lg p-2 sm:p-4 h-60 sm:h-80 overflow-y-auto font-mono text-xs shadow-inner">
+            <div 
+              ref={logsContainerRef}
+              onScroll={handleScroll}
+              className="bg-gray-900 text-gray-100 rounded-lg p-2 sm:p-4 h-60 sm:h-80 overflow-y-auto font-mono text-xs shadow-inner"
+            >
               {job.logs && job.logs.length > 0 ? (
                 <div className="space-y-1">
                   {job.logs.map((log, index) => (

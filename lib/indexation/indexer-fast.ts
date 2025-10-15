@@ -279,12 +279,16 @@ async function processPlacesFromZone(
       await logger.success(`✅ Guardado: ${details.name} (${category}, ${normalizedProvince})`);
 
     } catch (error: any) {
+      processed++; // Incrementar procesados incluso si hay error
       discarded++; // Contar como error de procesamiento
       errorsCount++;
       await logger.error(`❌ Error procesando lugar ${placeId}: ${error.message}`);
+      
+      // Actualizar progreso incluso en caso de error
+      if (onProgress) {
+        await onProgress(processed, total);
+      }
     }
-    
-    processed++;
   }
   
   return { processed, saved, discarded, errors: errorsCount };
