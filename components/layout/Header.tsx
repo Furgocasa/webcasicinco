@@ -27,11 +27,15 @@ export default function Header() {
   }, []);
 
   return (
-    <header className="bg-white shadow-sm sticky top-0 z-50">
+    <header className="bg-white shadow-sm sticky top-0 z-[999]">
       <nav className="container mx-auto px-4">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2">
+          <Link 
+            href="/" 
+            className="flex items-center space-x-2 relative z-10 touch-manipulation"
+            style={{ touchAction: 'manipulation' }}
+          >
             <span className="text-base sm:text-xl font-bold text-gray-900">Casi Cinco</span>
             <span className="text-2xl font-bold text-indigo-600">⭐</span>
           </Link>
@@ -40,13 +44,15 @@ export default function Header() {
           <div className="hidden md:flex items-center space-x-8">
             <Link 
               href="/mapa" 
-              className="text-gray-700 hover:text-indigo-600 transition"
+              className="text-gray-700 hover:text-indigo-600 transition relative z-10 touch-manipulation"
+              style={{ touchAction: 'manipulation' }}
             >
               Mapa
             </Link>
             <Link 
               href="/ruta" 
-              className="text-gray-700 hover:text-indigo-600 transition"
+              className="text-gray-700 hover:text-indigo-600 transition relative z-10 touch-manipulation"
+              style={{ touchAction: 'manipulation' }}
             >
               Planificar Ruta
             </Link>
@@ -56,14 +62,16 @@ export default function Header() {
           <div className="flex md:hidden items-center gap-1">
             <Link 
               href="/mapa"
-              className="p-2.5 hover:bg-indigo-50 rounded-lg transition-colors"
+              className="p-2.5 hover:bg-indigo-50 rounded-lg transition-colors relative z-10 touch-manipulation"
+              style={{ touchAction: 'manipulation' }}
               aria-label="Mapa"
             >
               <Map className="h-5 w-5 text-indigo-600" />
             </Link>
             <Link 
               href="/ruta"
-              className="p-2.5 hover:bg-indigo-50 rounded-lg transition-colors"
+              className="p-2.5 hover:bg-indigo-50 rounded-lg transition-colors relative z-10 touch-manipulation"
+              style={{ touchAction: 'manipulation' }}
               aria-label="Rutas"
             >
               <Navigation className="h-5 w-5 text-indigo-600" />

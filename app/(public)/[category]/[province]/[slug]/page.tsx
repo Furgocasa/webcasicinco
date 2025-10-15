@@ -106,6 +106,15 @@ export default function PlaceDetailPage() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showShareMenu]);
 
+  // Limpiar estados al desmontar componente (cuando se navega fuera)
+  useEffect(() => {
+    return () => {
+      setShowShareMenu(false);
+      setShowVisitModal(false);
+      document.body.style.overflow = 'unset';
+    };
+  }, []);
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
