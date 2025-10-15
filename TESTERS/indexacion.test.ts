@@ -18,8 +18,8 @@ import { test, expect } from '@playwright/test';
 
 // Configuración
 const BASE_URL = process.env.TEST_URL || 'http://localhost:3000';
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@casicinco.com';
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123456';
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'narciso.pardo@outlook.com';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '14356830Np@';
 
 // Timeouts extendidos para procesos de indexación
 test.setTimeout(120000); // 2 minutos por test

@@ -56,8 +56,8 @@ El test `indexacion.test.ts` verifica **TODO el flujo de indexación** de lugare
    Debe estar en `http://localhost:3000`
 
 2. **Usuario admin creado en Supabase:**
-   - Email: `admin@casicinco.com`
-   - Password: `admin123456`
+   - Email: `narciso.pardo@outlook.com`
+   - Password: `14356830Np@`
    - Role: `admin` (en user_metadata)
 
 3. **Variables de entorno configuradas:**
@@ -110,8 +110,8 @@ TEST_URL=https://main.d2nzzzmoajf631.amplifyapp.com npm run test:indexacion
 ### Cambiar Credenciales Admin
 
 Por defecto usa:
-- Email: `admin@casicinco.com`
-- Password: `admin123456`
+- Email: `narciso.pardo@outlook.com`
+- Password: `14356830Np@`
 
 Para cambiar:
 
@@ -293,7 +293,7 @@ Test de integración end-to-end de todo el sistema.
 -- En Supabase SQL Editor
 UPDATE auth.users
 SET raw_user_meta_data = raw_user_meta_data || '{"role": "admin"}'::jsonb
-WHERE email = 'admin@casicinco.com';
+WHERE email = 'narciso.pardo@outlook.com';
 ```
 
 ### 4. "No hay trabajos/lugares"
