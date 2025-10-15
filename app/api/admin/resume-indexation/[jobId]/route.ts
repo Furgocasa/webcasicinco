@@ -103,13 +103,19 @@ export async function POST(
     // Nota: El indexer es inteligente y saltará los lugares ya procesados
     const searchParams = job.search_params as { provinces: string[]; categories: string[]; minRating: number };
     
+    // Ejecutar en background sin esperar
     Promise.resolve().then(async () => {
       try {
+        // Pequeño delay para asegurar que el estado se actualice
+        await new Promise(resolve => setTimeout(resolve, 1000));
         await startFastIndexation(jobId, searchParams);
       } catch (err) {
         console.error('Error reanudando indexación:', err);
       }
     });
+
+    // Pequeño delay antes de retornar para dar tiempo a que se actualice el estado
+    await new Promise(resolve => setTimeout(resolve, 500));
 
     return NextResponse.json({
       success: true,

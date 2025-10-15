@@ -43,6 +43,7 @@ export function IndexationModal({ jobId, onClose }: IndexationModalProps) {
   const [isCancelling, setIsCancelling] = useState(false);
   const logsEndRef = useRef<HTMLDivElement>(null);
   const [autoClose, setAutoClose] = useState(false);
+  const [isResuming, setIsResuming] = useState(false);
 
   // Polling cada 2s para actualizar estado
   useEffect(() => {
@@ -52,6 +53,11 @@ export function IndexationModal({ jobId, onClose }: IndexationModalProps) {
         const data = await res.json();
         if (data.success) {
           setJob(data.job);
+          
+          // Si el trabajo cambió de paused a running, quitar el estado de reanudación
+          if (data.job.status === 'running' && isResuming) {
+            setIsResuming(false);
+          }
           
           // Auto-scroll al final del log
           setTimeout(() => {
@@ -71,14 +77,33 @@ export function IndexationModal({ jobId, onClose }: IndexationModalProps) {
       }
     };
 
+    // Detectar si es un trabajo reanudado
+    const isResumedJob = window.location.search.includes('autoOpen=true');
+    if (isResumedJob) {
+      setIsResuming(true);
+    }
+
     // Fetch inmediato
     fetchStatus();
 
-    // Polling cada 1 segundo para ver logs en tiempo real
-    const interval = setInterval(fetchStatus, 1000);
+    // Para trabajos reanudados, hacer fetch más frecuente al inicio
+    const initialInterval = isResumedJob ? 500 : 1000; // 500ms para trabajos reanudados
+    const normalInterval = 1000; // 1s normal
 
-    return () => clearInterval(interval);
-  }, [jobId, autoClose, onClose]);
+    // Polling inicial más frecuente para trabajos reanudados
+    const initialTimeout = setTimeout(() => {
+      const interval = setInterval(fetchStatus, normalInterval);
+      return () => clearInterval(interval);
+    }, 3000); // Después de 3 segundos, volver al polling normal
+
+    // Polling inmediato más frecuente
+    const interval = setInterval(fetchStatus, initialInterval);
+
+    return () => {
+      clearInterval(interval);
+      clearTimeout(initialTimeout);
+    };
+  }, [jobId, autoClose, onClose, isResuming]);
 
   const handlePause = async () => {
     if (!confirm('¿Pausar la indexación? Podrás reanudarla más tarde desde el historial.')) return;
@@ -157,16 +182,23 @@ export function IndexationModal({ jobId, onClose }: IndexationModalProps) {
             <div className="flex-1 min-w-0">
               <h2 className="text-lg sm:text-2xl font-bold flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
                 <span className="flex items-center gap-2">
-                  {job.status === 'running' && '🔄 Indexación en Progreso'}
-                  {job.status === 'paused' && '⏸️ Indexación Pausada'}
+                  {isResuming && job.status === 'paused' && '🔄 Reanudando Indexación...'}
+                  {!isResuming && job.status === 'running' && '🔄 Indexación en Progreso'}
+                  {!isResuming && job.status === 'paused' && '⏸️ Indexación Pausada'}
                   {job.status === 'completed' && '✅ Indexación Completada'}
                   {job.status === 'failed' && '❌ Indexación Fallida'}
                   {job.status === 'cancelled' && '🛑 Indexación Cancelada'}
                 </span>
                 
-                {job.status === 'running' && (
+                {job.status === 'running' && !isResuming && (
                   <Badge className="bg-blue-600 text-white animate-pulse text-xs">
                     En vivo
+                  </Badge>
+                )}
+                
+                {isResuming && (
+                  <Badge className="bg-orange-600 text-white animate-pulse text-xs">
+                    Reanudando...
                   </Badge>
                 )}
               </h2>

@@ -26,4 +26,12 @@ WHERE table_name = 'indexation_jobs'
   AND column_name = 'progress_state';
 
 -- 3. Mostrar estructura actualizada de la tabla
-\d indexation_jobs;
+SELECT 
+  column_name,
+  data_type,
+  is_nullable,
+  column_default,
+  character_maximum_length
+FROM information_schema.columns 
+WHERE table_name = 'indexation_jobs' 
+ORDER BY ordinal_position;
