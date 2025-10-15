@@ -166,12 +166,12 @@ export default function IndexarPage() {
                     🎯 Sistema Nearby Search por Cuadrantes
                   </p>
                   <div className="text-xs text-blue-800 space-y-1">
-                    <p>✅ Solo búsquedas geográficas (Nearby = 20 resultados, pausas 12s anti-rate-limit)</p>
-                    <p>• Ciudades grandes (&gt;200k): 9 búsquedas × 7-8km</p>
-                    <p>• Ciudades medianas (50k-200k): 3 búsquedas × 15km (optimizado)</p>
+                    <p>✅ Solo búsquedas geográficas (Nearby = 20 resultados, pausas 10s)</p>
+                    <p>• Ciudades grandes (&gt;200k): <strong>5 búsquedas × 9-10km</strong> (optimizado -44%)</p>
+                    <p>• Ciudades medianas (50k-200k): 3 búsquedas × 15km</p>
                     <p>• Ciudades pequeñas (&lt;50k): 3 búsquedas × 12-15km</p>
                     <p className="font-bold text-green-700 pt-1">
-                      ⚡ Optimizado para evitar bloqueos de Google API
+                      ⚡ Balance óptimo: velocidad + cobertura + anti-rate-limit
                     </p>
                   </div>
                 </div>
@@ -224,10 +224,13 @@ export default function IndexarPage() {
                     <p>3️⃣ <strong>Filtrar</strong> rating ≥4.7, reseñas ≥20, detectar duplicados</p>
                     <p>4️⃣ <strong>Guardar</strong> como "Pendientes de Enriquecer"</p>
                     <p className="font-bold mt-3 pt-3 border-t border-blue-300">
-                      ⏱️ Tiempo: 30-40 min por provincia (cobertura completa)
+                      ⏱️ Tiempo: 15-25 min por provincia (optimizado -50%)
                     </p>
                     <p className="font-bold text-green-700">
-                      ✅ Resultado: ~250-300 lugares por provincia (SIN IA aún)
+                      ✅ Resultado: ~200-250 lugares por provincia (SIN IA aún)
+                    </p>
+                    <p className="text-xs text-blue-700 pt-1">
+                      🗺️ Ciudades desde Supabase: 380 ciudades en 52 provincias
                     </p>
                   </div>
                 </div>
