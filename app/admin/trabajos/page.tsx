@@ -153,8 +153,8 @@ export default function TrabajosPage() {
   };
 
   const handleActiveJobStatusChange = (newStatus: string) => {
-    // Si el trabajo activo cambió a completado/fallido/cancelado, recargar la lista
-    if (['completed', 'failed', 'cancelled'].includes(newStatus)) {
+    // Si el trabajo activo cambió a completado/fallido/cancelado/eliminado, recargar la lista
+    if (['completed', 'failed', 'cancelled', 'deleted'].includes(newStatus)) {
       setActiveJobId(null);
       loadJobs(); // Recargar para actualizar la lista
     }

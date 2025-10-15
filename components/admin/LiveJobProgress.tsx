@@ -4,7 +4,8 @@ import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
-import { Play, Pause, X, Eye, EyeOff } from 'lucide-react';
+import { Play, Pause, X, Eye, EyeOff, Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface JobStatus {
   id: string;
@@ -41,6 +42,7 @@ export function LiveJobProgress({ jobId, onStatusChange }: LiveJobProgressProps)
   const [isPausing, setIsPausing] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const logsEndRef = useRef<HTMLDivElement>(null);
 
   // Polling cada 2s para actualizar estado
@@ -114,6 +116,38 @@ export function LiveJobProgress({ jobId, onStatusChange }: LiveJobProgressProps)
     }
   };
 
+  const handleDelete = async () => {
+    if (!confirm('¿Estás seguro de que quieres eliminar este trabajo?')) {
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      const response = await fetch('/api/admin/jobs', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ jobId }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast.success('Trabajo eliminado correctamente');
+        // Notificar al componente padre que el trabajo fue eliminado
+        if (onStatusChange) {
+          onStatusChange('deleted');
+        }
+      } else {
+        toast.error(data.error || 'Error al eliminar el trabajo');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error('Error al eliminar el trabajo');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   if (!job) {
     return (
       <Card className="border-blue-200 bg-blue-50">
@@ -166,6 +200,20 @@ export function LiveJobProgress({ jobId, onStatusChange }: LiveJobProgressProps)
               {isExpanded ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               {isExpanded ? 'Ocultar' : 'Ver'} Log
             </Button>
+            
+            {/* Botón de eliminar en el header para trabajos pausados */}
+            {job.status === 'paused' && (
+              <Button
+                onClick={handleDelete}
+                disabled={isDeleting}
+                variant="outline"
+                size="sm"
+                className="text-red-600 border-red-500 hover:bg-red-50"
+                title="Eliminar trabajo"
+              >
+                {isDeleting ? '...' : <Trash2 className="h-4 w-4" />}
+              </Button>
+            )}
           </div>
         </div>
 
@@ -280,6 +328,19 @@ export function LiveJobProgress({ jobId, onStatusChange }: LiveJobProgressProps)
               className="text-green-600 border-green-500 hover:bg-green-50"
             >
               <Play className="h-4 w-4 mr-1" />Reanudar
+            </Button>
+          )}
+
+          {/* Botón de eliminar para trabajos pausados */}
+          {job.status === 'paused' && (
+            <Button
+              onClick={handleDelete}
+              disabled={isDeleting}
+              variant="outline"
+              size="sm"
+              className="text-red-600 border-red-500 hover:bg-red-50"
+            >
+              {isDeleting ? '...' : <><Trash2 className="h-4 w-4 mr-1" />Eliminar</>}
             </Button>
           )}
         </div>
