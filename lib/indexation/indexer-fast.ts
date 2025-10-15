@@ -492,6 +492,7 @@ export async function startFastIndexation(
               const search = strategy.searches[searchIndex];
               
               await logger.info(`   🔍 Búsqueda ${searchIndex + 1}/${strategy.searches.length}: ${search.description}`);
+              await logger.info(`   ⏳ Iniciando llamada a Google API...`);
               
               let placeIds: string[] = [];
               
@@ -545,13 +546,17 @@ export async function startFastIndexation(
               await logger.info(`   ✅ Búsqueda ${searchIndex + 1}: ${placeIds.length} encontrados (${cityPlaceIds.length} únicos acumulados)`);
               
               // Actualizar total_places encontrados
+              await logger.info(`   💾 Actualizando contador en BD...`);
               await supabase
                 .from('indexation_jobs')
                 .update({ total_places: allPlaceIds.size })
                 .eq('id', jobId);
               
-              // Pausa entre búsquedas
-              await new Promise(r => setTimeout(r, 5000));
+              // Pausa entre búsquedas (aumentada para evitar rate limiting)
+              if (searchIndex < strategy.searches.length - 1) {
+                await logger.info(`   ⏸️ Pausa de 8 segundos antes de siguiente búsqueda...`);
+                await new Promise(r => setTimeout(r, 8000)); // 8 segundos (antes 5s)
+              }
             }
 
             // ✅ FASE 2: PROCESAR TODOS LOS LUGARES DE ESTA CIUDAD
