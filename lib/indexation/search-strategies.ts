@@ -66,22 +66,28 @@ export function generateSearchStrategy(
   const searches: SearchQuery[] = [];
 
   // ESTRATEGIA TEXT SEARCH OPTIMIZADA
+  // NO usamos "mejores" - solo variamos la especificidad geográfica
+  // Google + keyword combina automáticamente: "restaurantes in [query]"
   
-  // 🏙️ CIUDADES GRANDES (>200k habitantes): 2 búsquedas Text Search
-  // 1. Búsqueda general (60 resultados)
-  // 2. Búsqueda enfocada en calidad (60 resultados)
-  // Total: ~120 resultados, filtro 4.7★ → ~15-20 guardados
+  // 🏙️ CIUDADES GRANDES (>200k habitantes): 3 búsquedas Text Search
+  // Variando especificidad geográfica para obtener diferentes conjuntos de resultados
+  // Total: ~180 resultados, filtro 4.7★ → ~20-30 guardados
   if (population > 200000) {
     searches.push(
       {
         type: 'text',
-        query: `${name} ${province} España`,
-        description: `${category} en ${name} (búsqueda general)`,
+        query: `${name}, ${province}, España`,
+        description: `${category} en ${name} (búsqueda 1)`,
       },
       {
         type: 'text',
-        query: `mejores ${category} ${name} ${province} España`,
-        description: `Mejores ${category} de ${name} (búsqueda calidad)`,
+        query: `${name}, España`,
+        description: `${category} en ${name} (búsqueda 2)`,
+      },
+      {
+        type: 'text',
+        query: `${name} ${province}`,
+        description: `${category} en ${name} (búsqueda 3)`,
       },
     );
 
@@ -90,19 +96,25 @@ export function generateSearchStrategy(
       cityPopulation: population,
       strategyLevel: 'MAXIMA',
       searches,
-      estimatedResults: 120, // 2 búsquedas × 60 resultados
-      estimatedTimeMinutes: 2, // 2 búsquedas × ~1min
+      estimatedResults: 180, // 3 búsquedas × 60 resultados
+      estimatedTimeMinutes: 3, // 3 búsquedas × ~1min
     };
   }
 
-  // 🏘️ CIUDADES MEDIANAS (50k-200k habitantes): 1 búsqueda Text Search
-  // Aprovecha los 60 resultados de Text Search
+  // 🏘️ CIUDADES MEDIANAS (50k-200k habitantes): 2 búsquedas Text Search
+  // Variando especificidad geográfica
+  // Total: ~120 resultados para filtrar
   if (population > 50000) {
     searches.push(
       {
         type: 'text',
-        query: `${name} ${province} España`,
-        description: `${category} en ${name}`,
+        query: `${name}, ${province}, España`,
+        description: `${category} en ${name} (búsqueda 1)`,
+      },
+      {
+        type: 'text',
+        query: `${name}, España`,
+        description: `${category} en ${name} (búsqueda 2)`,
       }
     );
 
@@ -111,8 +123,8 @@ export function generateSearchStrategy(
       cityPopulation: population,
       strategyLevel: 'MEDIA',
       searches,
-      estimatedResults: 60, // 1 búsqueda × 60 resultados
-      estimatedTimeMinutes: 1, // 1 búsqueda × ~1min
+      estimatedResults: 120, // 2 búsquedas × 60 resultados
+      estimatedTimeMinutes: 2, // 2 búsquedas × ~1min
     };
   }
 
@@ -120,7 +132,7 @@ export function generateSearchStrategy(
   searches.push(
     {
       type: 'text',
-      query: `${name} ${province} España`,
+      query: `${name}, ${province}, España`,
       description: `${category} en ${name}`,
     }
   );
