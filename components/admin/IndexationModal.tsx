@@ -72,8 +72,14 @@ export function IndexationModal({ jobId, onClose }: IndexationModalProps) {
         if (data.success) {
           setJob(data.job);
           
-          // Si el trabajo cambió de paused a running, quitar el estado de reanudación
+          // Si el trabajo está en running y es un trabajo reanudado, quitar el estado de reanudación
           if (data.job.status === 'running' && isResuming) {
+            setIsResuming(false);
+          }
+          
+          // Si el trabajo está en running y teníamos autoOpen, ya está activo
+          const urlParams = new URLSearchParams(window.location.search);
+          if (data.job.status === 'running' && urlParams.get('autoOpen') === 'true') {
             setIsResuming(false);
           }
           
@@ -202,7 +208,7 @@ export function IndexationModal({ jobId, onClose }: IndexationModalProps) {
             <div className="flex-1 min-w-0">
               <h2 className="text-lg sm:text-2xl font-bold flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
                 <span className="flex items-center gap-2">
-                  {isResuming && job.status === 'paused' && '🔄 Reanudando Indexación...'}
+                  {isResuming && (job.status === 'paused' || job.status === 'running') && '🔄 Reanudando Indexación...'}
                   {!isResuming && job.status === 'running' && '🔄 Indexación en Progreso'}
                   {!isResuming && job.status === 'paused' && '⏸️ Indexación Pausada'}
                   {job.status === 'completed' && '✅ Indexación Completada'}

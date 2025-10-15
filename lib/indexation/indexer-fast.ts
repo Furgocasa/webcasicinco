@@ -567,6 +567,13 @@ export async function startFastIndexation(
               if (searchIndex < strategy.searches.length - 1) {
                 await logger.info(`   ⏸️ Pausa de 12 segundos antes de siguiente búsqueda...`);
                 await new Promise(r => setTimeout(r, 12000)); // 12 segundos (antes 8s)
+                
+                // Verificar si debe continuar después de la pausa
+                if (!await shouldContinueJob(jobId, supabase)) {
+                  await logger.warning('⏸️ Indexación pausada durante pausa entre búsquedas');
+                  await logger.close();
+                  return;
+                }
               }
             }
 

@@ -107,15 +107,15 @@ export async function POST(
     Promise.resolve().then(async () => {
       try {
         // Pequeño delay para asegurar que el estado se actualice
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, 500));
         await startFastIndexation(jobId, searchParams);
       } catch (err) {
         console.error('Error reanudando indexación:', err);
       }
     });
 
-    // Pequeño delay antes de retornar para dar tiempo a que se actualice el estado
-    await new Promise(resolve => setTimeout(resolve, 500));
+    // Delay antes de retornar para dar tiempo a que se actualice el estado
+    await new Promise(resolve => setTimeout(resolve, 1500));
 
     return NextResponse.json({
       success: true,
