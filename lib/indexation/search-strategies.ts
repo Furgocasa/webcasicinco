@@ -67,66 +67,41 @@ export function generateSearchStrategy(
 
   // ESTRATEGIA SOLO NEARBY POR CUADRANTES
   
-  // 🏙️ CIUDADES GRANDES (>200k habitantes): 9 búsquedas por cuadrantes
-  // Nearby Search solo devuelve 20 resultados/búsqueda (no 60 como Text Search)
-  // Necesitamos más búsquedas para compensar
+  // 🏙️ CIUDADES GRANDES (>200k habitantes): 5 búsquedas optimizadas
+  // OPTIMIZACIÓN: Reducido de 9→5 búsquedas para evitar rate limiting
+  // Radios aumentados para mantener excelente cobertura
   if (population > 200000) {
     searches.push(
       {
         type: 'nearby',
         coords: coords,
-        radius: 8000, // 8km centro (aumentado)
-        description: `Centro de ${name} (8km)`,
+        radius: 10000, // 10km centro (aumentado de 8km)
+        description: `Centro de ${name} (10km)`,
       },
       {
         type: 'nearby',
-        coords: offsetCoords(coords, 4, 'north'),
-        radius: 8000,
-        description: `Zona Norte ${name} (8km)`,
+        coords: offsetCoords(coords, 5, 'north'),
+        radius: 9000, // 9km zonas (aumentado de 8km)
+        description: `Zona Norte ${name} (9km)`,
       },
       {
         type: 'nearby',
-        coords: offsetCoords(coords, 4, 'south'),
-        radius: 8000,
-        description: `Zona Sur ${name} (8km)`,
+        coords: offsetCoords(coords, 5, 'south'),
+        radius: 9000,
+        description: `Zona Sur ${name} (9km)`,
       },
       {
         type: 'nearby',
-        coords: offsetCoords(coords, 4, 'east'),
-        radius: 8000,
-        description: `Zona Este ${name} (8km)`,
+        coords: offsetCoords(coords, 5, 'east'),
+        radius: 9000,
+        description: `Zona Este ${name} (9km)`,
       },
       {
         type: 'nearby',
-        coords: offsetCoords(coords, 4, 'west'),
-        radius: 8000,
-        description: `Zona Oeste ${name} (8km)`,
+        coords: offsetCoords(coords, 5, 'west'),
+        radius: 9000,
+        description: `Zona Oeste ${name} (9km)`,
       },
-      // Búsquedas adicionales en zonas intermedias
-      {
-        type: 'nearby',
-        coords: offsetCoords(coords, 6, 'north'),
-        radius: 7000,
-        description: `Norte Externo ${name} (7km)`,
-      },
-      {
-        type: 'nearby',
-        coords: offsetCoords(coords, 6, 'south'),
-        radius: 7000,
-        description: `Sur Externo ${name} (7km)`,
-      },
-      {
-        type: 'nearby',
-        coords: offsetCoords(coords, 6, 'east'),
-        radius: 7000,
-        description: `Este Externo ${name} (7km)`,
-      },
-      {
-        type: 'nearby',
-        coords: offsetCoords(coords, 6, 'west'),
-        radius: 7000,
-        description: `Oeste Externo ${name} (7km)`,
-      }
     );
 
     return {
@@ -134,8 +109,8 @@ export function generateSearchStrategy(
       cityPopulation: population,
       strategyLevel: 'MAXIMA',
       searches,
-      estimatedResults: 90, // 9 búsquedas × ~10 guardados (con 4.7★)
-      estimatedTimeMinutes: 18, // 9 búsquedas × ~2min
+      estimatedResults: 60, // 5 búsquedas × ~12 guardados (optimizado)
+      estimatedTimeMinutes: 9, // 5 búsquedas × ~1.5min (reducido de 18min)
     };
   }
 

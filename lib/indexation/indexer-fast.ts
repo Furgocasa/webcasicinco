@@ -89,8 +89,8 @@ async function processPlacesFromZone(
     try {
       const details = await withRetry(
         () => getPlaceDetails(placeId),
-        3, // 3 intentos
-        20000, // 20 segundos por intento (aumentado de 6s)
+        2, // 2 intentos (reducido de 3)
+        15000, // 15 segundos por intento (reducido de 20s)
         logger,
         `Obtener detalles del lugar`
       );
@@ -605,8 +605,8 @@ export async function startFastIndexation(
                     search.radius || 20000,
                     nearbyType
                   ),
-                  3,
-                  20000,
+                  2, // 2 intentos (reducido de 3)
+                  15000, // 15 segundos (reducido de 20s)
                   logger,
                   search.description
                 );
@@ -631,10 +631,10 @@ export async function startFastIndexation(
                 .update({ total_places: allPlaceIds.size })
                 .eq('id', jobId);
               
-              // Pausa entre búsquedas (aumentada para evitar rate limiting severo)
+              // Pausa entre búsquedas (optimizada para balance velocidad/rate-limit)
               if (searchIndex < strategy.searches.length - 1) {
-                await logger.info(`   ⏸️ Pausa de 12 segundos antes de siguiente búsqueda...`);
-                await new Promise(r => setTimeout(r, 12000)); // 12 segundos (antes 8s)
+                await logger.info(`   ⏸️ Pausa de 10 segundos antes de siguiente búsqueda...`);
+                await new Promise(r => setTimeout(r, 10000)); // 10 segundos (reducido de 12s)
                 
                 // Verificar si debe continuar después de la pausa
                 if (!await shouldContinueJob(jobId, supabase)) {
