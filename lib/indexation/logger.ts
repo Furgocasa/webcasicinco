@@ -20,7 +20,7 @@ export class IndexationLogger {
   private jobId: string;
   private logs: IndexationLog[] = [];
   private supabase = createAdminClient();
-  private flushThreshold = 1; // 🔥 Guardar CADA log inmediatamente para ver en tiempo real
+  private flushThreshold = 10; // Guardar cada 10 logs para optimizar rendimiento
 
   constructor(jobId: string) {
     this.jobId = jobId;
@@ -67,8 +67,8 @@ export class IndexationLogger {
       const currentLogs = (job?.logs as IndexationLog[]) || [];
       const updatedLogs = [...currentLogs, ...this.logs];
 
-      // Mantener solo los últimos 500 logs para no saturar
-      const logsToSave = updatedLogs.slice(-500);
+      // Sin límite - guardar todos los logs para procesos largos
+      const logsToSave = updatedLogs;
 
       // Guardar en BD
       await this.supabase
