@@ -65,6 +65,7 @@ export default function LugaresPage() {
   const [publishedFilter, setPublishedFilter] = useState<'all' | 'published' | 'draft'>('all');
   const [sortField, setSortField] = useState<SortField>('created_at');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
+  const [updatingCategoryId, setUpdatingCategoryId] = useState<string | null>(null);
 
   // Paginación
   const [currentPage, setCurrentPage] = useState(1);
@@ -357,13 +358,40 @@ export default function LugaresPage() {
   const uniqueCategories = Array.from(new Set(places.map(p => p.category))).filter(Boolean);
   const uniqueProvinces = Array.from(new Set(places.map(p => p.province))).filter(Boolean).sort();
 
+  // Categorías permitidas en todo el sistema (regla del proyecto)
+  const ALLOWED_CATEGORIES: Array<'restaurante' | 'bar' | 'cafe' | 'hotel'> = [
+    'restaurante', 'bar', 'cafe', 'hotel'
+  ];
+
   const categoryNames: Record<string, string> = {
     restaurante: 'Restaurantes',
-    hotel: 'Hoteles',
-    spa: 'Spas',
     bar: 'Bares',
-    experiencia: 'Experiencias',
-    monumento: 'Monumentos',
+    cafe: 'Cafeterías',
+    hotel: 'Hoteles',
+  } as const;
+
+  // Actualizar la categoría del lugar (edición rápida desde la tabla)
+  const handleChangeCategory = async (id: string, newCategory: 'restaurante' | 'bar' | 'cafe' | 'hotel') => {
+    try {
+      setUpdatingCategoryId(id);
+      const res = await fetch(`/api/places/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ category: newCategory }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Error al actualizar la categoría');
+      }
+      // Actualizar en memoria
+      setPlaces(prev => prev.map(p => p.id === id ? { ...p, category: newCategory } : p));
+      toast.success('✅ Categoría actualizada');
+    } catch (error: any) {
+      console.error('Error actualizando categoría:', error);
+      toast.error(error.message || 'Error al actualizar la categoría');
+    } finally {
+      setUpdatingCategoryId(null);
+    }
   };
 
   const handleSort = (field: SortField) => {
@@ -808,11 +836,21 @@ export default function LugaresPage() {
                           </div>
                         </td>
 
-                        {/* Categoría */}
+                        {/* Categoría (editable) */}
                         <td className="px-6 py-4">
-                          <Badge variant="default" className="text-xs">
-                            {categoryNames[place.category] || place.category}
-                          </Badge>
+                          <div className="inline-flex items-center gap-2">
+                            <select
+                              value={ALLOWED_CATEGORIES.includes(place.category) ? place.category : 'restaurante'}
+                              onChange={(e) => handleChangeCategory(place.id, e.target.value as any)}
+                              disabled={updatingCategoryId === place.id}
+                              className="px-2 py-1 text-xs border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 bg-white"
+                              title="Editar categoría"
+                            >
+                              {ALLOWED_CATEGORIES.map(cat => (
+                                <option key={cat} value={cat}>{categoryNames[cat]}</option>
+                              ))}
+                            </select>
+                          </div>
                         </td>
 
                         {/* Ubicación */}
