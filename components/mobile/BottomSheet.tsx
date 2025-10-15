@@ -36,17 +36,17 @@ export default function BottomSheet({
 
   return (
     <>
-      {/* Overlay */}
+      {/* Overlay - z-30 para estar DEBAJO del BottomNavigation (z-50) */}
       <div
-        className={`fixed inset-0 bg-black transition-opacity duration-300 z-40 md:hidden ${
+        className={`fixed inset-0 bg-black transition-opacity duration-300 z-30 md:hidden ${
           isOpen ? 'opacity-50' : 'opacity-0 pointer-events-none'
         }`}
         onClick={onClose}
       />
 
-      {/* Bottom Sheet */}
+      {/* Bottom Sheet - z-40 para estar DEBAJO del BottomNavigation (z-50) */}
       <div
-        className={`fixed left-0 right-0 bottom-0 bg-white rounded-t-3xl shadow-2xl transform transition-transform duration-300 z-50 md:hidden ${
+        className={`fixed left-0 right-0 bottom-0 bg-white rounded-t-3xl shadow-2xl transform transition-transform duration-300 z-40 md:hidden ${
           isOpen ? 'translate-y-0' : 'translate-y-full'
         } ${heightClass}`}
       >

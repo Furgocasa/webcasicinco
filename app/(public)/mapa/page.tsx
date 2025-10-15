@@ -79,6 +79,7 @@ export default function MapPage() {
   const mapRef = useRef<google.maps.Map | null>(null);
   const clustererRef = useRef<MarkerClusterer | null>(null);
   const markersRef = useRef<google.maps.Marker[]>([]);
+  const isUserInteractingRef = useRef(false); // 🔧 Nuevo: rastrear si el usuario está moviendo el mapa manualmente
 
   // Google Maps
   const { isLoaded, loadError } = useLoadScript({
@@ -317,6 +318,12 @@ export default function MapPage() {
     const placeIdFromUrl = searchParams.get('place');
     if (placeIdFromUrl) {
       console.log('⏸️ Auto-zoom de filtros desactivado - modo lugar específico');
+      return;
+    }
+    
+    // 🔧 NO aplicar auto-zoom si el usuario está moviendo el mapa manualmente
+    if (isUserInteractingRef.current) {
+      console.log('⏸️ Auto-zoom de filtros desactivado - usuario interactuando con el mapa');
       return;
     }
 
@@ -1583,6 +1590,22 @@ export default function MapPage() {
                   console.log('🗺️ Google Map cargado correctamente');
                   mapRef.current = map;
                   setMapReady(true); // ✅ Disparar creación de marcadores
+                  
+                  // 🔧 Detectar cuando el usuario mueve el mapa manualmente
+                  map.addListener('dragstart', () => {
+                    isUserInteractingRef.current = true;
+                  });
+                  
+                  map.addListener('zoom_changed', () => {
+                    isUserInteractingRef.current = true;
+                  });
+                  
+                  // Resetear después de 2 segundos de inactividad
+                  map.addListener('idle', () => {
+                    setTimeout(() => {
+                      isUserInteractingRef.current = false;
+                    }, 2000);
+                  });
                 }}
             options={{
               styles: [
@@ -1676,6 +1699,13 @@ export default function MapPage() {
                       // Limpiar parámetro place de la URL si existe
                       if (searchParams.get('place')) {
                         router.push('/mapa', { scroll: false });
+                      }
+                      // 🔧 En móvil, devolver foco al mapa para facilitar navegación
+                      if (window.innerWidth < 768 && mapRef.current) {
+                        setTimeout(() => {
+                          const mapDiv = mapRef.current?.getDiv();
+                          mapDiv?.focus();
+                        }, 100);
                       }
                     }}
                     className="absolute top-2 right-2 z-30 bg-white rounded-full p-1.5 shadow-lg hover:bg-gray-100 transition"

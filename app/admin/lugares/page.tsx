@@ -372,20 +372,35 @@ export default function LugaresPage() {
 
   // Actualizar la categoría del lugar (edición rápida desde la tabla)
   const handleChangeCategory = async (id: string, newCategory: 'restaurante' | 'bar' | 'cafe' | 'hotel') => {
+    // Guardar categoría anterior para rollback
+    const previousPlace = places.find(p => p.id === id);
+    const oldCategory = previousPlace?.category;
+    
     try {
       setUpdatingCategoryId(id);
+      
+      // Actualización optimista (inmediata en UI)
+      setPlaces(prev => prev.map(p => p.id === id ? { ...p, category: newCategory } : p));
+      
       const res = await fetch(`/api/places/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ category: newCategory }),
       });
       const data = await res.json();
+      
       if (!res.ok || !data.success) {
+        // Rollback: restaurar categoría anterior
+        if (oldCategory) {
+          setPlaces(prev => prev.map(p => p.id === id ? { ...p, category: oldCategory } : p));
+        }
         throw new Error(data.error || 'Error al actualizar la categoría');
       }
-      // Actualizar en memoria
-      setPlaces(prev => prev.map(p => p.id === id ? { ...p, category: newCategory } : p));
+      
+      // Actualizar con datos completos del servidor (incluye slug regenerado)
+      setPlaces(prev => prev.map(p => p.id === id ? { ...p, ...data.place } : p));
       toast.success('✅ Categoría actualizada');
+      
     } catch (error: any) {
       console.error('Error actualizando categoría:', error);
       toast.error(error.message || 'Error al actualizar la categoría');

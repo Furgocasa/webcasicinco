@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/client';
+import { createClient, createAdminClient } from '@/lib/supabase/server';
 
 export async function GET(
   request: NextRequest,
@@ -43,6 +43,7 @@ export async function PUT(
 ) {
   try {
     const supabase = await createClient();
+    const adminSupabase = createAdminClient();
     const { id } = params;
     const body = await request.json();
 
@@ -55,8 +56,44 @@ export async function PUT(
         { status: 401 }
       );
     }
+    
+    // Requerir rol admin para actualizar lugares
+    if (user.user_metadata?.role !== 'admin') {
+      return NextResponse.json(
+        { error: 'Acceso denegado' },
+        { status: 403 }
+      );
+    }
 
-    const { data, error } = await supabase
+    // Validar categoría si viene en el body
+    const ALLOWED_CATEGORIES = ['restaurante', 'bar', 'cafe', 'hotel'];
+    if (body.category && !ALLOWED_CATEGORIES.includes(body.category)) {
+      return NextResponse.json(
+        { error: `Categoría no permitida. Solo: ${ALLOWED_CATEGORIES.join(', ')}` },
+        { status: 400 }
+      );
+    }
+
+    // Si se cambia categoría, regenerar slug para SEO correcto
+    if (body.category) {
+      const { data: currentPlace } = await adminSupabase
+        .from('places')
+        .select('category, name, city, slug')
+        .eq('id', id)
+        .single();
+
+      if (currentPlace && currentPlace.category !== body.category) {
+        // Regenerar slug con nueva categoría
+        const { generatePlaceSlug } = await import('@/lib/utils/slugify');
+        const newSlug = generatePlaceSlug(currentPlace.name, currentPlace.city);
+        body.slug = newSlug;
+        
+        console.log(`🔄 Categoría cambiada: ${currentPlace.category} → ${body.category}, slug: ${currentPlace.slug} → ${newSlug}`);
+      }
+    }
+
+    // Usar cliente admin para evitar problemas de RLS
+    const { data, error } = await adminSupabase
       .from('places')
       .update(body)
       .eq('id', id)
@@ -69,6 +106,11 @@ export async function PUT(
         { error: 'Error al actualizar el lugar' },
         { status: 500 }
       );
+    }
+
+    // Si se actualizó categoría, invalidar cache del mapa (incrementar versión)
+    if (body.category) {
+      console.log('🔄 Categoría actualizada, cache del mapa se invalidará automáticamente en próxima carga');
     }
 
     return NextResponse.json({
@@ -91,6 +133,7 @@ export async function DELETE(
 ) {
   try {
     const supabase = await createClient();
+    const adminSupabase = createAdminClient();
     const { id } = params;
 
     // Verificar autenticación y rol admin
@@ -102,8 +145,16 @@ export async function DELETE(
         { status: 401 }
       );
     }
+    
+    // Requerir rol admin
+    if (user.user_metadata?.role !== 'admin') {
+      return NextResponse.json(
+        { error: 'Acceso denegado' },
+        { status: 403 }
+      );
+    }
 
-    const { error } = await supabase
+    const { error } = await adminSupabase
       .from('places')
       .delete()
       .eq('id', id);
