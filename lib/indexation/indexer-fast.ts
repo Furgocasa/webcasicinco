@@ -573,10 +573,21 @@ export async function startFastIndexation(
                   radius: 30000, // Reducir radio para más precisión
                 }),
                 3, // 3 intentos
-                10000, // 10 segundos por intento (más realista)
+                6000, // 6 segundos por intento (feedback más rápido)
                 logger,
                 `Buscar en ${location}`
               );
+
+              // Acumular IDs únicos y actualizar total_places para reflejar progreso
+              for (const id of placeIds) {
+                if (!allPlaceIds.has(id)) {
+                  allPlaceIds.add(id);
+                }
+              }
+              await supabase
+                .from('indexation_jobs')
+                .update({ total_places: allPlaceIds.size })
+                .eq('id', jobId);
               
               await logger.info(`   📍 Zona ${zoneIndex + 1}/${searchLocations.length}: ${placeIds.length} resultados → Procesando...`);
               
