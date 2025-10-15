@@ -239,7 +239,10 @@ export const CITIES_BY_PROVINCE: Record<string, ProvinceData> = {
     name: 'Albacete',
     cities: [
       { name: 'Albacete', coords: { lat: 38.9943, lng: -1.8585 }, population: 173000, priority: 1 },
-      { name: 'Hellín', coords: { lat: 38.5122, lng: -1.7014 }, population: 30000, priority: 3 },
+      { name: 'Hellín', coords: { lat: 38.5122, lng: -1.7014 }, population: 29000, priority: 3 },
+      { name: 'Villarrobledo', coords: { lat: 39.2714, lng: -2.6031 }, population: 25000, priority: 3 },
+      { name: 'Almansa', coords: { lat: 38.8697, lng: -1.0972 }, population: 24000, priority: 3 },
+      { name: 'La Roda', coords: { lat: 39.2056, lng: -2.1625 }, population: 15000, priority: 3 },
     ],
   },
   'Ciudad Real': {

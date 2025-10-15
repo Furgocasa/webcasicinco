@@ -50,11 +50,33 @@ async function processPlacesFromZone(
   logger: IndexationLogger,
   minRating: number = 4.7, // ← Añadido parámetro minRating
   onProgress?: (processed: number, total: number) => Promise<void> // ← Callback de progreso
-): Promise<{processed: number, saved: number, discarded: number, errors: number}> {
+): Promise<{
+  processed: number, 
+  saved: number, 
+  discarded: number, 
+  errors: number,
+  breakdown: {
+    lowRating: number,
+    lowReviews: number,
+    duplicates: number,
+    noRating: number,
+    outOfSpain: number,
+    invalidCategory: number
+  }
+}> {
   let processed = 0;
   let saved = 0;
   let discarded = 0;
   let errorsCount = 0;
+  
+  // Desglose detallado de descartados
+  let countLowRating = 0;
+  let countLowReviews = 0;
+  let countDuplicates = 0;
+  let countNoRating = 0;
+  let countOutOfSpain = 0;
+  let countInvalidCategory = 0;
+  
   const total = placeIds.length;
   
   for (const placeId of placeIds) {
@@ -140,7 +162,8 @@ async function processPlacesFromZone(
       );
 
       if (!isSpanishProvince || hasNonSpanishIndicator) {
-        discarded++; // Contar como descartado - fuera de España
+        discarded++;
+        countOutOfSpain++; // ← Contador específico
         await logger.warning(`⚠️ Descartado (fuera de España): ${details.name} - ${province} (normalizado: ${normalizedProvince})`);
         continue;
       }
@@ -153,27 +176,31 @@ async function processPlacesFromZone(
         .single();
 
       if (existingPlace) {
-        discarded++; // Contar como duplicado
+        discarded++;
+        countDuplicates++; // ← Contador específico
         await logger.warning(`⚠️ Descartado (duplicado): ${details.name}`);
         continue;
       }
 
       // Validar que tenga rating (algunos lugares no tienen)
       if (!details.rating || details.rating === null || details.rating === undefined) {
-        discarded++; // Contar como sin rating
+        discarded++;
+        countNoRating++; // ← Contador específico
         await logger.warning(`⚠️ Descartado (sin rating): ${details.name}`);
         continue;
       }
 
       // Validar rating y reseñas
       if (details.rating < minRating) {
-        discarded++; // Contar como rating bajo
+        discarded++;
+        countLowRating++; // ← Contador específico
         await logger.warning(`⚠️ Descartado (rating bajo): ${details.name} - ${details.rating}`);
         continue;
       }
 
       if (details.user_ratings_total < 50) {
-        discarded++; // Contar como pocas reseñas
+        discarded++;
+        countLowReviews++; // ← Contador específico
         await logger.warning(`⚠️ Descartado (pocas reseñas): ${details.name} - ${details.user_ratings_total}`);
         continue;
       }
@@ -181,7 +208,8 @@ async function processPlacesFromZone(
       // Categorizar
       const category = strictCategorizePlaceByTypes(details.types, details.name);
       if (!category || !['restaurante', 'bar', 'cafe', 'hotel'].includes(category)) {
-        discarded++; // Contar como categoría inválida
+        discarded++;
+        countInvalidCategory++; // ← Contador específico
         await logger.warning(`⚠️ Descartado (categoría inválida): ${details.name} - ${category}`);
         continue;
       }
@@ -291,7 +319,20 @@ async function processPlacesFromZone(
     }
   }
   
-  return { processed, saved, discarded, errors: errorsCount };
+  return { 
+    processed, 
+    saved, 
+    discarded, 
+    errors: errorsCount,
+    breakdown: {
+      lowRating: countLowRating,
+      lowReviews: countLowReviews,
+      duplicates: countDuplicates,
+      noRating: countNoRating,
+      outOfSpain: countOutOfSpain,
+      invalidCategory: countInvalidCategory
+    }
+  };
 }
 
 async function shouldContinueJob(jobId: string, supabase: ReturnType<typeof createAdminClient>): Promise<boolean> {
@@ -409,6 +450,9 @@ export async function startFastIndexation(
     let lowReviews = isResume ? (currentJob.error_log?.lowReviews || 0) : 0;
     let chains = isResume ? (currentJob.error_log?.chains || 0) : 0;
     let duplicates = isResume ? (currentJob.error_log?.duplicates || 0) : 0;
+    let noRating = isResume ? (currentJob.error_log?.noRating || 0) : 0;
+    let outOfSpain = isResume ? (currentJob.error_log?.outOfSpain || 0) : 0;
+    let invalidCategory = isResume ? (currentJob.error_log?.invalidCategory || 0) : 0;
     let errors = isResume ? (currentJob.failed_places || 0) : 0;
 
     // Recuperar progreso de provincias/ciudades procesadas si es reanudación
@@ -607,7 +651,14 @@ export async function startFastIndexation(
             totalProcessed += searchResults.processed;
             approved += searchResults.saved;
             errors += searchResults.errors;
-            lowRating += searchResults.discarded;
+            
+            // ✅ USAR EL DESGLOSE DETALLADO
+            lowRating += searchResults.breakdown.lowRating;
+            lowReviews += searchResults.breakdown.lowReviews;
+            duplicates += searchResults.breakdown.duplicates;
+            noRating += searchResults.breakdown.noRating;
+            outOfSpain += searchResults.breakdown.outOfSpain;
+            invalidCategory += searchResults.breakdown.invalidCategory;
             
             // Actualizar contadores finales
             await supabase
@@ -620,10 +671,13 @@ export async function startFastIndexation(
                   approved,
                   lowRating,
                   lowReviews,
-                  chains,
+                  chains, // Siempre 0 por ahora (no detectamos cadenas aún)
                   duplicates,
+                  noRating,
+                  outOfSpain,
+                  invalidCategory,
                   errors,
-                  summary: `${approved} aprobados | ${lowRating + lowReviews + chains + duplicates} descartados | ${errors} errores`
+                  summary: `${approved} aprobados | ${lowRating + lowReviews + duplicates + noRating + outOfSpain + invalidCategory} descartados | ${errors} errores`
                 }
               })
               .eq('id', jobId);
