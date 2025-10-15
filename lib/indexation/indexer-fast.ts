@@ -15,6 +15,8 @@ import { shouldExcludeChain } from './searcher';
 import { generatePlaceSlug } from '../utils/slugify';
 import { strictCategorizePlaceByTypes, shouldExcludeFromCategory } from './category-filters';
 import { IndexationLogger } from './logger';
+import { getCitiesForProvince, type CityData } from './cities-database';
+import { generateSearchStrategy, getStrategyDescription } from './search-strategies';
 
 interface IndexationParams {
   provinces: string[];
@@ -391,100 +393,6 @@ export async function startFastIndexation(
     // Recuperar progreso de provincias/ciudades procesadas si es reanudación
     const processedProgress = isResume ? (currentJob.progress_state || {}) : {};
 
-    // Ciudades principales por provincia (COBERTURA COMPLETA - Todas las provincias españolas)
-    const mainCities: Record<string, string[]> = {
-      // Andalucía
-      'Almería': ['Almería', 'Roquetas de Mar', 'El Ejido', 'Níjar', 'Vícar', 'Huércal-Overa', 'Adra', 'Vera', 'Mojácar'],
-      'Cádiz': ['Cádiz', 'Jerez de la Frontera', 'Algeciras', 'San Fernando', 'El Puerto de Santa María', 'Chiclana', 'La Línea', 'Sanlúcar', 'Barbate', 'Rota', 'Conil', 'Tarifa'],
-      'Córdoba': ['Córdoba', 'Lucena', 'Puente Genil', 'Montilla', 'Priego', 'Palma del Río', 'Pozoblanco', 'Baena', 'Cabra', 'Aguilar', 'Rute'],
-      'Granada': ['Granada', 'Motril', 'Almuñécar', 'Baza', 'Guadix', 'Loja', 'Armilla', 'Albolote', 'Maracena', 'Salobreña', 'Huétor Vega'],
-      'Huelva': ['Huelva', 'Lepe', 'Almonte', 'Moguer', 'Isla Cristina', 'Ayamonte', 'Punta Umbría', 'Cartaya', 'Aracena'],
-      'Jaén': ['Jaén', 'Linares', 'Andújar', 'Úbeda', 'Martos', 'Alcalá la Real', 'Baeza', 'Villacarrillo', 'Bailén'],
-      'Málaga': ['Málaga', 'Marbella', 'Mijas', 'Vélez-Málaga', 'Fuengirola', 'Torremolinos', 'Estepona', 'Benalmádena', 'Ronda', 'Antequera', 'Nerja', 'Torrox'],
-      'Sevilla': ['Sevilla', 'Dos Hermanas', 'Alcalá de Guadaíra', 'Utrera', 'Mairena', 'Écija', 'La Rinconada', 'Carmona', 'Lebrija', 'Coria del Río', 'Los Palacios'],
-      // Aragón
-      'Huesca': ['Huesca', 'Monzón', 'Barbastro', 'Jaca', 'Sabiñánigo', 'Binéfar', 'Fraga', 'Ainsa'],
-      'Teruel': ['Teruel', 'Alcañiz', 'Andorra', 'Calamocha', 'Albarracín', 'Mora de Rubielos'],
-      'Zaragoza': ['Zaragoza', 'Calatayud', 'Utebo', 'Ejea de los Caballeros', 'Cuarte de Huerva', 'Tarazona', 'Caspe', 'Borja'],
-      // Asturias
-      'Asturias': ['Oviedo', 'Gijón', 'Avilés', 'Siero', 'Langreo', 'Mieres', 'Castrillón', 'Llanera', 'Llanes', 'Cangas de Onís', 'Ribadesella'],
-      // Baleares
-      'Baleares': ['Palma', 'Calvià', 'Manacor', 'Ibiza', 'Alcúdia', 'Mahón', 'Ciutadella', 'Sóller', 'Pollensa'],
-      // Canarias
-      'Las Palmas': ['Las Palmas', 'Telde', 'Santa Lucía', 'Arucas', 'Agüimes', 'Ingenio', 'Puerto del Rosario', 'Arrecife', 'Maspalomas'],
-      'Santa Cruz de Tenerife': ['Santa Cruz de Tenerife', 'San Cristóbal de La Laguna', 'Arona', 'Adeje', 'Los Realejos', 'Puerto de la Cruz', 'La Orotava', 'Los Llanos de Aridane'],
-      // Cantabria
-      'Cantabria': ['Santander', 'Torrelavega', 'Castro Urdiales', 'Camargo', 'El Astillero', 'Laredo', 'Santoña', 'Comillas', 'Potes'],
-      // Castilla-La Mancha
-      'Albacete': ['Albacete', 'Hellín', 'Villarrobledo', 'Almansa', 'La Roda', 'Caudete', 'Yeste', 'Tobarra', 'Chinchilla'],
-      'Ciudad Real': ['Ciudad Real', 'Puertollano', 'Tomelloso', 'Alcázar de San Juan', 'Valdepeñas', 'Manzanares', 'Daimiel', 'Almagro'],
-      'Cuenca': ['Cuenca', 'Tarancón', 'Quintanar del Rey', 'San Clemente', 'Motilla del Palancar', 'Las Pedroñeras'],
-      'Guadalajara': ['Guadalajara', 'Azuqueca de Henares', 'Sigüenza', 'Molina de Aragón', 'Yunquera de Henares', 'Brihuega'],
-      'Toledo': ['Toledo', 'Talavera de la Reina', 'Illescas', 'Seseña', 'Torrijos', 'Ocaña', 'Mora', 'Consuegra'],
-      // Castilla y León
-      'Ávila': ['Ávila', 'Arévalo', 'Arenas de San Pedro', 'El Barco de Ávila', 'Sotillo de la Adrada'],
-      'Burgos': ['Burgos', 'Aranda de Duero', 'Miranda de Ebro', 'Briviesca', 'Lerma', 'Belorado'],
-      'León': ['León', 'Ponferrada', 'San Andrés del Rabanedo', 'Astorga', 'La Bañeza', 'Villablino', 'Sahagún'],
-      'Palencia': ['Palencia', 'Guardo', 'Aguilar de Campoo', 'Venta de Baños', 'Cervera de Pisuerga'],
-      'Salamanca': ['Salamanca', 'Béjar', 'Ciudad Rodrigo', 'Peñaranda de Bracamonte', 'Alba de Tormes', 'La Alberca'],
-      'Segovia': ['Segovia', 'Cuéllar', 'San Ildefonso', 'El Espinar', 'Cantalejo', 'Sepúlveda'],
-      'Soria': ['Soria', 'Almazán', 'El Burgo de Osma', 'Ágreda', 'San Leonardo de Yagüe'],
-      'Valladolid': ['Valladolid', 'Medina del Campo', 'Laguna de Duero', 'Arroyo de la Encomienda', 'Tordesillas', 'Peñafiel'],
-      'Zamora': ['Zamora', 'Benavente', 'Toro', 'Villalpando', 'Puebla de Sanabria'],
-      // Cataluña
-      'Barcelona': ['Barcelona', 'Hospitalet', 'Terrassa', 'Badalona', 'Sabadell', 'Mataró', 'Granollers', 'Sitges', 'Vic', 'Manresa', 'Rubí', 'Cornellà'],
-      'Girona': ['Girona', 'Figueres', 'Lloret de Mar', 'Blanes', 'Olot', 'Salt', 'Platja d\'Aro', 'Roses', 'Cadaqués', 'Tossa de Mar'],
-      'Lleida': ['Lleida', 'Balaguer', 'Tàrrega', 'Mollerussa', 'La Seu d\'Urgell', 'Vielha'],
-      'Tarragona': ['Tarragona', 'Reus', 'Salou', 'Cambrils', 'El Vendrell', 'Valls', 'Torredembarra', 'Amposta', 'Calafell'],
-      // Comunidad Valenciana
-      'Alicante': ['Alicante', 'Elche', 'Torrevieja', 'Benidorm', 'Orihuela', 'Alcoy', 'Dénia', 'Jávea', 'Calpe', 'Altea', 'Villena', 'Elda'],
-      'Castellón': ['Castellón', 'Vila-real', 'Burriana', 'Vinaròs', 'Onda', 'Benicarló', 'Peñíscola', 'Benicàssim', 'Morella'],
-      'Valencia': ['Valencia', 'Gandía', 'Torrent', 'Paterna', 'Sagunto', 'Alzira', 'Cullera', 'Burjassot', 'Mislata', 'Requena', 'Xàtiva', 'Ontinyent'],
-      // Extremadura
-      'Badajoz': ['Badajoz', 'Mérida', 'Don Benito', 'Almendralejo', 'Villanueva de la Serena', 'Zafra', 'Olivenza', 'Jerez de los Caballeros'],
-      'Cáceres': ['Cáceres', 'Plasencia', 'Navalmoral de la Mata', 'Coria', 'Trujillo', 'Jaraíz de la Vera'],
-      // Galicia
-      'A Coruña': ['A Coruña', 'Santiago de Compostela', 'Ferrol', 'Carballo', 'Oleiros', 'Culleredo', 'Arteixo', 'Betanzos', 'Narón', 'Ames', 'Cambre', 'Ribeira'],
-      'Lugo': ['Lugo', 'Viveiro', 'Monforte de Lemos', 'Vilalba', 'Sarria', 'Foz', 'Ribadeo'],
-      'Ourense': ['Ourense', 'Verín', 'O Carballiño', 'Ribadavia', 'Xinzo de Limia', 'Celanova', 'Allariz'],
-      'Pontevedra': ['Vigo', 'Pontevedra', 'Vilagarcía de Arousa', 'Redondela', 'Cangas', 'Marín', 'Sanxenxo', 'O Grove', 'Cambados', 'Baiona'],
-      // La Rioja
-      'La Rioja': ['Logroño', 'Calahorra', 'Arnedo', 'Haro', 'Alfaro', 'Nájera', 'Santo Domingo de la Calzada'],
-      // Madrid
-      'Madrid': ['Madrid', 'Móstoles', 'Alcalá de Henares', 'Fuenlabrada', 'Leganés', 'Getafe', 'Torrejón', 'Parla', 'Coslada', 'Pozuelo', 'Las Rozas', 'Majadahonda'],
-      // Murcia
-      'Murcia': ['Murcia', 'Cartagena', 'Lorca', 'Molina de Segura', 'Mazarrón', 'Yecla', 'Jumilla', 'Cieza', 'Águilas', 'San Javier', 'Totana', 'Alcantarilla'],
-      // Navarra
-      'Navarra': ['Pamplona', 'Tudela', 'Barañáin', 'Burlada', 'Estella', 'Tafalla', 'Villava', 'Sangüesa'],
-      // País Vasco
-      'Álava': ['Vitoria-Gasteiz', 'Llodio', 'Amurrio', 'Salvatierra', 'Laguardia'],
-      'Araba': ['Vitoria-Gasteiz', 'Llodio', 'Amurrio', 'Salvatierra', 'Laguardia'], // Variante euskera
-      'Guipúzcoa': ['San Sebastián', 'Irún', 'Éibar', 'Rentería', 'Zarautz', 'Mondragón', 'Hernani', 'Hondarribia', 'Tolosa', 'Azpeitia', 'Pasaia', 'Lasarte-Oria', 'Andoain', 'Errenteria', 'Oñati', 'Bergara', 'Beasain', 'Ordizia', 'Legazpi', 'Villabona', 'Usurbil', 'Lezo', 'Oiartzun', 'Astigarraga', 'Hernialde', 'Albiztur', 'Asteasu', 'Zizurkil', 'Aia', 'Zestoa'],
-      'Gipuzkoa': ['San Sebastián', 'Irún', 'Éibar', 'Rentería', 'Zarautz', 'Mondragón', 'Hernani', 'Hondarribia', 'Tolosa', 'Azpeitia', 'Pasaia', 'Lasarte-Oria', 'Andoain', 'Errenteria', 'Oñati', 'Bergara', 'Beasain', 'Ordizia', 'Legazpi', 'Villabona', 'Usurbil', 'Lezo', 'Oiartzun', 'Astigarraga', 'Hernialde', 'Albiztur', 'Asteasu', 'Zizurkil', 'Aia', 'Zestoa'], // Variante euskera
-      'Vizcaya': ['Bilbao', 'Barakaldo', 'Getxo', 'Portugalete', 'Sestao', 'Durango', 'Basauri', 'Santurce', 'Bermeo', 'Gernika'],
-      'Bizkaia': ['Bilbao', 'Barakaldo', 'Getxo', 'Portugalete', 'Sestao', 'Durango', 'Basauri', 'Santurce', 'Bermeo', 'Gernika'], // Variante euskera
-      // Ceuta y Melilla
-      'Ceuta': ['Ceuta'],
-      'Melilla': ['Melilla'],
-    };
-
-    // 🔥 IMPORTANTE: Si una provincia no tiene ciudades definidas, usar fallback inteligente
-    // En lugar de solo [provincia], buscar en la provincia + "principales ciudades"
-    const getCitiesForProvince = (province: string): string[] => {
-      // Si está en mainCities, usar esa lista
-      if (mainCities[province]) {
-        return mainCities[province];
-      }
-      
-      // Si no está definida, usar estrategia de búsqueda amplia
-      // Esto cubre provincias pequeñas que no están en mainCities
-      return [
-        province, // Capital/provincia
-        `${province} centro`,
-        `${province} ciudad`,
-      ];
-    };
-
     // ==========================================
     // FASE 1: BÚSQUEDA EXHAUSTIVA
     // ==========================================
@@ -523,18 +431,25 @@ export async function startFastIndexation(
           };
 
           const searchTerm = searchTerms[category] || category;
-          const cities = getCitiesForProvince(province);
+          
+          // 🆕 SISTEMA OPTIMIZADO: Obtener ciudades principales de la provincia
+          const cities: CityData[] = getCitiesForProvince(province);
+
+          if (cities.length === 0) {
+            await logger.warning(`⚠️ No hay ciudades configuradas para ${province}, saltando...`);
+            continue;
+          }
 
           await logger.info(`📍 ${province} - ${category.toUpperCase()}`);
-          await logger.info(`   Buscando en ${cities.length} ciudades...`);
+          await logger.info(`   ${cities.length} ciudades a procesar con estrategia dinámica`);
 
         for (let i = 0; i < cities.length; i++) {
-          const city = cities[i];
+          const cityData = cities[i];
           
           // Verificar si esta ciudad ya fue procesada
-          const cityKey = `${categoryKey}_city_${city}`;
+          const cityKey = `${categoryKey}_city_${cityData.name}`;
           if (processedProgress[cityKey] === 'completed') {
-            await logger.info(`⏭️ Saltando ${city} - ya procesada`);
+            await logger.info(`⏭️ Saltando ${cityData.name} - ya procesada`);
             continue;
           }
           
@@ -542,46 +457,68 @@ export async function startFastIndexation(
           if (i % 3 === 0 && !await shouldContinueJob(jobId, supabase)) {
             await logger.warning('⏸️ Indexación pausada durante búsqueda');
             await logger.close();
-            // NO actualizar nada más - el estado ya fue cambiado por el API de pausa/cancel
             return;
           }
           
           try {
-            // 🔥 BÚSQUEDA MÚLTIPLE POR ZONAS: Buscar en diferentes puntos de la ciudad para obtener MÁS resultados
-            const searchLocations = [
-              `${searchTerm} ${city} ${province} España`, // Búsqueda más específica
-              `${searchTerm} ${city} centro ${province} España`, // Centro
-              `${searchTerm} ${city} norte ${province} España`, // Norte
-              `${searchTerm} ${city} sur ${province} España`, // Sur
-              `${searchTerm} ${city} este ${province} España`, // Este
-              `${searchTerm} ${city} oeste ${province} España`, // Oeste
-            ];
+            // 🚀 GENERAR ESTRATEGIA OPTIMIZADA según tamaño de ciudad
+            const strategy = generateSearchStrategy(cityData, searchTerm, province);
+            
+            await logger.info(`\n🏙️  ${getStrategyDescription(strategy)}`);
+            await logger.info(`   Estrategia: ${strategy.strategyLevel} - ${strategy.searches.length} búsquedas`);
             
             const cityStartCount = allPlaceIds.size;
             let cityProcessed = 0;
             let citySaved = 0;
             let cityDiscarded = 0;
             
-            // 🔥 PROCESAMIENTO POR ZONA: Buscar y procesar inmediatamente
-            for (let zoneIndex = 0; zoneIndex < searchLocations.length; zoneIndex++) {
-              const location = searchLocations[zoneIndex];
+            // 🔥 EJECUTAR BÚSQUEDAS SEGÚN ESTRATEGIA
+            for (let searchIndex = 0; searchIndex < strategy.searches.length; searchIndex++) {
+              const search = strategy.searches[searchIndex];
               
-              await logger.info(`   🔍 Zona ${zoneIndex + 1}/${searchLocations.length}: "${location}"`);
+              await logger.info(`   🔍 Búsqueda ${searchIndex + 1}/${strategy.searches.length}: ${search.description}`);
               
-              const placeIds = await withRetry(
-                () => searchPlaces({
-                  location: location,
-                  keyword: searchTerm,
-                  minRating: params.minRating,
-                  radius: 30000, // Reducir radio para más precisión
-                }),
-                3, // 3 intentos
-                6000, // 6 segundos por intento (feedback más rápido)
-                logger,
-                `Buscar en ${location}`
-              );
+              let placeIds: string[] = [];
+              
+              // Ejecutar búsqueda según tipo
+              if (search.type === 'text') {
+                placeIds = await withRetry(
+                  () => searchPlaces({
+                    location: search.query,
+                    keyword: searchTerm,
+                    minRating: params.minRating,
+                    radius: 50000, // Radio grande para text search
+                  }),
+                  3, // 3 intentos
+                  6000, // 6s por intento
+                  logger,
+                  search.description
+                );
+              } else if (search.type === 'nearby' && search.coords) {
+                // Nearby search con coordenadas
+                const typeMap: Record<string, string> = {
+                  'restaurantes': 'restaurant',
+                  'bares tapas': 'bar',
+                  'cafeterías coffee': 'cafe',
+                  'hoteles alojamiento': 'lodging',
+                };
+                const nearbyType = typeMap[searchTerm] || 'restaurant';
+                
+                placeIds = await withRetry(
+                  () => searchNearbyPlaces(
+                    search.coords!.lat,
+                    search.coords!.lng,
+                    search.radius || 20000,
+                    nearbyType
+                  ),
+                  3,
+                  6000,
+                  logger,
+                  search.description
+                );
+              }
 
-              // Acumular IDs únicos y actualizar total_places para reflejar progreso
+              // Acumular IDs únicos y actualizar total_places
               for (const id of placeIds) {
                 if (!allPlaceIds.has(id)) {
                   allPlaceIds.add(id);
@@ -592,120 +529,46 @@ export async function startFastIndexation(
                 .update({ total_places: allPlaceIds.size })
                 .eq('id', jobId);
               
-              await logger.info(`   📍 Zona ${zoneIndex + 1}/${searchLocations.length}: ${placeIds.length} resultados → Procesando...`);
+              await logger.info(`   📍 Búsqueda ${searchIndex + 1}: ${placeIds.length} resultados → Procesando...`);
               
-              // Procesar inmediatamente los lugares encontrados en esta zona
-              const zoneResults = await processPlacesFromZone(placeIds, jobId, supabase, logger);
-              cityProcessed += zoneResults.processed;
-              citySaved += zoneResults.saved;
-              cityDiscarded += zoneResults.discarded;
+              // Procesar inmediatamente los lugares encontrados
+              const searchResults = await processPlacesFromZone(placeIds, jobId, supabase, logger);
+              cityProcessed += searchResults.processed;
+              citySaved += searchResults.saved;
+              cityDiscarded += searchResults.discarded;
               
               // Acumular en contadores globales
-              totalProcessed += zoneResults.processed;
-              approved += zoneResults.saved;
-              // Los errores técnicos reales suman a "errors"
-              errors += zoneResults.errors;
-              // Los descartes por reglas siguen en lowRating como total simplificado
-              lowRating += zoneResults.discarded;
+              totalProcessed += searchResults.processed;
+              approved += searchResults.saved;
+              errors += searchResults.errors;
+              lowRating += searchResults.discarded;
               
-              // 🔥 ACTUALIZAR CONTADORES EN TIEMPO REAL
-          await supabase
-            .from('indexation_jobs')
-            .update({
-              processed_places: totalProcessed,
-              successful_places: approved,
-                  failed_places: lowRating + lowReviews + chains + duplicates + errors,
-              error_log: {
-                approved,
-                lowRating,
-                lowReviews,
-                chains,
-                duplicates,
-                errors,
-                summary: `${approved} aprobados | ${lowRating} rating bajo | ${lowReviews} pocas reseñas | ${chains} cadenas | ${duplicates} duplicados | ${errors} errores`
-              }
-            })
-            .eq('id', jobId);
+              // Actualizar contadores en tiempo real
+              await supabase
+                .from('indexation_jobs')
+                .update({
+                  processed_places: totalProcessed,
+                  successful_places: approved,
+                  failed_places: errors,
+                  error_log: {
+                    approved,
+                    lowRating,
+                    lowReviews,
+                    chains,
+                    duplicates,
+                    errors,
+                    summary: `${approved} aprobados | ${lowRating + lowReviews + chains + duplicates} descartados | ${errors} errores`
+                  }
+                })
+                .eq('id', jobId);
               
-              await logger.info(`   ✅ Zona ${zoneIndex + 1}/${searchLocations.length}: ${zoneResults.saved} guardados, ${zoneResults.discarded} descartados`);
+              await logger.info(`   ✅ Búsqueda ${searchIndex + 1}: ${searchResults.saved} guardados, ${searchResults.discarded} descartados`);
               
-              // Pequeña pausa entre zonas para no saturar
+              // Pequeña pausa entre búsquedas
               await new Promise(r => setTimeout(r, 500));
             }
 
-            // 🔥 BÚSQUEDA NEARBY: Buscar lugares cercanos por coordenadas (complementa text search)
-            try {
-              // Obtener coordenadas aproximadas de la ciudad (esto es una aproximación)
-              const cityCoordinates: Record<string, {lat: number, lng: number}> = {
-                'San Sebastián': { lat: 43.3183, lng: -1.9812 },
-                'Irún': { lat: 43.3391, lng: -1.7893 },
-                'Éibar': { lat: 43.1844, lng: -2.4731 },
-                'Rentería': { lat: 43.3122, lng: -1.9014 },
-                'Zarautz': { lat: 43.2844, lng: -2.1719 },
-                'Mondragón': { lat: 43.0644, lng: -2.4897 },
-                'Hernani': { lat: 43.2667, lng: -1.9833 },
-                'Hondarribia': { lat: 43.3631, lng: -1.7914 },
-                'Tolosa': { lat: 43.1333, lng: -2.0667 },
-                'Azpeitia': { lat: 43.1833, lng: -2.2667 },
-                'Pasaia': { lat: 43.3167, lng: -1.9167 },
-              };
-
-              const coords = cityCoordinates[city];
-              if (coords) {
-                await logger.info(`   📍 Nearby search en ${city}...`);
-                
-                const nearbyPlaceIds = await withRetry(
-                  () => searchNearbyPlaces(
-                    coords.lat, 
-                    coords.lng, 
-                    30000, // 30km radio
-                    'restaurant' // Tipo específico
-                  ),
-                  3, // 3 intentos
-                  10000, // 10 segundos
-                  logger,
-                  `Búsqueda nearby en ${city}`
-                );
-
-                await logger.info(`   📍 Nearby search: ${nearbyPlaceIds.length} resultados → Procesando...`);
-                
-                // Procesar inmediatamente los lugares nearby
-                const nearbyResults = await processPlacesFromZone(nearbyPlaceIds, jobId, supabase, logger);
-                cityProcessed += nearbyResults.processed;
-                citySaved += nearbyResults.saved;
-                cityDiscarded += nearbyResults.discarded;
-                
-                // Acumular en contadores globales
-                totalProcessed += nearbyResults.processed;
-                approved += nearbyResults.saved;
-                lowRating += nearbyResults.discarded; // Simplificado
-                
-                // 🔥 ACTUALIZAR CONTADORES EN TIEMPO REAL
-                await supabase
-                  .from('indexation_jobs')
-                  .update({
-                    processed_places: totalProcessed,
-                    successful_places: approved,
-                    failed_places: lowRating + lowReviews + chains + duplicates + errors,
-                    error_log: {
-                      approved,
-                      lowRating,
-                      lowReviews,
-                      chains,
-                      duplicates,
-                      errors,
-                      summary: `${approved} aprobados | ${lowRating} rating bajo | ${lowReviews} pocas reseñas | ${chains} cadenas | ${duplicates} duplicados | ${errors} errores`
-                    }
-                  })
-                  .eq('id', jobId);
-                
-                await logger.info(`   ✅ Nearby: ${nearbyResults.saved} guardados, ${nearbyResults.discarded} descartados`);
-              }
-            } catch (nearbyError: any) {
-              await logger.warning(`   ⚠️ Nearby search falló en ${city}: ${nearbyError.message}`);
-            }
-
-            await logger.info(`   📊 Total ${city}: ${cityProcessed} procesados, ${citySaved} guardados, ${cityDiscarded} descartados`);
+            await logger.info(`   📊 Total ${cityData.name}: ${cityProcessed} procesados, ${citySaved} guardados, ${cityDiscarded} descartados`);
 
             // Marcar esta ciudad como completada en el progreso
             processedProgress[cityKey] = 'completed';
@@ -720,7 +583,7 @@ export async function startFastIndexation(
 
             await new Promise(r => setTimeout(r, 200));
           } catch (error: any) {
-            await logger.error(`   Error en ${city}: ${error.message}`);
+            await logger.error(`   Error en ${cityData.name}: ${error.message}`);
             // Continuar con la siguiente ciudad aunque falle una
           }
         }

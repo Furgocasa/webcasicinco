@@ -154,8 +154,26 @@ export default function IndexarPage() {
                 <div className="p-3 bg-amber-50 border border-amber-300 rounded-lg">
                   <p className="text-xs text-amber-800">
                     <strong>⚠️ Recomendación:</strong> Para mejor estabilidad, indexa <strong>UNA provincia a la vez</strong>.
-                    Múltiples provincias pueden tardar 1-2 horas.
+                    Múltiples provincias pueden tardar 30-90 minutos.
                   </p>
+                </div>
+              )}
+              
+              {/* 🆕 Info del sistema optimizado */}
+              {selectedProvinces.length > 0 && selectedCategories.length > 0 && (
+                <div className="p-3 bg-blue-50 border border-blue-300 rounded-lg space-y-2">
+                  <p className="text-xs font-bold text-blue-900">
+                    🚀 Sistema Optimizado Dinámico
+                  </p>
+                  <div className="text-xs text-blue-800 space-y-1">
+                    <p>✅ Búsquedas adaptadas al tamaño de cada ciudad</p>
+                    <p>• Ciudades grandes (&gt;200k): 4 búsquedas (máxima cobertura)</p>
+                    <p>• Ciudades medianas (50k-200k): 3 búsquedas</p>
+                    <p>• Ciudades pequeñas (&lt;50k): 2 búsquedas</p>
+                    <p className="font-bold text-green-700 pt-1">
+                      ⚡ 3x más rápido que el sistema anterior
+                    </p>
+                  </div>
                 </div>
               )}
 
@@ -177,7 +195,7 @@ export default function IndexarPage() {
                 
                 {selectedProvinces.length === 1 && selectedCategories.length > 0 && (
                   <p className="text-xs text-green-600 mt-2 text-center">
-                    ✅ Configuración óptima: 1 provincia × {selectedCategories.length} categoría(s) = {selectedCategories.length * 12} ciudades
+                    ✅ Configuración óptima: 1 provincia × {selectedCategories.length} categoría(s)
                   </p>
                 )}
               </div>
@@ -201,15 +219,15 @@ export default function IndexarPage() {
                     🔍 FASE 1: Indexación Rápida <Badge className="bg-blue-600">Este Proceso</Badge>
                   </h3>
                   <div className="space-y-2 text-sm text-blue-800">
-                    <p>1️⃣ <strong>Búsqueda exhaustiva</strong> en Google Maps (sin filtros)</p>
+                    <p>1️⃣ <strong>Búsqueda inteligente</strong> en Google Maps (adaptada a cada ciudad)</p>
                     <p>2️⃣ <strong>Obtener detalles básicos</strong> (rating, reseñas, ubicación)</p>
                     <p>3️⃣ <strong>Filtrar</strong> rating ≥4.7, reseñas ≥20, detectar duplicados</p>
                     <p>4️⃣ <strong>Guardar</strong> como "Pendientes de Enriquecer"</p>
                     <p className="font-bold mt-3 pt-3 border-t border-blue-300">
-                      ⏱️ Tiempo: 30-60 min para todas las provincias
+                      ⏱️ Tiempo: 15-30 min por provincia (sistema optimizado)
                     </p>
                     <p className="font-bold text-green-700">
-                      ✅ Resultado: ~3,500 lugares aprobados (SIN IA aún)
+                      ✅ Resultado: ~200-400 lugares por provincia (SIN IA aún)
                     </p>
                   </div>
                 </div>
@@ -225,7 +243,7 @@ export default function IndexarPage() {
                     <p>✨ Generar highlights con IA</p>
                     <p>🚀 Publicar en el mapa</p>
                     <p className="font-bold mt-3 pt-3 border-t border-amber-300">
-                      ⏱️ Tiempo: ~3 seg/lugar = 3-5 horas para 3,500
+                      ⏱️ Tiempo: ~3 seg/lugar = 20-30 min por 400 lugares
                     </p>
                     <p className="font-bold text-purple-700">
                       💡 Acceso: Dashboard → "Enriquecer con IA"
@@ -235,7 +253,7 @@ export default function IndexarPage() {
 
                 <div className="p-3 bg-green-50 border border-green-300 rounded-lg">
                   <p className="text-xs text-green-800">
-                    <strong>💰 Ventaja:</strong> Puedes revisar los 3,500 lugares ANTES de gastar en IA.
+                    <strong>💰 Ventaja:</strong> Puedes revisar los lugares ANTES de gastar en IA.
                     Si hay duplicados o errores, los eliminas antes de procesarlos.
                   </p>
                 </div>
