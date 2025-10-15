@@ -15,7 +15,8 @@ import { shouldExcludeChain } from './searcher';
 import { generatePlaceSlug } from '../utils/slugify';
 import { strictCategorizePlaceByTypes, shouldExcludeFromCategory } from './category-filters';
 import { IndexationLogger } from './logger';
-import { getCitiesForProvince, type CityData } from './cities-database';
+import { getCitiesForProvince as getCitiesFromFile, type CityData } from './cities-database';
+import { getAllCitiesFromSupabase, getCitiesFromSupabase } from './cities-supabase';
 import { generateSearchStrategy, getStrategyDescription } from './search-strategies';
 
 interface IndexationParams {
@@ -459,6 +460,19 @@ export async function startFastIndexation(
     const processedProgress = isResume ? (currentJob.progress_state || {}) : {};
 
     // ==========================================
+    // 🆕 CARGAR CIUDADES DESDE SUPABASE
+    // ==========================================
+    await logger.info('🗺️ Cargando ciudades desde Supabase...');
+    
+    const citiesCache = await getAllCitiesFromSupabase();
+    
+    if (citiesCache.size > 0) {
+      await logger.info(`✅ Cargadas ${citiesCache.size} provincias desde Supabase (cache en memoria)`);
+    } else {
+      await logger.warning('⚠️ No se pudieron cargar ciudades de Supabase, usando archivo hardcodeado');
+    }
+
+    // ==========================================
     // FASE 1: BÚSQUEDA EXHAUSTIVA
     // ==========================================
     await logger.info('🔍 FASE 1: Búsqueda exhaustiva iniciada');
@@ -498,11 +512,21 @@ export async function startFastIndexation(
           const searchTerm = searchTerms[category] || category;
           
           // 🆕 SISTEMA OPTIMIZADO: Obtener ciudades principales de la provincia
-          const cities: CityData[] = getCitiesForProvince(province);
-
+          // Primero intenta del cache de Supabase, luego fallback al archivo
+          let cities: CityData[] = citiesCache.get(province) || [];
+          
           if (cities.length === 0) {
-            await logger.warning(`⚠️ No hay ciudades configuradas para ${province}, saltando...`);
-            continue;
+            // Fallback: intentar cargar del archivo hardcodeado
+            cities = getCitiesFromFile(province);
+            
+            if (cities.length > 0) {
+              await logger.warning(`⚠️ ${province}: usando ${cities.length} ciudades del archivo (fallback)`);
+            } else {
+              await logger.warning(`⚠️ No hay ciudades configuradas para ${province}, saltando...`);
+              continue;
+            }
+          } else {
+            await logger.info(`📍 ${province}: ${cities.length} ciudades desde Supabase`);
           }
 
           await logger.info(`📍 ${province} - ${category.toUpperCase()}`);
