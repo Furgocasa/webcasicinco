@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient, createAdminClient } from '@/lib/supabase/server';
+import { generatePlaceSlug } from '@/lib/utils/slugify';
 
 export async function GET(
   request: NextRequest,
@@ -84,7 +85,6 @@ export async function PUT(
 
       if (currentPlace && currentPlace.category !== body.category) {
         // Regenerar slug con nueva categoría
-        const { generatePlaceSlug } = await import('@/lib/utils/slugify');
         const newSlug = generatePlaceSlug(currentPlace.name, currentPlace.city);
         body.slug = newSlug;
         
