@@ -38,6 +38,14 @@ export const metadata: Metadata = {
     description:
       'Descubre restaurantes, hoteles, spas y experiencias con valoraciones excepcionales.',
     siteName: 'Casi Cinco',
+    images: [
+      {
+        url: '/images/opengraph_casicinco.png',
+        width: 1200,
+        height: 1200,
+        alt: 'Casi Cinco - Los mejores lugares con 4.7+ estrellas',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
@@ -45,6 +53,7 @@ export const metadata: Metadata = {
     description:
       'Descubre restaurantes, hoteles, spas y experiencias con valoraciones excepcionales.',
     creator: '@casi5app',
+    images: ['/images/opengraph_casicinco.png'],
   },
   robots: {
     index: true,
