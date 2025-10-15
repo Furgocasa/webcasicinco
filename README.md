@@ -1,7 +1,7 @@
 # 🌟 Casi Cinco - Los Mejores Lugares de España
 
-**Versión:** BETA 6.0  
-**Fecha:** 14 de octubre de 2025  
+**Versión:** BETA 10  
+**Fecha:** 15 de octubre de 2025  
 **Dominio:** [www.casicinco.com](https://www.casicinco.com)
 
 ---
@@ -37,16 +37,25 @@ Utilizando inteligencia artificial y datos de Google Places, ofrecemos una exper
 
 ---
 
-## 🎯 **BETA 6.0 - Sistema de 2 Fases**
+## 🎯 **BETA 10 - Sistema de Indexación Profesional**
 
-### **FASE 1: Indexación Rápida (30-60 min)**
-- Búsqueda exhaustiva en Google Places
-- Filtrado automático (rating ≥4.7, reseñas ≥20)
+### **✨ Novedades BETA 10:**
+- 🔍 **Estrategia de búsqueda optimizada** sin términos ambiguos
+- 📝 **Logs ilimitados** para procesos largos completos
+- 🛡️ **Filtrado geográfico perfecto** - 0 contaminación internacional
+- ⚡ **Continuidad ante errores** - El proceso nunca se detiene
+- 📊 **Cobertura máxima**: 3 búsquedas por ciudad grande = 180 resultados
+
+### **FASE 1: Indexación Rápida**
+- **Búsqueda inteligente** por ciudades (Supabase)
+- **3 búsquedas** para ciudades grandes (>200k hab)
+- **2 búsquedas** para ciudades medianas (50k-200k hab)
+- **1 búsqueda** para ciudades pequeñas (<50k hab)
+- Filtrado: rating ≥4.7, reseñas ≥50, solo España
 - Detección de duplicados
-- Guardado sin IA (rápido)
-- **Resultado:** Lugares "aprobados" listos para enriquecer
+- **Resultado:** Lugares listos para enriquecer
 
-### **FASE 2: Enriquecimiento IA (pausable)**
+### **FASE 2: Enriquecimiento IA (separado)**
 - Categorización inteligente con IA
 - Descarga de fotos → Supabase Storage
 - Generación de descripción con IA

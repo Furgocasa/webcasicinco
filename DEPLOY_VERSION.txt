@@ -1,12 +1,26 @@
-BETA 6.1 - Build: 2025-10-13 18:50
-Commit: Sistema completo de indexación optimizado
-Features:
-- Indexación en 2 fases (búsqueda + procesamiento)
-- Descartados vs errores correctamente separados
-- Marcadores del mapa con estado mapReady
-- Sin errores de hidratación React
-- Revalidación automática cada 5 min
-- Títulos SEO únicos por lugar
-- Dashboard optimizado
-- Logs con prefijos [DASHBOARD] e [INDEXACIÓN]
+BETA 10
+15 de Octubre de 2025, 22:45h
 
+CAMBIOS PRINCIPALES:
+- Estrategia de búsqueda optimizada sin "mejores"
+- Logs ilimitados para procesos largos
+- Filtrado geográfico perfecto (0 contaminación internacional)
+- 3 búsquedas para ciudades grandes = 180 resultados
+- Proceso continúa ante errores sin bloquearse
+
+ARCHIVOS MODIFICADOS:
+- lib/indexation/search-strategies.ts
+- lib/indexation/logger.ts
+- CHANGELOG.md
+- README.md
+- LEEME_PRIMERO.md
+- BETA_10_OPTIMIZACION_INDEXACION.md (NUEVO)
+
+VERIFICACIÓN:
+✅ Testing completado en Murcia
+✅ 0 resultados internacionales
+✅ Logs completos visibles
+✅ Sin bloqueos
+✅ Todas las ciudades procesadas
+
+ESTADO: PRODUCCIÓN LISTA ✅

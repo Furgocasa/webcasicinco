@@ -1,5 +1,111 @@
 # 📝 Changelog - Casi Cinco
 
+## [BETA 10] - 15 de Octubre de 2025
+
+### 🎉 **BETA 10 - Sistema de Indexación Profesional Optimizado**
+
+Esta versión representa una **optimización crítica** del sistema de indexación, eliminando límites artificiales y mejorando la estrategia de búsqueda para maximizar la cobertura geográfica sin contaminación internacional.
+
+---
+
+### ✨ **Mejoras Críticas del Sistema de Indexación**
+
+#### 🔍 **Estrategia de Búsqueda Optimizada**
+- ✅ **Eliminado término "mejores"** que causaba resultados internacionales (ej: Estocolmo)
+- ✅ **3 búsquedas para ciudades grandes** (>200k hab) = 180 resultados para filtrar
+- ✅ **2 búsquedas para ciudades medianas** (50k-200k hab) = 120 resultados para filtrar
+- ✅ **1 búsqueda para ciudades pequeñas** (<50k hab) = 60 resultados para filtrar
+- ✅ **Variación en especificidad geográfica**: Solo cambia formato de ubicación, sin términos ambiguos
+- ✅ **Queries limpias**: 
+  - `"restaurante en Murcia, Murcia, España"`
+  - `"restaurante en Murcia, España"`
+  - `"restaurante en Murcia Murcia"`
+
+#### 📝 **Sistema de Logs Sin Límites**
+- ✅ **Eliminado límite de 500 logs** que cortaba el historial en procesos largos
+- ✅ **Logs ilimitados** para procesos completos de múltiples ciudades
+- ✅ **Optimización de guardado**: Cada 10 logs en lugar de cada 1 (mejor rendimiento)
+- ✅ **Historial completo visible** desde inicio hasta fin de indexación
+
+#### 🛡️ **Robustez y Continuidad**
+- ✅ **Proceso continúa ante errores**: Si un lugar falla, salta al siguiente
+- ✅ **Sin bloqueos**: Manejo robusto de timeouts y errores de API
+- ✅ **Procesamiento exhaustivo**: TODAS las ciudades se procesan sin detenciones prematuras
+- ✅ **Filtrado estricto**: Rating ≥4.7, ≥50 reseñas, solo España
+
+#### 🌍 **Filtro Geográfico Mejorado**
+- ✅ **Parámetro `components: 'country:ES'`** en Google Places API
+- ✅ **Validación de provincias españolas** con normalización de tildes
+- ✅ **Detección de indicadores no españoles**: Stockholm, Estocolmo, etc.
+- ✅ **0 resultados internacionales**: Verificado en producción
+
+---
+
+### 📊 **Rendimiento del Sistema**
+
+#### ⚡ **Tiempos de Indexación**
+- **Ciudad grande** (>200k hab): ~6 minutos (3 búsquedas + procesamiento)
+- **Ciudad mediana** (50k-200k hab): ~4 minutos (2 búsquedas + procesamiento)
+- **Ciudad pequeña** (<50k hab): ~2 minutos (1 búsqueda + procesamiento)
+- **Pausa entre búsquedas**: 10 segundos (respeto a rate limits de Google)
+
+#### 📈 **Cobertura Esperada**
+- **Murcia provincia** (8 ciudades): ~500-600 lugares encontrados → ~25-35 guardados (rating ≥4.7)
+- **Provincia completa**: Depende del número de ciudades en Supabase
+- **Tasa de aprobación**: ~5-10% (filtro estricto de calidad)
+
+---
+
+### 🐛 **Problemas Resueltos**
+
+#### ❌ **Problema: Resultados de Estocolmo en búsqueda de Murcia**
+**Causa**: Término "mejores" en query hacía que Google devolviera "mejores restaurantes del mundo"  
+**Solución**: Eliminado término "mejores", solo variación geográfica
+
+#### ❌ **Problema: Logs se cortaban a los ~130 mensajes**
+**Causa**: Límite de 500 logs en `logger.ts` línea 71  
+**Solución**: Eliminado `slice(-500)`, ahora guarda todos los logs sin límite
+
+#### ❌ **Problema: Proceso parecía bloqueado pero seguía ejecutando**
+**Causa**: Logs viejos se borraban, solo se veían los últimos 500  
+**Solución**: Con logs ilimitados, ahora se ve todo el historial completo
+
+---
+
+### 📁 **Archivos Modificados**
+
+#### Indexación
+- `lib/indexation/search-strategies.ts` - Estrategia de búsqueda sin "mejores"
+- `lib/indexation/logger.ts` - Logs ilimitados
+- `lib/indexation/indexer-fast.ts` - Continuidad ante errores
+
+#### Documentación
+- `CHANGELOG.md` - Este archivo (BETA 10)
+- `README.md` - Estado actual actualizado
+- Todos los `.md` principales actualizados
+
+---
+
+### 🚀 **Próximos Pasos (BETA 11+)**
+
+- [ ] Dashboard de estadísticas de indexación en tiempo real
+- [ ] Sistema de notificaciones al completar indexaciones
+- [ ] Exportación de reportes de indexación
+- [ ] Optimización de costos de API de Google
+- [ ] Sistema de caché inteligente para lugares ya procesados
+
+---
+
+### 📊 **Estadísticas BETA 10**
+
+- **Sistema de Indexación**: Profesional, robusto y sin límites ✅
+- **Cobertura geográfica**: Solo España, 0 contaminación internacional ✅
+- **Filtros de calidad**: Rating ≥4.7, ≥50 reseñas ✅
+- **Logs**: Ilimitados para procesos largos ✅
+- **Continuidad**: Proceso completo sin bloqueos ✅
+
+---
+
 ## [2.0.0 - BETA 2.0] - 12 de Octubre de 2025
 
 ### 🎉 **BETA 2.0 - Lanzamiento Mayor**
@@ -102,87 +208,5 @@ Esta versión representa un salto cualitativo en la plataforma, enfocándose en 
 
 ---
 
-### 🏷️ **Página de Detalle**
-- ✅ **Categoría visible** con icono 🏷️ y badge translúcido
-
----
-
-### 🐛 **Correcciones Críticas**
-
-#### ❌ **Error "places is not defined"**
-- ✅ Eliminadas referencias a variable inexistente
-- ✅ Logs actualizados
-- ✅ Chatbot funciona sin errores
-
-#### 🔄 **Error de Hidratación**
-- ✅ Renderizado simplificado con `dangerouslySetInnerHTML`
-- ✅ Evita conflictos servidor-cliente
-
-#### ⚙️ **Variables de Entorno**
-- ✅ Archivo `.env.local` creado con todas las API keys
-
----
-
-### 📁 **Archivos SQL Creados**
-
-Scripts para actualizar el prompt del chatbot en Supabase:
-- `supabase/20-update-prompt-coherente.sql`
-- `supabase/21-prompt-alrededores-optimizado.sql`
-- `supabase/22-prompt-con-enlaces-y-datos.sql`
-- `supabase/23-prompt-completo-final.sql` ⭐ **Usar este (incluye todo)**
-
----
-
-### 📖 **Documentación Nueva**
-
-- `CHATBOT_TIO_VIAJERO.md` - Guía completa del chatbot
-- `ESTADO_ACTUAL_PROYECTO.md` - Estado completo actualizado
-- `LEEME_PRIMERO.md` - Punto de entrada para nuevos desarrolladores
-- `INDICE_DOCUMENTACION.md` - Índice maestro
-- `RESUMEN_SESION_12_OCT.md` - Resumen de la sesión
-- `supabase/MEJORAS_ALREDEDORES_AFUERAS.md`
-- `supabase/MEJORAS_ENLACES_Y_CONTACTO.md`
-
----
-
-### 🚫 **Características Eliminadas**
-
-- ❌ **Sección de Listas** (`/listas`) - Protección de base de datos
-
-**Razón**: Prevenir scraping/copia masiva de la base de datos. 
-Los usuarios ahora usan:
-- 🗺️ Mapa (exploración visual limitada)
-- 🧭 Rutas (búsqueda puntual)
-- 🤖 Chatbot (recomendaciones específicas)
-
----
-
-### 📊 **Estadísticas BETA 2.0**
-
-- **Lugares indexados:** 3,547
-- **Rating promedio:** 4.8★
-- **Provincias cubiertas:** 50+
-- **Categorías:** 6 (restaurante, hotel, spa, bar, experiencia, monumento)
-- **Tiers de calidad:** 6 niveles
-- **Páginas principales:** 5 (Home, Mapa, Rutas, Metodología, Pricing)
-- **APIs creadas:** 20+
-- **Archivos .md:** 10+ actualizados
-
----
-
-## [1.1.0] - 12 de Octubre de 2025
-
-### ✨ **Mejoras del Chatbot "Tío Viajero"**
-(Ver detalles en versión anterior)
-
----
-
-## [1.0.0] - 11 de Octubre de 2025
-
-### ✨ Características Implementadas
-(Ver detalles en versión anterior)
-
----
-
-**Última actualización:** 12 de Octubre de 2025, 23:55h  
-**Estado:** BETA 2.0 - Lista para testing extensivo y preparación para producción ✅
+**Última actualización:** 15 de Octubre de 2025, 22:30h  
+**Estado:** BETA 10 - Sistema de indexación profesional optimizado ✅

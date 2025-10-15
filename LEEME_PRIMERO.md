@@ -2,9 +2,9 @@
 
 ## 👋 **¡Bienvenido!**
 
-**Versión:** 2.1.0  
-**Fecha:** 14 de Octubre de 2025  
-**Estado:** 🟢 PRODUCCIÓN - TODO FUNCIONAL
+**Versión:** BETA 10  
+**Fecha:** 15 de Octubre de 2025  
+**Estado:** 🟢 PRODUCCIÓN - Sistema de Indexación Optimizado
 
 ---
 
