@@ -344,7 +344,21 @@ export async function startFastIndexation(
   const supabase = createAdminClient();
   const logger = new IndexationLogger(jobId);
 
-  await logger.info('🚀 Indexación rápida iniciada');
+  // Obtener el estado actual del trabajo para ver si es una reanudación
+  const { data: currentJob } = await supabase
+    .from('indexation_jobs')
+    .select('*')
+    .eq('id', jobId)
+    .single();
+
+  const isResume = currentJob?.status === 'paused';
+  
+  if (isResume) {
+    await logger.info('🔄 Reanudando indexación desde donde se quedó...');
+  } else {
+    await logger.info('🚀 Indexación rápida iniciada');
+  }
+  
   await logger.info(`Provincias: ${params.provinces.join(', ')}`);
   await logger.info(`Categorías: ${params.categories.join(', ')}`);
   await logger.info(`Rating mínimo: ${params.minRating}`);
@@ -354,7 +368,7 @@ export async function startFastIndexation(
       .from('indexation_jobs')
       .update({ 
         status: 'running', 
-        started_at: new Date().toISOString(),
+        started_at: isResume ? currentJob.started_at : new Date().toISOString(),
         should_continue: true // Asegurar que comienza en true
       })
       .eq('id', jobId);
@@ -362,13 +376,17 @@ export async function startFastIndexation(
     const allPlaceIds = new Set<string>();
     const processedIds = new Set<string>();
     
-    let totalProcessed = 0;
-    let approved = 0;
-    let lowRating = 0;
-    let lowReviews = 0;
-    let chains = 0;
-    let duplicates = 0;
-    let errors = 0;
+    // Recuperar contadores si es una reanudación
+    let totalProcessed = isResume ? (currentJob.processed_places || 0) : 0;
+    let approved = isResume ? (currentJob.successful_places || 0) : 0;
+    let lowRating = isResume ? (currentJob.error_log?.lowRating || 0) : 0;
+    let lowReviews = isResume ? (currentJob.error_log?.lowReviews || 0) : 0;
+    let chains = isResume ? (currentJob.error_log?.chains || 0) : 0;
+    let duplicates = isResume ? (currentJob.error_log?.duplicates || 0) : 0;
+    let errors = isResume ? (currentJob.failed_places || 0) : 0;
+
+    // Recuperar progreso de provincias/ciudades procesadas si es reanudación
+    const processedProgress = isResume ? (currentJob.progress_state || {}) : {};
 
     // Ciudades principales por provincia (COBERTURA COMPLETA - Todas las provincias españolas)
     const mainCities: Record<string, string[]> = {
@@ -478,7 +496,20 @@ export async function startFastIndexation(
         return;
       }
 
+      // Verificar si esta provincia ya fue completamente procesada
+      const provinceKey = `province_${province}`;
+      if (processedProgress[provinceKey] === 'completed') {
+        await logger.info(`⏭️ Saltando ${province} - ya procesada completamente`);
+        continue;
+      }
+
       for (const category of params.categories) {
+        // Verificar si esta combinación provincia-categoría ya fue procesada
+        const categoryKey = `${provinceKey}_${category}`;
+        if (processedProgress[categoryKey] === 'completed') {
+          await logger.info(`⏭️ Saltando ${province} - ${category} - ya procesada`);
+          continue;
+        }
         try {
           // SOLO 4 CATEGORÍAS PERMITIDAS
           const searchTerms: Record<string, string> = {
@@ -496,6 +527,13 @@ export async function startFastIndexation(
 
         for (let i = 0; i < cities.length; i++) {
           const city = cities[i];
+          
+          // Verificar si esta ciudad ya fue procesada
+          const cityKey = `${categoryKey}_city_${city}`;
+          if (processedProgress[cityKey] === 'completed') {
+            await logger.info(`⏭️ Saltando ${city} - ya procesada`);
+            continue;
+          }
           
           // Verificar si debe continuar cada 3 ciudades
           if (i % 3 === 0 && !await shouldContinueJob(jobId, supabase)) {
@@ -652,9 +690,15 @@ export async function startFastIndexation(
 
             await logger.info(`   📊 Total ${city}: ${cityProcessed} procesados, ${citySaved} guardados, ${cityDiscarded} descartados`);
 
+            // Marcar esta ciudad como completada en el progreso
+            processedProgress[cityKey] = 'completed';
+
             await supabase
               .from('indexation_jobs')
-              .update({ total_places: allPlaceIds.size })
+              .update({ 
+                total_places: allPlaceIds.size,
+                progress_state: processedProgress // Guardar progreso
+              })
               .eq('id', jobId);
 
             await new Promise(r => setTimeout(r, 200));
@@ -666,11 +710,29 @@ export async function startFastIndexation(
 
         await logger.success(`✅ ${category}: ${allPlaceIds.size} lugares únicos acumulados`);
         
+        // Marcar esta categoría como completada
+        processedProgress[categoryKey] = 'completed';
+        
+        // Actualizar progreso en BD
+        await supabase
+          .from('indexation_jobs')
+          .update({ progress_state: processedProgress })
+          .eq('id', jobId);
+        
         } catch (categoryError: any) {
           await logger.error(`❌ Error fatal en ${province} - ${category}: ${categoryError.message}`);
           // Continuar con la siguiente categoría aunque falle una
         }
       }
+      
+      // Marcar esta provincia como completada
+      processedProgress[provinceKey] = 'completed';
+      
+      // Actualizar progreso en BD
+      await supabase
+        .from('indexation_jobs')
+        .update({ progress_state: processedProgress })
+        .eq('id', jobId);
     }
 
     // Finalizar

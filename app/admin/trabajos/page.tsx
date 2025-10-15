@@ -11,12 +11,14 @@ import { Button } from '@/components/ui/Button';
 import { formatDate } from '@/lib/utils/formatters';
 import { Trash2, ChevronDown, ChevronUp } from 'lucide-react';
 import { toast } from 'sonner';
+import { LiveJobProgress } from '@/components/admin/LiveJobProgress';
 
 export default function TrabajosPage() {
   const [jobs, setJobs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [resuming, setResuming] = useState<string | null>(null);
   const [expandedLogs, setExpandedLogs] = useState<Set<string>>(new Set());
+  const [activeJobId, setActiveJobId] = useState<string | null>(null);
 
   useEffect(() => {
     loadJobs();
@@ -29,6 +31,17 @@ export default function TrabajosPage() {
       
       if (data.success) {
         setJobs(data.jobs || []);
+        
+        // Detectar si hay un trabajo activo (running o paused)
+        const activeJob = data.jobs?.find((job: any) => 
+          job.status === 'running' || job.status === 'paused'
+        );
+        
+        if (activeJob) {
+          setActiveJobId(activeJob.id);
+        } else {
+          setActiveJobId(null);
+        }
       }
     } catch (error) {
       console.error('Error cargando trabajos:', error);
@@ -139,6 +152,14 @@ export default function TrabajosPage() {
     });
   };
 
+  const handleActiveJobStatusChange = (newStatus: string) => {
+    // Si el trabajo activo cambió a completado/fallido/cancelado, recargar la lista
+    if (['completed', 'failed', 'cancelled'].includes(newStatus)) {
+      setActiveJobId(null);
+      loadJobs(); // Recargar para actualizar la lista
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     const variants: Record<string, any> = {
       completed: 'success',
@@ -197,8 +218,18 @@ export default function TrabajosPage() {
       </div>
 
       <div className="space-y-4">
+        {/* Progreso en vivo para trabajos activos */}
+        {activeJobId && (
+          <LiveJobProgress 
+            jobId={activeJobId} 
+            onStatusChange={handleActiveJobStatusChange}
+          />
+        )}
+
         {jobs.length > 0 ? (
-          jobs.map((job) => (
+          jobs
+            .filter(job => job.id !== activeJobId) // Excluir trabajo activo de la lista normal
+            .map((job) => (
             <Card key={job.id}>
               <CardContent>
                 <div className="flex items-start justify-between mb-4">
@@ -381,6 +412,15 @@ export default function TrabajosPage() {
             </Card>
           ))
         ) : (
+          <div className="text-center py-12 text-gray-500">
+            <div className="text-4xl mb-4">📋</div>
+            <p>No hay trabajos registrados</p>
+            <p className="text-sm mt-2">Los trabajos de indexación aparecerán aquí</p>
+          </div>
+        )}
+
+        {/* Mostrar mensaje si no hay trabajos y tampoco hay trabajo activo */}
+        {jobs.length === 0 && !activeJobId && (
           <div className="text-center py-12 text-gray-500">
             <div className="text-4xl mb-4">📋</div>
             <p>No hay trabajos registrados</p>
