@@ -492,7 +492,7 @@ export default function RutaPage() {
               <Button 
                 onClick={calculateRoute}
                 disabled={calculating || !origin || !destination}
-                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                className="w-full bg-[#ffd935] hover:bg-[#e6c430] text-[#002196] font-bold"
               >
                 {calculating ? (
                   <>
