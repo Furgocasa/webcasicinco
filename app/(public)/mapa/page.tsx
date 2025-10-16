@@ -57,15 +57,15 @@ const mapContainerStyle = {
   height: '100%',
 };
 
-// Centro de España para vista inicial (Madrid - Península centrada)
+// Centro de España para vista inicial (más al norte para mejor vista del norte de España)
 const defaultCenter = {
-  lat: 41.8,  // Más al norte para mostrar mejor el norte de España y menos Marruecos
+  lat: 40.0,  // Centrado para ver toda la península con énfasis en el norte
   lng: -3.7038,  // Madrid
 };
 
 // Límites del mapa para mantener vista en España (incluyendo Canarias y Baleares)
 const SPAIN_BOUNDS = {
-  north: 44.0,    // Norte de Galicia
+  north: 44.5,    // Más al norte para ver mejor Galicia, Asturias, País Vasco
   south: 27.5,    // Sur de Canarias (El Hierro)
   west: -18.5,    // Oeste de Canarias (La Palma)
   east: 4.5,      // Este de Baleares (Menorca)
@@ -99,7 +99,7 @@ export default function MapPage() {
   // Vista móvil: 'map', 'filters', 'list'
   const [mobileView, setMobileView] = useState<'map' | 'filters' | 'list'>('map');
   const [mapCenter, setMapCenter] = useState(defaultCenter);
-  const [mapZoom, setMapZoom] = useState(6); // Zoom enfocado en península (Canarias visible si haces scroll)
+  const [mapZoom, setMapZoom] = useState(6.2); // Zoom enfocado en península con mejor vista del norte
   const [showVisitModal, setShowVisitModal] = useState(false);
   const [visitNotes, setVisitNotes] = useState('');
   const [visitRating, setVisitRating] = useState(0);
