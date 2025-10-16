@@ -22,6 +22,7 @@ import { generateSearchStrategy, getStrategyDescription } from './search-strateg
 interface IndexationParams {
   provinces: string[];
   categories: string[];
+  cities?: string[]; // 🆕 Ciudades específicas (opcional)
   minRating: number;
 }
 
