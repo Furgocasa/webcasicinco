@@ -509,3 +509,23 @@ export function getCityData(province: string, cityName: string): CityData | null
   return cities.find(c => c.name === cityName) || null;
 }
 
+/**
+ * Obtener TODAS las ciudades de TODAS las provincias
+ * Útil para selector independiente de ciudades
+ */
+export function getAllCities(): (CityData & { province: string })[] {
+  const allCities: (CityData & { province: string })[] = [];
+  
+  Object.entries(CITIES_BY_PROVINCE).forEach(([province, provinceData]) => {
+    provinceData.cities.forEach(city => {
+      allCities.push({
+        ...city,
+        province: province,
+      });
+    });
+  });
+  
+  // Ordenar por población descendente
+  return allCities.sort((a, b) => b.population - a.population);
+}
+

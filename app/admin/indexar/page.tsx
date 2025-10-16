@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/Badge';
 import { PROVINCES, PLACE_CATEGORIES } from '@/lib/utils/constants';
 import { toast } from 'sonner';
 import { IndexationModal } from '@/components/admin/IndexationModal';
-import { CitySelector } from '@/components/admin/CitySelector';
+import { CityMultiSelector } from '@/components/admin/CityMultiSelector';
 
 export default function IndexarPage() {
   // Título del navegador
@@ -205,16 +205,13 @@ export default function IndexarPage() {
             </CardContent>
           </Card>
 
-          {/* 🆕 Selector de ciudades (solo si hay una provincia seleccionada) */}
-          {selectedProvinces.length === 1 && (
-            <div className="mt-6">
-              <CitySelector
-                province={selectedProvinces[0]}
-                selectedCities={selectedCities}
-                onCitiesChange={setSelectedCities}
-              />
-            </div>
-          )}
+          {/* 🆕 Selector de ciudades (siempre visible, independiente) */}
+          <div className="mt-6">
+            <CityMultiSelector
+              selectedCities={selectedCities}
+              onCitiesChange={setSelectedCities}
+            />
+          </div>
         </div>
 
         {/* Información del proceso */}
