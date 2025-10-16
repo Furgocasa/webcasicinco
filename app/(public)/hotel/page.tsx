@@ -102,7 +102,7 @@ export default function HotelPage() {
                       >
                         <div className="grid md:grid-cols-3 gap-0">
                           {/* Foto */}
-                          <div className="relative md:col-span-1 h-64 md:h-auto">
+                          <div className="relative md:col-span-1 h-64 md:h-80">
                             {photoUrl ? (
                               <img
                                 src={photoUrl}
