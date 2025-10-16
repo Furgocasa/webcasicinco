@@ -4,6 +4,8 @@ import { Toaster } from 'sonner';
 import Header from '@/components/layout/Header';
 import ChatbotFloating from '@/components/ChatbotFloating';
 import PlacesPreloader from '@/components/PlacesPreloader';
+import GoogleAnalytics from '@/components/GoogleAnalytics';
+import PageTracker from '@/components/PageTracker';
 import './globals.css';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
@@ -66,6 +68,9 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
+  verification: {
+    google: 'google-site-verification-code', // Reemplazar con el código real de Search Console
+  },
   icons: {
     icon: '/favicon.ico',
     shortcut: '/favicon-16x16.png',
@@ -81,7 +86,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es" className={inter.variable}>
+      <head>
+        <GoogleAnalytics />
+      </head>
       <body className={inter.className}>
+        <PageTracker />
         <PlacesPreloader />
         <Header />
         <main>
