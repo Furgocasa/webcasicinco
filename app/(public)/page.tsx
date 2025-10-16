@@ -70,7 +70,7 @@ export default function HomePage() {
     <>
       <main className="min-h-screen">
         {/* HERO SECTION - EL GANCHO */}
-        <section className="relative bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 text-white overflow-hidden">
+        <section className="relative bg-[#002196] text-white overflow-hidden">
           {/* Decorative background */}
           <div className="absolute inset-0 bg-black opacity-10"></div>
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
@@ -79,7 +79,7 @@ export default function HomePage() {
             <div className="max-w-4xl mx-auto text-center">
               {/* Badge */}
               <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-3 md:px-4 py-1.5 md:py-2 rounded-full mb-6 md:mb-8 animate-fade-in">
-                <Star className="h-3 md:h-4 w-3 md:w-4 fill-yellow-300 text-yellow-300" />
+                <Star className="h-3 md:h-4 w-3 md:w-4 fill-[#ffd935] text-[#ffd935]" />
                 <span className="text-xs md:text-sm font-medium">Solo lugares excepcionales +4.7★</span>
               </div>
 
@@ -87,7 +87,7 @@ export default function HomePage() {
               <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold mb-4 md:mb-6 leading-tight animate-slide-up">
                 Acaba con las
                 <br />
-                <span className="bg-clip-text text-transparent bg-gradient-to-r from-yellow-300 to-orange-300">
+                <span className="text-[#ffd935]">
                   Experiencias Mediocres
                 </span>
               </h1>
@@ -113,7 +113,7 @@ export default function HomePage() {
                   </div>
                   <Button 
                     onClick={handleSearch}
-                    className="h-12 md:h-auto text-base md:text-lg bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 md:px-8 w-full sm:w-auto"
+                    className="h-12 md:h-auto text-base md:text-lg bg-[#ffd935] hover:bg-[#e6c430] text-[#002196] font-bold px-6 md:px-8 w-full sm:w-auto"
                   >
                     Buscar
                   </Button>
@@ -127,11 +127,11 @@ export default function HomePage() {
                   <span>{stats.totalPlaces.toLocaleString('es-ES')}+ lugares verificados</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Star className="h-5 w-5 text-yellow-300 fill-yellow-300" />
+                  <Star className="h-5 w-5 text-[#ffd935] fill-[#ffd935]" />
                   <span>Solo 4.7★ o más</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Award className="h-5 w-5 text-purple-300" />
+                  <Award className="h-5 w-5 text-[#ffd935]" />
                   <span>{stats.topTierPlaces}+ lugares excepcionales</span>
                 </div>
               </div>
@@ -141,7 +141,7 @@ export default function HomePage() {
           {/* Wave separator */}
           <div className="absolute bottom-0 left-0 right-0">
             <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M0 120L60 105C120 90 240 60 360 45C480 30 600 30 720 37.5C840 45 960 60 1080 67.5C1200 75 1320 75 1380 75L1440 75V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z" fill="white"/>
+              <path d="M0 120L60 105C120 90 240 60 360 45C480 30 600 30 720 37.5C840 45 960 60 1080 67.5C1200 75 1320 75 1380 75L1440 75V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z" fill="#F9FAFB"/>
             </svg>
           </div>
         </section>
@@ -251,7 +251,7 @@ export default function HomePage() {
         </section>
 
         {/* DIFERENCIADORES CLAVE */}
-        <section className="py-20 bg-gray-50">
+        <section className="py-20 bg-white">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
@@ -264,8 +264,8 @@ export default function HomePage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 max-w-7xl mx-auto">
               {/* Feature 1 */}
-              <Card className="p-6 hover:shadow-lg transition-shadow">
-                <div className="bg-gradient-to-br from-purple-500 to-pink-500 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+              <Card className="p-6 hover:shadow-xl transition-shadow border-2 border-gray-100 hover:border-[#ffd935]">
+                <div className="bg-[#002196] w-12 h-12 rounded-lg flex items-center justify-center mb-4">
                   <Shield className="h-6 w-6 text-white" />
                 </div>
                 <h3 className="text-lg font-bold text-gray-900 mb-2">
@@ -277,8 +277,8 @@ export default function HomePage() {
               </Card>
 
               {/* Feature 2 */}
-              <Card className="p-6 hover:shadow-lg transition-shadow">
-                <div className="bg-gradient-to-br from-blue-500 to-cyan-500 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+              <Card className="p-6 hover:shadow-xl transition-shadow border-2 border-gray-100 hover:border-[#ffd935]">
+                <div className="bg-[#002196] w-12 h-12 rounded-lg flex items-center justify-center mb-4">
                   <TrendingUp className="h-6 w-6 text-white" />
                 </div>
                 <h3 className="text-lg font-bold text-gray-900 mb-2">
@@ -290,8 +290,8 @@ export default function HomePage() {
               </Card>
 
               {/* Feature 3 */}
-              <Card className="p-6 hover:shadow-lg transition-shadow">
-                <div className="bg-gradient-to-br from-green-500 to-emerald-500 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+              <Card className="p-6 hover:shadow-xl transition-shadow border-2 border-gray-100 hover:border-[#ffd935]">
+                <div className="bg-[#002196] w-12 h-12 rounded-lg flex items-center justify-center mb-4">
                   <Sparkles className="h-6 w-6 text-white" />
                 </div>
                 <h3 className="text-lg font-bold text-gray-900 mb-2">
@@ -303,8 +303,8 @@ export default function HomePage() {
               </Card>
 
               {/* Feature 4 */}
-              <Card className="p-6 hover:shadow-lg transition-shadow">
-                <div className="bg-gradient-to-br from-orange-500 to-red-500 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+              <Card className="p-6 hover:shadow-xl transition-shadow border-2 border-gray-100 hover:border-[#ffd935]">
+                <div className="bg-[#002196] w-12 h-12 rounded-lg flex items-center justify-center mb-4">
                   <Zap className="h-6 w-6 text-white" />
                 </div>
                 <h3 className="text-lg font-bold text-gray-900 mb-2">
@@ -332,13 +332,13 @@ export default function HomePage() {
 
             <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
               {/* Plan Trial */}
-              <Card className="border-2 border-gray-200 p-6 hover:shadow-xl transition">
+              <Card className="border-2 border-gray-200 p-6 hover:shadow-xl transition hover:border-[#d6d8d7]">
                 <div className="text-center mb-6">
-                  <div className="inline-block p-3 bg-blue-100 rounded-full mb-4">
-                    <Clock className="h-8 w-8 text-blue-600" />
+                  <div className="inline-block p-3 bg-gray-100 rounded-full mb-4">
+                    <Clock className="h-8 w-8 text-gray-600" />
                   </div>
                   <h3 className="text-2xl font-bold text-gray-900 mb-2">Prueba Gratis</h3>
-                  <div className="text-4xl font-bold text-blue-600 mb-2">0€</div>
+                  <div className="text-4xl font-bold text-[#002196] mb-2">0€</div>
                   <p className="text-gray-600">30 días completos</p>
                 </div>
                 <ul className="space-y-3 mb-6">
@@ -369,13 +369,13 @@ export default function HomePage() {
               </Card>
 
               {/* Plan Mensual */}
-              <Card className="border-2 border-indigo-200 p-6 hover:shadow-xl transition">
+              <Card className="border-2 border-[#002196]/30 p-6 hover:shadow-xl transition hover:border-[#002196]">
                 <div className="text-center mb-6">
-                  <div className="inline-block p-3 bg-indigo-100 rounded-full mb-4">
-                    <Zap className="h-8 w-8 text-indigo-600" />
+                  <div className="inline-block p-3 bg-blue-50 rounded-full mb-4">
+                    <Zap className="h-8 w-8 text-[#002196]" />
                   </div>
                   <h3 className="text-2xl font-bold text-gray-900 mb-2">Premium Mensual</h3>
-                  <div className="text-4xl font-bold text-indigo-600 mb-2">2,99€</div>
+                  <div className="text-4xl font-bold text-[#002196] mb-2">2,99€</div>
                   <p className="text-gray-600">por mes</p>
                 </div>
                 <ul className="space-y-3 mb-6">
@@ -398,27 +398,27 @@ export default function HomePage() {
                 </ul>
                 <Button 
                   onClick={() => router.push('/pricing?plan=monthly')}
-                  className="w-full bg-indigo-600 hover:bg-indigo-700"
+                  className="w-full bg-[#002196] hover:bg-[#001570] text-white"
                 >
                   Suscribirse
                 </Button>
               </Card>
 
               {/* Plan Anual - DESTACADO */}
-              <Card className="border-2 border-purple-400 bg-gradient-to-br from-purple-50 to-white p-6 hover:shadow-2xl transition relative">
+              <Card className="border-2 border-[#ffd935] bg-gradient-to-br from-yellow-50 to-white p-6 hover:shadow-2xl transition relative">
                 {/* Badge de ahorro */}
                 <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <div className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-4 py-1 rounded-full text-sm font-bold shadow-lg">
+                  <div className="bg-[#ffd935] text-[#002196] px-4 py-1 rounded-full text-sm font-bold shadow-lg">
                     ¡Ahorra 30%!
                   </div>
                 </div>
                 
                 <div className="text-center mb-6 mt-2">
-                  <div className="inline-block p-3 bg-purple-100 rounded-full mb-4">
-                    <Crown className="h-8 w-8 text-purple-600" />
+                  <div className="inline-block p-3 bg-[#ffd935]/20 rounded-full mb-4">
+                    <Crown className="h-8 w-8 text-[#002196]" />
                   </div>
                   <h3 className="text-2xl font-bold text-gray-900 mb-2">Premium Anual</h3>
-                  <div className="text-4xl font-bold text-purple-600 mb-2">24,99€</div>
+                  <div className="text-4xl font-bold text-[#002196] mb-2">24,99€</div>
                   <p className="text-gray-600">por año · Solo 2,08€/mes</p>
                 </div>
                 <ul className="space-y-3 mb-6">
@@ -441,7 +441,7 @@ export default function HomePage() {
                 </ul>
                 <Button 
                   onClick={() => router.push('/pricing?plan=yearly')}
-                  className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 shadow-lg"
+                  className="w-full bg-[#002196] hover:bg-[#001570] text-white shadow-lg"
                 >
                   Mejor Valor
                 </Button>
@@ -505,7 +505,7 @@ export default function HomePage() {
                 </Card>
 
                 {/* Testimonial 2 */}
-                <Card className="p-6 hover:shadow-lg transition-shadow border-2 border-purple-200">
+                <Card className="p-6 hover:shadow-lg transition-shadow border-2 border-[#ffd935]">
                   <div className="flex items-center gap-1 mb-4">
                     {[...Array(5)].map((_, i) => (
                       <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
@@ -515,8 +515,8 @@ export default function HomePage() {
                     "Ya no pierdo tiempo leyendo reseñas. <strong>Solo lugares increíbles</strong>. El filtro de 4.7★ es genial."
                   </p>
                   <div className="flex items-center gap-3">
-                    <div className="bg-blue-100 w-10 h-10 rounded-full flex items-center justify-center">
-                      <span className="text-sm font-bold text-blue-600">CM</span>
+                    <div className="bg-[#002196] w-10 h-10 rounded-full flex items-center justify-center">
+                      <span className="text-sm font-bold text-white">CM</span>
                     </div>
                     <div>
                       <p className="font-semibold text-gray-900">Carlos M.</p>
@@ -567,9 +567,9 @@ export default function HomePage() {
 
               {/* Algoritmo en 3 pasos */}
               <div className="grid md:grid-cols-3 gap-8 mb-16">
-                <Card className="p-6 text-center hover:shadow-lg transition">
-                  <div className="bg-indigo-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <span className="text-3xl font-bold text-indigo-600">1</span>
+                <Card className="p-6 text-center hover:shadow-xl transition border-2 border-gray-100 hover:border-[#ffd935]">
+                  <div className="bg-[#002196] w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span className="text-3xl font-bold text-white">1</span>
                   </div>
                   <h3 className="text-xl font-bold text-gray-900 mb-2">Rating 4.7★+</h3>
                   <p className="text-gray-600">
@@ -577,9 +577,9 @@ export default function HomePage() {
                   </p>
                 </Card>
 
-                <Card className="p-6 text-center hover:shadow-lg transition">
-                  <div className="bg-indigo-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <span className="text-3xl font-bold text-indigo-600">2</span>
+                <Card className="p-6 text-center hover:shadow-xl transition border-2 border-gray-100 hover:border-[#ffd935]">
+                  <div className="bg-[#002196] w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span className="text-3xl font-bold text-white">2</span>
                   </div>
                   <h3 className="text-xl font-bold text-gray-900 mb-2">Validación Masiva</h3>
                   <p className="text-gray-600">
@@ -587,9 +587,9 @@ export default function HomePage() {
                   </p>
                 </Card>
 
-                <Card className="p-6 text-center hover:shadow-lg transition">
-                  <div className="bg-indigo-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <span className="text-3xl font-bold text-indigo-600">3</span>
+                <Card className="p-6 text-center hover:shadow-xl transition border-2 border-gray-100 hover:border-[#ffd935]">
+                  <div className="bg-[#002196] w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span className="text-3xl font-bold text-white">3</span>
                   </div>
                   <h3 className="text-xl font-bold text-gray-900 mb-2">IA Analiza</h3>
                   <p className="text-gray-600">
@@ -605,28 +605,28 @@ export default function HomePage() {
                 </h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
                   <div>
-                    <div className="text-4xl md:text-5xl font-bold text-indigo-600 mb-2">
+                    <div className="text-4xl md:text-5xl font-bold text-[#002196] mb-2">
                       {stats.totalPlaces.toLocaleString('es-ES')}
                     </div>
                     <p className="text-gray-600 text-sm">Lugares verificados</p>
                   </div>
 
                   <div>
-                    <div className="text-4xl md:text-5xl font-bold text-indigo-600 mb-2">
+                    <div className="text-4xl md:text-5xl font-bold text-[#002196] mb-2">
                       {stats.avgRating}★
                     </div>
                     <p className="text-gray-600 text-sm">Rating promedio</p>
                   </div>
 
                   <div>
-                    <div className="text-4xl md:text-5xl font-bold text-indigo-600 mb-2">
+                    <div className="text-4xl md:text-5xl font-bold text-[#002196] mb-2">
                       {stats.provincesCount}
                     </div>
                     <p className="text-gray-600 text-sm">Provincias</p>
                   </div>
 
                   <div>
-                    <div className="text-4xl md:text-5xl font-bold text-indigo-600 mb-2">
+                    <div className="text-4xl md:text-5xl font-bold text-[#002196] mb-2">
                       {(stats.totalReviews / 1000).toFixed(0)}K+
                     </div>
                     <p className="text-gray-600 text-sm">Reseñas analizadas</p>
@@ -639,7 +639,7 @@ export default function HomePage() {
                 <Button 
                   variant="outline"
                   onClick={() => router.push('/metodologia')}
-                  className="text-indigo-600 border-indigo-600 hover:bg-indigo-50"
+                  className="text-[#002196] border-[#002196] hover:bg-blue-50"
                 >
                   Conocer Nuestra Metodología Completa
                   <ArrowRight className="ml-2 h-5 w-5" />
@@ -650,7 +650,7 @@ export default function HomePage() {
         </section>
 
         {/* CTA FINAL SIMPLIFICADO */}
-        <section className="py-20 bg-gradient-to-br from-indigo-600 to-purple-600 text-white">
+        <section className="py-20 bg-[#002196] text-white">
           <div className="container mx-auto px-4 text-center">
             <div className="max-w-3xl mx-auto">
               <h2 className="text-4xl md:text-5xl font-bold mb-6">
@@ -665,7 +665,7 @@ export default function HomePage() {
                 <Button 
                   size="lg" 
                   onClick={() => router.push('/registro')}
-                  className="bg-white text-indigo-600 hover:bg-gray-100 font-bold text-lg px-10 py-6 shadow-2xl"
+                  className="bg-[#ffd935] text-[#002196] hover:bg-[#e6c430] font-bold text-lg px-10 py-6 shadow-2xl"
                 >
                   Probar Gratis 30 Días
                   <ArrowRight className="ml-2 h-5 w-5" />
