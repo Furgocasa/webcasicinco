@@ -91,7 +91,7 @@ export function generateSearchStrategy(
     for (let i = 0; i < subCategories.length; i++) {
       searches.push({
         type: 'text',
-        query: `${subCategories[i]} ${name}, ${province}`,
+        query: `${subCategories[i]} ${name}, ${province}, España`,
         description: `${subCategories[i]} en ${name}`,
       });
     }
@@ -114,7 +114,7 @@ export function generateSearchStrategy(
     for (let i = 0; i < mainSubCategories.length; i++) {
       searches.push({
         type: 'text',
-        query: `${mainSubCategories[i]} ${name}, ${province}`,
+        query: `${mainSubCategories[i]} ${name}, ${province}, España`,
         description: `${mainSubCategories[i]} en ${name}`,
       });
     }
@@ -136,7 +136,7 @@ export function generateSearchStrategy(
   for (let i = 0; i < smallCitySubCategories.length; i++) {
     searches.push({
       type: 'text',
-      query: `${smallCitySubCategories[i]} ${name}, ${province}`,
+      query: `${smallCitySubCategories[i]} ${name}, ${province}, España`,
       description: `${smallCitySubCategories[i]} en ${name}`,
     });
   }

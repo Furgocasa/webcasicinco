@@ -541,6 +541,19 @@ export async function startFastIndexation(
             await logger.info(`📍 ${province}: ${cities.length} ciudades desde Supabase`);
           }
 
+          // 🆕 FILTRAR por ciudades seleccionadas si vienen en params
+          if (params.cities && params.cities.length > 0) {
+            const selectedCityNames = params.cities;
+            const beforeFilter = cities.length;
+            cities = cities.filter(c => selectedCityNames.includes(c.name));
+            await logger.info(`🎯 Filtro de ciudades: ${beforeFilter} → ${cities.length} ciudades seleccionadas`);
+            
+            if (cities.length === 0) {
+              await logger.warning(`⚠️ No hay ciudades seleccionadas válidas para ${province}, saltando...`);
+              continue;
+            }
+          }
+
           await logger.info(`📍 ${province} - ${category.toUpperCase()}`);
           await logger.info(`   ${cities.length} ciudades a procesar con estrategia dinámica`);
 

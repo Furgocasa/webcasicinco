@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/Badge';
 import { PROVINCES, PLACE_CATEGORIES } from '@/lib/utils/constants';
 import { toast } from 'sonner';
 import { IndexationModal } from '@/components/admin/IndexationModal';
+import { CitySelector } from '@/components/admin/CitySelector';
 
 export default function IndexarPage() {
   // Título del navegador
@@ -20,6 +21,7 @@ export default function IndexarPage() {
 
   const [selectedProvinces, setSelectedProvinces] = useState<string[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedCities, setSelectedCities] = useState<string[]>([]); // 🆕 Ciudades seleccionadas
   const [minRating, setMinRating] = useState('4.7');
   const [isIndexing, setIsIndexing] = useState(false);
   const [jobId, setJobId] = useState<string | null>(null);
@@ -51,6 +53,7 @@ export default function IndexarPage() {
         body: JSON.stringify({
           provinces: selectedProvinces,
           categories: selectedCategories,
+          cities: selectedCities.length > 0 ? selectedCities : undefined, // 🆕 Enviar ciudades si están seleccionadas
           minRating: parseFloat(minRating),
         }),
       });
@@ -201,6 +204,17 @@ export default function IndexarPage() {
               </div>
             </CardContent>
           </Card>
+
+          {/* 🆕 Selector de ciudades (solo si hay una provincia seleccionada) */}
+          {selectedProvinces.length === 1 && (
+            <div className="mt-6">
+              <CitySelector
+                province={selectedProvinces[0]}
+                selectedCities={selectedCities}
+                onCitiesChange={setSelectedCities}
+              />
+            </div>
+          )}
         </div>
 
         {/* Información del proceso */}

@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { provinces, categories, minRating } = body;
+    const { provinces, categories, cities, minRating } = body;
 
     // Validar parámetros
     if (!provinces || provinces.length === 0) {
@@ -74,6 +74,7 @@ export async function POST(request: NextRequest) {
         search_params: {
           provinces,
           categories,
+          cities: cities || undefined, // 🆕 Ciudades específicas (opcional)
           minRating: minRating || 4.7,
         },
         total_places: 0,
