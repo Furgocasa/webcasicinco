@@ -4,14 +4,14 @@
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { PROVINCES, PLACE_CATEGORIES } from '@/lib/utils/constants';
 import { toast } from 'sonner';
 import { IndexationModal } from '@/components/admin/IndexationModal';
-import { CityMultiSelector } from '@/components/admin/CityMultiSelector';
+import { getAllCities } from '@/lib/indexation/cities-database';
 
 export default function IndexarPage() {
   // Título del navegador
@@ -19,13 +19,39 @@ export default function IndexarPage() {
     document.title = 'Indexar Lugares - Admin | Casi Cinco';
   }, []);
 
-  const [selectedProvinces, setSelectedProvinces] = useState<string[]>([]);
+  const [selectedCity, setSelectedCity] = useState<string>(''); // UNA ciudad
+  const [selectedProvince, setSelectedProvince] = useState<string>(''); // UNA provincia
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [selectedCities, setSelectedCities] = useState<string[]>([]); // 🆕 Ciudades seleccionadas
+  const [citySearch, setCitySearch] = useState<string>(''); // Búsqueda de ciudad
   const [minRating, setMinRating] = useState('4.7');
   const [isIndexing, setIsIndexing] = useState(false);
   const [jobId, setJobId] = useState<string | null>(null);
-  const [showModal, setShowModal] = useState(false); // 🆕 Control del modal
+  const [showModal, setShowModal] = useState(false);
+
+  // Cargar todas las ciudades
+  const allCities = useMemo(() => getAllCities(), []);
+  
+  // Filtrar ciudades por búsqueda
+  const filteredCities = useMemo(() => {
+    if (!citySearch.trim()) return allCities;
+    const search = citySearch.toLowerCase();
+    return allCities.filter(c => 
+      c.name.toLowerCase().includes(search) ||
+      c.province.toLowerCase().includes(search)
+    );
+  }, [allCities, citySearch]);
+
+  // Cuando se selecciona una ciudad, limpiar provincia
+  const handleCityChange = (city: string) => {
+    setSelectedCity(city);
+    if (city) setSelectedProvince(''); // Limpiar provincia
+  };
+
+  // Cuando se selecciona una provincia, limpiar ciudad
+  const handleProvinceChange = (province: string) => {
+    setSelectedProvince(province);
+    if (province) setSelectedCity(''); // Limpiar ciudad
+  };
 
   // 🆕 Detectar si se debe abrir el modal automáticamente (reanudación desde historial)
   useEffect(() => {
@@ -51,9 +77,9 @@ export default function IndexarPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          provinces: selectedProvinces,
+          provinces: selectedProvince ? [selectedProvince] : [], // 🆕 UNA provincia o ninguna
           categories: selectedCategories,
-          cities: selectedCities.length > 0 ? selectedCities : undefined, // 🆕 Enviar ciudades si están seleccionadas
+          cities: selectedCity ? [selectedCity] : undefined, // 🆕 UNA ciudad o ninguna
           minRating: parseFloat(minRating),
         }),
       });
@@ -89,20 +115,48 @@ export default function IndexarPage() {
               <CardTitle>Configuración</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {/* Provincias */}
+              {/* 🏙️ SELECTOR DE CIUDADES (PRIMERO) */}
               <div>
                 <label className="block text-sm font-medium mb-2">
-                  Provincias
+                  🏙️ Ciudad (opcional)
+                </label>
+                <input
+                  type="text"
+                  placeholder="🔍 Buscar ciudad..."
+                  value={citySearch}
+                  onChange={(e) => setCitySearch(e.target.value)}
+                  className="w-full px-3 py-2 mb-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+                />
+                <select
+                  value={selectedCity}
+                  onChange={(e) => handleCityChange(e.target.value)}
+                  disabled={!!selectedProvince}
+                  className="flex h-32 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                >
+                  <option value="">-- Ninguna --</option>
+                  {filteredCities.map((city) => (
+                    <option key={`${city.province}-${city.name}`} value={city.name}>
+                      {city.name} ({city.province}) - {(city.population / 1000).toFixed(0)}k hab
+                    </option>
+                  ))}
+                </select>
+                <p className="text-xs text-gray-500 mt-1">
+                  {selectedProvince ? '⚠️ Desactiva provincia para seleccionar ciudad' : 'Selecciona UNA ciudad específica'}
+                </p>
+              </div>
+
+              {/* 📍 SELECTOR DE PROVINCIAS (SEGUNDO) */}
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  📍 Provincia (opcional)
                 </label>
                 <select
-                  multiple
-                  value={selectedProvinces}
-                  onChange={(e) => {
-                    const options = Array.from(e.target.selectedOptions);
-                    setSelectedProvinces(options.map(opt => opt.value));
-                  }}
-                  className="flex h-32 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  value={selectedProvince}
+                  onChange={(e) => handleProvinceChange(e.target.value)}
+                  disabled={!!selectedCity}
+                  className="flex h-32 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
                 >
+                  <option value="">-- Ninguna --</option>
                   {PROVINCES.map((province) => (
                     <option key={province} value={province}>
                       {province}
@@ -110,14 +164,14 @@ export default function IndexarPage() {
                   ))}
                 </select>
                 <p className="text-xs text-gray-500 mt-1">
-                  Mantén Ctrl/Cmd para seleccionar múltiples
+                  {selectedCity ? '⚠️ Desactiva ciudad para seleccionar provincia' : 'Selecciona UNA provincia completa'}
                 </p>
               </div>
 
-              {/* Categorías */}
+              {/* 🍽️ CATEGORÍAS (TERCERO) */}
               <div>
                 <label className="block text-sm font-medium mb-2">
-                  Categorías
+                  🍽️ Categorías
                 </label>
                 <select
                   multiple
@@ -126,7 +180,7 @@ export default function IndexarPage() {
                     const options = Array.from(e.target.selectedOptions);
                     setSelectedCategories(options.map(opt => opt.value));
                   }}
-                  className="flex h-32 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  className="flex h-24 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                 >
                   {PLACE_CATEGORIES.map((cat) => (
                     <option key={cat.value} value={cat.value}>
@@ -134,79 +188,62 @@ export default function IndexarPage() {
                     </option>
                   ))}
                 </select>
+                <p className="text-xs text-gray-500 mt-1">
+                  Mantén Ctrl/Cmd para seleccionar múltiples
+                </p>
               </div>
 
-              {/* Rating mínimo */}
+              {/* ⭐ RATING MÍNIMO */}
               <div>
                 <label className="block text-sm font-medium mb-2">
-                  Rating Mínimo
+                  ⭐ Rating Mínimo
                 </label>
                 <select
                   value={minRating}
                   onChange={(e) => setMinRating(e.target.value)}
                   className="flex h-11 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                 >
-                  <option value="4.7">4.7★ o más</option>
+                  <option value="4.7">4.7★ o más (recomendado)</option>
                   <option value="4.8">4.8★ o más</option>
                   <option value="4.9">4.9★ o más</option>
                 </select>
               </div>
 
-              {/* 🆕 Selector de ciudades (dentro de Configuración) */}
-              <div className="pt-4 border-t border-gray-200">
-                <CityMultiSelector
-                  selectedCities={selectedCities}
-                  onCitiesChange={setSelectedCities}
-                />
+              {/* 💡 INFO */}
+              <div className="p-3 bg-blue-50 border border-blue-300 rounded-lg">
+                <p className="text-xs font-bold text-blue-900 mb-1">💡 Reglas:</p>
+                <div className="text-xs text-blue-800 space-y-1">
+                  <p>• Selecciona <strong>CIUDAD</strong> O <strong>PROVINCIA</strong> (no ambas)</p>
+                  <p>• Ciudad = búsqueda específica en esa ciudad</p>
+                  <p>• Provincia = búsqueda en todas sus ciudades</p>
+                </div>
               </div>
-
-              {/* Advertencia para múltiples provincias */}
-              {selectedProvinces.length > 1 && (
-                <div className="p-3 bg-amber-50 border border-amber-300 rounded-lg">
-                  <p className="text-xs text-amber-800">
-                    <strong>⚠️ Recomendación:</strong> Para mejor estabilidad, indexa <strong>UNA provincia a la vez</strong>.
-                    Múltiples provincias pueden tardar 30-90 minutos.
-                  </p>
-                </div>
-              )}
-              
-              {/* 🆕 Info del sistema optimizado */}
-              {selectedProvinces.length > 0 && selectedCategories.length > 0 && (
-                <div className="p-3 bg-blue-50 border border-blue-300 rounded-lg space-y-2">
-                  <p className="text-xs font-bold text-blue-900">
-                    🎯 Sistema Text Search Optimizado por Ciudad
-                  </p>
-                  <div className="text-xs text-blue-800 space-y-1">
-                    <p>✅ Text Search por ciudad (hasta 60 resultados/búsqueda, pausas 10s)</p>
-                    <p>• Ciudades grandes (&gt;200k): <strong>2 búsquedas</strong> (general + calidad)</p>
-                    <p>• Ciudades medianas (50k-200k): <strong>1 búsqueda</strong></p>
-                    <p>• Ciudades pequeñas (&lt;50k): <strong>1 búsqueda</strong></p>
-                    <p className="font-bold text-green-700 pt-1">
-                      ⚡ Máxima eficiencia: 380 ciudades × 1-2 búsquedas = cobertura nacional
-                    </p>
-                  </div>
-                </div>
-              )}
 
               {/* Botón de indexación */}
               <div className="pt-4">
                 <Button
                   onClick={handleStartIndexation}
-                  disabled={isIndexing || selectedProvinces.length === 0 || selectedCategories.length === 0}
+                  disabled={isIndexing || (!selectedCity && !selectedProvince) || selectedCategories.length === 0}
                   className="w-full"
                 >
                   {isIndexing ? 'Iniciando...' : '🚀 Iniciar Indexación'}
                 </Button>
                 
-                {(selectedProvinces.length === 0 || selectedCategories.length === 0) && (
+                {(!selectedCity && !selectedProvince) && (
                   <p className="text-xs text-red-500 mt-2 text-center">
-                    Selecciona al menos una provincia y una categoría
+                    Selecciona una ciudad O una provincia
                   </p>
                 )}
                 
-                {selectedProvinces.length === 1 && selectedCategories.length > 0 && (
+                {selectedCategories.length === 0 && (
+                  <p className="text-xs text-red-500 mt-2 text-center">
+                    Selecciona al menos una categoría
+                  </p>
+                )}
+                
+                {(selectedCity || selectedProvince) && selectedCategories.length > 0 && (
                   <p className="text-xs text-green-600 mt-2 text-center">
-                    ✅ Configuración óptima: 1 provincia × {selectedCategories.length} categoría(s)
+                    ✅ {selectedCity ? `Ciudad: ${selectedCity}` : `Provincia: ${selectedProvince}`} × {selectedCategories.length} categoría(s)
                   </p>
                 )}
               </div>
