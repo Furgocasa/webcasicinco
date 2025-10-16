@@ -225,14 +225,15 @@ function getSearchVariations(category: string): string[] {
 }
 
 /**
- * Mapea categorías a términos de búsqueda
+ * Mapea categorías a términos de búsqueda mejorados
+ * Incluye variantes para capturar más tipos (hamburgueserías, pizzerías, etc.)
  */
 function getCategorySearchTerm(category: string): string {
   const terms: Record<string, string> = {
-    'restaurante': 'restaurantes',
-    'hotel': 'hoteles',
+    'restaurante': 'restaurantes hamburgueserías pizzerías',
+    'hotel': 'hoteles hostales',
     'spa': 'spa wellness',
-    'bar': 'bares',
+    'bar': 'bares pubs',
     'experiencia': 'lugares turísticos',
     'monumento': 'monumentos',
   };

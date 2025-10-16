@@ -82,11 +82,12 @@ export async function startIndexation(
     for (const province of params.provinces) {
       for (const category of params.categories) {
         try {
+          // Términos de búsqueda mejorados para capturar más tipos de establecimientos
           const searchTerms: Record<string, string> = {
-            'restaurante': 'restaurantes',
-            'hotel': 'hoteles',
+            'restaurante': 'restaurantes hamburgueserías pizzerías',
+            'hotel': 'hoteles hostales',
             'spa': 'spa wellness',
-            'bar': 'bares',
+            'bar': 'bares pubs',
             'experiencia': 'lugares turísticos',
             'monumento': 'monumentos museos',
           };

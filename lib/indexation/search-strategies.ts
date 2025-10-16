@@ -53,9 +53,25 @@ function offsetCoords(
 }
 
 /**
+ * Obtener sub-categorías específicas para búsquedas diversificadas
+ * Esto permite capturar hamburgueserías, pizzerías, etc. que se perdían antes
+ */
+function getSubCategoriesForSearch(category: string): string[] {
+  const subCategories: Record<string, string[]> = {
+    'restaurantes': ['restaurantes', 'hamburgueserías', 'pizzerías', 'asadores'],
+    'bares': ['bares', 'pubs', 'cervecerías', 'cocktelerías'],
+    'cafeterías': ['cafeterías', 'coffee shops', 'pastelerías'],
+    'hoteles': ['hoteles', 'hostales', 'alojamiento'],
+  };
+  
+  return subCategories[category] || [category];
+}
+
+/**
  * Generar estrategia de búsqueda óptima según tamaño de ciudad
- * NUEVA ESTRATEGIA: Text Search por ciudad (aprovecha límite de 60 resultados)
- * Ciudades grandes: 2 búsquedas complementarias para máxima cobertura
+ * ESTRATEGIA MEJORADA: Búsquedas por sub-categorías específicas
+ * Aprovecha el límite de 60 resultados por búsqueda con términos diversos
+ * Esto captura hamburgueserías, pizzerías, etc. que antes se perdían
  */
 export function generateSearchStrategy(
   city: CityData,
@@ -65,85 +81,73 @@ export function generateSearchStrategy(
   const { name, coords, population } = city;
   const searches: SearchQuery[] = [];
 
-  // ESTRATEGIA TEXT SEARCH OPTIMIZADA
-  // NO usamos "mejores" - solo variamos la especificidad geográfica
-  // Google + keyword combina automáticamente: "restaurantes in [query]"
+  // Obtener sub-categorías específicas para esta categoría
+  const subCategories = getSubCategoriesForSearch(category);
   
-  // 🏙️ CIUDADES GRANDES (>200k habitantes): 3 búsquedas Text Search
-  // Variando especificidad geográfica para obtener diferentes conjuntos de resultados
-  // Total: ~180 resultados, filtro 4.7★ → ~20-30 guardados
+  // 🏙️ CIUDADES GRANDES (>200k habitantes): 4-5 búsquedas por sub-categoría
+  // Total: ~240-300 resultados únicos (vs 180 con método anterior)
   if (population > 200000) {
-    searches.push(
-      {
+    // Usar todas las sub-categorías disponibles
+    for (let i = 0; i < subCategories.length; i++) {
+      searches.push({
         type: 'text',
-        query: `${name}, ${province}, España`,
-        description: `${category} en ${name} (búsqueda 1)`,
-      },
-      {
-        type: 'text',
-        query: `${name}, España`,
-        description: `${category} en ${name} (búsqueda 2)`,
-      },
-      {
-        type: 'text',
-        query: `${name} ${province}`,
-        description: `${category} en ${name} (búsqueda 3)`,
-      },
-    );
+        query: `${subCategories[i]} ${name}, ${province}`,
+        description: `${subCategories[i]} en ${name}`,
+      });
+    }
 
     return {
       cityName: name,
       cityPopulation: population,
       strategyLevel: 'MAXIMA',
       searches,
-      estimatedResults: 180, // 3 búsquedas × 60 resultados
-      estimatedTimeMinutes: 3, // 3 búsquedas × ~1min
+      estimatedResults: searches.length * 60,
+      estimatedTimeMinutes: searches.length,
     };
   }
 
-  // 🏘️ CIUDADES MEDIANAS (50k-200k habitantes): 2 búsquedas Text Search
-  // Variando especificidad geográfica
-  // Total: ~120 resultados para filtrar
+  // 🏘️ CIUDADES MEDIANAS (50k-200k habitantes): 2-3 búsquedas por sub-categoría
+  // Usar las primeras 2-3 sub-categorías más importantes
   if (population > 50000) {
-    searches.push(
-      {
+    const mainSubCategories = subCategories.slice(0, Math.min(3, subCategories.length));
+    
+    for (let i = 0; i < mainSubCategories.length; i++) {
+      searches.push({
         type: 'text',
-        query: `${name}, ${province}, España`,
-        description: `${category} en ${name} (búsqueda 1)`,
-      },
-      {
-        type: 'text',
-        query: `${name}, España`,
-        description: `${category} en ${name} (búsqueda 2)`,
-      }
-    );
+        query: `${mainSubCategories[i]} ${name}, ${province}`,
+        description: `${mainSubCategories[i]} en ${name}`,
+      });
+    }
 
     return {
       cityName: name,
       cityPopulation: population,
       strategyLevel: 'MEDIA',
       searches,
-      estimatedResults: 120, // 2 búsquedas × 60 resultados
-      estimatedTimeMinutes: 2, // 2 búsquedas × ~1min
+      estimatedResults: searches.length * 60,
+      estimatedTimeMinutes: searches.length,
     };
   }
 
-  // 🏡 CIUDADES PEQUEÑAS (<50k habitantes): 1 búsqueda Text Search
-  searches.push(
-    {
+  // 🏡 CIUDADES PEQUEÑAS (<50k habitantes): 1-2 búsquedas
+  // Usar la categoría principal y una secundaria si existe
+  const smallCitySubCategories = subCategories.slice(0, Math.min(2, subCategories.length));
+  
+  for (let i = 0; i < smallCitySubCategories.length; i++) {
+    searches.push({
       type: 'text',
-      query: `${name}, ${province}, España`,
-      description: `${category} en ${name}`,
-    }
-  );
+      query: `${smallCitySubCategories[i]} ${name}, ${province}`,
+      description: `${smallCitySubCategories[i]} en ${name}`,
+    });
+  }
 
   return {
     cityName: name,
     cityPopulation: population,
     strategyLevel: 'BASICA',
     searches,
-    estimatedResults: 60, // 1 búsqueda × 60 resultados
-    estimatedTimeMinutes: 1, // 1 búsqueda × ~1min
+    estimatedResults: searches.length * 60,
+    estimatedTimeMinutes: searches.length,
   };
 }
 

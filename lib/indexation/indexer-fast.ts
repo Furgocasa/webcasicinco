@@ -513,11 +513,12 @@ export async function startFastIndexation(
         }
         try {
           // SOLO 4 CATEGORÍAS PERMITIDAS
+          // Términos amplios para capturar todos los tipos de establecimientos
           const searchTerms: Record<string, string> = {
-            'restaurante': 'restaurantes',
-            'bar': 'bares tapas',
-            'cafe': 'cafeterías coffee',
-            'hotel': 'hoteles alojamiento',
+            'restaurante': 'restaurantes',  // Se expandirá en search-strategies.ts
+            'bar': 'bares',                 // Se expandirá en search-strategies.ts
+            'cafe': 'cafeterías',           // Se expandirá en search-strategies.ts
+            'hotel': 'hoteles',             // Se expandirá en search-strategies.ts
           };
 
           const searchTerm = searchTerms[category] || category;

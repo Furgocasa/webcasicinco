@@ -88,8 +88,9 @@ export function shouldExcludeFromCategory(
       if (RESTAURANT_EXCLUSIONS.some(keyword => nameLower.includes(keyword))) {
         return true;
       }
-      // Debe tener tipo 'restaurant', 'food', o 'meal_delivery/takeaway'
-      const validRestaurantTypes = ['restaurant', 'food', 'meal_delivery', 'meal_takeaway', 'cafe'];
+      // Debe tener tipo 'restaurant', 'food', 'meal_delivery/takeaway', 'fast_food'
+      // Incluye fast_food para capturar hamburgueserías, pizzerías, etc.
+      const validRestaurantTypes = ['restaurant', 'food', 'meal_delivery', 'meal_takeaway', 'cafe', 'fast_food'];
       if (!typesLower.some(t => validRestaurantTypes.includes(t))) {
         return true;
       }
@@ -140,8 +141,8 @@ export function strictCategorizePlaceByTypes(types: string[], placeName: string)
     }
   }
 
-  // PRIORIDAD 2: Restaurantes
-  if (typesLower.includes('restaurant') || typesLower.includes('food') || typesLower.includes('meal_takeaway')) {
+  // PRIORIDAD 2: Restaurantes (incluye hamburgueserías, pizzerías = fast_food)
+  if (typesLower.includes('restaurant') || typesLower.includes('food') || typesLower.includes('meal_takeaway') || typesLower.includes('fast_food')) {
     if (!shouldExcludeFromCategory(placeName, types, 'restaurante')) {
       return 'restaurante';
     }
