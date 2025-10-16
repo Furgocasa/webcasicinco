@@ -112,18 +112,18 @@ export default function MapPage() {
   // Geolocalización
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [isGeolocationActive, setIsGeolocationActive] = useState(false); // ✅ Siempre false inicialmente (sin hidratación)
+  const [shouldReactivateGeo, setShouldReactivateGeo] = useState(false); // Flag para reactivar geo después de definir la función
+  const [geolocationError, setGeolocationError] = useState<string | null>(null);
   
-  // ✅ Recuperar y reactivar geolocalización si estaba activa
+  // ✅ Recuperar flag de localStorage al montar (sin hidratar)
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('geolocationActive') === 'true';
       if (saved) {
-        // Reactivar geolocalización automáticamente al volver a la página
-        activateGeolocation();
+        setShouldReactivateGeo(true);
       }
     }
-  }, [activateGeolocation]); // Depende de activateGeolocation (estable con useCallback)
-  const [geolocationError, setGeolocationError] = useState<string | null>(null);
+  }, []);
 
   // Ordenamiento de lista
   const [sortBy, setSortBy] = useState<'rating' | 'reviews' | 'proximity'>('reviews');
@@ -926,6 +926,14 @@ export default function MapPage() {
       options // ✅ Opciones adaptativas según dispositivo
     );
   }, []); // ✅ useCallback sin dependencias para que sea estable
+
+  // ✅ Reactivar geolocalización si el flag está activo (ejecuta después de que activateGeolocation esté definido)
+  useEffect(() => {
+    if (shouldReactivateGeo) {
+      activateGeolocation();
+      setShouldReactivateGeo(false); // Resetear flag
+    }
+  }, [shouldReactivateGeo, activateGeolocation]);
 
   // Desactivar geolocalización
   const deactivateGeolocation = () => {
