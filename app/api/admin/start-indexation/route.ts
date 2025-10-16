@@ -27,10 +27,13 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { provinces, categories, cities, minRating } = body;
 
-    // Validar parámetros
-    if (!provinces || provinces.length === 0) {
+    // Validar parámetros: Debe haber al menos UNA ciudad O UNA provincia
+    const hasProvinces = provinces && provinces.length > 0;
+    const hasCities = cities && cities.length > 0;
+    
+    if (!hasProvinces && !hasCities) {
       return NextResponse.json(
-        { error: 'Se requiere al menos una provincia' },
+        { error: 'Se requiere al menos una ciudad o una provincia' },
         { status: 400 }
       );
     }
@@ -98,7 +101,12 @@ export async function POST(request: NextRequest) {
     // FASE 1: Solo búsqueda + filtrado + guardado básico (SIN IA)
     Promise.resolve().then(async () => {
       try {
-        await startFastIndexation(job.id, { provinces, categories, minRating: minRating || 4.7 });
+        await startFastIndexation(job.id, { 
+          provinces: provinces || [], 
+          categories, 
+          cities: cities || undefined,
+          minRating: minRating || 4.7 
+        });
       } catch (err) {
         console.error('Error en indexación rápida:', err);
       }

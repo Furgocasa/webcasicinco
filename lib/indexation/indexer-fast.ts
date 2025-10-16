@@ -439,7 +439,28 @@ export async function startFastIndexation(
     await logger.info('🚀 Indexación rápida iniciada');
   }
   
-  await logger.info(`Provincias: ${params.provinces.join(', ')}`);
+  // 🆕 Si hay ciudades pero NO provincias, inferir provincias de las ciudades
+  let provincesToProcess = [...params.provinces];
+  if (params.cities && params.cities.length > 0 && provincesToProcess.length === 0) {
+    // Importar todas las ciudades del archivo estático para inferir provincias
+    const { getAllCities: getAll } = await import('./cities-database');
+    const allCitiesData = getAll();
+    const cityProvinces = new Set<string>();
+    
+    for (const cityName of params.cities) {
+      const cityData = allCitiesData.find(c => c.name === cityName);
+      if (cityData) {
+        cityProvinces.add(cityData.province);
+      }
+    }
+    
+    provincesToProcess = Array.from(cityProvinces);
+    await logger.info(`🎯 Ciudades seleccionadas: ${params.cities.join(', ')}`);
+    await logger.info(`📍 Provincias inferidas de las ciudades: ${provincesToProcess.join(', ')}`);
+  } else {
+    await logger.info(`Provincias: ${params.provinces.join(', ')}`);
+  }
+  
   await logger.info(`Categorías: ${params.categories.join(', ')}`);
   await logger.info(`Rating mínimo: ${params.minRating}`);
 
@@ -489,7 +510,7 @@ export async function startFastIndexation(
     // ==========================================
     await logger.info('🔍 FASE 1: Búsqueda exhaustiva iniciada');
 
-    for (const province of params.provinces) {
+    for (const province of provincesToProcess) {
       // Verificar si debe continuar antes de cada provincia
       if (!await shouldContinueJob(jobId, supabase)) {
         await logger.warning('⏸️ Indexación pausada o cancelada por el administrador');

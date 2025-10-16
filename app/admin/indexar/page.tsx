@@ -125,23 +125,47 @@ export default function IndexarPage() {
                   placeholder="🔍 Buscar ciudad..."
                   value={citySearch}
                   onChange={(e) => setCitySearch(e.target.value)}
-                  className="w-full px-3 py-2 mb-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
-                />
-                <select
-                  value={selectedCity}
-                  onChange={(e) => handleCityChange(e.target.value)}
                   disabled={!!selectedProvince}
-                  className="flex h-32 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
-                >
-                  <option value="">-- Ninguna --</option>
-                  {filteredCities.map((city) => (
-                    <option key={`${city.province}-${city.name}`} value={city.name}>
-                      {city.name} ({city.province}) - {(city.population / 1000).toFixed(0)}k hab
-                    </option>
+                  className="w-full px-3 py-2 mb-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
+                />
+                <div className={`h-40 overflow-y-auto border border-gray-300 rounded-lg ${selectedProvince ? 'bg-gray-100' : 'bg-white'}`}>
+                  {filteredCities.slice(0, 50).map((city) => (
+                    <button
+                      key={`${city.province}-${city.name}`}
+                      type="button"
+                      disabled={!!selectedProvince}
+                      onClick={() => handleCityChange(city.name)}
+                      className={`w-full px-3 py-2 text-left text-sm hover:bg-blue-50 transition-colors disabled:cursor-not-allowed ${
+                        selectedCity === city.name ? 'bg-blue-100 font-medium' : ''
+                      }`}
+                    >
+                      <span className="font-medium">{city.name}</span>
+                      <span className="text-gray-600 text-xs ml-1">({city.province})</span>
+                      <span className="text-gray-500 text-xs ml-1">- {(city.population / 1000).toFixed(0)}k hab</span>
+                    </button>
                   ))}
-                </select>
+                  {filteredCities.length > 50 && (
+                    <p className="px-3 py-2 text-xs text-gray-500 italic">
+                      Mostrando 50 de {filteredCities.length}. Refina tu búsqueda...
+                    </p>
+                  )}
+                  {filteredCities.length === 0 && (
+                    <p className="px-3 py-8 text-sm text-gray-500 text-center">
+                      No se encontraron ciudades
+                    </p>
+                  )}
+                </div>
+                {selectedCity && (
+                  <button
+                    type="button"
+                    onClick={() => handleCityChange('')}
+                    className="mt-2 text-xs text-red-600 hover:text-red-800"
+                  >
+                    ✕ Limpiar selección
+                  </button>
+                )}
                 <p className="text-xs text-gray-500 mt-1">
-                  {selectedProvince ? '⚠️ Desactiva provincia para seleccionar ciudad' : 'Selecciona UNA ciudad específica'}
+                  {selectedProvince ? '⚠️ Desactiva provincia para seleccionar ciudad' : 'Haz clic en una ciudad para seleccionarla'}
                 </p>
               </div>
 
@@ -150,21 +174,32 @@ export default function IndexarPage() {
                 <label className="block text-sm font-medium mb-2">
                   📍 Provincia (opcional)
                 </label>
-                <select
-                  value={selectedProvince}
-                  onChange={(e) => handleProvinceChange(e.target.value)}
-                  disabled={!!selectedCity}
-                  className="flex h-32 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
-                >
-                  <option value="">-- Ninguna --</option>
+                <div className={`h-40 overflow-y-auto border border-gray-300 rounded-lg ${selectedCity ? 'bg-gray-100' : 'bg-white'}`}>
                   {PROVINCES.map((province) => (
-                    <option key={province} value={province}>
+                    <button
+                      key={province}
+                      type="button"
+                      disabled={!!selectedCity}
+                      onClick={() => handleProvinceChange(province)}
+                      className={`w-full px-3 py-2 text-left text-sm hover:bg-blue-50 transition-colors disabled:cursor-not-allowed ${
+                        selectedProvince === province ? 'bg-blue-100 font-medium' : ''
+                      }`}
+                    >
                       {province}
-                    </option>
+                    </button>
                   ))}
-                </select>
+                </div>
+                {selectedProvince && (
+                  <button
+                    type="button"
+                    onClick={() => handleProvinceChange('')}
+                    className="mt-2 text-xs text-red-600 hover:text-red-800"
+                  >
+                    ✕ Limpiar selección
+                  </button>
+                )}
                 <p className="text-xs text-gray-500 mt-1">
-                  {selectedCity ? '⚠️ Desactiva ciudad para seleccionar provincia' : 'Selecciona UNA provincia completa'}
+                  {selectedCity ? '⚠️ Desactiva ciudad para seleccionar provincia' : 'Haz clic en una provincia para seleccionarla'}
                 </p>
               </div>
 
@@ -173,23 +208,32 @@ export default function IndexarPage() {
                 <label className="block text-sm font-medium mb-2">
                   🍽️ Categorías
                 </label>
-                <select
-                  multiple
-                  value={selectedCategories}
-                  onChange={(e) => {
-                    const options = Array.from(e.target.selectedOptions);
-                    setSelectedCategories(options.map(opt => opt.value));
-                  }}
-                  className="flex h-24 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                >
+                <div className="border border-gray-300 rounded-lg bg-white divide-y">
                   {PLACE_CATEGORIES.map((cat) => (
-                    <option key={cat.value} value={cat.value}>
-                      {cat.icon} {cat.label}
-                    </option>
+                    <label
+                      key={cat.value}
+                      className="flex items-center px-3 py-2.5 hover:bg-blue-50 cursor-pointer transition-colors"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedCategories.includes(cat.value)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedCategories([...selectedCategories, cat.value]);
+                          } else {
+                            setSelectedCategories(selectedCategories.filter(c => c !== cat.value));
+                          }
+                        }}
+                        className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                      />
+                      <span className="ml-3 text-sm">
+                        {cat.icon} {cat.label}
+                      </span>
+                    </label>
                   ))}
-                </select>
+                </div>
                 <p className="text-xs text-gray-500 mt-1">
-                  Mantén Ctrl/Cmd para seleccionar múltiples
+                  Selecciona una o varias categorías
                 </p>
               </div>
 
