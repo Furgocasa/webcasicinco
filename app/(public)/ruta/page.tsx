@@ -108,6 +108,11 @@ export default function RutaPage() {
     return R * c;
   }, []);
 
+  // Establecer título de la página
+  useEffect(() => {
+    document.title = 'Planificar Ruta | Casi Cinco';
+  }, []);
+
   // Obtener ubicación del usuario al montar el componente
   useEffect(() => {
     if (navigator.geolocation) {

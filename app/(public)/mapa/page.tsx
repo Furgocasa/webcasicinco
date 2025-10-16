@@ -81,6 +81,11 @@ export default function MapPage() {
   const markersRef = useRef<google.maps.Marker[]>([]);
   const isUserInteractingRef = useRef(false); // 🔧 Nuevo: rastrear si el usuario está moviendo el mapa manualmente
 
+  // Establecer título de la página
+  useEffect(() => {
+    document.title = 'Mapa de Lugares | Casi Cinco';
+  }, []);
+
   // Google Maps
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '',
