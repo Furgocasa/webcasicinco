@@ -1,9 +1,30 @@
 import { MetadataRoute } from 'next';
+import { createClient } from '@supabase/supabase-js';
 
-export default function sitemap(): MetadataRoute.Sitemap {
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://casicinco.com';
 
-  return [
+  // Obtener todos los lugares de la base de datos
+  const { data: places } = await supabase
+    .from('places')
+    .select('slug, category, province, updated_at')
+    .order('rating', { ascending: false });
+
+  // Generar URLs para cada lugar
+  const placeUrls: MetadataRoute.Sitemap = (places || []).map((place) => ({
+    url: `${baseUrl}/${place.category}/${place.province}/${place.slug}`,
+    lastModified: place.updated_at ? new Date(place.updated_at) : new Date(),
+    changeFrequency: 'weekly' as const,
+    priority: 0.7,
+  }));
+
+  // Páginas estáticas
+  const staticPages: MetadataRoute.Sitemap = [
     {
       url: baseUrl,
       lastModified: new Date(),
@@ -85,4 +106,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.5,
     },
   ];
+
+  // Combinar páginas estáticas + lugares dinámicos
+  return [...staticPages, ...placeUrls];
 }
