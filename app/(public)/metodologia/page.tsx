@@ -22,7 +22,7 @@ export default function MetodologiaPage() {
     <>
       <main className="min-h-screen bg-white">
         {/* HERO */}
-        <section className="relative bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 text-white overflow-hidden py-20">
+        <section className="relative bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 text-white overflow-hidden py-24 md:py-32">
           <div className="absolute inset-0 bg-black opacity-10"></div>
           
           <div className="relative container mx-auto px-4">
