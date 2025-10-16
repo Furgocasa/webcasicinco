@@ -36,7 +36,7 @@ export default function HotelPage() {
         <section className="relative bg-[#002196] text-white overflow-hidden py-24 md:py-32">
           <div className="absolute inset-0 bg-black opacity-10"></div>
           
-          <div className="relative container mx-auto px-4">
+          <div className="relative container mx-auto px-4 z-10">
             <div className="max-w-4xl mx-auto text-center">
               <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full mb-6">
                 <Star className="h-4 w-4 fill-[#ffd935] text-[#ffd935]" />
@@ -56,12 +56,14 @@ export default function HotelPage() {
                 <br />Ordenados por nuestro algoritmo de calidad objetiva.
               </p>
 
-              <Link href="/mapa?category=hotel">
-                <Button className="bg-[#ffd935] text-[#002196] hover:bg-[#ffd935]/90 font-bold px-8 py-6 text-lg">
-                  Ver Todos en el Mapa
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-              </Link>
+              <div className="relative z-10">
+                <Link href="/mapa?category=hotel">
+                  <Button className="bg-[#ffd935] text-[#002196] hover:bg-[#ffd935]/90 font-bold px-8 py-6 text-lg">
+                    Ver Todos en el Mapa
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </Link>
+              </div>
             </div>
           </div>
 
