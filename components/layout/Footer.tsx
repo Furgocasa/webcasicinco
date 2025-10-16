@@ -74,13 +74,13 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/spa" className="hover:text-white transition">
-                  Spas
+                <Link href="/bar" className="hover:text-white transition">
+                  Bares
                 </Link>
               </li>
               <li>
-                <Link href="/experiencia" className="hover:text-white transition">
-                  Experiencias
+                <Link href="/cafeteria" className="hover:text-white transition">
+                  Cafeterías
                 </Link>
               </li>
             </ul>
