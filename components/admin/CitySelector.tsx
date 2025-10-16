@@ -222,9 +222,9 @@ export function CitySelector({ province, selectedCities, onCitiesChange }: CityS
           {/* Info sobre estrategias */}
           <div className="bg-gray-50 rounded-lg p-3 text-xs text-gray-600 space-y-1">
             <p className="font-medium">Estrategias de búsqueda:</p>
-            <p>• <span className="font-medium">MÁXIMA</span> (>200k hab): 4 búsquedas específicas</p>
+            <p>• <span className="font-medium">MÁXIMA</span> {`(>200k hab)`}: 4 búsquedas específicas</p>
             <p>• <span className="font-medium">MEDIA</span> (50k-200k hab): 3 búsquedas</p>
-            <p>• <span className="font-medium">BÁSICA</span> (&lt;50k hab): 2 búsquedas</p>
+            <p>• <span className="font-medium">BÁSICA</span> {`(<50k hab)`}: 2 búsquedas</p>
           </div>
         </div>
       </CardContent>
