@@ -327,7 +327,7 @@ export default function RutaPage() {
         <div className="container mx-auto">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <Navigation className="h-6 w-6 text-purple-600" />
+              <Navigation className="h-6 w-6 text-[#002196]" />
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">Planificar Ruta</h1>
                 <p className="text-sm text-gray-600">Descubre lugares excepcionales en tu camino</p>
@@ -344,7 +344,7 @@ export default function RutaPage() {
                   <span className="text-gray-600">Tiempo:</span>
                   <span className="font-bold text-gray-900 ml-2">{routeInfo.duration}</span>
                 </div>
-                <div className="bg-purple-50 px-3 py-2 rounded-lg">
+                <div className="bg-blue-50 px-3 py-2 rounded-lg">
                   <span className="text-gray-600">Lugares:</span>
                   <span className="font-bold text-gray-900 ml-2">{placesNearRoute.length}</span>
                 </div>
@@ -396,7 +396,7 @@ export default function RutaPage() {
                       }
                     }}
                     onKeyPress={(e) => e.key === 'Enter' && calculateRoute()}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-base"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#002196] focus:border-transparent text-base"
                   />
                 </Autocomplete>
               )}
@@ -444,7 +444,7 @@ export default function RutaPage() {
                       }
                     }}
                     onKeyPress={(e) => e.key === 'Enter' && calculateRoute()}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-base"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#002196] focus:border-transparent text-base"
                   />
                 </Autocomplete>
               )}
@@ -458,7 +458,7 @@ export default function RutaPage() {
               <select
                 value={searchRadius}
                 onChange={(e) => setSearchRadius(Number(e.target.value))}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-base"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#002196] focus:border-transparent text-base"
               >
                 <option value={5}>5 km</option>
                 <option value={10}>10 km</option>
@@ -475,7 +475,7 @@ export default function RutaPage() {
               <select
                 value={categoryFilter}
                 onChange={(e) => setCategoryFilter(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-base"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#002196] focus:border-transparent text-base"
               >
                 <option value="">Todas</option>
                 <option value="restaurante">Restaurantes</option>
@@ -533,7 +533,7 @@ export default function RutaPage() {
           {!isLoaded ? (
             <div className="h-full flex items-center justify-center bg-gray-100">
               <div className="text-center">
-                <Loader2 className="h-12 w-12 animate-spin text-purple-600 mx-auto mb-4" />
+                <Loader2 className="h-12 w-12 animate-spin text-[#002196] mx-auto mb-4" />
                 <p className="text-gray-600">Cargando mapa...</p>
               </div>
             </div>
@@ -634,9 +634,9 @@ export default function RutaPage() {
             {/* Overlay central cuando no hay ruta - Guía al usuario */}
             {!directionsResponse && (
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
-                <div className="bg-white rounded-2xl shadow-2xl p-6 md:p-8 max-w-sm pointer-events-auto border-2 border-purple-200">
+                <div className="bg-white rounded-2xl shadow-2xl p-6 md:p-8 max-w-sm pointer-events-auto border-2 border-[#ffd935]">
                   <div className="text-center">
-                    <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                    <div className="w-16 h-16 mx-auto mb-4 bg-[#002196] rounded-full flex items-center justify-center">
                       <Navigation className="h-8 w-8 text-white" />
                     </div>
                     <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-2">
@@ -647,7 +647,7 @@ export default function RutaPage() {
                     </p>
                     <Button
                       onClick={() => setMobileView('form')}
-                      className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                      className="w-full bg-[#ffd935] hover:bg-[#e6c430] text-[#002196]"
                     >
                       🚀 Calcular Ruta
                     </Button>
@@ -732,7 +732,7 @@ export default function RutaPage() {
 
                     {/* Categoría y tier */}
                     <div className="flex items-center gap-2 mb-3">
-                      <span className="px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 text-xs font-medium">
+                      <span className="px-2 py-0.5 rounded-full bg-blue-100 text-[#002196] text-xs font-medium">
                         {selectedPlace.category}
                       </span>
                       <span className={`px-2 py-0.5 rounded-full text-xs font-medium bg-gradient-to-r ${tierInfo.color} text-white`}>
@@ -895,7 +895,7 @@ export default function RutaPage() {
 
                       {/* Categoría y tier */}
                       <div className="flex items-center gap-2 mb-3">
-                        <span className="px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 text-xs font-medium">
+                        <span className="px-2 py-0.5 rounded-full bg-blue-100 text-[#002196] text-xs font-medium">
                           {place.category}
                         </span>
                         <span className={`px-2 py-0.5 rounded-full text-xs font-medium bg-gradient-to-r ${tierInfo.color} text-white`}>
@@ -948,7 +948,7 @@ export default function RutaPage() {
             <button
               onClick={() => setMobileView('form')}
               className={`flex-1 flex flex-col items-center justify-center py-3 ${
-                mobileView === 'form' ? 'text-purple-600 bg-purple-50' : 'text-gray-600'
+                mobileView === 'form' ? 'text-[#002196] bg-blue-50' : 'text-gray-600'
               }`}
             >
               <Navigation className="h-6 w-6 mb-1" />
@@ -957,7 +957,7 @@ export default function RutaPage() {
             <button
               onClick={() => setMobileView('map')}
               className={`flex-1 flex flex-col items-center justify-center py-3 ${
-                mobileView === 'map' ? 'text-purple-600 bg-purple-50' : 'text-gray-600'
+                mobileView === 'map' ? 'text-[#002196] bg-blue-50' : 'text-gray-600'
               }`}
             >
               <MapPin className="h-6 w-6 mb-1" />
@@ -966,13 +966,13 @@ export default function RutaPage() {
             <button
               onClick={() => setMobileView('list')}
               className={`flex-1 flex flex-col items-center justify-center py-3 ${
-                mobileView === 'list' ? 'text-purple-600 bg-purple-50' : 'text-gray-600'
+                mobileView === 'list' ? 'text-[#002196] bg-blue-50' : 'text-gray-600'
               }`}
             >
               <MapPin className="h-6 w-6 mb-1" />
               <span className="text-xs font-medium">Lista</span>
               {placesNearRoute.length > 0 && (
-                <span className="absolute top-1 text-[10px] text-purple-600 font-bold">
+                <span className="absolute top-1 text-[10px] text-[#002196] font-bold">
                   {placesNearRoute.length}
                 </span>
               )}
@@ -1028,7 +1028,7 @@ export default function RutaPage() {
                         setOrigin(originValueRef.current);
                       }
                     }}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-base"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#002196] focus:border-transparent text-base"
                   />
                 </Autocomplete>
               )}
@@ -1073,7 +1073,7 @@ export default function RutaPage() {
                         setDestination(destinationValueRef.current);
                       }
                     }}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-base"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#002196] focus:border-transparent text-base"
                   />
                 </Autocomplete>
               )}
@@ -1117,7 +1117,7 @@ export default function RutaPage() {
               <Button
                 onClick={calculateRoute}
                 disabled={calculating || !origin || !destination}
-                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white"
+                className="w-full bg-[#ffd935] hover:bg-[#e6c430] text-[#002196] font-bold"
               >
                 {calculating ? '⏳ Calculando...' : '🚀 Calcular Ruta'}
               </Button>
@@ -1176,7 +1176,7 @@ export default function RutaPage() {
 
             {loadingPlaces ? (
               <div className="flex justify-center py-8">
-                <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
+                <Loader2 className="h-8 w-8 animate-spin text-[#002196]" />
               </div>
             ) : sortedPlaces.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
@@ -1265,7 +1265,7 @@ export default function RutaPage() {
 
                     {/* Categoría y tier */}
                     <div className="flex items-center gap-2 mb-3">
-                      <span className="px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 text-xs font-medium">
+                      <span className="px-2 py-0.5 rounded-full bg-blue-100 text-[#002196] text-xs font-medium">
                         {place.category}
                       </span>
                       <span className={`px-2 py-0.5 rounded-full text-xs font-medium bg-gradient-to-r ${tierInfo.color} text-white`}>
