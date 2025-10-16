@@ -152,6 +152,14 @@ export default function IndexarPage() {
                 </select>
               </div>
 
+              {/* 🆕 Selector de ciudades (dentro de Configuración) */}
+              <div className="pt-4 border-t border-gray-200">
+                <CityMultiSelector
+                  selectedCities={selectedCities}
+                  onCitiesChange={setSelectedCities}
+                />
+              </div>
+
               {/* Advertencia para múltiples provincias */}
               {selectedProvinces.length > 1 && (
                 <div className="p-3 bg-amber-50 border border-amber-300 rounded-lg">
@@ -204,14 +212,6 @@ export default function IndexarPage() {
               </div>
             </CardContent>
           </Card>
-
-          {/* 🆕 Selector de ciudades (siempre visible, independiente) */}
-          <div className="mt-6">
-            <CityMultiSelector
-              selectedCities={selectedCities}
-              onCitiesChange={setSelectedCities}
-            />
-          </div>
         </div>
 
         {/* Información del proceso */}
