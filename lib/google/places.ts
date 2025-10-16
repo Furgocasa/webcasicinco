@@ -9,10 +9,11 @@ const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY || process.env.NEXT_
 const PLACES_API_BASE = 'https://maps.googleapis.com/maps/api/place';
 
 interface SearchPlacesParams {
-  location?: string;
+  query?: string;      // 🆕 Query completo (prioritario si existe)
+  location?: string;   // Ubicación (legacy, para compatibilidad)
   latitude?: number;
   longitude?: number;
-  radius?: number; // en metros
+  radius?: number;     // en metros
   type?: string;
   keyword?: string;
   minRating?: number;
@@ -20,14 +21,22 @@ interface SearchPlacesParams {
 
 /**
  * Busca lugares usando Text Search de Google Places CON PAGINACIÓN
+ * Soporta query completo O construcción legacy con keyword/location
  */
 export async function searchPlaces(params: SearchPlacesParams): Promise<string[]> {
   try {
-    const { location, latitude, longitude, radius = 50000, type, keyword, minRating = 4.7 } = params;
+    const { query: providedQuery, location, latitude, longitude, radius = 50000, type, keyword, minRating = 4.7 } = params;
     
-    let query = keyword || type || 'restaurant';
-    if (location) {
-      query += ` in ${location}`;
+    // 🆕 PRIORIZAR query completo si existe, sino construir legacy
+    let query: string;
+    if (providedQuery) {
+      query = providedQuery; // ✅ Usar query directo: "hamburgueserías Madrid, Madrid, España"
+    } else {
+      // Legacy: construir query
+      query = keyword || type || 'restaurant';
+      if (location) {
+        query += ` in ${location}`;
+      }
     }
 
     // Logs mínimos (solo para debugging crítico)

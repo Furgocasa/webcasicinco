@@ -605,10 +605,11 @@ export async function startFastIndexation(
               if (search.type === 'text') {
                 placeIds = await withRetry(
                   () => searchPlaces({
-                    location: search.query,
-                    keyword: searchTerm,
-                    minRating: 4.5, // Bajamos a 4.5 para obtener más, filtraremos en código
-                    radius: 25000, // 25km radio por ciudad
+                    query: search.query,              // ✅ Query completo: "hamburgueserías Madrid, Madrid, España"
+                    latitude: cityData.coords.lat,    // ✅ Coordenadas ciudad para priorización
+                    longitude: cityData.coords.lng,   // ✅ Coordenadas ciudad para priorización
+                    radius: 25000,                    // ✅ 25km - ahora funciona con coordenadas
+                    minRating: 4.5,                   // Bajamos a 4.5 para obtener más, filtraremos en código
                   }),
                   2, // 2 intentos (optimizado)
                   15000, // 15 segundos timeout
