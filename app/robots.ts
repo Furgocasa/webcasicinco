@@ -8,10 +8,13 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: '*',
       allow: '/',
       disallow: [
-        '/admin/',
-        '/api/',
-        '/_next/',
-        '/private/',
+        '/admin/',      // Panel de administración
+        '/api/',        // Endpoints API
+        '/perfil',      // Perfiles de usuario
+        '/login',       // Página de login
+        '/registro',    // Página de registro
+        '/_next/',      // Archivos internos de Next.js
+        '/private/',    // Rutas privadas
       ],
     },
     sitemap: `${baseUrl}/sitemap.xml`,
