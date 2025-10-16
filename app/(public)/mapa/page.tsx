@@ -108,15 +108,16 @@ export default function MapPage() {
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [isGeolocationActive, setIsGeolocationActive] = useState(false); // ✅ Siempre false inicialmente (sin hidratación)
   
-  // ✅ Recuperar estado de localStorage DESPUÉS de montar (evita hidratación)
+  // ✅ Recuperar y reactivar geolocalización si estaba activa
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('geolocationActive') === 'true';
       if (saved) {
-        setIsGeolocationActive(true);
+        // Reactivar geolocalización automáticamente al volver a la página
+        activateGeolocation();
       }
     }
-  }, []);
+  }, [activateGeolocation]); // Depende de activateGeolocation (estable con useCallback)
   const [geolocationError, setGeolocationError] = useState<string | null>(null);
 
   // Ordenamiento de lista
@@ -803,7 +804,7 @@ export default function MapPage() {
   };
 
   // Activar geolocalización
-  const activateGeolocation = () => {
+  const activateGeolocation = useCallback(() => {
     // Verificar soporte del navegador
     if (!navigator.geolocation) {
       setGeolocationError('Tu navegador no soporta geolocalización');
@@ -919,7 +920,7 @@ export default function MapPage() {
       },
       options // ✅ Opciones adaptativas según dispositivo
     );
-  };
+  }, []); // ✅ useCallback sin dependencias para que sea estable
 
   // Desactivar geolocalización
   const deactivateGeolocation = () => {
