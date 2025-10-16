@@ -107,13 +107,24 @@ async function processPlacesFromZone(
 
       // Función para normalizar nombres de provincias (acepta tildes y variantes)
       const normalizeProvinceName = (name: string): string => {
-        // Mapa de variantes (euskera/gallego → castellano estándar)
+        // Mapa de variantes (euskera/gallego/valenciano/catalán → castellano estándar)
         const variants: Record<string, string> = {
+          // Euskera
           'Gipuzkoa': 'Guipúzcoa',
           'Bizkaia': 'Vizcaya',
           'Araba': 'Álava',
+          // Gallego
           'La Coruña': 'A Coruña',
           'Orense': 'Ourense',
+          // Valenciano/Catalán
+          'Castelló': 'Castellón',
+          'València': 'Valencia',
+          'Alacant': 'Alicante',
+          'Lleida': 'Lérida',
+          'Girona': 'Gerona',
+          // Variantes adicionales
+          'Illes Balears': 'Baleares',
+          'Islas Baleares': 'Baleares',
         };
         
         // Buscar en el mapa de variantes (comparación sin tildes, case-insensitive)
