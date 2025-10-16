@@ -38,6 +38,11 @@ export default function PerfilPage() {
   const [loadingSubscription, setLoadingSubscription] = useState(false);
   const [accessInfo, setAccessInfo] = useState<any>(null);
 
+  // Establecer título de la página
+  useEffect(() => {
+    document.title = 'Mi Perfil | Casi Cinco';
+  }, []);
+
   useEffect(() => {
     loadUserData();
     loadAccessInfo();

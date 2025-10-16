@@ -35,6 +35,11 @@ export default function HomePage() {
     topTierPlaces: 400,
   });
 
+  // Establecer título de la página
+  useEffect(() => {
+    document.title = 'Casi Cinco - Los mejores lugares con 4.7+ estrellas';
+  }, []);
+
   // Cargar stats reales al montar
   useEffect(() => {
     const loadStats = async () => {

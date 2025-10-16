@@ -12,6 +12,11 @@ export default function RestaurantePage() {
   const [topPlaces, setTopPlaces] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Establecer título de la página
+  useEffect(() => {
+    document.title = 'Top 10 Restaurantes | Casi Cinco';
+  }, []);
+
   useEffect(() => {
     const fetchTopRestaurants = async () => {
       try {

@@ -14,6 +14,11 @@ export default function PricingPage() {
   const [loading, setLoading] = useState<string | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+  // Establecer título de la página
+  useEffect(() => {
+    document.title = 'Planes y Precios | Casi Cinco';
+  }, []);
+
   // Verificar si el usuario está logueado
   useEffect(() => {
     const checkAuth = async () => {

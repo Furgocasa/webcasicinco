@@ -1,6 +1,12 @@
 import Link from 'next/link';
 import { ArrowLeft, Shield } from 'lucide-react';
 import Footer from '@/components/layout/Footer';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Política de Privacidad',
+  description: 'Política de privacidad y protección de datos de Casi Cinco.',
+};
 
 export default function PrivacidadPage() {
   return (

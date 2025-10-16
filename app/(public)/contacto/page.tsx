@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Mail, Send, CheckCircle2 } from 'lucide-react';
 import Footer from '@/components/layout/Footer';
@@ -17,6 +17,11 @@ export default function ContactoPage() {
   });
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
+
+  // Establecer título de la página
+  useEffect(() => {
+    document.title = 'Contacto | Casi Cinco';
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

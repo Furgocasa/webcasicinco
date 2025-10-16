@@ -12,6 +12,11 @@ export default function CafeteriaPage() {
   const [topPlaces, setTopPlaces] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Establecer título de la página
+  useEffect(() => {
+    document.title = 'Top 10 Cafeterías | Casi Cinco';
+  }, []);
+
   useEffect(() => {
     const fetchTopCafes = async () => {
       try {

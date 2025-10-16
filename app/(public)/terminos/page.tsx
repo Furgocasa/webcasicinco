@@ -1,6 +1,12 @@
 import Link from 'next/link';
 import { ArrowLeft, FileText } from 'lucide-react';
 import Footer from '@/components/layout/Footer';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Términos y Condiciones',
+  description: 'Términos y condiciones de uso de Casi Cinco.',
+};
 
 export default function TerminosPage() {
   return (

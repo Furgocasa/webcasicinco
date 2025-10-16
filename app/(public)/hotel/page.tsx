@@ -12,6 +12,11 @@ export default function HotelPage() {
   const [topPlaces, setTopPlaces] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Establecer título de la página
+  useEffect(() => {
+    document.title = 'Top 10 Hoteles | Casi Cinco';
+  }, []);
+
   useEffect(() => {
     const fetchTopHotels = async () => {
       try {

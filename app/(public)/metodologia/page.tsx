@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import Link from 'next/link';
 import { 
   ArrowLeft,
@@ -18,6 +19,11 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 
 export default function MetodologiaPage() {
+  // Establecer título de la página
+  useEffect(() => {
+    document.title = 'Nuestra Metodología | Casi Cinco';
+  }, []);
+
   return (
     <>
       <main className="min-h-screen bg-white">

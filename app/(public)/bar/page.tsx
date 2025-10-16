@@ -12,6 +12,11 @@ export default function BarPage() {
   const [topPlaces, setTopPlaces] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Establecer título de la página
+  useEffect(() => {
+    document.title = 'Top 10 Bares | Casi Cinco';
+  }, []);
+
   useEffect(() => {
     const fetchTopBars = async () => {
       try {
