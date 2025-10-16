@@ -7,6 +7,9 @@ import { Badge } from '@/components/ui/Badge';
 // Importar todas las ciudades del archivo estático
 import { getAllCities, type CityData } from '@/lib/indexation/cities-database';
 
+// Tipo extendido que incluye la provincia
+type CityWithProvince = CityData & { province: string };
+
 interface CityMultiSelectorProps {
   selectedCities: string[];
   onCitiesChange: (cities: string[]) => void;
@@ -31,7 +34,7 @@ export function CityMultiSelector({ selectedCities, onCitiesChange }: CityMultiS
 
   // Agrupar por provincias para mejor organización
   const citiesByProvince = useMemo(() => {
-    const grouped: Record<string, CityData[]> = {};
+    const grouped: Record<string, CityWithProvince[]> = {};
     
     filteredCities.forEach(city => {
       if (!grouped[city.province]) {
