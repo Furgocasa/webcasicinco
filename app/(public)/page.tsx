@@ -147,54 +147,102 @@ export default function HomePage() {
         </section>
 
         {/* PROBLEMA + SOLUCIÓN */}
-        <section className="py-20 bg-white">
+        <section className="py-20 bg-gray-50">
           <div className="container mx-auto px-4">
             <div className="max-w-6xl mx-auto">
-              {/* Problem */}
+              {/* Título */}
               <div className="text-center mb-16">
-                <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-6">
                   El Problema de Elegir
                 </h2>
-                <div className="max-w-3xl mx-auto space-y-4">
-                  <p className="text-xl text-gray-600">
-                    Abres Google Maps, ves <strong>2,547 resultados</strong>, pasas <strong>30 minutos leyendo reseñas</strong>, 
-                    y al final... eliges uno al azar 🤷
-                  </p>
-                  <p className="text-lg text-gray-500 italic">
-                    "¿Es mejor un 4.9★ con 15 reseñas o un 4.7★ con 2,000 reseñas?"
-                  </p>
-                  <p className="text-base text-gray-600">
-                    <strong className="text-purple-600">Spoiler:</strong> El de 2,000 reseñas. Pero Google no te lo dice. Nosotros sí.
-                  </p>
-                </div>
+                <p className="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
+                  Abres Google Maps, ves <span className="text-[#002196] font-bold">2,547 resultados</span>, 
+                  pasas <span className="text-[#002196] font-bold">30 minutos leyendo reseñas</span>...
+                  <br />
+                  <span className="text-gray-500 mt-2 block">Y al final eliges uno al azar 🤷</span>
+                </p>
               </div>
 
-              {/* Solution Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mb-12">
-                {/* Card 1 */}
-                <Card className="p-8 text-center hover:shadow-xl transition-shadow border-2 border-gray-100 hover:border-purple-200">
-                  <div className="bg-red-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <span className="text-3xl">😰</span>
+              {/* Comparación Antes/Después */}
+              <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+                {/* ANTES - El Problema */}
+                <Card className="relative overflow-hidden">
+                  <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-red-500 to-orange-500"></div>
+                  <div className="p-8">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="bg-red-100 w-14 h-14 rounded-full flex items-center justify-center flex-shrink-0">
+                        <span className="text-3xl">❌</span>
+                      </div>
+                      <h3 className="text-2xl font-bold text-gray-900">Método Tradicional</h3>
+                    </div>
+                    <ul className="space-y-4">
+                      <li className="flex items-start gap-3">
+                        <span className="text-red-500 font-bold mt-1">•</span>
+                        <span className="text-gray-700">Miles de resultados sin filtrar</span>
+                      </li>
+                      <li className="flex items-start gap-3">
+                        <span className="text-red-500 font-bold mt-1">•</span>
+                        <span className="text-gray-700">Información contradictoria</span>
+                      </li>
+                      <li className="flex items-start gap-3">
+                        <span className="text-red-500 font-bold mt-1">•</span>
+                        <span className="text-gray-700">¿4.9★ con 10 reseñas o 4.7★ con 2,000?</span>
+                      </li>
+                      <li className="flex items-start gap-3">
+                        <span className="text-red-500 font-bold mt-1">•</span>
+                        <span className="text-gray-700">30 minutos perdidos</span>
+                      </li>
+                      <li className="flex items-start gap-3">
+                        <span className="text-red-500 font-bold mt-1">•</span>
+                        <span className="text-gray-700 font-semibold">Resultado: Elección al azar</span>
+                      </li>
+                    </ul>
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">El Problema</h3>
-                  <p className="text-gray-600">
-                    Demasiadas opciones, información contradictoria, miedo a equivocarte
-                  </p>
                 </Card>
 
-                {/* Arrow */}
-                <div className="hidden md:flex items-center justify-center">
-                  <ArrowRight className="h-12 w-12 text-purple-400" />
-                </div>
-
-                {/* Card 2 */}
-                <Card className="p-8 text-center hover:shadow-xl transition-shadow border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50">
-                  <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <span className="text-3xl">😍</span>
+                {/* DESPUÉS - La Solución */}
+                <Card className="relative overflow-hidden border-2 border-[#ffd935] shadow-xl">
+                  <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-[#002196] to-[#ffd935]"></div>
+                  <div className="p-8 bg-gradient-to-br from-blue-50 to-yellow-50">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="bg-[#ffd935] w-14 h-14 rounded-full flex items-center justify-center flex-shrink-0">
+                        <span className="text-3xl">✨</span>
+                      </div>
+                      <h3 className="text-2xl font-bold text-[#002196]">Método Casi Cinco</h3>
+                    </div>
+                    <ul className="space-y-4">
+                      <li className="flex items-start gap-3">
+                        <CheckCircle2 className="h-6 w-6 text-[#002196] flex-shrink-0 mt-0.5" />
+                        <span className="text-gray-900 font-medium">Solo 50 opciones (ya filtradas)</span>
+                      </li>
+                      <li className="flex items-start gap-3">
+                        <CheckCircle2 className="h-6 w-6 text-[#002196] flex-shrink-0 mt-0.5" />
+                        <span className="text-gray-900 font-medium">Información clara y objetiva</span>
+                      </li>
+                      <li className="flex items-start gap-3">
+                        <CheckCircle2 className="h-6 w-6 text-[#002196] flex-shrink-0 mt-0.5" />
+                        <span className="text-gray-900 font-medium">Nuestro algoritmo ya decidió por ti</span>
+                      </li>
+                      <li className="flex items-start gap-3">
+                        <CheckCircle2 className="h-6 w-6 text-[#002196] flex-shrink-0 mt-0.5" />
+                        <span className="text-gray-900 font-medium">30 segundos de decisión</span>
+                      </li>
+                      <li className="flex items-start gap-3">
+                        <CheckCircle2 className="h-6 w-6 text-[#002196] flex-shrink-0 mt-0.5" />
+                        <span className="text-gray-900 font-bold">Resultado: Experiencia excepcional</span>
+                      </li>
+                    </ul>
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">Nuestra Solución</h3>
-                  <p className="text-gray-600">
-                    <strong>Solo el top 5%</strong>. Decisión en 2 minutos. Experiencia excepcional garantizada.
+                </Card>
+              </div>
+
+              {/* Spoiler Box */}
+              <div className="mt-12 max-w-3xl mx-auto">
+                <Card className="p-6 bg-[#002196] text-white border-none">
+                  <p className="text-center text-lg">
+                    <span className="text-[#ffd935] font-bold">💡 Spoiler:</span> El de 4.7★ con 2,000 reseñas es objetivamente mejor.
+                    <br />
+                    <span className="text-white/90 mt-2 block">Pero Google no te lo dice. <strong>Nosotros sí.</strong></span>
                   </p>
                 </Card>
               </div>
