@@ -69,7 +69,7 @@ export const metadata: Metadata = {
     },
   },
   verification: {
-    google: 'google-site-verification-code', // Reemplazar con el código real de Search Console
+    google: 'google1a3ec9faf90ba022',
   },
   icons: {
     icon: '/favicon.ico',
