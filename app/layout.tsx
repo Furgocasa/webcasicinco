@@ -72,9 +72,9 @@ export const metadata: Metadata = {
     google: 'google1a3ec9faf90ba022',
   },
   icons: {
-    icon: '/favicon.ico',
-    shortcut: '/favicon-16x16.png',
-    apple: '/apple-touch-icon.png',
+    icon: '/images/favicon.png',
+    shortcut: '/images/favicon.png',
+    apple: '/images/favicon.png',
   },
   manifest: '/manifest.json',
 };
