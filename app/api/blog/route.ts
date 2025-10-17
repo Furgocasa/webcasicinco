@@ -41,7 +41,40 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json({ success: true, posts });
+    // Enriquecer cada post con la foto del primer lugar de su Top 10
+    const enrichedPosts = await Promise.all(
+      (posts || []).map(async (post) => {
+        // Obtener el primer lugar (mejor valorado) para este post
+        let placesQuery = supabase
+          .from('places')
+          .select('photo_reference')
+          .eq('category', post.category)
+          .eq('published', true)
+          .gte('rating', 4.7)
+          .order('rating', { ascending: false })
+          .order('review_count', { ascending: false })
+          .limit(1);
+
+        // Filtrar por ubicación
+        if (post.location_type === 'city') {
+          placesQuery = placesQuery.eq('city', post.location);
+        } else if (post.location_type === 'province') {
+          placesQuery = placesQuery.eq('province', post.location);
+        } else if (post.location_type === 'community') {
+          placesQuery = placesQuery.eq('community', post.location);
+        }
+
+        const { data: places } = await placesQuery;
+        const firstPlace = places && places.length > 0 ? places[0] : null;
+
+        return {
+          ...post,
+          first_place_photo: firstPlace?.photo_reference || null
+        };
+      })
+    );
+
+    return NextResponse.json({ success: true, posts: enrichedPosts });
 
   } catch (error: any) {
     console.error('Error in blog API:', error);

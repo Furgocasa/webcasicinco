@@ -10,6 +10,7 @@ export interface BlogPost {
   conclusion_text?: string;
   keywords: string[];
   featured_image_url?: string;
+  first_place_photo?: string | null; // Photo reference del primer lugar del Top 10
   published: boolean;
   views_count: number;
   created_at: string;

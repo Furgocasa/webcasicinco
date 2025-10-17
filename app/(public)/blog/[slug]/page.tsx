@@ -78,6 +78,11 @@ export default function BlogPostPage() {
     return emojis[category] || '📍';
   };
 
+  // Usar la foto del primer lugar si existe
+  const featuredImage = post.places && post.places.length > 0 && post.places[0].photo_reference
+    ? getPlacePhotoUrl(post.places[0].photo_reference || '', 1200)
+    : post.featured_image_url;
+
   return (
     <>
       <main className="min-h-screen bg-gray-50">
@@ -131,12 +136,12 @@ export default function BlogPostPage() {
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto">
               {/* Imagen destacada */}
-              {post.featured_image_url && (
+              {featuredImage && (
                 <div className="mb-12 rounded-2xl overflow-hidden shadow-xl">
                   <img 
-                    src={post.featured_image_url} 
+                    src={featuredImage} 
                     alt={post.title}
-                    className="w-full h-auto object-cover"
+                    className="w-full h-auto object-cover max-h-[500px]"
                   />
                 </div>
               )}

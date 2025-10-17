@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { BookOpen, MapPin, Calendar, TrendingUp } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import Footer from '@/components/layout/Footer';
+import { getPlacePhotoUrl } from '@/lib/utils/photo-helper';
 import type { BlogPost } from '@/types/blog';
 
 export default function BlogPage() {
@@ -152,30 +153,36 @@ export default function BlogPage() {
               </div>
             ) : (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
-                {posts.map((post) => (
-                  <Link key={post.id} href={`/blog/${post.slug}`}>
-                    <Card className="h-full hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer overflow-hidden">
-                      {/* Imagen destacada */}
-                      {post.featured_image_url && (
-                        <div className="relative h-48 bg-gray-200 overflow-hidden">
-                          <img 
-                            src={post.featured_image_url} 
-                            alt={post.title}
-                            className="w-full h-full object-cover"
-                          />
-                          {/* Badge de categoría sobre la imagen */}
-                          <div className="absolute top-3 left-3 flex items-center gap-2 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-lg shadow-lg">
-                            <span className="text-xl">{getCategoryEmoji(post.category)}</span>
-                            <span className="text-xs font-semibold text-indigo-600">
-                              {getCategoryLabel(post.category)}
-                            </span>
+                {posts.map((post) => {
+                  // Usar la foto del primer lugar si existe, si no usar featured_image_url
+                  const imageUrl = post.first_place_photo 
+                    ? getPlacePhotoUrl(post.first_place_photo, 800)
+                    : post.featured_image_url;
+
+                  return (
+                    <Link key={post.id} href={`/blog/${post.slug}`}>
+                      <Card className="h-full hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer overflow-hidden">
+                        {/* Imagen destacada */}
+                        {imageUrl && (
+                          <div className="relative h-48 bg-gray-200 overflow-hidden">
+                            <img 
+                              src={imageUrl} 
+                              alt={post.title}
+                              className="w-full h-full object-cover"
+                            />
+                            {/* Badge de categoría sobre la imagen */}
+                            <div className="absolute top-3 left-3 flex items-center gap-2 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-lg shadow-lg">
+                              <span className="text-xl">{getCategoryEmoji(post.category)}</span>
+                              <span className="text-xs font-semibold text-indigo-600">
+                                {getCategoryLabel(post.category)}
+                              </span>
+                            </div>
                           </div>
-                        </div>
-                      )}
+                        )}
                       
                       <div className="p-6">
                         {/* Categoría badge (solo si no hay imagen) */}
-                        {!post.featured_image_url && (
+                        {!imageUrl && (
                           <div className="flex items-center gap-2 mb-4">
                             <span className="text-2xl">{getCategoryEmoji(post.category)}</span>
                             <span className="text-sm font-medium text-indigo-600">
@@ -214,7 +221,8 @@ export default function BlogPage() {
                       </div>
                     </Card>
                   </Link>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
