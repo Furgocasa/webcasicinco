@@ -80,6 +80,43 @@ export async function PATCH(request: NextRequest) {
 }
 
 /**
+ * POST /api/admin/blog
+ * Crea un nuevo post
+ */
+export async function POST(request: NextRequest) {
+  try {
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    
+    if (authError || !user || user.user_metadata?.role !== 'admin') {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
+
+    const postData = await request.json();
+
+    const adminSupabase = createAdminClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
+    const { data, error } = await adminSupabase
+      .from('blog_posts')
+      .insert(postData)
+      .select()
+      .single();
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true, post: data });
+
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
+/**
  * DELETE /api/admin/blog
  * Elimina un post
  */

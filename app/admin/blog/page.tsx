@@ -153,14 +153,23 @@ export default function AdminBlogPage() {
               </h1>
               <p className="text-gray-600 mt-1">Administra los artículos del blog</p>
             </div>
-            <Button
-              onClick={() => router.push('/blog')}
-              variant="outline"
-              size="sm"
-            >
-              <Eye className="h-4 w-4 mr-2" />
-              Ver Blog Público
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                onClick={() => router.push('/admin/blog/nuevo')}
+                size="sm"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Nuevo Post
+              </Button>
+              <Button
+                onClick={() => router.push('/blog')}
+                variant="outline"
+                size="sm"
+              >
+                <Eye className="h-4 w-4 mr-2" />
+                Ver Blog Público
+              </Button>
+            </div>
           </div>
 
           {/* Stats */}
@@ -331,9 +340,18 @@ export default function AdminBlogPage() {
                     <td className="px-6 py-4 text-right">
                       <div className="flex justify-end gap-2">
                         <Button
+                          onClick={() => router.push(`/admin/blog/${post.id}`)}
+                          variant="ghost"
+                          size="sm"
+                          title="Editar"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
                           onClick={() => window.open(`/blog/${post.slug}`, '_blank')}
                           variant="ghost"
                           size="sm"
+                          title="Ver"
                         >
                           <Eye className="h-4 w-4" />
                         </Button>
@@ -341,6 +359,7 @@ export default function AdminBlogPage() {
                           onClick={() => togglePublished(post.id, post.published)}
                           variant="ghost"
                           size="sm"
+                          title={post.published ? 'Ocultar' : 'Publicar'}
                         >
                           {post.published ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                         </Button>
@@ -349,6 +368,7 @@ export default function AdminBlogPage() {
                           variant="ghost"
                           size="sm"
                           className="text-red-600 hover:text-red-700"
+                          title="Eliminar"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
