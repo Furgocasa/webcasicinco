@@ -33,6 +33,7 @@ import { calculateQualityTier, getTierInfo } from '@/lib/utils/tier-calculator';
 import { MarkdownText } from '@/lib/utils/markdown';
 import { getPlacePhotoUrl } from '@/lib/utils/photo-helper';
 import { toast } from 'sonner';
+import { trackEvent, EVENTS, CATEGORIES } from '@/lib/analytics/tracker';
 
 const libraries: ("places")[] = ["places"];
 
@@ -392,6 +393,15 @@ export default function PlaceDetailPage() {
                 {place.phone && (
                   <a 
                     href={`tel:${place.phone}`}
+                    onClick={() => {
+                      // 🎯 Trackear click en teléfono
+                      trackEvent(EVENTS.PHONE_CLICK, CATEGORIES.PLACE, {
+                        place_id: place.id,
+                        place_name: place.name,
+                        place_category: place.category,
+                        place_city: place.city
+                      });
+                    }}
                     className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg transition group"
                   >
                     <Phone className="h-5 w-5 text-indigo-600" />
@@ -404,6 +414,16 @@ export default function PlaceDetailPage() {
                     href={place.website}
                     target="_blank"
                     rel="noopener noreferrer"
+                    onClick={() => {
+                      // 🎯 Trackear click en website
+                      trackEvent(EVENTS.WEBSITE_CLICK, CATEGORIES.PLACE, {
+                        place_id: place.id,
+                        place_name: place.name,
+                        place_category: place.category,
+                        place_city: place.city,
+                        website_url: place.website
+                      });
+                    }}
                     className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg transition group"
                   >
                     <Globe className="h-5 w-5 text-indigo-600" />
@@ -525,7 +545,16 @@ export default function PlaceDetailPage() {
                 
                 {place.google_maps_url && (
                   <Button
-                    onClick={() => window.open(place.google_maps_url, '_blank')}
+                    onClick={() => {
+                      // 🎯 Trackear click en directions (Google Maps)
+                      trackEvent(EVENTS.DIRECTIONS_CLICK, CATEGORIES.PLACE, {
+                        place_id: place.id,
+                        place_name: place.name,
+                        place_category: place.category,
+                        place_city: place.city
+                      });
+                      window.open(place.google_maps_url, '_blank');
+                    }}
                     variant="outline"
                     className="w-full"
                   >

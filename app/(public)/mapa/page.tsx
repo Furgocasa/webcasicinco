@@ -24,6 +24,7 @@ import BottomNavigation from '@/components/mobile/BottomNavigation';
 import BottomSheet from '@/components/mobile/BottomSheet';
 import type { PlaceWithTier, PlaceFilters, QualityTier, ReviewsRange } from '@/types/filters';
 import { calculateQualityTier, getTierMarkerColor, getTierInfo } from '@/lib/utils/tier-calculator';
+import { trackEvent, EVENTS, CATEGORIES } from '@/lib/analytics/tracker';
 import { 
   QUALITY_TIERS, 
   REVIEWS_RANGES, 
@@ -988,6 +989,17 @@ export default function MapPage() {
 
   // Manejar click en marcador
   const handleMarkerClick = (place: PlaceWithTier) => {
+    // 🎯 Trackear click en marcador del mapa
+    trackEvent(EVENTS.PLACE_VIEW, CATEGORIES.PLACE, {
+      place_id: place.id,
+      place_name: place.name,
+      place_category: place.category,
+      place_city: place.city,
+      place_rating: place.rating,
+      place_tier: place.tier,
+      source: 'map_marker'
+    });
+    
     // Primero centrar el mapa en el lugar
     if (mapRef.current) {
       mapRef.current.panTo({ lat: place.latitude, lng: place.longitude });
@@ -997,6 +1009,25 @@ export default function MapPage() {
     setTimeout(() => {
       setSelectedPlace(place);
     }, 300);
+  };
+
+  // 🎯 Manejar cierre de filtros móviles (trackear búsqueda finalizada)
+  const handleCloseMobileFilters = () => {
+    // Trackear búsqueda finalizada con todos los filtros aplicados
+    trackEvent(EVENTS.SEARCH_FINALIZED, CATEGORIES.SEARCH, {
+      category: filters.category,
+      search_term: filters.searchTerm,
+      community: filters.community,
+      province: filters.province,
+      city: filters.city,
+      quality_tier: filters.qualityTier,
+      reviews_range: filters.reviewsRange,
+      price_levels: filters.priceLevels,
+      results_count: filteredPlaces.length,
+      has_filters: activeFiltersCount > 0
+    });
+    
+    setMobileView('map');
   };
 
   // Añadir a favoritos
@@ -2157,7 +2188,7 @@ export default function MapPage() {
       {/* BOTTOM SHEET - Filtros Mobile */}
       <BottomSheet
         isOpen={mobileView === 'filters'}
-        onClose={() => setMobileView('map')}
+        onClose={handleCloseMobileFilters}
         title="Filtros"
         height="full"
       >
