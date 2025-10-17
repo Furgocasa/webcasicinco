@@ -76,7 +76,8 @@ export async function DELETE(request: NextRequest) {
       data: { user },
     } = await supabase.auth.getUser();
 
-    // ✅ SOFT DELETE: Marcar como inactivo en lugar de borrar
+    // ✅ SOFT DELETE MEJORADO: Marcar TODOS los mensajes como inactivos (no solo los activos)
+    // Esto soluciona el bug donde mensajes viejos reaparecían al recargar
     let query = supabase
       .from('chat_history')
       .update({ 
@@ -95,10 +96,10 @@ export async function DELETE(request: NextRequest) {
       });
     }
 
-    // Solo marcar como inactivo los que estén activos
-    query = query.eq('is_active', true);
+    // 🆕 CAMBIO CRÍTICO: NO filtrar por is_active = true
+    // Marcamos TODOS los mensajes del usuario/sesión como inactivos
 
-    const { error } = await query;
+    const { error, count } = await query;
 
     if (error) {
       console.error('Error marcando historial como obsoleto:', error);
@@ -108,11 +109,12 @@ export async function DELETE(request: NextRequest) {
       }, { status: 500 });
     }
 
-    console.log(`✅ Conversación ${user ? `usuario ${user.email}` : `sesión ${session_id}`} marcada como obsoleta`);
+    console.log(`✅ ${count || 0} mensajes de conversación ${user ? `usuario ${user.email}` : `sesión ${session_id}`} marcados como obsoletos`);
 
     return NextResponse.json({
       success: true,
       message: 'Conversación finalizada correctamente',
+      deletedCount: count || 0,
     });
 
   } catch (error: any) {

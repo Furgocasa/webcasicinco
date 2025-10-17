@@ -58,14 +58,22 @@ const mapContainerStyle = {
   height: '100%',
 };
 
-// Centro de España para vista inicial (más al norte para mejor vista del norte de España)
+// Centro de España para vista inicial (más al norte para mejor vista móvil)
 const defaultCenter = {
-  lat: 40.0,  // Centrado para ver toda la península con énfasis en el norte
+  lat: 40.5,  // ✅ Subido para mejor vista del norte en móvil
   lng: -3.7038,  // Madrid
 };
 
-// Límites del mapa para mantener vista en España (incluyendo Canarias y Baleares)
-const SPAIN_BOUNDS = {
+// Límites del mapa para península ibérica (mejor UX móvil)
+const SPAIN_BOUNDS_PENINSULA = {
+  north: 43.8,    // Norte de España (Costa Vasca)
+  south: 36.0,    // Sur de Andalucía (Tarifa)
+  west: -9.5,     // Galicia (Cabo Finisterre)
+  east: 3.5,      // Cataluña/Girona
+};
+
+// Límites completos incluyendo Canarias y Baleares (para desktop)
+const SPAIN_BOUNDS_FULL = {
   north: 44.5,    // Más al norte para ver mejor Galicia, Asturias, País Vasco
   south: 27.5,    // Sur de Canarias (El Hierro)
   west: -18.5,    // Oeste de Canarias (La Palma)
@@ -85,6 +93,17 @@ export default function MapPage() {
     document.title = 'Mapa de Lugares | Casi Cinco';
   }, []);
 
+  // ✅ Detectar si es móvil para ajustar límites del mapa
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   // ✅ OPTIMIZACIÓN: Usar contexto del mapa (ahorro 66% en navegaciones)
   const { isLoaded, loadError } = useMap();
 
@@ -96,6 +115,7 @@ export default function MapPage() {
   const [showFilters, setShowFilters] = useState(true);
   const [showPlacesList, setShowPlacesList] = useState(true);
   const [mapReady, setMapReady] = useState(false); // ✅ Nuevo: saber cuándo el mapa está listo
+  const [isMobile, setIsMobile] = useState(false); // ✅ Detectar dispositivo móvil
   
   // Vista móvil: 'map', 'filters', 'list'
   const [mobileView, setMobileView] = useState<'map' | 'filters' | 'list'>('map');
@@ -1637,11 +1657,11 @@ export default function MapPage() {
               mapTypeControl: false,
               streetViewControl: false,
               fullscreenControl: true,
-              minZoom: 5, // Permitir ver toda España con islas
+              minZoom: isMobile ? 6 : 5, // ✅ Zoom mínimo más alto en móvil para mejor navegación vertical
               maxZoom: 18,
               restriction: {
-                latLngBounds: SPAIN_BOUNDS,
-                strictBounds: false, // Permite ver toda España incluyendo Canarias y Baleares
+                latLngBounds: isMobile ? SPAIN_BOUNDS_PENINSULA : SPAIN_BOUNDS_FULL, // ✅ Límites según dispositivo
+                strictBounds: false, // Permite scroll flexible
               },
               gestureHandling: 'greedy', // Permite desplazar con 1 dedo y zoom con 2 dedos en móvil
             }}

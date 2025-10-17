@@ -13,6 +13,7 @@ type SearchParams = {
   limit: number;
   excludeCity?: string;
   isNationalRanking?: boolean;
+  textSearch?: string; // 🆕 Búsqueda textual en ai_description para subcategorías (cocina mexicana, italiana, etc.)
 };
 
 const CATEGORY_SYNONYMS: Record<string, string[]> = {
@@ -59,9 +60,38 @@ function detectCategory(message: string): string | undefined {
 function parseIntent(message: string): {
   category?: string; city?: string; province?: string; region?: string;
   topN?: number; excludeCapital?: boolean; explicitProvince?: boolean;
+  textSearch?: string; // 🆕 Para búsqueda de subcategorías
 } {
   const msg = message.toLowerCase();
   const category = detectCategory(msg);
+  
+  // 🆕 Detectar términos de búsqueda textual para subcategorías de cocina
+  let textSearch: string | undefined;
+  
+  const cuisineKeywords: Record<string, string[]> = {
+    'mexicana': ['mexicana', 'mexicano', 'mejicana', 'mejicano', 'tacos', 'burritos', 'tex-mex', 'azteca'],
+    'italiana': ['italiana', 'italiano', 'pizza', 'pasta', 'pizzería', 'pizzeria', 'trattoria', 'osteria', 'ristorante'],
+    'japonesa': ['japonesa', 'japones', 'japonés', 'sushi', 'ramen', 'yakitori', 'izakaya', 'nikkei'],
+    'china': ['china', 'chino', 'wok', 'dim sum', 'cantones', 'cantonés'],
+    'india': ['india', 'indio', 'hindu', 'hindú', 'curry', 'tandoori', 'masala'],
+    'mariscos': ['mariscos', 'marisco', 'pescado', 'marisquería', 'marisqueria', 'pescadería', 'pescaderia'],
+    'vegetariana': ['vegetariana', 'vegetariano', 'vegano', 'vegana', 'vegan'],
+    'tapas': ['tapas', 'pinchos', 'pintxos', 'taberna'],
+    'asador': ['asador', 'parrilla', 'carne', 'brasa', 'churrasco', 'churrascaria'],
+    'mediterránea': ['mediterránea', 'mediterranea'],
+    'francesa': ['francesa', 'frances', 'francés', 'bistro', 'brasserie'],
+    'peruana': ['peruana', 'peruano', 'ceviche', 'pisco'],
+    'argentina': ['argentina', 'argentino', 'pampa'],
+    'árabe': ['árabe', 'arabe', 'libanesa', 'libanes', 'kebab', 'falafel'],
+    'fusión': ['fusión', 'fusion', 'contemporánea', 'contemporanea', 'creativa'],
+  };
+
+  for (const [cuisine, keywords] of Object.entries(cuisineKeywords)) {
+    if (keywords.some(k => msg.includes(k))) {
+      textSearch = cuisine;
+      break;
+    }
+  }
   
   // Detectar número específico: "top 5", "mejores 10", etc.
   const topMatch = msg.match(/(?:top|mejores?)\s*(\d+)/);
@@ -102,13 +132,13 @@ function parseIntent(message: string): {
   const excludeCapital = /fuera de la capital|resto de la provincia|sin capital|pueblos|municipios|afueras de|alrededores de|cercan[ií]as de|cerca de (?!.*\ben\b)|extrarradio|fuera de la ciudad|provincia de \w+ pero no en|cerca pero no en/.test(msg);
   const finalCity = explicitProvince ? undefined : city;
 
-  return { category, city: finalCity, province, region, topN, excludeCapital, explicitProvince };
+  return { category, city: finalCity, province, region, topN, excludeCapital, explicitProvince, textSearch };
 }
 
 async function searchPlacesTool(supabase: any, params: SearchParams) {
   let query = supabase
     .from('places')
-    .select('id, name, slug, category, rating, review_count, city, province, region, address, phone, website')
+    .select('id, name, slug, category, rating, review_count, city, province, region, address, phone, website, ai_description, subcategory')
     .eq('published', true);
 
   if (params.category) query = query.eq('category', params.category);
@@ -116,6 +146,13 @@ async function searchPlacesTool(supabase: any, params: SearchParams) {
   if (params.province) query = query.eq('province', params.province);
   if (params.provinces && params.provinces.length > 0) query = query.in('province', params.provinces);
   if (params.excludeCity) query = query.neq('city', params.excludeCity);
+
+  // 🆕 BÚSQUEDA TEXTUAL POR SUBCATEGORÍA (cocina mexicana, italiana, japonesa, etc.)
+  if (params.textSearch) {
+    // Primero intentar buscar en subcategory (exacto, más rápido)
+    // Si no hay, buscar en ai_description, name, ai_review_summary (texto)
+    query = query.or(`subcategory.eq.${params.textSearch},ai_description.ilike.%${params.textSearch}%,name.ilike.%${params.textSearch}%,ai_review_summary.ilike.%${params.textSearch}%`);
+  }
 
   // Sistema de tiers flexible:
   // - Búsquedas específicas (ciudad/provincia): mínimo 50 reseñas (Tier Bronce)
@@ -326,6 +363,7 @@ export async function POST(request: NextRequest) {
         category: requestedCategory,
         province: intent.province,
         excludeCity: capitalToExclude,
+        textSearch: intent.textSearch, // 🆕 Búsqueda por subcategoría
         limit: contextLimit,
       });
     }
@@ -333,6 +371,7 @@ export async function POST(request: NextRequest) {
       candidates = await searchPlacesTool(supabase, {
         category: requestedCategory,
         city: intent.city,
+        textSearch: intent.textSearch, // 🆕 Búsqueda por subcategoría
         limit: contextLimit,
       });
     }
@@ -340,6 +379,7 @@ export async function POST(request: NextRequest) {
       candidates = await searchPlacesTool(supabase, {
         category: requestedCategory,
         province: intent.province,
+        textSearch: intent.textSearch, // 🆕 Búsqueda por subcategoría
         limit: contextLimit,
       });
     }
@@ -347,6 +387,7 @@ export async function POST(request: NextRequest) {
       candidates = await searchPlacesTool(supabase, {
         category: requestedCategory,
         provinces: provincesFromRegion,
+        textSearch: intent.textSearch, // 🆕 Búsqueda por subcategoría
         limit: contextLimit,
       });
     }
@@ -356,6 +397,7 @@ export async function POST(request: NextRequest) {
         candidates = await searchPlacesTool(supabase, {
           category: requestedCategory,
           provinces: near,
+          textSearch: intent.textSearch, // 🆕 Búsqueda por subcategoría
           limit: contextLimit,
         });
       }
@@ -363,6 +405,7 @@ export async function POST(request: NextRequest) {
     if (candidates.length === 0 && requestedCategory) {
       candidates = await searchPlacesTool(supabase, {
         category: requestedCategory,
+        textSearch: intent.textSearch, // 🆕 Búsqueda por subcategoría
         limit: contextLimit,
         isNationalRanking: true,  // Fallback nacional: mínimo 500 reseñas
       });
@@ -379,6 +422,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Usar candidates como contexto específico para esta pregunta
+    const startTime = Date.now();
     const response = await chatbotResponse(
       message,
       conversation_history || [],
@@ -387,6 +431,7 @@ export async function POST(request: NextRequest) {
         places: candidates.length ? candidates : context.places,
       }
     );
+    const queryTimeMs = Date.now() - startTime;
 
     // Guardar mensaje del usuario en la base de datos
     await supabase.from('chat_history').insert({
@@ -405,6 +450,24 @@ export async function POST(request: NextRequest) {
       message: response,
       is_active: true, // ✅ Nueva conversación = activa
     });
+
+    // 📊 Guardar en analytics para análisis posterior
+    try {
+      await supabase.from('chatbot_analytics').insert({
+        user_id: user?.id || null,
+        user_email: user?.email || null,
+        session_id: !user ? session_id : null,
+        user_message: message,
+        bot_response: response,
+        conversation_context: conversation_history.slice(-6), // Últimos 3 pares (6 mensajes)
+        detected_intent: intent,
+        places_found: candidates.length,
+        query_time_ms: queryTimeMs,
+      });
+    } catch (analyticsError) {
+      // No fallar si hay error en analytics
+      console.error('Error guardando analytics:', analyticsError);
+    }
 
     return NextResponse.json({
       success: true,
