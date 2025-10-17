@@ -72,6 +72,27 @@ const POSTS_TO_GENERATE: PostConfig[] = [
 ];
 
 // ================================================================
+// GENERACIÓN DE IMÁGENES
+// ================================================================
+
+function generateFeaturedImageUrl(config: PostConfig): string {
+  // Usar Unsplash Source API para imágenes relevantes y gratuitas
+  const searchTerms: Record<string, string> = {
+    restaurante: 'restaurant,food,dining',
+    bar: 'bar,cocktail,drinks',
+    cafe: 'cafe,coffee,espresso',
+    hotel: 'hotel,luxury,accommodation'
+  };
+  
+  const terms = searchTerms[config.category];
+  const location = config.location.toLowerCase();
+  
+  // Unsplash Source API - Imágenes aleatorias de alta calidad
+  // https://source.unsplash.com/featured/?{query}
+  return `https://source.unsplash.com/1200x600/?${terms},${location},spain`;
+}
+
+// ================================================================
 // GENERACIÓN DE CONTENIDO CON IA
 // ================================================================
 
@@ -217,6 +238,10 @@ async function generatePosts() {
       console.log('   🤖 Generando intro con OpenAI...');
       const introText = await generateIntro(config);
 
+      // Generar URL de imagen
+      const featuredImageUrl = generateFeaturedImageUrl(config);
+      console.log('   🖼️  Imagen destacada: Unsplash');
+
       // Insertar en base de datos
       const { error } = await supabase
         .from('blog_posts')
@@ -229,6 +254,7 @@ async function generatePosts() {
           location_type: config.locationType,
           intro_text: introText,
           keywords: generateKeywords(config),
+          featured_image_url: featuredImageUrl,
           published: true
         });
 
