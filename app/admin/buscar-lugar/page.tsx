@@ -1,0 +1,355 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { GoogleMap, Marker } from '@react-google-maps/api';
+import { useMap } from '@/lib/contexts/MapContext';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
+import { Search, MapPin, Star, Phone, Globe, DollarSign, Loader2, AlertCircle } from 'lucide-react';
+import { toast } from 'sonner';
+
+export default function BuscarLugarPage() {
+  useEffect(() => {
+    document.title = 'Búsqueda Manual | Admin';
+  }, []);
+
+  const { isLoaded, loadError } = useMap();
+
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searching, setSearching] = useState(false);
+  const [results, setResults] = useState<any[]>([]);
+  const [selectedPlace, setSelectedPlace] = useState<any>(null);
+  const [adding, setAdding] = useState(false);
+  const [totalCost, setTotalCost] = useState(0);
+
+  const handleSearch = async () => {
+    if (!searchTerm || searchTerm.length < 3) {
+      toast.error('Escribe al menos 3 caracteres');
+      return;
+    }
+
+    setSearching(true);
+    setResults([]);
+    setSelectedPlace(null);
+
+    try {
+      const res = await fetch('/api/admin/search-manual', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ searchTerm }),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        setResults(data.places);
+        setTotalCost(prev => prev + data.cost);
+        
+        if (data.count === 0) {
+          toast.warning('No se encontraron lugares con ≥4.7★');
+        } else {
+          toast.success(`${data.count} lugares encontrados con ≥4.7★`);
+        }
+      } else {
+        toast.error(data.error || 'No se encontraron resultados');
+        setResults([]);
+      }
+    } catch (error) {
+      toast.error('Error en la búsqueda');
+      setResults([]);
+    } finally {
+      setSearching(false);
+    }
+  };
+
+  const handleAddPlace = async () => {
+    if (!selectedPlace) return;
+
+    setAdding(true);
+    try {
+      const res = await fetch('/api/admin/add-manual-place', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ place_id: selectedPlace.place_id }),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        setTotalCost(prev => prev + data.cost);
+        toast.success('✅ Lugar añadido! Pendiente de enriquecimiento IA');
+        
+        // Quitar de resultados
+        setResults(results.filter(p => p.place_id !== selectedPlace.place_id));
+        setSelectedPlace(null);
+      } else {
+        toast.error(data.error);
+      }
+    } catch (error) {
+      toast.error('Error añadiendo lugar');
+    } finally {
+      setAdding(false);
+    }
+  };
+
+  if (loadError) {
+    return (
+      <div className="container mx-auto p-6">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="text-red-600">Error cargando Google Maps</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container mx-auto p-6 max-w-7xl">
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold">🔍 Búsqueda Manual de Lugares</h1>
+        <p className="text-gray-600 mt-2">
+          Busca y añade lugares de calidad que no estén indexados
+        </p>
+      </div>
+
+      {/* Barra de búsqueda */}
+      <Card className="mb-6">
+        <CardContent className="pt-6">
+          <div className="flex gap-3">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Ej: Restaurante El Patio, Madrid"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
+                disabled={searching}
+              />
+            </div>
+            <Button onClick={handleSearch} disabled={searching} size="lg">
+              {searching ? (
+                <>
+                  <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                  Buscando...
+                </>
+              ) : (
+                <>
+                  <Search className="h-5 w-5 mr-2" />
+                  Buscar
+                </>
+              )}
+            </Button>
+          </div>
+          <div className="flex items-center justify-between mt-3">
+            <p className="text-xs text-gray-500">
+              💰 Coste de esta sesión: ${totalCost.toFixed(3)}
+            </p>
+            <p className="text-xs text-gray-500">
+              Solo se muestran lugares con ≥4.7★
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="grid md:grid-cols-2 gap-6">
+        {/* Lista de resultados */}
+        <div>
+          <h2 className="text-xl font-bold mb-4">
+            📋 Resultados 
+            {results.length > 0 && ` (${results.length})`}
+          </h2>
+          
+          {results.length === 0 ? (
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-center text-gray-500 py-8">
+                  <Search className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                  <p>Busca un lugar para ver resultados</p>
+                  <p className="text-sm mt-2">
+                    Ejemplos: "Restaurante La Viña, San Sebastián" o "Hotel Ritz, Madrid"
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2">
+              {results.map((place) => (
+                <Card
+                  key={place.place_id}
+                  className={`cursor-pointer transition ${
+                    selectedPlace?.place_id === place.place_id
+                      ? 'border-primary border-2 shadow-md'
+                      : 'hover:border-gray-300 hover:shadow'
+                  }`}
+                  onClick={() => setSelectedPlace(place)}
+                >
+                  <CardContent className="pt-4">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <h3 className="font-bold text-gray-900">{place.name}</h3>
+                        <div className="flex items-center gap-2 text-sm mt-1">
+                          <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
+                          <span className="font-semibold">{place.rating}★</span>
+                          <span className="text-gray-500">({place.user_ratings_total} reseñas)</span>
+                        </div>
+                        <p className="text-sm text-gray-600 mt-2 line-clamp-2">
+                          {place.address}
+                        </p>
+                      </div>
+                      {selectedPlace?.place_id === place.place_id && (
+                        <div className="ml-3">
+                          <div className="w-3 h-3 bg-primary rounded-full animate-pulse"></div>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Mapa + Detalles */}
+        <div>
+          <h2 className="text-xl font-bold mb-4">🗺️ Mapa</h2>
+          
+          {!isLoaded ? (
+            <Card>
+              <CardContent className="pt-6">
+                <div className="h-[300px] flex items-center justify-center">
+                  <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <>
+              {/* Mapa */}
+              <Card className="mb-4">
+                <div className="h-[300px] rounded-lg overflow-hidden">
+                  <GoogleMap
+                    mapContainerStyle={{ width: '100%', height: '100%' }}
+                    center={
+                      selectedPlace
+                        ? selectedPlace.location
+                        : { lat: 40.4168, lng: -3.7038 }
+                    }
+                    zoom={selectedPlace ? 15 : 6}
+                    options={{
+                      mapTypeControl: false,
+                      streetViewControl: false,
+                      fullscreenControl: false,
+                    }}
+                  >
+                    {results.map((place) => (
+                      <Marker
+                        key={place.place_id}
+                        position={place.location}
+                        onClick={() => setSelectedPlace(place)}
+                        icon={{
+                          url: place.place_id === selectedPlace?.place_id
+                            ? 'http://maps.google.com/mapfiles/ms/icons/red-dot.png'
+                            : 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+                        }}
+                      />
+                    ))}
+                  </GoogleMap>
+                </div>
+              </Card>
+
+              {/* Detalles del lugar seleccionado */}
+              {selectedPlace && (
+                <Card className="border-primary">
+                  <CardHeader>
+                    <CardTitle className="flex items-start justify-between">
+                      <span className="flex-1">{selectedPlace.name}</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <Star className="h-5 w-5 text-yellow-500 fill-yellow-500" />
+                        <span className="font-bold text-lg">{selectedPlace.rating}★</span>
+                        <span className="text-gray-600">
+                          ({selectedPlace.user_ratings_total} reseñas)
+                        </span>
+                      </div>
+
+                      <div className="flex items-start gap-2 text-sm">
+                        <MapPin className="h-4 w-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                        <span className="text-gray-700">{selectedPlace.address}</span>
+                      </div>
+
+                      {selectedPlace.rating >= 4.7 ? (
+                        <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                          <p className="text-sm text-green-800 font-medium">
+                            ✅ Cumple requisitos (≥4.7★)
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                          <p className="text-sm text-red-800 font-medium">
+                            ❌ No cumple requisitos (&lt;4.7★)
+                          </p>
+                        </div>
+                      )}
+
+                      <div className="pt-3 flex gap-2">
+                        <Button
+                          onClick={handleAddPlace}
+                          disabled={adding || selectedPlace.rating < 4.7}
+                          className="flex-1"
+                          size="lg"
+                        >
+                          {adding ? (
+                            <>
+                              <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                              Añadiendo...
+                            </>
+                          ) : (
+                            <>
+                              ✅ Añadir Lugar
+                            </>
+                          )}
+                        </Button>
+                        <Button
+                          onClick={() => setSelectedPlace(null)}
+                          variant="outline"
+                        >
+                          Cancelar
+                        </Button>
+                      </div>
+
+                      <p className="text-xs text-gray-500 text-center">
+                        Se añadirá como borrador pendiente de enriquecimiento IA
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Información adicional */}
+      <Card className="mt-6 border-blue-200 bg-blue-50">
+        <CardContent className="pt-4">
+          <div className="flex gap-3">
+            <AlertCircle className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+            <div className="text-sm text-blue-900">
+              <p className="font-semibold mb-1">💡 Información:</p>
+              <ul className="space-y-1 text-blue-800">
+                <li>• Solo se muestran lugares con rating ≥4.7★</li>
+                <li>• Los lugares se añaden como borradores (no publicados)</li>
+                <li>• Necesitarás enriquecerlos con IA antes de publicar</li>
+                <li>• Coste: $0.032 por búsqueda + $0.017 por lugar añadido</li>
+              </ul>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+

@@ -15,6 +15,11 @@ const menuItems = [
     icon: '🔍',
   },
   {
+    name: 'Búsqueda Manual',
+    href: '/admin/buscar-lugar',
+    icon: '🎯',
+  },
+  {
     name: 'Actualizar Ratings',
     href: '/admin/update-ratings',
     icon: '⭐',

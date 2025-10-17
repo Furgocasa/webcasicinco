@@ -1,0 +1,141 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/server';
+import { getPlaceDetails } from '@/lib/google/places';
+import { generatePlaceSlug } from '@/lib/utils/slug-generator';
+
+export const dynamic = 'force-dynamic';
+
+/**
+ * POST - Añadir lugar manualmente desde búsqueda
+ * Inserta el lugar como borrador pendiente de enriquecimiento IA
+ */
+export async function POST(request: NextRequest) {
+  try {
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    
+    if (authError || !user || user.user_metadata?.role !== 'admin') {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
+
+    const { place_id } = await request.json();
+
+    if (!place_id) {
+      return NextResponse.json({ error: 'place_id requerido' }, { status: 400 });
+    }
+
+    // Verificar que no exista ya
+    const adminSupabase = createAdminClient();
+    const { data: existing } = await adminSupabase
+      .from('places')
+      .select('id, name')
+      .eq('google_place_id', place_id)
+      .maybeSingle();
+
+    if (existing) {
+      return NextResponse.json({ 
+        error: `Este lugar ya existe en la base de datos: "${existing.name}"` 
+      }, { status: 400 });
+    }
+
+    // Obtener detalles completos del lugar
+    const placeDetails = await getPlaceDetails(place_id);
+
+    // Verificar requisitos
+    if (placeDetails.rating < 4.7) {
+      return NextResponse.json({ 
+        error: `El lugar no cumple el requisito mínimo de 4.7★ (tiene ${placeDetails.rating}★)` 
+      }, { status: 400 });
+    }
+
+    // Determinar categoría
+    let category = 'restaurante';
+    const types = placeDetails.types || [];
+    if (types.includes('bar') || types.includes('night_club')) {
+      category = 'bar';
+    } else if (types.includes('cafe') || types.includes('coffee_shop')) {
+      category = 'cafe';
+    } else if (types.includes('lodging') || types.includes('hotel')) {
+      category = 'hotel';
+    }
+
+    // Extraer ubicación
+    const addressComponents = placeDetails.address_components || [];
+    let province = '';
+    let city = '';
+    let country = '';
+    
+    for (const component of addressComponents) {
+      if (component.types.includes('administrative_area_level_2')) {
+        province = component.long_name;
+      }
+      if (component.types.includes('locality')) {
+        city = component.long_name;
+      }
+      if (component.types.includes('country')) {
+        country = component.long_name;
+      }
+    }
+
+    // Verificar que sea de España
+    if (country && country !== 'España' && country !== 'Spain') {
+      return NextResponse.json({
+        error: `Este lugar no está en España (está en ${country})`
+      }, { status: 400 });
+    }
+
+    const slug = generatePlaceSlug(placeDetails.name, city || province);
+
+    // Preparar datos del lugar
+    const placeData = {
+      google_place_id: place_id,
+      name: placeDetails.name,
+      slug,
+      category,
+      rating: placeDetails.rating,
+      review_count: placeDetails.user_ratings_total || 0,
+      address: placeDetails.formatted_address,
+      latitude: placeDetails.geometry.location.lat,
+      longitude: placeDetails.geometry.location.lng,
+      province: province || null,
+      city: city || null,
+      country: 'España',
+      phone: placeDetails.formatted_phone_number || null,
+      website: placeDetails.website || null,
+      google_maps_url: placeDetails.url || null,
+      price_level: placeDetails.price_level || null,
+      photos: placeDetails.photos?.slice(0, 3).map((p: any) => p.photo_reference) || [],
+      published: false, // Borrador
+      needs_enrichment: true, // Pendiente de IA
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+
+    // Insertar en BD
+    const { data: newPlace, error: insertError } = await adminSupabase
+      .from('places')
+      .insert(placeData)
+      .select()
+      .single();
+
+    if (insertError) {
+      console.error('Error insertando lugar:', insertError);
+      throw new Error(`Error insertando: ${insertError.message}`);
+    }
+
+    return NextResponse.json({
+      success: true,
+      place: newPlace,
+      message: 'Lugar añadido correctamente. Pendiente de enriquecimiento IA.',
+      cost: 0.017, // $0.017 por Place Details
+    });
+
+  } catch (error: any) {
+    console.error('Error añadiendo lugar manual:', error);
+    return NextResponse.json({ 
+      error: error.message 
+    }, { status: 500 });
+  }
+}
+
