@@ -111,6 +111,9 @@ export const EVENTS = {
   // Rutas
   ROUTE_CALCULATE: 'route_calculate',
   
+  // Búsqueda
+  SEARCH_FINALIZED: 'search_finalized',
+  
   // Alias para compatibilidad
   PHONE_CLICK: 'place_phone_click',
   WEBSITE_CLICK: 'place_website_click',

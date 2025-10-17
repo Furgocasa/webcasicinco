@@ -1021,7 +1021,7 @@ export default function MapPage() {
       city: filters.city,
       quality_tier: filters.qualityTier,
       reviews_range: filters.reviewsRange,
-      price_levels: filters.priceLevels,
+      price_level: filters.priceLevel,
       results_count: filteredPlaces.length,
       has_filters: activeFiltersCount > 0
     });
