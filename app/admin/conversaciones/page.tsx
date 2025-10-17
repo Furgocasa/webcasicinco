@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { Loader2, Search, RefreshCw, CheckCircle, AlertCircle, XCircle, Trash2, Eye, BarChart3 } from 'lucide-react';
+import { Loader2, Search, RefreshCw, CheckCircle, AlertCircle, XCircle, Trash2, Eye, BarChart3, Download, FileSpreadsheet } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { useRouter } from 'next/navigation';
@@ -154,6 +154,173 @@ export default function ConversacionesPage() {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
+  // ================================================================
+  // FUNCIONES DE EXPORTACIÓN
+  // ================================================================
+
+  // Exportar a CSV
+  const exportToCSV = async () => {
+    try {
+      toast.info('Exportando conversaciones a CSV...');
+      
+      // Obtener todas las conversaciones sin paginación
+      const params = new URLSearchParams({ limit: '10000' });
+      if (qualityFilter !== 'all') params.append('quality', qualityFilter);
+      if (searchTerm) params.append('search', searchTerm);
+      
+      const response = await fetch(`/api/admin/conversations?${params}`);
+      const data = await response.json();
+      
+      if (!data.success) {
+        throw new Error('Error obteniendo datos');
+      }
+
+      const allConversations = data.conversations;
+
+      // Crear CSV
+      const headers = [
+        'ID',
+        'Fecha',
+        'Usuario',
+        'Sesión',
+        'Pregunta',
+        'Respuesta',
+        'Calidad',
+        'Resumen IA',
+        'Razonamiento',
+        'Mejoras Sugeridas',
+        'Lugares Encontrados',
+        'Tiempo (ms)',
+        'Categoría Detectada',
+        'Ubicación Detectada',
+        'Fecha Análisis'
+      ];
+
+      const rows = allConversations.map((conv: Conversation) => {
+        const intent = conv.detected_intent || {};
+        return [
+          conv.id,
+          new Date(conv.created_at).toLocaleString('es-ES'),
+          conv.user_email || '',
+          conv.session_id?.slice(0, 16) || '',
+          `"${(conv.user_message || '').replace(/"/g, '""')}"`,
+          `"${(conv.bot_response || '').replace(/"/g, '""')}"`,
+          conv.quality_assessment || 'pendiente',
+          `"${(conv.ai_summary || '').replace(/"/g, '""')}"`,
+          `"${(conv.quality_reasoning || '').replace(/"/g, '""')}"`,
+          `"${(conv.suggested_improvements || '').replace(/"/g, '""')}"`,
+          conv.places_found,
+          conv.query_time_ms,
+          intent.category || '',
+          intent.location || '',
+          conv.analyzed_at ? new Date(conv.analyzed_at).toLocaleString('es-ES') : ''
+        ];
+      });
+
+      // Combinar headers y rows
+      const csvContent = [
+        headers.join(','),
+        ...rows.map(row => row.join(','))
+      ].join('\n');
+
+      // Crear y descargar archivo
+      const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      
+      link.setAttribute('href', url);
+      link.setAttribute('download', `conversaciones_${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      toast.success(`${allConversations.length} conversaciones exportadas a CSV`);
+    } catch (error) {
+      console.error('Error exportando CSV:', error);
+      toast.error('Error al exportar CSV');
+    }
+  };
+
+  // Exportar a Excel (usando biblioteca xlsx)
+  const exportToExcel = async () => {
+    try {
+      toast.info('Exportando conversaciones a Excel...');
+      
+      // Obtener todas las conversaciones
+      const params = new URLSearchParams({ limit: '10000' });
+      if (qualityFilter !== 'all') params.append('quality', qualityFilter);
+      if (searchTerm) params.append('search', searchTerm);
+      
+      const response = await fetch(`/api/admin/conversations?${params}`);
+      const data = await response.json();
+      
+      if (!data.success) {
+        throw new Error('Error obteniendo datos');
+      }
+
+      const allConversations = data.conversations;
+
+      // Importar xlsx dinámicamente
+      const XLSX = await import('xlsx');
+
+      // Preparar datos para Excel
+      const excelData = allConversations.map((conv: Conversation) => {
+        const intent = conv.detected_intent || {};
+        return {
+          'ID': conv.id.slice(0, 8),
+          'Fecha': new Date(conv.created_at).toLocaleString('es-ES'),
+          'Usuario': conv.user_email || 'Anónimo',
+          'Sesión': conv.session_id?.slice(0, 16) || '',
+          'Pregunta': conv.user_message,
+          'Respuesta': conv.bot_response,
+          'Calidad': conv.quality_assessment || 'pendiente',
+          'Resumen IA': conv.ai_summary || '',
+          'Razonamiento': conv.quality_reasoning || '',
+          'Mejoras Sugeridas': conv.suggested_improvements || '',
+          'Lugares': conv.places_found,
+          'Tiempo (ms)': conv.query_time_ms,
+          'Categoría': intent.category || '',
+          'Ubicación': intent.location || '',
+          'Fecha Análisis': conv.analyzed_at ? new Date(conv.analyzed_at).toLocaleString('es-ES') : ''
+        };
+      });
+
+      // Crear workbook y worksheet
+      const ws = XLSX.utils.json_to_sheet(excelData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Conversaciones');
+
+      // Ajustar anchos de columna
+      const colWidths = [
+        { wch: 10 },  // ID
+        { wch: 18 },  // Fecha
+        { wch: 25 },  // Usuario
+        { wch: 18 },  // Sesión
+        { wch: 50 },  // Pregunta
+        { wch: 60 },  // Respuesta
+        { wch: 12 },  // Calidad
+        { wch: 40 },  // Resumen IA
+        { wch: 40 },  // Razonamiento
+        { wch: 40 },  // Mejoras
+        { wch: 8 },   // Lugares
+        { wch: 10 },  // Tiempo
+        { wch: 15 },  // Categoría
+        { wch: 20 },  // Ubicación
+        { wch: 18 }   // Fecha Análisis
+      ];
+      ws['!cols'] = colWidths;
+
+      // Descargar archivo
+      XLSX.writeFile(wb, `conversaciones_${new Date().toISOString().split('T')[0]}.xlsx`);
+
+      toast.success(`${allConversations.length} conversaciones exportadas a Excel`);
+    } catch (error) {
+      console.error('Error exportando Excel:', error);
+      toast.error('Error al exportar Excel');
+    }
+  };
+
   if (authLoading || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -264,7 +431,7 @@ export default function ConversacionesPage() {
           </div>
 
           {/* Botones de acción */}
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Button
               onClick={loadConversations}
               variant="outline"
@@ -273,6 +440,28 @@ export default function ConversacionesPage() {
             >
               <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
               Recargar
+            </Button>
+
+            <Button
+              onClick={exportToCSV}
+              variant="outline"
+              size="sm"
+              disabled={loading}
+              className="border-green-600 text-green-600 hover:bg-green-50"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Exportar CSV
+            </Button>
+
+            <Button
+              onClick={exportToExcel}
+              variant="outline"
+              size="sm"
+              disabled={loading}
+              className="border-emerald-600 text-emerald-600 hover:bg-emerald-50"
+            >
+              <FileSpreadsheet className="h-4 w-4 mr-2" />
+              Exportar Excel
             </Button>
 
             {stats && stats.pending > 0 && (
