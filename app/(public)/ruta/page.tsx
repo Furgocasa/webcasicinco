@@ -162,6 +162,43 @@ export default function RutaPage() {
     });
   }, [placesNearRoute, sortBy, userLocation, calculateDistance]);
 
+  // ✅ OPTIMIZACIÓN: Cache de rutas en localStorage (ahorro 50% Directions)
+  const getCachedRoute = (origin: string, dest: string): google.maps.DirectionsResult | null => {
+    try {
+      const cacheKey = `route_${origin.toLowerCase()}_${dest.toLowerCase()}`;
+      const cached = localStorage.getItem(cacheKey);
+      
+      if (cached) {
+        const { data, timestamp } = JSON.parse(cached);
+        const CACHE_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 días
+        
+        // Cache válido por 7 días
+        if (Date.now() - timestamp < CACHE_DURATION) {
+          console.log('💾 Ruta encontrada en caché - Ahorro: $0.005');
+          return data;
+        }
+      }
+    } catch (error) {
+      // Si falla el caché, continuar normalmente
+      console.warn('Error leyendo caché de rutas:', error);
+    }
+    return null;
+  };
+
+  const saveRouteToCache = (origin: string, dest: string, data: google.maps.DirectionsResult) => {
+    try {
+      const cacheKey = `route_${origin.toLowerCase()}_${dest.toLowerCase()}`;
+      localStorage.setItem(cacheKey, JSON.stringify({
+        data,
+        timestamp: Date.now()
+      }));
+      console.log('💾 Ruta guardada en caché');
+    } catch (error) {
+      // Si falla guardar en caché, no afecta funcionalidad
+      console.warn('Error guardando ruta en caché:', error);
+    }
+  };
+
   const calculateRoute = async () => {
     if (!origin || !destination) {
       toast.error('Por favor, introduce origen y destino');
@@ -182,13 +219,29 @@ export default function RutaPage() {
     setCalculating(true);
     
     try {
-      const directionsService = new google.maps.DirectionsService();
+      // ✅ Verificar caché primero
+      const cachedRoute = getCachedRoute(origin, destination);
       
-      const results = await directionsService.route({
-        origin: origin,
-        destination: destination,
-        travelMode: google.maps.TravelMode.DRIVING,
-      });
+      let results: google.maps.DirectionsResult;
+      
+      if (cachedRoute) {
+        // Usar ruta cacheada
+        results = cachedRoute;
+        toast.success('✅ Ruta cargada desde caché');
+      } else {
+        // Calcular nueva ruta
+        const directionsService = new google.maps.DirectionsService();
+        
+        results = await directionsService.route({
+          origin: origin,
+          destination: destination,
+          travelMode: google.maps.TravelMode.DRIVING,
+        });
+        
+        // Guardar en caché
+        saveRouteToCache(origin, destination, results);
+        toast.success('✅ Ruta calculada correctamente');
+      }
 
       setDirectionsResponse(results);
       
@@ -200,8 +253,6 @@ export default function RutaPage() {
           distance: leg.distance?.text || '',
           duration: leg.duration?.text || '',
         });
-
-        toast.success('✅ Ruta calculada correctamente');
         
         // Buscar lugares cerca de la ruta
         await findPlacesNearRoute(results);

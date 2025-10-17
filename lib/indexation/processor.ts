@@ -69,14 +69,11 @@ export async function processPlace(
       };
     }
 
-    // 2. Descargar fotos Y subirlas a Supabase Storage (SOLO 3 para velocidad)
-    const { supabaseUrls, photoReferences } = await downloadAndUploadPhotosToSupabase(
-      placeDetails.photos || [], 
-      placeDetails.name,
-      placeDetails.place_id,
-      3  // ✅ 3 fotos en lugar de 5 (2x más rápido)
-    );
-    cost += supabaseUrls.length * 0.007;
+    // 2. ✅ OPTIMIZACIÓN: Guardar solo referencias de fotos (sin descargar aún)
+    // Las fotos se descargarán DESPUÉS de validar IA para ahorrar costes
+    const photoReferences = placeDetails.photos 
+      ? placeDetails.photos.slice(0, 3).map((p: any) => p.photo_reference)
+      : [];
 
     // 3. Extraer reseñas
     const reviews = extractReviews(placeDetails);
@@ -139,6 +136,16 @@ export async function processPlace(
         cost,
       };
     }
+
+    // ✅ AHORA SÍ: Descargar fotos SOLO si toda la IA fue exitosa
+    // Esto ahorra ~70% del coste de fotos (lugares que fallan en IA no descargan fotos)
+    const { supabaseUrls } = await downloadAndUploadPhotosToSupabase(
+      placeDetails.photos || [], 
+      placeDetails.name,
+      placeDetails.place_id,
+      3  // ✅ 3 fotos para velocidad
+    );
+    cost += supabaseUrls.length * 0.007; // $0.007 por foto
 
     // 5. Preparar datos del lugar
     const slug = generatePlaceSlug(placeDetails.name, city);

@@ -20,8 +20,12 @@ interface SearchPlacesParams {
 }
 
 /**
- * Busca lugares usando Text Search de Google Places CON PAGINACIÓN
+ * Busca lugares usando Text Search de Google Places CON PAGINACIÓN Y CACHÉ
  * Soporta query completo O construcción legacy con keyword/location
+ * 
+ * OPTIMIZACIÓN: Cachea resultados en BD para evitar búsquedas duplicadas
+ * - Ahorra ~$0.032 por búsqueda cacheada
+ * - Caché expira en 30 días
  */
 export async function searchPlaces(params: SearchPlacesParams): Promise<string[]> {
   try {
@@ -44,6 +48,41 @@ export async function searchPlaces(params: SearchPlacesParams): Promise<string[]
       throw new Error('❌ GOOGLE_MAPS_API_KEY no está configurada');
     }
 
+    // ✅ OPTIMIZACIÓN: Verificar caché primero (no afecta funcionalidad si falla)
+    const cacheKey = `${query}|${latitude || ''}|${longitude || ''}|${radius}|${type || ''}`;
+    try {
+      const { createClient } = await import('@supabase/supabase-js');
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+      );
+
+      const { data: cachedResult, error: cacheError } = await supabase
+        .from('search_cache')
+        .select('place_ids, result_count')
+        .eq('search_query', cacheKey)
+        .gt('expires_at', new Date().toISOString())
+        .maybeSingle();
+
+      if (!cacheError && cachedResult && cachedResult.place_ids) {
+        const cachedIds = cachedResult.place_ids as string[];
+        console.log(`💾 CACHÉ HIT: "${query}" (${cachedIds.length} lugares) - Ahorro: $0.032`);
+        
+        // Actualizar last_used_at
+        await supabase
+          .from('search_cache')
+          .update({ last_used_at: new Date().toISOString() })
+          .eq('search_query', cacheKey);
+        
+        return cachedIds;
+      }
+    } catch (cacheCheckError) {
+      // Si falla el caché, continuar normalmente sin afectar funcionalidad
+      console.log('⚠️ Caché no disponible, buscando en Google API...');
+    }
+
+    // ❌ CACHÉ MISS: Buscar en Google API (comportamiento original)
+    console.log(`🔍 Buscando en Google API: "${query}"`);
     const allPlaceIds: string[] = [];
     let pageToken: string | undefined = undefined;
     let pageCount = 0;
@@ -121,6 +160,33 @@ export async function searchPlaces(params: SearchPlacesParams): Promise<string[]
 
     console.log('\n========== FIN BÚSQUEDA GOOGLE PLACES ==========');
     console.log(`✅ TOTAL: ${allPlaceIds.length} lugares encontrados\n`);
+
+    // ✅ OPTIMIZACIÓN: Guardar en caché para futuras búsquedas (no afecta funcionalidad si falla)
+    try {
+      const { createClient } = await import('@supabase/supabase-js');
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+      );
+
+      await supabase.from('search_cache').upsert({
+        search_query: cacheKey,
+        province: location || null,
+        city: null,
+        category: type || null,
+        place_ids: allPlaceIds,
+        result_count: allPlaceIds.length,
+        expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 días
+        last_used_at: new Date().toISOString(),
+      }, {
+        onConflict: 'search_query'
+      });
+
+      console.log(`💾 Guardado en caché: "${query}" (${allPlaceIds.length} lugares) - Ahorro futuro: $0.032`);
+    } catch (cacheSaveError) {
+      // Si falla guardar en caché, no afecta el resultado
+      console.log('⚠️ No se pudo guardar en caché, pero la búsqueda fue exitosa');
+    }
 
     return allPlaceIds;
   } catch (error: any) {
