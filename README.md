@@ -1,264 +1,302 @@
-# 🌟 Casi Cinco - Los Mejores Lugares de España
+# ⭐ Casi Cinco - Los Mejores Lugares de España
 
-**Versión:** BETA 10  
-**Fecha:** 15 de octubre de 2025  
-**Dominio:** [www.casicinco.com](https://www.casicinco.com)
+> **Descubre establecimientos excepcionales con +4.7★ en Google Maps**
 
----
-
-## 📋 **Descripción**
-
-Casi Cinco es una plataforma que recopila y presenta los **mejores lugares de España** con valoraciones de 4.7 estrellas o superiores. 
-
-Utilizando inteligencia artificial y datos de Google Places, ofrecemos una experiencia curada de:
-- 🍽️ **Restaurantes** excepcionales
-- 🍺 **Bares** y tabernas de calidad
-- ☕ **Cafeterías** únicas
-- 🏨 **Hoteles** y alojamientos premium
+[![Estado](https://img.shields.io/badge/Estado-BETA%20100-success)](https://www.casicinco.com)
+[![Deploy](https://img.shields.io/badge/Deploy-AWS%20Amplify-orange)](https://aws.amazon.com/amplify/)
+[![Framework](https://img.shields.io/badge/Framework-Next.js%2014-black)](https://nextjs.org/)
 
 ---
 
-## 🚀 **Características Principales**
+## 🌟 ¿Qué es Casi Cinco?
 
-### **Para Usuarios:**
-- 🗺️ **Mapa Interactivo** con 2,700+ lugares verificados
-- 🔍 **Filtros Avanzados** por categoría, provincia, rating, reseñas
-- 📍 **Planificador de Rutas** con sugerencias inteligentes
-- 🤖 **Chatbot IA** con recomendaciones personalizadas
-- 💎 **Sistema de Tiers** (Diamond, Platinum, Gold, Silver, Bronze)
-- 📱 **Responsive** - Optimizado para móvil y desktop
+**Casi Cinco** es una plataforma que te ayuda a descubrir los mejores restaurantes, bares, cafeterías y hoteles de España. Solo incluimos lugares con valoración mínima de **4.7 estrellas** en Google Maps.
 
-### **Para Administradores:**
-- 🔍 **Sistema de Indexación de 2 Fases** (revolucionario)
-- 🎨 **Enriquecimiento IA** separado y controlable
-- 📊 **Dashboard Analytics** completo
-- 👥 **Gestión de Usuarios** y suscripciones
-- 📋 **Historial de Trabajos** con tracking detallado
+### 🎯 Características Principales:
+
+- 🗺️ **Mapa Interactivo** - Visualiza lugares por categoría y ubicación
+- 🤖 **Chat IA** - Pregúntale al "Tío Viajero" por recomendaciones
+- 📝 **Blog SEO** - Guías "Top 10" por ciudad/provincia
+- 📍 **Planificador de Rutas** - Crea itinerarios personalizados
+- 📊 **Analytics** - Descubre tendencias y lugares populares
 
 ---
 
-## 🎯 **BETA 10 - Sistema de Indexación Profesional**
+## 🚀 Inicio Rápido
 
-### **✨ Novedades BETA 10:**
-- 🔍 **Estrategia de búsqueda optimizada** sin términos ambiguos
-- 📝 **Logs ilimitados** para procesos largos completos
-- 🛡️ **Filtrado geográfico perfecto** - 0 contaminación internacional
-- ⚡ **Continuidad ante errores** - El proceso nunca se detiene
-- 📊 **Cobertura máxima**: 3 búsquedas por ciudad grande = 180 resultados
+### Requisitos Previos:
+- Node.js 18+ 
+- npm o yarn
+- Cuenta de Supabase
+- API Keys: Google Maps, OpenAI, Stripe
 
-### **FASE 1: Indexación Rápida**
-- **Búsqueda inteligente** por ciudades (Supabase)
-- **3 búsquedas** para ciudades grandes (>200k hab)
-- **2 búsquedas** para ciudades medianas (50k-200k hab)
-- **1 búsqueda** para ciudades pequeñas (<50k hab)
-- Filtrado: rating ≥4.7, reseñas ≥50, solo España
-- Detección de duplicados
-- **Resultado:** Lugares listos para enriquecer
+### Instalación:
 
-### **FASE 2: Enriquecimiento IA (separado)**
-- Categorización inteligente con IA
-- Descarga de fotos → Supabase Storage
-- Generación de descripción con IA
-- Resumen de reseñas con IA
-- Highlights con IA
-- **Resultado:** Lugares publicados en el mapa
-
----
-
-## 🛠️ **Stack Tecnológico**
-
-- **Frontend:** Next.js 14, React, TypeScript, Tailwind CSS
-- **Backend:** Next.js API Routes, Supabase
-- **Base de Datos:** PostgreSQL (Supabase)
-- **Autenticación:** Supabase Auth
-- **Pagos:** Stripe (suscripciones)
-- **IA:** OpenAI GPT-4o-mini
-- **Mapas:** Google Maps API
-- **Storage:** Supabase Storage (fotos)
-- **Deployment:** AWS Amplify
-- **Dominio:** OVH + AWS Route53
-
----
-
-## 📊 **Categorías (Solo 4)**
-
-- 🍽️ **Restaurantes** - Lugares para comer
-- 🍺 **Bares** - Bebidas y tapas
-- ☕ **Cafeterías** - Cafés y dulces
-- 🏨 **Hoteles** - Alojamientos premium
-
-*Spas, experiencias, monumentos descartados temporalmente*
-
----
-
-## 💰 **Monetización**
-
-- **Trial:** 30 días gratis (requiere tarjeta)
-- **Premium Mensual:** 2.99€/mes
-- **Premium Anual:** 29.99€/año (casi 4 meses gratis)
-- **Admin:** 99€/mes (indexación ilimitada)
-
----
-
-## 🗂️ **Estructura del Proyecto**
-
-```
-casi5-app/
-├── app/
-│   ├── (public)/          # Páginas públicas
-│   │   ├── page.tsx       # Homepage
-│   │   ├── mapa/          # Mapa interactivo
-│   │   ├── ruta/          # Planificador de rutas
-│   │   ├── perfil/        # Perfil de usuario
-│   │   └── pricing/       # Planes y precios
-│   ├── admin/             # Panel de administración
-│   │   ├── dashboard/     # Analytics
-│   │   ├── indexar/       # FASE 1: Indexación rápida
-│   │   ├── enriquecer/    # FASE 2: Enriquecimiento IA
-│   │   ├── lugares/       # Gestión de lugares
-│   │   └── usuarios/      # Gestión de usuarios
-│   └── api/               # API Routes
-├── lib/
-│   ├── indexation/
-│   │   ├── indexer-fast.ts    # FASE 1: Búsqueda rápida
-│   │   ├── enricher-batch.ts  # FASE 2: Enriquecimiento IA
-│   │   └── category-filters.ts # Filtros estrictos
-│   ├── ai/
-│   │   ├── openai.ts          # Generación de contenido
-│   │   └── categorize.ts      # Categorización inteligente
-│   └── google/
-│       └── places.ts          # Google Places API
-└── supabase/
-    ├── migrations/
-    └── scripts SQL
-```
-
----
-
-## 🎯 **Inicio Rápido**
-
-### **Instalación:**
 ```bash
+# Clonar repositorio
+git clone [repo-url]
+cd Casi5-App
+
+# Instalar dependencias
 npm install --legacy-peer-deps
-```
 
-### **Variables de Entorno (.env.local):**
-```env
-# Supabase
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
-SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+# Configurar variables de entorno
+cp .env.example .env.local
+# Editar .env.local con tus API keys
 
-# Google
-NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_google_key
-GOOGLE_MAPS_API_KEY=your_google_key
+# Ejecutar migraciones de Supabase
+# (Ir a Supabase → SQL Editor → Ejecutar archivos en /supabase/migrations/)
 
-# OpenAI
-OPENAI_API_KEY=your_openai_key
-
-# Stripe
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=your_stripe_key
-STRIPE_SECRET_KEY=your_stripe_secret
-```
-
-### **Desarrollo:**
-```bash
+# Iniciar desarrollo
 npm run dev
 ```
 
-### **Producción:**
+### Despliegue:
+
 ```bash
+# Build de producción
 npm run build
+
+# O desplegar a AWS Amplify
+git push origin main
 ```
 
 ---
 
-## 📚 **Documentación**
+## 📚 Documentación
 
-- **Sistema de 2 Fases:** [NUEVO_SISTEMA_2_FASES.md](NUEVO_SISTEMA_2_FASES.md)
-- **Monetización:** [SISTEMA_MONETIZACION.md](SISTEMA_MONETIZACION.md)
-- **Configuración Dominio:** [CONFIGURAR_DOMINIO.md](CONFIGURAR_DOMINIO.md)
-- **Verificación Producción:** [VERIFICAR_PRODUCCION.md](VERIFICAR_PRODUCCION.md)
+### 📖 Guías Esenciales:
+- **[BETA_100_RELEASE_NOTES.md](BETA_100_RELEASE_NOTES.md)** - Release notes completas
+- **[LEEME_PRIMERO.md](LEEME_PRIMERO.md)** - Introducción al proyecto
+- **[INDICE_MAESTRO_DOCUMENTACION.md](INDICE_MAESTRO_DOCUMENTACION.md)** - Índice completo
+
+### 🔧 Configuración:
+- [CONFIGURACION_COMPLETA.md](CONFIGURACION_COMPLETA.md) - Setup completo
+- [DEPLOY_AWS.md](DEPLOY_AWS.md) - Despliegue en AWS
+- [GOOGLE_OAUTH_SETUP.md](GOOGLE_OAUTH_SETUP.md) - OAuth con Google
+
+### 💡 Sistemas Principales:
+- [CHATBOT_TIO_VIAJERO.md](CHATBOT_TIO_VIAJERO.md) - Chatbot IA
+- [SISTEMA_FILTRADO.md](SISTEMA_FILTRADO.md) - Filtros avanzados
+- [SISTEMA_MONETIZACION.md](SISTEMA_MONETIZACION.md) - Stripe
+- [IMPLEMENTAR_TRACKING.md](IMPLEMENTAR_TRACKING.md) - Analytics
+
+### 📊 Analytics:
+- Dashboard de estadísticas: `/admin/estadisticas`
+- Dashboard de conversaciones IA: `/admin/conversaciones`
+- Gestor de blog: `/admin/blog`
 
 ---
 
-## 🔑 **Usuarios de Prueba**
+## 🗂️ Estructura del Proyecto
 
 ```
-Admin:
-- Email: info@furgocasa.com
-- Password: (en variables de entorno)
-
-Usuario Premium:
-- Email: spaindud@gmail.com
-- Password: (en variables de entorno)
+app/
+├── (public)/          # Páginas públicas
+│   ├── mapa/         # Mapa interactivo
+│   ├── blog/         # Blog SEO
+│   └── [category]/   # Detalles de lugares
+├── admin/            # Panel de administración
+├── api/              # API routes
+│   ├── chatbot/     # IA conversacional
+│   ├── blog/        # Gestión blog
+│   └── analytics/   # Tracking
+├── components/       # Componentes React
+├── lib/             # Utilidades
+│   ├── ai/          # OpenAI + evaluación
+│   ├── analytics/   # Tracking
+│   └── indexation/  # Google Places
+└── types/           # TypeScript types
 ```
 
 ---
 
-## 📈 **Estadísticas**
+## 🔑 Variables de Entorno
 
-- **Lugares:** 2,700+ verificados
-- **Provincias:** 61 con cobertura
-- **Categorías:** 4 principales
-- **Rating promedio:** 4.78⭐
-- **Usuarios:** Sistema de trials de 30 días
+```bash
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
 
----
+# Google
+NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=
+GOOGLE_PLACES_API_KEY=
+GOOGLE_OAUTH_CLIENT_ID=
+GOOGLE_OAUTH_CLIENT_SECRET=
 
-## 🚢 **Deployment**
+# OpenAI
+OPENAI_API_KEY=
 
-- **Plataforma:** AWS Amplify
-- **Dominio:** www.casicinco.com
-- **SSL:** Automático (AWS)
-- **Email:** OVH (MX records preservados)
+# Stripe (opcional)
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
+STRIPE_SECRET_KEY=
+STRIPE_WEBHOOK_SECRET=
 
----
-
-## 📝 **Changelog BETA 6.0**
-
-### **🎉 Nuevo Sistema de 2 Fases:**
-- ✅ Indexación rápida (30-60 min) sin IA
-- ✅ Enriquecimiento IA separado y pausable
-- ✅ Categorización inteligente con IA
-- ✅ Solo 4 categorías (Restaurantes, Bares, Cafeterías, Hoteles)
-- ✅ Filtros estrictos (sin autocaravanas en hoteles)
-- ✅ Tracking independiente de ambas fases
-- ✅ Menú lateral con "Enriquecer con IA"
-
-### **🔧 Optimizaciones:**
-- ✅ 10x más rápido en búsqueda
-- ✅ Sin límites de paginación (búsqueda exhaustiva)
-- ✅ Números coherentes (procesados = guardados + descartados)
-- ✅ Marcadores del mapa optimizados
-- ✅ Revalidación automática cada 5 min
-
-### **🐛 Bugs Corregidos:**
-- ✅ Errores de hidratación React
-- ✅ Trabajos zombies en "running"
-- ✅ Contadores incoherentes
-- ✅ API de Google (restricciones)
-- ✅ Títulos SEO únicos por lugar
+# App
+NEXT_PUBLIC_APP_URL=https://www.casicinco.com
+```
 
 ---
 
-## 🤝 **Contribuir**
+## 📊 Base de Datos
 
-Este es un proyecto privado. Para acceso, contacta al administrador.
+### Tablas Principales:
+- `places` - Lugares indexados
+- `blog_posts` - Posts de blog SEO
+- `user_analytics` - Tracking de usuarios
+- `chatbot_analytics` - Conversaciones IA
+- `chat_history` - Historial chatbot
+- `favorites`, `visits`, `lists` - Datos usuario
+
+### Migraciones:
+Ejecutar en orden en Supabase → SQL Editor:
+1. `20251016_create_cities_table.sql`
+2. `20251017_user_analytics.sql`
+3. `20251017_chatbot_analytics.sql`
+4. `20251017_blog_posts.sql`
+5. `20251017_add_subcategory_index.sql`
+
+Luego ejecutar (opcional):
+- `supabase/maintenance/update_blog_dates_organic.sql` - Programar posts
 
 ---
 
-## 📞 **Soporte**
+## 🎨 Características del Blog
 
-- **Email:** info@casicinco.com
-- **Web:** www.casicinco.com
+### Sistema de Auto-Publicación (tipo Joomla):
+- ✅ Posts con fecha futura NO se muestran
+- ✅ Se publican automáticamente al llegar la fecha
+- ✅ Sin intervención manual necesaria
+
+### Editor Completo:
+- ✅ Generación de intro con IA (botón ✨)
+- ✅ Auto-slug desde título
+- ✅ Programación de fecha/hora
+- ✅ SEO integrado (meta, keywords)
+- ✅ Top 10 dinámico por filtros
+
+### URLs Generadas:
+```
+/blog/mejores-restaurantes-madrid
+/blog/mejores-bares-barcelona
+/blog/mejores-hoteles-provincia-cuenca
+```
 
 ---
 
-## 📄 **Licencia**
+## 🤖 Chatbot IA
 
-Todos los derechos reservados © 2025 Casi Cinco
+### Capacidades:
+- Búsqueda por lenguaje natural
+- Filtrado por subcategorías (cocinas específicas)
+- Recomendaciones personalizadas
+- Enlaces directos a lugares y mapa
+- Rate limiting (20 msg/min)
+
+### Analytics:
+- Logging completo de conversaciones
+- Auto-evaluación de calidad (IA)
+- Métricas de rendimiento
+- Dashboard de análisis
 
 ---
 
-**Hecho con ❤️ en España** 🇪🇸
+## 📈 Sistema de Analytics
+
+### Eventos Trackeados:
+- `page_view` - Vistas de página
+- `place_view` - Clicks en lugares
+- `place_phone_click` - Clicks en teléfono
+- `place_website_click` - Clicks en website
+- `place_directions_click` - Cómo llegar
+- `search_finalized` - Búsquedas completadas
+- `chatbot_message_send` - Mensajes al chat
+- `chatbot_link_click` - Enlaces del chat
+
+### Dashboard `/admin/estadisticas`:
+- Usuarios activos (7d / 30d)
+- Conversiones
+- Top 10 lugares
+- Eventos por tipo
+- Dispositivos
+
+---
+
+## 🛠️ Scripts Disponibles
+
+### Desarrollo:
+```bash
+npm run dev          # Servidor de desarrollo
+npm run build        # Build de producción
+npm run start        # Servidor de producción
+npm run lint         # Linter
+```
+
+### Utilities:
+```bash
+# Generar posts de blog con IA
+npx tsx scripts/generate-blog-posts.ts
+
+# Tests
+npm test
+```
+
+---
+
+## 🔒 Seguridad
+
+- ✅ Row Level Security (RLS) en todas las tablas
+- ✅ Autenticación con Google OAuth
+- ✅ API keys restringidas por dominio
+- ✅ Rate limiting en endpoints críticos
+- ✅ Validaciones server-side
+- ✅ HTTPS obligatorio
+- ✅ Política de cookies y privacidad
+
+---
+
+## 📱 Compatibilidad
+
+- ✅ Desktop (Chrome, Firefox, Safari, Edge)
+- ✅ Móvil (iOS Safari, Chrome Android)
+- ✅ Tablet (iPad, Android tablets)
+- ✅ Responsive design completo
+
+---
+
+## 🌐 SEO
+
+- ✅ Sitemap.xml automático
+- ✅ Robots.txt configurado
+- ✅ Meta tags dinámicos
+- ✅ Open Graph images
+- ✅ Google Search Console verificado
+- ✅ 29 posts de blog optimizados
+- ✅ URLs amigables
+- ✅ Structured data (preparado)
+
+---
+
+## 📄 Licencia
+
+**Propietario:** Narciso Pardo Buendía  
+**Uso:** Privado - Todos los derechos reservados
+
+---
+
+## 🤝 Contribuciones
+
+Este es un proyecto privado. No se aceptan contribuciones externas.
+
+---
+
+## 📞 Contacto
+
+**Web:** https://www.casicinco.com  
+**Email:** [contacto en la web]  
+**Admin:** https://www.casicinco.com/admin
+
+---
+
+**Última actualización:** 18 de Octubre 2025 - BETA 100 🎉

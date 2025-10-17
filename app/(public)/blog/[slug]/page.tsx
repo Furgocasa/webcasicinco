@@ -137,10 +137,13 @@ export default function BlogPostPage() {
                       <Card key={place.id} className="overflow-hidden hover:shadow-xl transition">
                         <div className="md:flex">
                           {/* Imagen */}
-                          {place.photo_reference && (
+                          {(place.photo_urls || place.photos || place.photo_reference) && (
                             <div className="md:w-1/3 h-48 md:h-auto">
                               <img
-                                src={getPlacePhotoUrl(place.photo_reference || '', 400)}
+                                src={getPlacePhotoUrl({ 
+                                  photo_urls: place.photo_urls, 
+                                  photos: place.photos || (place.photo_reference ? [place.photo_reference] : null)
+                                }, 0, 400) || '/images/placeholder.png'}
                                 alt={place.name}
                                 className="w-full h-full object-cover"
                               />
