@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '../ui/Button';
 import { useAuth } from '@/lib/hooks/useAuth';
-import { User, LogOut, Settings, ChevronDown, Map, Navigation } from 'lucide-react';
+import { User, LogOut, Settings, ChevronDown, Map, Navigation, BookOpen } from 'lucide-react';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -56,6 +56,13 @@ export default function Header() {
             >
               Planificar Ruta
             </Link>
+            <Link 
+              href="/blog" 
+              className="text-gray-700 hover:text-indigo-600 transition relative z-10 touch-manipulation"
+              style={{ touchAction: 'manipulation' }}
+            >
+              Blog
+            </Link>
           </div>
 
           {/* Mobile Quick Nav + Menu - Iconos permanentes en navbar */}
@@ -75,6 +82,14 @@ export default function Header() {
               aria-label="Rutas"
             >
               <Navigation className="h-5 w-5 text-indigo-600" />
+            </Link>
+            <Link 
+              href="/blog"
+              className="p-2.5 hover:bg-indigo-50 rounded-lg transition-colors relative z-10 touch-manipulation"
+              style={{ touchAction: 'manipulation' }}
+              aria-label="Blog"
+            >
+              <BookOpen className="h-5 w-5 text-indigo-600" />
             </Link>
             {/* Separador visual */}
             <div className="w-px h-6 bg-gray-300 mx-1" />

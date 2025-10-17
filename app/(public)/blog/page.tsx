@@ -63,7 +63,7 @@ export default function BlogPage() {
     <>
       <main className="min-h-screen bg-gray-50">
         {/* HERO */}
-        <section className="relative bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 text-white overflow-hidden py-16 md:py-24">
+        <section className="relative bg-gradient-to-br from-indigo-600 via-indigo-700 to-gray-800 text-white overflow-hidden py-16 md:py-24">
           <div className="absolute inset-0 bg-black opacity-10"></div>
           
           <div className="relative container mx-auto px-4 z-10">
@@ -154,15 +154,35 @@ export default function BlogPage() {
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
                 {posts.map((post) => (
                   <Link key={post.id} href={`/blog/${post.slug}`}>
-                    <Card className="h-full hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer">
-                      <div className="p-6">
-                        {/* Categoría badge */}
-                        <div className="flex items-center gap-2 mb-4">
-                          <span className="text-2xl">{getCategoryEmoji(post.category)}</span>
-                          <span className="text-sm font-medium text-indigo-600">
-                            {getCategoryLabel(post.category)}
-                          </span>
+                    <Card className="h-full hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer overflow-hidden">
+                      {/* Imagen destacada */}
+                      {post.featured_image_url && (
+                        <div className="relative h-48 bg-gray-200 overflow-hidden">
+                          <img 
+                            src={post.featured_image_url} 
+                            alt={post.title}
+                            className="w-full h-full object-cover"
+                          />
+                          {/* Badge de categoría sobre la imagen */}
+                          <div className="absolute top-3 left-3 flex items-center gap-2 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-lg shadow-lg">
+                            <span className="text-xl">{getCategoryEmoji(post.category)}</span>
+                            <span className="text-xs font-semibold text-indigo-600">
+                              {getCategoryLabel(post.category)}
+                            </span>
+                          </div>
                         </div>
+                      )}
+                      
+                      <div className="p-6">
+                        {/* Categoría badge (solo si no hay imagen) */}
+                        {!post.featured_image_url && (
+                          <div className="flex items-center gap-2 mb-4">
+                            <span className="text-2xl">{getCategoryEmoji(post.category)}</span>
+                            <span className="text-sm font-medium text-indigo-600">
+                              {getCategoryLabel(post.category)}
+                            </span>
+                          </div>
+                        )}
 
                         {/* Título */}
                         <h2 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2 hover:text-indigo-600 transition">
@@ -201,7 +221,7 @@ export default function BlogPage() {
         </section>
 
         {/* CTA */}
-        <section className="py-16 bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
+        <section className="py-16 bg-gradient-to-r from-indigo-600 to-indigo-800 text-white">
           <div className="container mx-auto px-4 text-center">
             <h2 className="text-3xl font-bold mb-4">¿Quieres explorar más?</h2>
             <p className="text-lg mb-8 text-white/90">

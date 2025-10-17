@@ -10,6 +10,19 @@ import Footer from '@/components/layout/Footer';
 import { getPlacePhotoUrl } from '@/lib/utils/photo-helper';
 import type { BlogPostWithPlaces } from '@/types/blog';
 
+// Función para renderizar Markdown básico
+const renderMarkdown = (text: string) => {
+  if (!text) return '';
+  
+  return text
+    // Negritas: **texto** -> <strong>texto</strong>
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    // Itálica: *texto* -> <em>texto</em>
+    .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+    // Saltos de línea
+    .replace(/\n/g, '<br />');
+};
+
 export default function BlogPostPage() {
   const params = useParams();
   const router = useRouter();
@@ -69,7 +82,7 @@ export default function BlogPostPage() {
     <>
       <main className="min-h-screen bg-gray-50">
         {/* HEADER */}
-        <section className="bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 text-white py-12 md:py-20">
+        <section className="bg-gradient-to-br from-indigo-600 via-indigo-700 to-gray-800 text-white py-12 md:py-20">
           <div className="container mx-auto px-4">
             <Link 
               href="/blog"
@@ -117,11 +130,23 @@ export default function BlogPostPage() {
         <section className="py-12">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto">
+              {/* Imagen destacada */}
+              {post.featured_image_url && (
+                <div className="mb-12 rounded-2xl overflow-hidden shadow-xl">
+                  <img 
+                    src={post.featured_image_url} 
+                    alt={post.title}
+                    className="w-full h-auto object-cover"
+                  />
+                </div>
+              )}
+
               {/* Intro */}
               <div className="prose prose-lg max-w-none mb-12">
-                <p className="text-gray-700 text-lg leading-relaxed whitespace-pre-line">
-                  {post.intro_text}
-                </p>
+                <div 
+                  className="text-gray-700 text-lg leading-relaxed"
+                  dangerouslySetInnerHTML={{ __html: renderMarkdown(post.intro_text) }}
+                />
               </div>
 
               {/* TOP 10 */}
@@ -213,12 +238,15 @@ export default function BlogPostPage() {
               {/* Conclusión */}
               {post.conclusion_text && (
                 <div className="prose prose-lg max-w-none mb-12 bg-gray-100 p-6 rounded-xl">
-                  <p className="text-gray-700 whitespace-pre-line">{post.conclusion_text}</p>
+                  <div 
+                    className="text-gray-700"
+                    dangerouslySetInnerHTML={{ __html: renderMarkdown(post.conclusion_text) }}
+                  />
                 </div>
               )}
 
               {/* CTA */}
-              <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-8 rounded-2xl text-center">
+              <div className="bg-gradient-to-r from-indigo-600 to-indigo-800 text-white p-8 rounded-2xl text-center">
                 <h3 className="text-2xl font-bold mb-3">¿Quieres explorar más opciones?</h3>
                 <p className="text-white/90 mb-6">
                   Usa nuestro mapa interactivo o planifica una ruta completa
