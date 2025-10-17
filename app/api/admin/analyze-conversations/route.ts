@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
     // Analizar cada conversación
     for (const conv of conversations) {
       try {
-        const analysis = await analyzeConversation(
+        const analysis = await evaluateConversation(
           conv.user_message,
           conv.bot_response,
           conv.detected_intent,
@@ -108,79 +108,6 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     console.error('Error en analyze-conversations:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-}
-
-/**
- * Analizar una conversación con OpenAI
- */
-async function analyzeConversation(
-  userMessage: string,
-  botResponse: string,
-  detectedIntent: any,
-  placesFound: number
-): Promise<{
-  quality: 'correcta' | 'mejorable' | 'incorrecta';
-  summary: string;
-  reasoning: string;
-  improvements: string | null;
-}> {
-  const prompt = `Analiza esta conversación del chatbot "Tío Viajero":
-
-PREGUNTA USUARIO:
-"${userMessage}"
-
-RESPUESTA BOT:
-"${botResponse}"
-
-CONTEXTO:
-- Intención detectada: ${JSON.stringify(detectedIntent)}
-- Lugares encontrados: ${placesFound}
-
-EVALÚA:
-1. ¿La respuesta es precisa y útil?
-2. ¿Detectó correctamente la intención (categoría, ubicación, subcategoría)?
-3. ¿Los lugares sugeridos son apropiados?
-4. ¿El formato es claro y profesional?
-5. ¿Incluye los enlaces necesarios?
-
-RESPONDE EN JSON:
-{
-  "quality": "correcta" | "mejorable" | "incorrecta",
-  "summary": "Resumen en 1 frase de qué se preguntó",
-  "reasoning": "Por qué se clasificó así (2-3 frases)",
-  "improvements": "Sugerencias específicas de mejora (o null si está correcta)"
-}`;
-
-  try {
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [{
-        role: 'user',
-        content: prompt
-      }],
-      temperature: 0.3,
-      max_tokens: 300,
-      response_format: { type: 'json_object' }
-    });
-
-    const result = JSON.parse(response.choices[0].message.content || '{}');
-    
-    return {
-      quality: result.quality || 'mejorable',
-      summary: result.summary || 'No disponible',
-      reasoning: result.reasoning || 'No disponible',
-      improvements: result.improvements || null
-    };
-
-  } catch (error) {
-    console.error('Error con OpenAI:', error);
-    return {
-      quality: 'mejorable',
-      summary: 'Error en análisis',
-      reasoning: 'No se pudo analizar con IA',
-      improvements: 'Revisar manualmente'
-    };
   }
 }
 

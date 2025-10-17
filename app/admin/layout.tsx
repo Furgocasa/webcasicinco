@@ -14,6 +14,7 @@ const adminSections = [
   { name: 'Gestión de Lugares', path: '/admin/lugares', icon: '📍' },
   { name: 'Gestión de Usuarios', path: '/admin/usuarios', icon: '👥' },
   { name: 'Historial de Trabajos', path: '/admin/trabajos', icon: '📋' },
+  { name: 'Conversaciones IA', path: '/admin/conversaciones', icon: '💬' },
   { name: 'Configuración', path: '/admin/configuracion', icon: '⚙️' },
 ];
 

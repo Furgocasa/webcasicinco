@@ -22,6 +22,11 @@ export default function UpdateRatingsPage() {
   const loadStats = async () => {
     try {
       const res = await fetch('/api/admin/update-ratings');
+      
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}`);
+      }
+      
       const data = await res.json();
       if (data.success) {
         setStats(data.stats);
@@ -63,6 +68,12 @@ export default function UpdateRatingsPage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ mode, batchSize: 100, offset })
         });
+
+        // Verificar que la respuesta es OK antes de parsear JSON
+        if (!res.ok) {
+          const errorText = await res.text();
+          throw new Error(`HTTP ${res.status}: ${errorText}`);
+        }
 
         const data = await res.json();
 
