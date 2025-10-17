@@ -159,7 +159,7 @@ export default function UpdateRatingsPage() {
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600">Antiguos (>3 meses)</p>
+                  <p className="text-sm text-gray-600">Antiguos (&gt;3 meses)</p>
                   <p className="text-2xl font-bold text-gray-600">{stats.old}</p>
                   <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
                     <DollarSign className="w-3 h-3" />
