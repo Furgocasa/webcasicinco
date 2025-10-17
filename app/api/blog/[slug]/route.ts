@@ -62,11 +62,31 @@ export async function GET(
       console.error('Error fetching places:', placesError);
     }
 
+    // Obtener foto del primer lugar para la imagen destacada
+    let photoReference = null;
+    let photoIsUrl = false;
+    
+    if (places && places.length > 0) {
+      const firstPlace = places[0];
+      // Priorizar photo_urls de Supabase
+      if (firstPlace.photo_urls && firstPlace.photo_urls.length > 0) {
+        photoReference = firstPlace.photo_urls[0]; // URL completa
+        photoIsUrl = true;
+      }
+      // Fallback a photos (photo_reference de Google)
+      else if (firstPlace.photos && firstPlace.photos.length > 0) {
+        photoReference = firstPlace.photos[0]; // photo_reference
+        photoIsUrl = false;
+      }
+    }
+
     return NextResponse.json({
       success: true,
       post: {
         ...post,
-        places: places || []
+        places: places || [],
+        first_place_photo: photoReference,
+        first_place_photo_is_url: photoIsUrl
       }
     });
 

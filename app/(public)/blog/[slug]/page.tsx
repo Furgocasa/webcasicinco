@@ -89,9 +89,16 @@ export default function BlogPostPage() {
   };
 
   // Usar la foto del primer lugar si existe
-  const featuredImage = post.places && post.places.length > 0 && post.places[0].photo_reference
-    ? buildPhotoUrl(post.places[0].photo_reference, 1200)
-    : post.featured_image_url;
+  let featuredImage = post.featured_image_url;
+  if (post.first_place_photo) {
+    // Si es URL completa, usarla directamente
+    if (post.first_place_photo_is_url) {
+      featuredImage = post.first_place_photo;
+    } else {
+      // Si es photo_reference, construir URL de Google
+      featuredImage = buildPhotoUrl(post.first_place_photo, 1200);
+    }
+  }
 
   return (
     <>
