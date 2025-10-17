@@ -20,12 +20,13 @@ export async function GET(
   try {
     const { slug } = params;
 
-    // Obtener el post
+    // Obtener el post (solo si está publicado Y la fecha ya pasó)
     const { data: post, error: postError } = await supabase
       .from('blog_posts')
       .select('*')
       .eq('slug', slug)
       .eq('published', true)
+      .lte('created_at', new Date().toISOString())
       .single();
 
     if (postError || !post) {

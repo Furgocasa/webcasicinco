@@ -26,6 +26,7 @@ export async function GET(request: NextRequest) {
       .from('blog_posts')
       .select('*')
       .eq('published', true)
+      .lte('created_at', new Date().toISOString()) // Solo mostrar si la fecha ya pasó
       .order('created_at', { ascending: false })
       .limit(limit);
 

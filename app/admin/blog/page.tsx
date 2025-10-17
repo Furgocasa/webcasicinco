@@ -103,30 +103,21 @@ export default function AdminBlogPage() {
     }
   };
 
-  const autoPublishScheduled = async () => {
-    try {
-      const response = await fetch('/api/admin/blog/auto-publish', {
-        method: 'POST'
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        toast.success(`${data.published} posts publicados`);
-        fetchPosts();
-      }
-    } catch (error) {
-      toast.error('Error auto-publicando posts');
-    }
-  };
 
   // Filtrar posts
   const filteredPosts = posts.filter(post => {
     const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          post.location.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = filterCategory === 'all' || post.category === filterCategory;
+    
+    const now = new Date();
+    const postDate = new Date(post.created_at);
+    const isVisible = post.published && postDate <= now;
+    const isScheduled = post.published && postDate > now;
+    
     const matchesPublished = filterPublished === 'all' || 
-                            (filterPublished === 'published' && post.published) ||
-                            (filterPublished === 'draft' && !post.published);
+                            (filterPublished === 'published' && isVisible) ||
+                            (filterPublished === 'draft' && isScheduled);
     
     return matchesSearch && matchesCategory && matchesPublished;
   });
@@ -162,24 +153,14 @@ export default function AdminBlogPage() {
               </h1>
               <p className="text-gray-600 mt-1">Administra los artículos del blog</p>
             </div>
-            <div className="flex gap-2">
-              <Button
-                onClick={autoPublishScheduled}
-                variant="outline"
-                size="sm"
-              >
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Auto-Publicar Programados
-              </Button>
-              <Button
-                onClick={() => router.push('/blog')}
-                variant="outline"
-                size="sm"
-              >
-                <Eye className="h-4 w-4 mr-2" />
-                Ver Blog Público
-              </Button>
-            </div>
+            <Button
+              onClick={() => router.push('/blog')}
+              variant="outline"
+              size="sm"
+            >
+              <Eye className="h-4 w-4 mr-2" />
+              Ver Blog Público
+            </Button>
           </div>
 
           {/* Stats */}
@@ -207,12 +188,12 @@ export default function AdminBlogPage() {
             <Card className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600">Borradores</p>
+                  <p className="text-sm text-gray-600">Programados</p>
                   <p className="text-2xl font-bold text-orange-600">
-                    {posts.filter(p => !p.published).length}
+                    {posts.filter(p => p.published && new Date(p.created_at) > new Date()).length}
                   </p>
                 </div>
-                <EyeOff className="h-8 w-8 text-orange-600" />
+                <Calendar className="h-8 w-8 text-orange-600" />
               </div>
             </Card>
             <Card className="p-4">
@@ -260,8 +241,8 @@ export default function AdminBlogPage() {
                 className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
               >
                 <option value="all">Todos los estados</option>
-                <option value="published">Publicados</option>
-                <option value="draft">Borradores</option>
+                <option value="published">Visibles Ahora</option>
+                <option value="draft">Programados (futuro)</option>
               </select>
 
               <Button onClick={fetchPosts} variant="outline">
@@ -320,15 +301,32 @@ export default function AdminBlogPage() {
                       {new Date(post.created_at).toLocaleDateString('es-ES')}
                     </td>
                     <td className="px-6 py-4">
-                      {post.published ? (
-                        <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
-                          Publicado
-                        </span>
-                      ) : (
-                        <span className="px-2 py-1 text-xs font-medium rounded-full bg-orange-100 text-orange-800">
-                          Borrador
-                        </span>
-                      )}
+                      {(() => {
+                        const now = new Date();
+                        const postDate = new Date(post.created_at);
+                        
+                        if (!post.published) {
+                          return (
+                            <span className="px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800">
+                              Oculto
+                            </span>
+                          );
+                        }
+                        
+                        if (postDate > now) {
+                          return (
+                            <span className="px-2 py-1 text-xs font-medium rounded-full bg-orange-100 text-orange-800">
+                              Programado
+                            </span>
+                          );
+                        }
+                        
+                        return (
+                          <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
+                            Visible
+                          </span>
+                        );
+                      })()}
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex justify-end gap-2">

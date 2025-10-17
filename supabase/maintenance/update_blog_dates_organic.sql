@@ -28,7 +28,7 @@ UPDATE blog_posts
 SET 
   created_at = NOW() + INTERVAL '14 days',
   updated_at = NOW() + INTERVAL '14 days',
-  published = false  -- Se publicarán automáticamente en esa fecha
+  published = true  -- Publicado, pero la fecha controla la visibilidad
 WHERE slug IN (
   'mejores-restaurantes-valencia',
   'mejores-restaurantes-sevilla',
@@ -42,7 +42,7 @@ UPDATE blog_posts
 SET 
   created_at = NOW() + INTERVAL '28 days',
   updated_at = NOW() + INTERVAL '28 days',
-  published = false
+  published = true
 WHERE slug IN (
   'mejores-restaurantes-malaga',
   'mejores-bares-sevilla',
@@ -56,7 +56,7 @@ UPDATE blog_posts
 SET 
   created_at = NOW() + INTERVAL '42 days',
   updated_at = NOW() + INTERVAL '42 days',
-  published = false
+  published = true
 WHERE slug IN (
   'mejores-restaurantes-granada',
   'mejores-restaurantes-bilbao',
@@ -70,7 +70,7 @@ UPDATE blog_posts
 SET 
   created_at = NOW() + INTERVAL '56 days',
   updated_at = NOW() + INTERVAL '56 days',
-  published = false
+  published = true
 WHERE slug IN (
   'mejores-restaurantes-zaragoza',
   'mejores-restaurantes-alicante',
@@ -84,7 +84,7 @@ UPDATE blog_posts
 SET 
   created_at = NOW() + INTERVAL '70 days',
   updated_at = NOW() + INTERVAL '70 days',
-  published = false
+  published = true
 WHERE slug IN (
   'mejores-hoteles-cuenca',
   'mejores-restaurantes-asturias',
@@ -93,27 +93,15 @@ WHERE slug IN (
 );
 
 -- ================================================================
--- FUNCIÓN PARA AUTO-PUBLICAR POSTS EN SU FECHA
+-- NOTA: AUTO-PUBLICACIÓN AUTOMÁTICA
 -- ================================================================
-
-CREATE OR REPLACE FUNCTION auto_publish_scheduled_posts()
-RETURNS void AS $$
-BEGIN
-  -- Publicar posts cuya fecha ya pasó
-  UPDATE blog_posts
-  SET published = true
-  WHERE published = false
-    AND created_at <= NOW();
-END;
-$$ LANGUAGE plpgsql;
-
+-- 
+-- Ya NO es necesaria una función de auto-publicación.
+-- Los posts se muestran automáticamente cuando su fecha llega,
+-- gracias al filtro .lte('created_at', NOW()) en las queries.
+-- 
+-- Sistema tipo Joomla: si created_at es futuro, no se muestra.
 -- ================================================================
--- TRIGGER DIARIO (opcional, para Supabase Cron Jobs)
--- ================================================================
-
-COMMENT ON FUNCTION auto_publish_scheduled_posts() IS 
-'Función para auto-publicar posts programados. 
-Ejecutar diariamente con Supabase Cron Jobs o llamarla manualmente desde admin.';
 
 -- ================================================================
 -- VERIFICACIÓN
