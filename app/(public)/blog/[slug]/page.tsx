@@ -140,7 +140,7 @@ export default function BlogPostPage() {
                           {place.photo_reference && (
                             <div className="md:w-1/3 h-48 md:h-auto">
                               <img
-                                src={getPlacePhotoUrl(place.photo_reference, 400)}
+                                src={getPlacePhotoUrl(place.photo_reference || '', 400)}
                                 alt={place.name}
                                 className="w-full h-full object-cover"
                               />
