@@ -208,7 +208,7 @@ export default function Header() {
             {/* Menú deslizable - Limpio y Sin Duplicados */}
             <div className="fixed top-16 left-0 right-0 bottom-0 bg-white z-50 md:hidden overflow-y-auto animate-slide-down shadow-2xl">
               <div className="p-6">
-              <div className="space-y-3">
+              <div className="space-y-6">
                 {loading ? (
                   <div className="flex justify-center py-8">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
@@ -216,7 +216,7 @@ export default function Header() {
                 ) : user ? (
                   <>
                     {/* User info card */}
-                    <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-4 mb-6">
+                    <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-4 mb-2">
                       <div className="flex items-center gap-3">
                         <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center">
                           <User className="h-6 w-6 text-white" />
@@ -276,6 +276,68 @@ export default function Header() {
                     </Link>
                   </div>
                 )}
+
+                {/* Sección de Navegación */}
+                <div>
+                  <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-4">Explorar</h3>
+                  <div className="space-y-2">
+                    <Link
+                      href="/mapa"
+                      className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-indigo-50 transition"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <Map className="h-5 w-5 text-indigo-600" />
+                      <span className="font-medium text-gray-900">Mapa de Lugares</span>
+                    </Link>
+                    <Link
+                      href="/ruta"
+                      className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-indigo-50 transition"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <Navigation className="h-5 w-5 text-indigo-600" />
+                      <span className="font-medium text-gray-900">Planificar Ruta</span>
+                    </Link>
+                  </div>
+                </div>
+
+                {/* Top 10 por Categoría */}
+                <div>
+                  <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-4">Top 10</h3>
+                  <div className="space-y-2">
+                    <Link
+                      href="/restaurante"
+                      className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-50 transition"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <span className="text-2xl">🍽️</span>
+                      <span className="font-medium text-gray-900">Restaurantes</span>
+                    </Link>
+                    <Link
+                      href="/bar"
+                      className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-amber-50 transition"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <span className="text-2xl">🍺</span>
+                      <span className="font-medium text-gray-900">Bares</span>
+                    </Link>
+                    <Link
+                      href="/cafeteria"
+                      className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-orange-50 transition"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <span className="text-2xl">☕</span>
+                      <span className="font-medium text-gray-900">Cafeterías</span>
+                    </Link>
+                    <Link
+                      href="/hotel"
+                      className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-blue-50 transition"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <span className="text-2xl">🏨</span>
+                      <span className="font-medium text-gray-900">Hoteles</span>
+                    </Link>
+                  </div>
+                </div>
               </div>
               </div>
             </div>
