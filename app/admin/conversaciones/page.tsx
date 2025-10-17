@@ -220,7 +220,7 @@ export default function ConversacionesPage() {
       // Combinar headers y rows
       const csvContent = [
         headers.join(','),
-        ...rows.map(row => row.join(','))
+        ...rows.map((row: (string | number)[]) => row.join(','))
       ].join('\n');
 
       // Crear y descargar archivo
