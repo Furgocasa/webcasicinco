@@ -33,7 +33,7 @@ import { calculateQualityTier, getTierInfo } from '@/lib/utils/tier-calculator';
 import { MarkdownText } from '@/lib/utils/markdown';
 import { getPlacePhotoUrl } from '@/lib/utils/photo-helper';
 import { toast } from 'sonner';
-import { trackEvent, EVENTS, CATEGORIES } from '@/lib/analytics/tracker';
+import { trackEvent, EVENTS, CATEGORIES as ANALYTICS_CATEGORIES } from '@/lib/analytics/tracker';
 
 const libraries: ("places")[] = ["places"];
 
@@ -395,7 +395,7 @@ export default function PlaceDetailPage() {
                     href={`tel:${place.phone}`}
                     onClick={() => {
                       // 🎯 Trackear click en teléfono
-                      trackEvent(EVENTS.PHONE_CLICK, CATEGORIES.PLACE, {
+                      trackEvent(EVENTS.PHONE_CLICK, ANALYTICS_CATEGORIES.PLACE, {
                         place_id: place.id,
                         place_name: place.name,
                         place_category: place.category,
@@ -416,7 +416,7 @@ export default function PlaceDetailPage() {
                     rel="noopener noreferrer"
                     onClick={() => {
                       // 🎯 Trackear click en website
-                      trackEvent(EVENTS.WEBSITE_CLICK, CATEGORIES.PLACE, {
+                      trackEvent(EVENTS.WEBSITE_CLICK, ANALYTICS_CATEGORIES.PLACE, {
                         place_id: place.id,
                         place_name: place.name,
                         place_category: place.category,
@@ -547,7 +547,7 @@ export default function PlaceDetailPage() {
                   <Button
                     onClick={() => {
                       // 🎯 Trackear click en directions (Google Maps)
-                      trackEvent(EVENTS.DIRECTIONS_CLICK, CATEGORIES.PLACE, {
+                      trackEvent(EVENTS.DIRECTIONS_CLICK, ANALYTICS_CATEGORIES.PLACE, {
                         place_id: place.id,
                         place_name: place.name,
                         place_category: place.category,

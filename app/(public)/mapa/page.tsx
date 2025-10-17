@@ -24,7 +24,7 @@ import BottomNavigation from '@/components/mobile/BottomNavigation';
 import BottomSheet from '@/components/mobile/BottomSheet';
 import type { PlaceWithTier, PlaceFilters, QualityTier, ReviewsRange } from '@/types/filters';
 import { calculateQualityTier, getTierMarkerColor, getTierInfo } from '@/lib/utils/tier-calculator';
-import { trackEvent, EVENTS, CATEGORIES } from '@/lib/analytics/tracker';
+import { trackEvent, EVENTS, CATEGORIES as ANALYTICS_CATEGORIES } from '@/lib/analytics/tracker';
 import { 
   QUALITY_TIERS, 
   REVIEWS_RANGES, 
@@ -990,7 +990,7 @@ export default function MapPage() {
   // Manejar click en marcador
   const handleMarkerClick = (place: PlaceWithTier) => {
     // 🎯 Trackear click en marcador del mapa
-    trackEvent(EVENTS.PLACE_VIEW, CATEGORIES.PLACE, {
+    trackEvent(EVENTS.PLACE_VIEW, ANALYTICS_CATEGORIES.PLACE, {
       place_id: place.id,
       place_name: place.name,
       place_category: place.category,
@@ -1014,7 +1014,7 @@ export default function MapPage() {
   // 🎯 Manejar cierre de filtros móviles (trackear búsqueda finalizada)
   const handleCloseMobileFilters = () => {
     // Trackear búsqueda finalizada con todos los filtros aplicados
-    trackEvent(EVENTS.SEARCH_FINALIZED, CATEGORIES.SEARCH, {
+    trackEvent(EVENTS.SEARCH_FINALIZED, ANALYTICS_CATEGORIES.SEARCH, {
       category: filters.category,
       search_term: filters.searchTerm,
       community: filters.community,

@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { toast } from 'sonner';
 import Link from 'next/link';
-import { trackEvent, EVENTS, CATEGORIES } from '@/lib/analytics/tracker';
+import { trackEvent, EVENTS, CATEGORIES as ANALYTICS_CATEGORIES } from '@/lib/analytics/tracker';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -66,7 +66,7 @@ export default function ChatbotFloating() {
               e.preventDefault();
               
               // 🎯 Trackear click en enlace del chatbot
-              trackEvent(EVENTS.CHATBOT_LINK_CLICK, CATEGORIES.CHATBOT, {
+              trackEvent(EVENTS.CHATBOT_LINK_CLICK, ANALYTICS_CATEGORIES.CHATBOT, {
                 link_url: href,
                 link_type: href.includes('/mapa') ? 'map' : 'detail'
               });
@@ -131,7 +131,7 @@ export default function ChatbotFloating() {
     setInput('');
     
     // 🎯 Trackear mensaje enviado al chatbot
-    trackEvent(EVENTS.CHATBOT_MESSAGE_SEND, CATEGORIES.CHATBOT, {
+    trackEvent(EVENTS.CHATBOT_MESSAGE_SEND, ANALYTICS_CATEGORIES.CHATBOT, {
       message_length: userMessage.length,
       messages_in_conversation: messages.length
     });
