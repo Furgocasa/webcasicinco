@@ -34,6 +34,11 @@ export default function Footer() {
                   Planificar Ruta
                 </Link>
               </li>
+              <li>
+                <Link href="/blog" className="hover:text-white transition">
+                  Blog
+                </Link>
+              </li>
             </ul>
           </div>
 
