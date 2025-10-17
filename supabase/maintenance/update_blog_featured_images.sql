@@ -42,3 +42,4 @@ FROM blog_posts
 GROUP BY category
 ORDER BY category;
 
+

@@ -66,7 +66,7 @@ export default function UpdateRatingsPage() {
         const res = await fetch('/api/admin/update-ratings', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ mode, batchSize: 100, offset })
+          body: JSON.stringify({ mode, batchSize: 20, offset })
         });
 
         // Verificar que la respuesta es OK antes de parsear JSON
@@ -96,7 +96,7 @@ export default function UpdateRatingsPage() {
 
         setLogs(prev => [
           ...prev,
-          `✅ Lote ${Math.floor(offset / 100) + 1}: ${data.updated} actualizados, ${data.deleted} despublicados, ${data.failed} fallos - ${data.cost}`
+          `✅ Lote ${Math.floor(offset / 20) + 1}: ${data.updated} actualizados, ${data.deleted} despublicados, ${data.failed} fallos - ${data.cost}`
         ]);
 
         if (data.errors && data.errors.length > 0) {
@@ -106,8 +106,8 @@ export default function UpdateRatingsPage() {
         hasMore = data.hasMore;
         offset = data.nextOffset;
 
-        // Pausa entre lotes
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Pausa breve entre lotes
+        await new Promise(resolve => setTimeout(resolve, 500));
 
       } catch (error: any) {
         setLogs(prev => [...prev, `❌ Error: ${error.message}`]);
@@ -261,7 +261,7 @@ export default function UpdateRatingsPage() {
                 <li>✅ Solo se consultan campos básicos (rating + reseñas) = $0.005 por lugar</li>
                 <li>✅ Lugares que bajen de 4.7 se despublican automáticamente (no se borran)</li>
                 <li>✅ Ratings que suban o bajen se actualizan automáticamente</li>
-                <li>⏱️ Tiempo estimado: ~1 minuto por cada 100 lugares</li>
+                <li>⏱️ Tiempo estimado: ~20 segundos por cada 20 lugares</li>
                 <li>💰 Coste estimado: ${stats?.estimatedCost[mode] || '0'}</li>
               </ul>
             </div>

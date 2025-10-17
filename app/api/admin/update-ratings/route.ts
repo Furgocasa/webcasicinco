@@ -4,7 +4,8 @@ import { createAdminClient } from '@/lib/supabase/server';
 import axios from 'axios';
 
 export const dynamic = 'force-dynamic';
-export const maxDuration = 300;
+export const maxDuration = 300; // 5 minutos max
+export const fetchCache = 'force-no-store';
 
 const GOOGLE_PLACES_API_KEY = process.env.GOOGLE_MAPS_API_KEY || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!;
 const PLACES_API_BASE = 'https://maps.googleapis.com/maps/api/place';
@@ -54,7 +55,7 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     const mode = body.mode || 'critical'; // 'all' | 'critical' | 'old'
-    const batchSize = body.batchSize || 100;
+    const batchSize = body.batchSize || 20; // Lotes más pequeños para evitar timeout
     const offset = body.offset || 0;
 
     const adminSupabase = createAdminClient();
@@ -150,8 +151,8 @@ export async function POST(request: NextRequest) {
           }
         }
 
-        // Pausa para no saturar API
-        await new Promise(resolve => setTimeout(resolve, 100));
+        // Pausa reducida para no saturar API (50ms en vez de 100ms)
+        await new Promise(resolve => setTimeout(resolve, 50));
 
       } catch (error: any) {
         console.error(`Error procesando ${place.name}:`, error);
