@@ -10,6 +10,21 @@ const menuItems = [
     icon: '📊',
   },
   {
+    name: 'Estadísticas',
+    href: '/admin/estadisticas',
+    icon: '📈',
+  },
+  {
+    name: 'Blog SEO',
+    href: '/admin/blog',
+    icon: '📝',
+  },
+  {
+    name: 'Conversaciones IA',
+    href: '/admin/conversaciones',
+    icon: '💬',
+  },
+  {
     name: 'Indexar Lugares',
     href: '/admin/indexar',
     icon: '🔍',
