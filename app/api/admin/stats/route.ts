@@ -41,9 +41,15 @@ export async function GET(request: NextRequest) {
       .select('*', { count: 'exact', head: true });
 
     // Lugares más visitados
-    const { data: placeViews } = await adminSupabase
-      .rpc('get_most_viewed_places', { days_ago: days, limit_count: 10 })
-      .catch(() => ({ data: null }));
+    let placeViews = null;
+    try {
+      const result = await adminSupabase
+        .rpc('get_most_viewed_places', { days_ago: days, limit_count: 10 });
+      placeViews = result.data;
+    } catch (error) {
+      // Si la función RPC no existe, placeViews quedará null
+      console.log('RPC function not available, using manual query');
+    }
 
     // Si la función no existe, hacer query manual
     let mostViewed = placeViews || [];
