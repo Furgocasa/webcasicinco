@@ -50,12 +50,7 @@ type Place = {
 
 export default function RutaPage() {
   // ✅ OPTIMIZACIÓN: Usar contexto del mapa (ahorro 66% en navegaciones)
-  const { isLoaded, loadError, setShouldLoadMap } = useMap();
-
-  // Activar carga del mapa al entrar en esta página
-  useEffect(() => {
-    setShouldLoadMap(true);
-  }, [setShouldLoadMap]);
+  const { isLoaded, loadError } = useMap();
 
   const mapRef = useRef<google.maps.Map | null>(null);
   const originAutocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);

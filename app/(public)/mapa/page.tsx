@@ -86,12 +86,7 @@ export default function MapPage() {
   }, []);
 
   // ✅ OPTIMIZACIÓN: Usar contexto del mapa (ahorro 66% en navegaciones)
-  const { isLoaded, loadError, shouldLoadMap, setShouldLoadMap } = useMap();
-
-  // ✅ ACTIVAR carga del mapa al entrar en esta página
-  useEffect(() => {
-    setShouldLoadMap(true);
-  }, [setShouldLoadMap]);
+  const { isLoaded, loadError } = useMap();
 
   // State
   const [allPlaces, setAllPlaces] = useState<PlaceWithTier[]>([]); // TODOS los lugares
@@ -764,22 +759,6 @@ export default function MapPage() {
   }, []); // Solo ejecutar una vez al montar el componente
 
   // ✅ OPTIMIZACIÓN: Activar carga del mapa cuando sea necesario
-  // Ahorra ~40% de cargas de mapa en móvil
-  useEffect(() => {
-    // Desktop: cargar inmediatamente
-    // Mobile: cargar solo si está en vista 'map'
-    const isMobile = window.innerWidth < 768;
-    
-    if (!isMobile) {
-      // Desktop: siempre cargar mapa
-      setShouldLoadMap(true);
-    } else {
-      // Mobile: cargar solo en vista mapa
-      if (mobileView === 'map') {
-        setShouldLoadMap(true);
-      }
-    }
-  }, [mobileView]);
 
   // Cargar lugares al montar
   useEffect(() => {

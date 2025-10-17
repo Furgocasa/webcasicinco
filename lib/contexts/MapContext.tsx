@@ -23,11 +23,11 @@ const MapContext = createContext<MapContextType | undefined>(undefined);
  */
 export function MapProvider({ children }: { children: ReactNode }) {
   const [mapInstance, setMapInstance] = useState<google.maps.Map | null>(null);
-  const [shouldLoadMap, setShouldLoadMap] = useState(false);
+  const [shouldLoadMap, setShouldLoadMap] = useState(true); // ✅ SIEMPRE true para carga inmediata
 
-  // Cargar Google Maps solo cuando se necesite
+  // Cargar Google Maps inmediatamente
   const { isLoaded, loadError } = useLoadScript({
-    googleMapsApiKey: shouldLoadMap ? (process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '') : '',
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '',
     libraries,
   });
 
