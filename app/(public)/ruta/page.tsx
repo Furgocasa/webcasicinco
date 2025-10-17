@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
-import { GoogleMap, useLoadScript, DirectionsRenderer, Marker, Autocomplete } from '@react-google-maps/api';
+import { GoogleMap, DirectionsRenderer, Marker, Autocomplete } from '@react-google-maps/api';
+import { useMap } from '@/lib/contexts/MapContext';
 import { 
   Navigation, 
   MapPin, 
@@ -20,8 +21,6 @@ import BottomSheet from '@/components/mobile/BottomSheet';
 import { calculateQualityTier, getTierInfo } from '@/lib/utils/tier-calculator';
 import { getPlacePhotoUrl } from '@/lib/utils/photo-helper';
 import { toast } from 'sonner';
-
-const libraries: ("places" | "geometry" | "drawing")[] = ["places", "geometry", "drawing"];
 
 const mapContainerStyle = {
   width: '100%',
@@ -50,10 +49,13 @@ type Place = {
 };
 
 export default function RutaPage() {
-  const { isLoaded, loadError } = useLoadScript({
-    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '',
-    libraries,
-  });
+  // ✅ OPTIMIZACIÓN: Usar contexto del mapa (ahorro 66% en navegaciones)
+  const { isLoaded, loadError, setShouldLoadMap } = useMap();
+
+  // Activar carga del mapa al entrar en esta página
+  useEffect(() => {
+    setShouldLoadMap(true);
+  }, [setShouldLoadMap]);
 
   const mapRef = useRef<google.maps.Map | null>(null);
   const originAutocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);

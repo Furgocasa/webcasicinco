@@ -15,6 +15,11 @@ const menuItems = [
     icon: '🔍',
   },
   {
+    name: 'Actualizar Ratings',
+    href: '/admin/update-ratings',
+    icon: '⭐',
+  },
+  {
     name: 'Gestión de Lugares',
     href: '/admin/lugares',
     icon: '📍',

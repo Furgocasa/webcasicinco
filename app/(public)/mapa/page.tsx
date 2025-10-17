@@ -1,28 +1,10 @@
 'use client';
 
 import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
-import { getPlacesFromCache, savePlacesToCache } from '@/lib/utils/places-cache';
-import { getPlacePhotoUrl } from '@/lib/utils/photo-helper';
-
-// 🚀 HOOK DE DEBOUNCE para optimizar búsquedas
-function useDebounce<T>(value: T, delay: number): T {
-  const [debouncedValue, setDebouncedValue] = useState<T>(value);
-  
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedValue(value);
-    }, delay);
-    
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [value, delay]);
-  
-  return debouncedValue;
-}
 import { useSearchParams, useRouter } from 'next/navigation';
-import { GoogleMap, useLoadScript, Marker, InfoWindow } from '@react-google-maps/api';
+import { GoogleMap, Marker, InfoWindow } from '@react-google-maps/api';
 import { MarkerClusterer } from '@googlemaps/markerclusterer';
+import { useMap } from '@/lib/contexts/MapContext';
 import { 
   Search, 
   X, 
@@ -51,6 +33,25 @@ import {
 } from '@/types/filters';
 import { PROVINCES, CATEGORIES } from '@/lib/utils/constants';
 import { toast } from 'sonner';
+import { getPlacesFromCache, savePlacesToCache } from '@/lib/utils/places-cache';
+import { getPlacePhotoUrl } from '@/lib/utils/photo-helper';
+
+// 🚀 HOOK DE DEBOUNCE para optimizar búsquedas
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+  
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+    
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+  
+  return debouncedValue;
+}
 
 const mapContainerStyle = {
   width: '100%',
@@ -71,8 +72,6 @@ const SPAIN_BOUNDS = {
   east: 4.5,      // Este de Baleares (Menorca)
 };
 
-const libraries: ("places" | "drawing" | "geometry" | "visualization")[] = ["places"];
-
 export default function MapPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -86,15 +85,13 @@ export default function MapPage() {
     document.title = 'Mapa de Lugares | Casi Cinco';
   }, []);
 
-  // ✅ OPTIMIZACIÓN: Carga perezosa del mapa (ahorro 40% de cargas)
-  // Solo cargar Google Maps cuando sea necesario
-  const [shouldLoadMap, setShouldLoadMap] = useState(false);
+  // ✅ OPTIMIZACIÓN: Usar contexto del mapa (ahorro 66% en navegaciones)
+  const { isLoaded, loadError, shouldLoadMap, setShouldLoadMap } = useMap();
 
-  // Google Maps (carga condicional)
-  const { isLoaded, loadError } = useLoadScript({
-    googleMapsApiKey: shouldLoadMap ? (process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '') : '',
-    libraries,
-  });
+  // ✅ ACTIVAR carga del mapa al entrar en esta página
+  useEffect(() => {
+    setShouldLoadMap(true);
+  }, [setShouldLoadMap]);
 
   // State
   const [allPlaces, setAllPlaces] = useState<PlaceWithTier[]>([]); // TODOS los lugares

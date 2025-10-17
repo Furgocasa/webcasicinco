@@ -6,6 +6,7 @@ import ChatbotFloating from '@/components/ChatbotFloating';
 import PlacesPreloader from '@/components/PlacesPreloader';
 import GoogleAnalytics from '@/components/GoogleAnalytics';
 import PageTracker from '@/components/PageTracker';
+import { MapProvider } from '@/lib/contexts/MapContext';
 import './globals.css';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
@@ -90,14 +91,16 @@ export default function RootLayout({
         <GoogleAnalytics />
       </head>
       <body className={inter.className}>
-        <PageTracker />
-        <PlacesPreloader />
-        <Header />
-        <main>
-          {children}
-        </main>
-        <ChatbotFloating />
-        <Toaster position="top-right" richColors closeButton />
+        <MapProvider>
+          <PageTracker />
+          <PlacesPreloader />
+          <Header />
+          <main>
+            {children}
+          </main>
+          <ChatbotFloating />
+          <Toaster position="top-right" richColors closeButton />
+        </MapProvider>
       </body>
     </html>
   );
