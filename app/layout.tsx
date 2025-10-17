@@ -6,6 +6,7 @@ import ChatbotFloating from '@/components/ChatbotFloating';
 import PlacesPreloader from '@/components/PlacesPreloader';
 import GoogleAnalytics from '@/components/GoogleAnalytics';
 import PageTracker from '@/components/PageTracker';
+import PageViewTracker from '@/components/PageViewTracker';
 import { MapProvider } from '@/lib/contexts/MapContext';
 import './globals.css';
 
@@ -93,6 +94,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <MapProvider>
           <PageTracker />
+          <PageViewTracker />
           <PlacesPreloader />
           <Header />
           <main>

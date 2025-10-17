@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { toast } from 'sonner';
 import Link from 'next/link';
+import { trackEvent, EVENTS, CATEGORIES } from '@/lib/analytics/tracker';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -63,6 +64,13 @@ export default function ChatbotFloating() {
             const href = target.getAttribute('data-href');
             if (href && !href.startsWith('http')) {
               e.preventDefault();
+              
+              // 🎯 Trackear click en enlace del chatbot
+              trackEvent(EVENTS.CHATBOT_LINK_CLICK, CATEGORIES.CHATBOT, {
+                link_url: href,
+                link_type: href.includes('/mapa') ? 'map' : 'detail'
+              });
+              
               router.push(href);
             }
           }
@@ -121,6 +129,12 @@ export default function ChatbotFloating() {
 
     const userMessage = input.trim();
     setInput('');
+    
+    // 🎯 Trackear mensaje enviado al chatbot
+    trackEvent(EVENTS.CHATBOT_MESSAGE_SEND, CATEGORIES.CHATBOT, {
+      message_length: userMessage.length,
+      messages_in_conversation: messages.length
+    });
     
     // Añadir mensaje del usuario
     const newMessages: Message[] = [...messages, { role: 'user', content: userMessage }];
