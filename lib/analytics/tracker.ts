@@ -110,11 +110,17 @@ export const EVENTS = {
   
   // Rutas
   ROUTE_CALCULATE: 'route_calculate',
+  
+  // Alias para compatibilidad
+  PHONE_CLICK: 'place_phone_click',
+  WEBSITE_CLICK: 'place_website_click',
+  DIRECTIONS_CLICK: 'place_directions_click',
 } as const;
 
 export const CATEGORIES = {
   NAVIGATION: 'navigation',
   MAP: 'map',
+  PLACE: 'place',
   ENGAGEMENT: 'engagement',
   CONVERSION: 'conversion',
   SEARCH: 'search',
