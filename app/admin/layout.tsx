@@ -9,6 +9,7 @@ import { ChevronDown } from 'lucide-react';
 const adminSections = [
   { name: 'Dashboard', path: '/admin/dashboard', icon: '📊' },
   { name: 'Estadísticas', path: '/admin/estadisticas', icon: '📈' },
+  { name: 'Blog SEO', path: '/admin/blog', icon: '📝' },
   { name: 'Indexar Lugares', path: '/admin/indexar', icon: '🔍' },
   { name: 'Búsqueda Manual', path: '/admin/buscar-lugar', icon: '🎯' },
   { name: 'Actualizar Ratings', path: '/admin/update-ratings', icon: '⭐' },
