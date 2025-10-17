@@ -996,7 +996,6 @@ export default function MapPage() {
       place_category: place.category,
       place_city: place.city,
       place_rating: place.rating,
-      place_tier: place.tier,
       source: 'map_marker'
     });
     
