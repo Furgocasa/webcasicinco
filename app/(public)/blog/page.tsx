@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { BookOpen, MapPin, Calendar, TrendingUp } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import Footer from '@/components/layout/Footer';
-import { getPlacePhotoUrl } from '@/lib/utils/photo-helper';
 import type { BlogPost } from '@/types/blog';
 
 export default function BlogPage() {
@@ -58,6 +57,11 @@ export default function BlogPage() {
       hotel: 'Hoteles'
     };
     return labels[category] || category;
+  };
+
+  // Helper para construir URL de foto de Google Places
+  const buildPhotoUrl = (photoReference: string, maxwidth: number = 800): string => {
+    return `https://maps.googleapis.com/maps/api/place/photo?maxwidth=${maxwidth}&photo_reference=${photoReference}&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`;
   };
 
   return (
@@ -156,7 +160,7 @@ export default function BlogPage() {
                 {posts.map((post) => {
                   // Usar la foto del primer lugar si existe, si no usar featured_image_url
                   const imageUrl = post.first_place_photo 
-                    ? getPlacePhotoUrl(post.first_place_photo, 800)
+                    ? buildPhotoUrl(post.first_place_photo, 800)
                     : post.featured_image_url;
 
                   return (

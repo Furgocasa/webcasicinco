@@ -43,3 +43,4 @@ GROUP BY category
 ORDER BY category;
 
 
+

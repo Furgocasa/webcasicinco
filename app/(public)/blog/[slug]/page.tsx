@@ -78,9 +78,14 @@ export default function BlogPostPage() {
     return emojis[category] || '📍';
   };
 
+  // Helper para construir URL de foto de Google Places
+  const buildPhotoUrl = (photoReference: string, maxwidth: number = 1200): string => {
+    return `https://maps.googleapis.com/maps/api/place/photo?maxwidth=${maxwidth}&photo_reference=${photoReference}&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`;
+  };
+
   // Usar la foto del primer lugar si existe
   const featuredImage = post.places && post.places.length > 0 && post.places[0].photo_reference
-    ? getPlacePhotoUrl(post.places[0].photo_reference || '', 1200)
+    ? buildPhotoUrl(post.places[0].photo_reference, 1200)
     : post.featured_image_url;
 
   return (

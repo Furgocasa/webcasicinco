@@ -107,3 +107,4 @@ DROP FUNCTION IF EXISTS get_google_photo_url(TEXT);
 -- Image de Next.js llamará a getPlacePhotoUrl() en tiempo de ejecución.
 -- ================================================================
 
+

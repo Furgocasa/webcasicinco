@@ -222,3 +222,4 @@ Documentos obsoletos o históricos movidos a `docs/archive/`:
 **Última revisión:** 18 Oct 2025 - BETA 100
 
 
+
