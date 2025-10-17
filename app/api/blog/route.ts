@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
         // Obtener el primer lugar (mejor valorado) para este post
         let placesQuery = supabase
           .from('places')
-          .select('photo_reference')
+          .select('photos, photo_urls')
           .eq('category', post.category)
           .eq('published', true)
           .gte('rating', 4.7)
@@ -67,9 +67,23 @@ export async function GET(request: NextRequest) {
         const { data: places } = await placesQuery;
         const firstPlace = places && places.length > 0 ? places[0] : null;
 
+        // Obtener photo_reference del primer lugar
+        let photoReference = null;
+        if (firstPlace) {
+          // Priorizar photo_urls de Supabase
+          if (firstPlace.photo_urls && firstPlace.photo_urls.length > 0) {
+            photoReference = firstPlace.photo_urls[0]; // Ya es URL completa
+          }
+          // Fallback a photos (photo_reference de Google)
+          else if (firstPlace.photos && firstPlace.photos.length > 0) {
+            photoReference = firstPlace.photos[0]; // Es photo_reference
+          }
+        }
+
         return {
           ...post,
-          first_place_photo: firstPlace?.photo_reference || null
+          first_place_photo: photoReference,
+          first_place_photo_is_url: !!(firstPlace?.photo_urls && firstPlace.photo_urls.length > 0)
         };
       })
     );

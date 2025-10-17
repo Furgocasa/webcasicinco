@@ -61,7 +61,12 @@ export default function BlogPage() {
 
   // Helper para construir URL de foto de Google Places
   const buildPhotoUrl = (photoReference: string, maxwidth: number = 800): string => {
-    return `https://maps.googleapis.com/maps/api/place/photo?maxwidth=${maxwidth}&photo_reference=${photoReference}&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`;
+    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+    if (!apiKey) {
+      console.error('Google Maps API key not found');
+      return '';
+    }
+    return `https://maps.googleapis.com/maps/api/place/photo?maxwidth=${maxwidth}&photo_reference=${photoReference}&key=${apiKey}`;
   };
 
   return (
@@ -159,9 +164,16 @@ export default function BlogPage() {
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
                 {posts.map((post) => {
                   // Usar la foto del primer lugar si existe, si no usar featured_image_url
-                  const imageUrl = post.first_place_photo 
-                    ? buildPhotoUrl(post.first_place_photo, 800)
-                    : post.featured_image_url;
+                  let imageUrl = post.featured_image_url;
+                  if (post.first_place_photo) {
+                    // Si es URL completa, usarla directamente
+                    if (post.first_place_photo_is_url) {
+                      imageUrl = post.first_place_photo;
+                    } else {
+                      // Si es photo_reference, construir URL de Google
+                      imageUrl = buildPhotoUrl(post.first_place_photo, 800);
+                    }
+                  }
 
                   return (
                     <Link key={post.id} href={`/blog/${post.slug}`}>

@@ -80,7 +80,12 @@ export default function BlogPostPage() {
 
   // Helper para construir URL de foto de Google Places
   const buildPhotoUrl = (photoReference: string, maxwidth: number = 1200): string => {
-    return `https://maps.googleapis.com/maps/api/place/photo?maxwidth=${maxwidth}&photo_reference=${photoReference}&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`;
+    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+    if (!apiKey) {
+      console.error('Google Maps API key not found');
+      return '';
+    }
+    return `https://maps.googleapis.com/maps/api/place/photo?maxwidth=${maxwidth}&photo_reference=${photoReference}&key=${apiKey}`;
   };
 
   // Usar la foto del primer lugar si existe
