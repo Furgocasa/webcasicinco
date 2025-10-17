@@ -31,14 +31,18 @@ export default function IndexarPage() {
   // Cargar todas las ciudades
   const allCities = useMemo(() => getAllCities(), []);
   
-  // Filtrar ciudades por búsqueda
+  // Filtrar ciudades por búsqueda y ordenar alfabéticamente
   const filteredCities = useMemo(() => {
-    if (!citySearch.trim()) return allCities;
-    const search = citySearch.toLowerCase();
-    return allCities.filter(c => 
-      c.name.toLowerCase().includes(search) ||
-      c.province.toLowerCase().includes(search)
-    );
+    let cities = allCities;
+    if (citySearch.trim()) {
+      const search = citySearch.toLowerCase();
+      cities = cities.filter(c => 
+        c.name.toLowerCase().includes(search) ||
+        c.province.toLowerCase().includes(search)
+      );
+    }
+    // ✅ Ordenar alfabéticamente por nombre
+    return cities.sort((a, b) => a.name.localeCompare(b.name, 'es'));
   }, [allCities, citySearch]);
 
   // Cuando se selecciona una ciudad, limpiar provincia
@@ -129,13 +133,13 @@ export default function IndexarPage() {
                   className="w-full px-3 py-2 mb-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
                 />
                 <div className={`h-40 overflow-y-auto border border-gray-300 rounded-lg ${selectedProvince ? 'bg-gray-100' : 'bg-white'}`}>
-                  {filteredCities.slice(0, 50).map((city) => (
+                  {filteredCities.map((city) => (
                     <button
                       key={`${city.province}-${city.name}`}
                       type="button"
                       disabled={!!selectedProvince}
                       onClick={() => handleCityChange(city.name)}
-                      className={`w-full px-3 py-2 text-left text-sm hover:bg-blue-50 transition-colors disabled:cursor-not-allowed ${
+                      className={`w-full px-3 py-1.5 text-left text-sm hover:bg-blue-50 transition-colors disabled:cursor-not-allowed ${
                         selectedCity === city.name ? 'bg-blue-100 font-medium' : ''
                       }`}
                     >
@@ -144,11 +148,6 @@ export default function IndexarPage() {
                       <span className="text-gray-500 text-xs ml-1">- {(city.population / 1000).toFixed(0)}k hab</span>
                     </button>
                   ))}
-                  {filteredCities.length > 50 && (
-                    <p className="px-3 py-2 text-xs text-gray-500 italic">
-                      Mostrando 50 de {filteredCities.length}. Refina tu búsqueda...
-                    </p>
-                  )}
                   {filteredCities.length === 0 && (
                     <p className="px-3 py-8 text-sm text-gray-500 text-center">
                       No se encontraron ciudades
@@ -181,7 +180,7 @@ export default function IndexarPage() {
                       type="button"
                       disabled={!!selectedCity}
                       onClick={() => handleProvinceChange(province)}
-                      className={`w-full px-3 py-2 text-left text-sm hover:bg-blue-50 transition-colors disabled:cursor-not-allowed ${
+                      className={`w-full px-3 py-1.5 text-left text-sm hover:bg-blue-50 transition-colors disabled:cursor-not-allowed ${
                         selectedProvince === province ? 'bg-blue-100 font-medium' : ''
                       }`}
                     >
@@ -212,7 +211,7 @@ export default function IndexarPage() {
                   {PLACE_CATEGORIES.map((cat) => (
                     <label
                       key={cat.value}
-                      className="flex items-center px-3 py-2.5 hover:bg-blue-50 cursor-pointer transition-colors"
+                      className="flex items-center px-3 py-1.5 hover:bg-blue-50 cursor-pointer transition-colors"
                     >
                       <input
                         type="checkbox"
