@@ -29,13 +29,9 @@ const getCategoryEmoji = (category: string) => {
 };
 
 // Helper para construir URL de foto de Google Places
+// Simplemente usar getPlacePhotoUrl que ya maneja la API key correctamente
 const buildPhotoUrl = (photoReference: string, maxwidth: number = 1200): string => {
-  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-  if (!apiKey) {
-    console.error('Google Maps API key not found');
-    return '';
-  }
-  return `https://maps.googleapis.com/maps/api/place/photo?maxwidth=${maxwidth}&photo_reference=${photoReference}&key=${apiKey}`;
+  return getPlacePhotoUrl(photoReference, maxwidth);
 };
 
 type BlogPostContentProps = {

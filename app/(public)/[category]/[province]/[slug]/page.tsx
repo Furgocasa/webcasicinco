@@ -82,16 +82,18 @@ export async function generateStaticParams() {
 export default async function PlaceDetailPage({ params }: Props) {
   const supabase = await createClient();
   
-  const { data: place, error } = await supabase
-    .from('places')
-    .select('*')
-    .eq('slug', params.slug)
-    .eq('published', true)
-    .single();
-  
-  if (error || !place) {
-    notFound();
-  }
+  try {
+    const { data: place, error } = await supabase
+      .from('places')
+      .select('*')
+      .eq('slug', params.slug)
+      .eq('published', true)
+      .single();
+    
+    if (error || !place) {
+      console.error('Error fetching place:', error);
+      notFound();
+    }
   
   // Calcular tier
   const tier = calculateQualityTier(place.rating, place.user_ratings_total);
@@ -186,6 +188,10 @@ export default async function PlaceDetailPage({ params }: Props) {
       <PlaceContent place={place} tier={tier} tierInfo={tierInfo} />
     </>
   );
+                  } catch (error) {
+    console.error('Error rendering place page:', error);
+    notFound();
+  }
 }
 
 // ✅ ISR: Revalidar cada 24 horas
