@@ -9,7 +9,7 @@ type Props = {
   params: { category: string; province: string; slug: string }
 }
 
-// 1. ✅ Metadata dinámica para SEO
+// Metadata dinámica para SEO
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const supabase = await createClient();
   
@@ -23,15 +23,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!place) {
     return {
       title: 'Lugar no encontrado | Casi Cinco',
-      description: 'El lugar que buscas no está disponible o ha sido eliminado.',
+      description: 'El lugar que buscas no está disponible.',
     };
   }
   
-            const categoryNames: Record<string, string> = {
-              restaurante: 'Restaurante',
-              hotel: 'Hotel',
-              bar: 'Bar',
-              cafe: 'Cafetería',
+  const categoryNames: Record<string, string> = {
+    restaurante: 'Restaurante',
+    hotel: 'Hotel',
+    bar: 'Bar',
+    cafe: 'Cafetería',
   };
   
   const categoryName = categoryNames[place.category] || place.category;
@@ -47,17 +47,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         : [],
       type: 'website',
     },
-    twitter: {
-      card: 'summary_large_image',
-      title: place.name,
-      description: place.ai_description?.substring(0, 200) || `${place.name} - ${place.rating}★`,
-    },
   };
 }
 
-// 2. ✅ Pre-generar rutas estáticas (SSG) - Top 100 para empezar
+// Pre-generar top 100 lugares (SSG)
 export async function generateStaticParams() {
-  // ⚠️ IMPORTANTE: Usar createClientBrowser sin cookies() para build time
   const supabase = createClientBrowser(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -68,8 +62,7 @@ export async function generateStaticParams() {
     .select('category, province, slug')
     .eq('published', true)
     .order('rating', { ascending: false })
-    .order('user_ratings_total', { ascending: false })
-    .limit(100); // Top 100 lugares para SSG, resto ISR
+    .limit(100);
   
   return (places || []).map((place) => ({
     category: place.category,
@@ -78,7 +71,7 @@ export async function generateStaticParams() {
   }));
 }
 
-// 3. ✅ Componente principal (Server Component)
+// Página principal
 export default async function PlaceDetailPage({ params }: Props) {
   const supabase = await createClient();
   
@@ -97,7 +90,7 @@ export default async function PlaceDetailPage({ params }: Props) {
   const tier = calculateQualityTier(place.rating, place.user_ratings_total);
   const tierInfo = getTierInfo(tier);
   
-  // 4. ✅ Schema.org para SEO (LocalBusiness + Rating)
+  // Schema.org para SEO
   const schemaTypeMap: Record<string, string> = {
     restaurante: 'Restaurant',
     hotel: 'Hotel',
@@ -136,7 +129,6 @@ export default async function PlaceDetailPage({ params }: Props) {
     }
   };
   
-  // Breadcrumb Schema
   const breadcrumbSchema = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -172,7 +164,6 @@ export default async function PlaceDetailPage({ params }: Props) {
 
   return (
     <>
-      {/* ✅ Schema.org JSON-LD para rich snippets */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
@@ -182,11 +173,11 @@ export default async function PlaceDetailPage({ params }: Props) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
       
-      {/* ✅ Client Component con UI interactiva */}
       <PlaceContent place={place} tier={tier} tierInfo={tierInfo} />
     </>
   );
 }
 
-// ✅ ISR: Revalidar cada 24 horas
-export const revalidate = 86400; // 24 horas
+// ISR: Revalidar cada 24 horas
+export const revalidate = 86400;
+
