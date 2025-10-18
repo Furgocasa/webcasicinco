@@ -99,17 +99,16 @@ function toSlug(text: string): string {
     .replace(/[^a-z0-9-]/g, ''); // Solo letras, números y guiones
 }
 
-export async function generateStaticParams({ params }: { params: { category: string } }) {
+export async function generateStaticParams() {
   const supabase = createClientBrowser(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
   
-  // Obtener todas las provincias PARA ESTA CATEGORÍA específica
+  // Obtener todas las provincias únicas de TODAS las categorías
   const { data: places } = await supabase
     .from('places')
     .select('province')
-    .eq('category', params.category)
     .eq('published', true);
   
   if (!places) return [];
@@ -123,7 +122,7 @@ export async function generateStaticParams({ params }: { params: { category: str
   });
   
   // Convertir a array de params con slug correcto
-  // Solo devolver el parámetro 'province', el 'category' ya viene del padre
+  // Next.js ejecutará esto para CADA categoría generada por el padre
   return Array.from(provinces).map(province => ({
     province: toSlug(province), // Aplicar toSlug para URLs limpias sin tildes
   }));
