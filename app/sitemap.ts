@@ -23,6 +23,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
+  // Obtener artículos del blog PUBLICADOS (solo published = true)
+  const { data: blogPosts } = await supabase
+    .from('blog_posts')
+    .select('slug, updated_at, created_at')
+    .eq('published', true)
+    .lte('created_at', new Date().toISOString()) // Solo posts cuya fecha ya pasó
+    .order('created_at', { ascending: false });
+
+  // Generar URLs para cada artículo del blog
+  const blogUrls: MetadataRoute.Sitemap = (blogPosts || []).map((post) => ({
+    url: `${baseUrl}/blog/${post.slug}`,
+    lastModified: post.updated_at ? new Date(post.updated_at) : new Date(post.created_at),
+    changeFrequency: 'monthly' as const,
+    priority: 0.8,
+  }));
+
   // Páginas estáticas
   const staticPages: MetadataRoute.Sitemap = [
     {
@@ -105,8 +121,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'monthly',
       priority: 0.5,
     },
+    // Página principal del blog
+    {
+      url: `${baseUrl}/blog`,
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.9,
+    },
   ];
 
-  // Combinar páginas estáticas + lugares dinámicos
-  return [...staticPages, ...placeUrls];
+  // Combinar páginas estáticas + lugares dinámicos + artículos del blog
+  return [...staticPages, ...placeUrls, ...blogUrls];
 }
