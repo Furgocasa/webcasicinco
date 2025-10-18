@@ -453,8 +453,6 @@ export default async function CategoryProvincePage({ params }: Props) {
   );
 }
 
-// Forzar dynamic rendering - no pre-generar en build
-// Pre-generar páginas estáticas en build time (SSG) para mejor SEO
-export const dynamicParams = true; // Permite generar páginas para rutas no pre-generadas
-export const revalidate = 86400; // Revalidar cada 24 horas (ISR)
+// Revalidar cada 24 horas (ISR)
+export const revalidate = 86400;
 
