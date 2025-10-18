@@ -48,6 +48,14 @@ export function PlaceContent({ place, tier, tierInfo }: PlaceContentProps) {
   const [visitNotes, setVisitNotes] = useState('');
   const [visitRating, setVisitRating] = useState(0);
 
+  // Convertir provincia a slug para URLs (Málaga → malaga)
+  const provinceSlug = place.province
+    ?.toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/[^a-z0-9-]/g, '') || place.province;
+
   // Usar Google Maps Static API para preview (no requiere JavaScript)
   // Esto es más rápido, mejor para SEO, y no consume cuota de JavaScript API
 
@@ -164,7 +172,7 @@ export function PlaceContent({ place, tier, tierInfo }: PlaceContentProps) {
               </Link>
               <ChevronRight className="h-4 w-4" />
               <Link 
-                href={`/${place.category}/${place.province}`}
+                href={`/${place.category}/${provinceSlug}`}
                 className="hover:text-white transition-colors font-medium"
               >
                 {place.province}
