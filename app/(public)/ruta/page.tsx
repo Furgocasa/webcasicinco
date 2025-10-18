@@ -532,11 +532,9 @@ export default function RutaPage() {
               >
                 <option value="">Todas</option>
                 <option value="restaurante">Restaurantes</option>
-                <option value="hotel">Hoteles</option>
-                <option value="spa">Spas</option>
                 <option value="bar">Bares</option>
-                <option value="experiencia">Experiencias</option>
-                <option value="monumento">Monumentos</option>
+                <option value="cafe">Cafeterías</option>
+                <option value="hotel">Hoteles</option>
               </select>
             </div>
 
@@ -1160,9 +1158,9 @@ export default function RutaPage() {
               >
                 <option value="">Todas</option>
                 <option value="restaurante">Restaurantes</option>
-                <option value="hotel">Hoteles</option>
-                <option value="spa">Spas</option>
                 <option value="bar">Bares</option>
+                <option value="cafe">Cafeterías</option>
+                <option value="hotel">Hoteles</option>
               </select>
             </div>
 
