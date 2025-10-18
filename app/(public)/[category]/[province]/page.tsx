@@ -15,6 +15,24 @@ type Props = {
 
 const VALID_CATEGORIES = ['restaurante', 'bar', 'cafe', 'hotel'];
 
+// Utility para convertir provincia a slug URL-friendly
+function toSlug(text: string): string {
+  return text
+    .toLowerCase()
+    .normalize('NFD') // Descomponer caracteres con tildes
+    .replace(/[\u0300-\u036f]/g, '') // Quitar tildes
+    .replace(/\s+/g, '-') // Espacios a guiones
+    .replace(/[^a-z0-9-]/g, ''); // Solo letras, números y guiones
+}
+
+// Utility para convertir slug de URL a nombre de provincia para BD
+function fromSlug(slug: string): string {
+  return slug
+    .split('-')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
 const CATEGORY_CONFIG: Record<string, {
   title: string;
   titleSingular: string;
@@ -63,7 +81,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   const config = CATEGORY_CONFIG[category];
-  const provinceName = province.charAt(0).toUpperCase() + province.slice(1);
+  const provinceName = fromSlug(province); // Convertir slug de URL a nombre de provincia
   
   // Obtener cantidad de lugares
   const supabase = await createClient();
@@ -89,16 +107,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 // Pre-generar rutas estáticas (SSG) para las combinaciones más populares
-// Utility para convertir provincia a slug URL-friendly
-function toSlug(text: string): string {
-  return text
-    .toLowerCase()
-    .normalize('NFD') // Descomponer caracteres con tildes
-    .replace(/[\u0300-\u036f]/g, '') // Quitar tildes
-    .replace(/\s+/g, '-') // Espacios a guiones
-    .replace(/[^a-z0-9-]/g, ''); // Solo letras, números y guiones
-}
-
 export async function generateStaticParams() {
   const supabase = createClientBrowser(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -140,10 +148,7 @@ export default async function CategoryProvincePage({ params }: Props) {
   // Convertir slug de URL a nombre de provincia para buscar en BD
   // BD tiene: "Málaga", "Madrid", "A Coruña"
   // URL tiene: "malaga", "madrid", "a-coruna"
-  const provinceName = province
-    .split('-')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
+  const provinceName = fromSlug(province);
   
   const supabase = await createClient();
   
