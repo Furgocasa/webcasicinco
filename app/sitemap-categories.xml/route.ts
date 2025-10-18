@@ -6,6 +6,16 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
+// Función para convertir provincias a slug URL-friendly
+function toSlug(text: string): string {
+  return text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // Quitar tildes
+    .replace(/\s+/g, '-') // Espacios a guiones
+    .replace(/[^a-z0-9-]/g, ''); // Solo letras, números y guiones
+}
+
 export async function GET() {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://casicinco.com';
 
@@ -38,13 +48,14 @@ export async function GET() {
     }
   });
 
-  // Convertir a array de URLs
+  // Convertir a array de URLs con slugs correctos
   const categoryProvinceUrls = Array.from(categoryProvinceSet).map(key => {
     const [category, province] = key.split('|');
+    const provinceSlug = toSlug(province);
     return {
-      url: `${baseUrl}/${category}/${province}`,
+      url: `${baseUrl}/${category}/${provinceSlug}`,
       category,
-      province
+      province: provinceSlug
     };
   });
 

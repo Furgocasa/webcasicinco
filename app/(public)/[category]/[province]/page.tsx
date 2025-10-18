@@ -130,7 +130,9 @@ export default async function CategoryProvincePage({ params }: Props) {
   }
 
   const config = CATEGORY_CONFIG[category];
-  // Normalizar el nombre de provincia desde la URL
+  // Convertir slug de URL a nombre de provincia para buscar en BD
+  // BD tiene: "Málaga", "Madrid", "A Coruña"
+  // URL tiene: "malaga", "madrid", "a-coruna"
   const provinceName = province
     .split('-')
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
