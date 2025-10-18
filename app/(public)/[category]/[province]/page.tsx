@@ -134,7 +134,18 @@ export default async function CategoryProvincePage({ params }: Props) {
   
   const supabase = await createClient();
   
-  // Obtener lugares de esta categoría y provincia
+  // Obtener total de lugares para mostrar en estadísticas
+  const { count: totalPlacesCount } = await supabase
+    .from('places')
+    .select('*', { count: 'exact', head: true })
+    .eq('category', category)
+    .eq('province', provinceName)
+    .eq('published', true)
+    .gte('rating', 4.7);
+  
+  const totalPlaces = totalPlacesCount || 0;
+  
+  // Obtener solo Top 10 para mostrar públicamente
   const { data: places, error } = await supabase
     .from('places')
     .select('*')
@@ -144,7 +155,7 @@ export default async function CategoryProvincePage({ params }: Props) {
     .gte('rating', 4.7)
     .order('rating', { ascending: false })
     .order('user_ratings_total', { ascending: false })
-    .limit(50);
+    .limit(10); // Solo Top 10 públicos - resto en el mapa
   
   if (error || !places || places.length === 0) {
     notFound();
@@ -250,9 +261,9 @@ export default async function CategoryProvincePage({ params }: Props) {
               <div className="bg-white/10 backdrop-blur-sm rounded-lg px-6 py-3">
                 <div className="flex items-center gap-2">
                   <MapPin className="h-5 w-5" />
-                  <span className="text-2xl font-bold">{places.length}</span>
+                  <span className="text-2xl font-bold">{totalPlaces}</span>
                 </div>
-                <p className="text-sm text-white/80 mt-1">{config.title}</p>
+                <p className="text-sm text-white/80 mt-1">{config.title} encontrados</p>
               </div>
               
               <div className="bg-white/10 backdrop-blur-sm rounded-lg px-6 py-3">
@@ -279,7 +290,7 @@ export default async function CategoryProvincePage({ params }: Props) {
           {/* Descripción SEO */}
           <div className="bg-white rounded-xl shadow-sm p-8 mb-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              ¿Por qué estos son los mejores {config.title.toLowerCase()} de {provinceName}?
+              Top 10: Los mejores {config.title.toLowerCase()} de {provinceName}
             </h2>
             <p className="text-gray-700 leading-relaxed mb-4">
               En Casi Cinco solo incluimos {config.title.toLowerCase()} con <strong>mínimo 4.7 estrellas</strong> y 
@@ -287,9 +298,9 @@ export default async function CategoryProvincePage({ params }: Props) {
               validado por miles de clientes reales en Google Maps.
             </p>
             <p className="text-gray-700 leading-relaxed">
-              Hemos encontrado <strong>{places.length} {config.title.toLowerCase()}</strong> en {provinceName} que 
-              cumplen nuestros estrictos criterios de calidad. La valoración media es de <strong>{avgRating} estrellas</strong>, 
-              respaldada por <strong>{totalReviews.toLocaleString()} reseñas</strong> de clientes satisfechos.
+              Hemos encontrado <strong>{totalPlaces} {config.title.toLowerCase()}</strong> en {provinceName} que 
+              cumplen nuestros estrictos criterios de calidad. Aquí mostramos el <strong>Top 10</strong> con la valoración 
+              media de <strong>{avgRating} estrellas</strong>. Para ver todos los lugares, usa nuestro mapa interactivo.
             </p>
           </div>
 
@@ -370,20 +381,50 @@ export default async function CategoryProvincePage({ params }: Props) {
             })}
           </div>
 
-          {/* CTA */}
-          <div className="mt-12 text-center bg-blue-50 rounded-xl p-8">
-            <h3 className="text-2xl font-bold text-gray-900 mb-2">
-              ¿Buscas más opciones?
-            </h3>
-            <p className="text-gray-700 mb-4">
-              Explora todos nuestros {config.title.toLowerCase()} en España
-            </p>
-            <Link href={`/${category}`}>
-              <button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-3 rounded-lg transition">
-                Ver todos los {config.title}
-              </button>
-            </Link>
-          </div>
+          {/* CTA al Mapa */}
+          {totalPlaces > 10 && (
+            <div className="mt-12 bg-gradient-to-br from-blue-600 to-indigo-700 text-white rounded-xl p-10 shadow-2xl">
+              <div className="text-center max-w-2xl mx-auto">
+                <div className="text-6xl mb-4">🗺️</div>
+                <h3 className="text-3xl font-bold mb-3">
+                  ¿Quieres ver los {totalPlaces - 10} {config.title.toLowerCase()} restantes?
+                </h3>
+                <p className="text-xl text-white/90 mb-6 leading-relaxed">
+                  Descubre todos los lugares de {provinceName} en nuestro <strong>mapa interactivo</strong> con 
+                  filtros avanzados, planificador de rutas, y mucho más
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <Link href="/mapa">
+                    <button className="bg-white text-blue-600 font-bold px-8 py-4 rounded-lg hover:shadow-2xl hover:scale-105 transition-all text-lg w-full sm:w-auto">
+                      Ver todos en el Mapa
+                    </button>
+                  </Link>
+                  <Link href={`/${category}`}>
+                    <button className="bg-white/10 backdrop-blur-sm border-2 border-white text-white font-semibold px-8 py-4 rounded-lg hover:bg-white/20 transition-all text-lg w-full sm:w-auto">
+                      Explorar otras provincias
+                    </button>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {/* CTA alternativo si hay menos de 10 */}
+          {totalPlaces <= 10 && (
+            <div className="mt-12 text-center bg-blue-50 rounded-xl p-8">
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                ¿Buscas más opciones?
+              </h3>
+              <p className="text-gray-700 mb-4">
+                Explora todos nuestros {config.title.toLowerCase()} en España
+              </p>
+              <Link href={`/${category}`}>
+                <button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-3 rounded-lg transition">
+                  Ver todos los {config.title}
+                </button>
+              </Link>
+            </div>
+          )}
         </div>
       </div>
     </>
