@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
+import { createClient as createClientBrowser } from '@supabase/supabase-js';
 import { PlaceContent } from '@/components/places/PlaceContent';
 import { calculateQualityTier, getTierInfo } from '@/lib/utils/tier-calculator';
 
@@ -56,7 +57,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 // 2. ✅ Pre-generar rutas estáticas (SSG) - Top 100 para empezar
 export async function generateStaticParams() {
-  const supabase = await createClient();
+  // ⚠️ IMPORTANTE: Usar createClientBrowser sin cookies() para build time
+  const supabase = createClientBrowser(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
   
   const { data: places } = await supabase
     .from('places')
