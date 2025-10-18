@@ -441,6 +441,7 @@ export default async function CategoryProvincePage({ params }: Props) {
   );
 }
 
-// ISR: Revalidar cada 24 horas
-export const revalidate = 86400;
+// Forzar dynamic rendering - no pre-generar en build
+export const dynamic = 'force-dynamic';
+export const dynamicParams = true;
 
