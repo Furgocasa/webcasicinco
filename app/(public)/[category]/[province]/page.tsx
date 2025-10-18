@@ -99,36 +99,34 @@ function toSlug(text: string): string {
     .replace(/[^a-z0-9-]/g, ''); // Solo letras, números y guiones
 }
 
-export async function generateStaticParams() {
+export async function generateStaticParams({ params }: { params: { category: string } }) {
   const supabase = createClientBrowser(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
   
-  // Obtener todas las combinaciones únicas de categoría + provincia
+  // Obtener todas las provincias PARA ESTA CATEGORÍA específica
   const { data: places } = await supabase
     .from('places')
-    .select('category, province')
+    .select('province')
+    .eq('category', params.category)
     .eq('published', true);
   
   if (!places) return [];
   
-  // Crear Set de combinaciones únicas
-  const combinations = new Set<string>();
+  // Crear Set de provincias únicas
+  const provinces = new Set<string>();
   places.forEach(place => {
-    if (place.category && place.province) {
-      combinations.add(`${place.category}|${place.province}`);
+    if (place.province) {
+      provinces.add(place.province);
     }
   });
   
   // Convertir a array de params con slug correcto
-  return Array.from(combinations).map(combo => {
-    const [category, province] = combo.split('|');
-    return {
-      category,
-      province: toSlug(province), // Aplicar toSlug para URLs limpias sin tildes
-    };
-  });
+  // Solo devolver el parámetro 'province', el 'category' ya viene del padre
+  return Array.from(provinces).map(province => ({
+    province: toSlug(province), // Aplicar toSlug para URLs limpias sin tildes
+  }));
 }
 
 // Página principal
