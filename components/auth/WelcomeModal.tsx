@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card } from '@/components/ui/Card';
 import { Clock, Zap, Crown } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
 
 export function WelcomeModal() {
   const router = useRouter();
@@ -11,17 +12,59 @@ export function WelcomeModal() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Mostrar solo al primer login (usuario recién registrado)
-    const checkFirstLogin = () => {
+    // Verificar si debe mostrar el modal
+    const checkShouldShow = async () => {
+      // 1. Verificar localStorage (ya lo vio antes)
       const hasSeenWelcome = localStorage.getItem('hasSeenWelcome');
-      
-      // Si no ha visto el modal, mostrarlo después de 500ms
-      if (!hasSeenWelcome) {
-        setTimeout(() => setShow(true), 500);
+      if (hasSeenWelcome) {
+        return;
       }
+
+      // 2. Verificar si el usuario ya tiene un plan activo o es admin
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) return;
+
+      // 2a. Verificar si es admin
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+
+      if (profile?.role === 'admin') {
+        // Admin: marcar como visto y no mostrar
+        localStorage.setItem('hasSeenWelcome', 'true');
+        return;
+      }
+
+      // 2b. Verificar si ya tiene suscripción activa
+      const { data: subscription } = await supabase
+        .from('subscriptions')
+        .select('status')
+        .eq('user_id', user.id)
+        .eq('status', 'active')
+        .maybeSingle();
+
+      if (subscription) {
+        // Ya tiene plan: marcar como visto y no mostrar
+        localStorage.setItem('hasSeenWelcome', 'true');
+        return;
+      }
+
+      // 2c. Verificar si es usuario "free" (bypass)
+      const isFreeUser = user.user_metadata?.is_free_user;
+      if (isFreeUser) {
+        localStorage.setItem('hasSeenWelcome', 'true');
+        return;
+      }
+
+      // 3. Si llegó aquí, es un nuevo usuario → mostrar modal
+      setTimeout(() => setShow(true), 500);
     };
 
-    checkFirstLogin();
+    checkShouldShow();
   }, []);
 
   const handleFreeTrial = () => {
