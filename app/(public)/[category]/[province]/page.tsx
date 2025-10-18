@@ -89,6 +89,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 // Pre-generar rutas estáticas (SSG) para las combinaciones más populares
+// Utility para convertir provincia a slug URL-friendly
+function toSlug(text: string): string {
+  return text
+    .toLowerCase()
+    .normalize('NFD') // Descomponer caracteres con tildes
+    .replace(/[\u0300-\u036f]/g, '') // Quitar tildes
+    .replace(/\s+/g, '-') // Espacios a guiones
+    .replace(/[^a-z0-9-]/g, ''); // Solo letras, números y guiones
+}
+
 export async function generateStaticParams() {
   const supabase = createClientBrowser(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -111,12 +121,12 @@ export async function generateStaticParams() {
     }
   });
   
-  // Convertir a array de params
+  // Convertir a array de params con slug correcto
   return Array.from(combinations).map(combo => {
     const [category, province] = combo.split('|');
     return {
       category,
-      province: province.toLowerCase().replace(/\s+/g, '-'),
+      province: toSlug(province), // Aplicar toSlug para URLs limpias sin tildes
     };
   });
 }
