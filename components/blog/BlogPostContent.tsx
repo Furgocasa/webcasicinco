@@ -30,7 +30,7 @@ const getCategoryEmoji = (category: string) => {
 
 // Helper para construir URL de foto de Google Places
 // Simplemente usar getPlacePhotoUrl que ya maneja la API key correctamente
-const buildPhotoUrl = (photoReference: string, maxwidth: number = 1200): string => {
+const buildPhotoUrl = (photoReference: string, maxwidth: number = 1200): string | null => {
   return getPlacePhotoUrl(photoReference, maxwidth);
 };
 
