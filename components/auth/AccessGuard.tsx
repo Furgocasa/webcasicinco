@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { useUserAccess } from '@/lib/hooks/useUserAccess';
 import { useRouter } from 'next/navigation';
-import PaywallModal from './PaywallModal';
 import { Loader2 } from 'lucide-react';
 
 interface AccessGuardProps {
@@ -83,21 +82,8 @@ export default function AccessGuard({
           {children}
         </div>
         
-        {/* Paywall modal */}
-        <PaywallModal
-          isOpen={true}
-          onClose={() => {
-            // Si está en trial, permitir cerrar y continuar
-            if (accessInfo.isInTrial) {
-              setShowPaywall(false);
-            } else {
-              // Si no tiene acceso, redirigir a pricing
-              router.push('/pricing');
-            }
-          }}
-          trialDaysRemaining={accessInfo.trialDaysRemaining}
-          feature={feature}
-        />
+        {/* El PaywallModal se renderiza automáticamente desde layout.tsx cuando needsSubscription es true */}
+        {/* No necesitamos renderizarlo aquí, solo difuminar el contenido */}
       </>
     );
   }
