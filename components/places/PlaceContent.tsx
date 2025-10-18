@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { 
   Star, 
   MapPin, 
@@ -22,7 +23,9 @@ import {
   Twitter,
   Linkedin,
   Check,
-  X
+  X,
+  ChevronRight,
+  Home
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
@@ -143,6 +146,33 @@ export function PlaceContent({ place, tier, tierInfo }: PlaceContentProps) {
         {/* Contenido sobre la imagen */}
         <div className="absolute bottom-0 left-0 right-0 p-4 md:p-8 text-white">
           <div className="max-w-7xl mx-auto">
+            {/* Breadcrumbs */}
+            <nav className="flex items-center gap-2 text-sm text-white/80 mb-4">
+              <Link href="/" className="hover:text-white transition-colors flex items-center gap-1">
+                <Home className="h-4 w-4" />
+                <span className="hidden sm:inline">Inicio</span>
+              </Link>
+              <ChevronRight className="h-4 w-4" />
+              <Link 
+                href={`/${place.category}`}
+                className="hover:text-white transition-colors"
+              >
+                {place.category === 'restaurante' ? 'Restaurantes' : 
+                 place.category === 'hotel' ? 'Hoteles' :
+                 place.category === 'bar' ? 'Bares' :
+                 place.category === 'cafe' ? 'Cafeterías' : place.category}
+              </Link>
+              <ChevronRight className="h-4 w-4" />
+              <Link 
+                href={`/${place.category}/${place.province}`}
+                className="hover:text-white transition-colors font-medium"
+              >
+                {place.province}
+              </Link>
+              <ChevronRight className="h-4 w-4" />
+              <span className="text-white font-medium truncate max-w-[200px]">{place.name}</span>
+            </nav>
+
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-3">
