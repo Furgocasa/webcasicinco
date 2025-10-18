@@ -64,9 +64,13 @@ export async function POST(request: NextRequest) {
     const addressComponents = placeDetails.address_components || [];
     let province = '';
     let city = '';
+    let region = '';
     let country = '';
     
     for (const component of addressComponents) {
+      if (component.types.includes('administrative_area_level_1')) {
+        region = component.long_name; // Comunidad Autónoma
+      }
       if (component.types.includes('administrative_area_level_2')) {
         province = component.long_name;
       }
@@ -87,6 +91,35 @@ export async function POST(request: NextRequest) {
 
     const slug = generatePlaceSlug(placeDetails.name, city || province);
 
+    // Buscar redes sociales si tiene website
+    let instagramUrl = null;
+    let facebookUrl = null;
+    let twitterUrl = null;
+    let tiktokUrl = null;
+
+    if (placeDetails.website) {
+      try {
+        const response = await fetch(placeDetails.website, {
+          headers: { 'User-Agent': 'Mozilla/5.0' },
+          signal: AbortSignal.timeout(5000)
+        });
+        if (response.ok) {
+          const html = await response.text();
+          const instagramMatch = html.match(/instagram\.com\/([a-zA-Z0-9._]+)/i);
+          const facebookMatch = html.match(/facebook\.com\/([a-zA-Z0-9._]+)/i);
+          const twitterMatch = html.match(/twitter\.com\/([a-zA-Z0-9._]+)/i);
+          const tiktokMatch = html.match(/tiktok\.com\/@([a-zA-Z0-9._]+)/i);
+          
+          if (instagramMatch) instagramUrl = `https://instagram.com/${instagramMatch[1]}`;
+          if (facebookMatch) facebookUrl = `https://facebook.com/${facebookMatch[1]}`;
+          if (twitterMatch) twitterUrl = `https://twitter.com/${twitterMatch[1]}`;
+          if (tiktokMatch) tiktokUrl = `https://tiktok.com/@${tiktokMatch[1]}`;
+        }
+      } catch (error) {
+        console.log('No se pudo scrapear website para redes sociales');
+      }
+    }
+
     // Preparar datos del lugar
     const placeData = {
       google_place_id: place_id,
@@ -98,6 +131,7 @@ export async function POST(request: NextRequest) {
       address: placeDetails.formatted_address,
       latitude: placeDetails.geometry.location.lat,
       longitude: placeDetails.geometry.location.lng,
+      region: region || 'España', // Fallback a 'España' si no se encuentra
       province: province || null,
       city: city || null,
       country: 'España',
@@ -106,6 +140,10 @@ export async function POST(request: NextRequest) {
       google_maps_url: placeDetails.url || null,
       price_level: placeDetails.price_level || null,
       photos: placeDetails.photos?.slice(0, 3).map((p: any) => p.photo_reference) || [],
+      instagram_url: instagramUrl,
+      facebook_url: facebookUrl,
+      twitter_url: twitterUrl,
+      tiktok_url: tiktokUrl,
       published: false, // Borrador
       needs_enrichment: true, // Pendiente de IA
       created_at: new Date().toISOString(),

@@ -13,11 +13,11 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-const GOOGLE_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY!;
+const GOOGLE_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!;
 const SEARCH_ENGINE_ID = process.env.GOOGLE_SEARCH_ENGINE_ID;
 
 if (!GOOGLE_API_KEY) {
-  throw new Error('❌ Falta NEXT_PUBLIC_GOOGLE_MAPS_KEY en .env.local');
+  throw new Error('❌ Falta NEXT_PUBLIC_GOOGLE_MAPS_API_KEY en .env.local');
 }
 
 interface Place {
