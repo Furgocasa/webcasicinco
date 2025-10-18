@@ -93,12 +93,13 @@ export default async function PlaceDetailPage({ params }: Props) {
   const tierInfo = getTierInfo(tier);
   
   // 4. ✅ Schema.org para SEO (LocalBusiness + Rating)
-  const schemaType = {
+  const schemaTypeMap: Record<string, string> = {
     restaurante: 'Restaurant',
     hotel: 'Hotel',
     bar: 'BarOrPub',
     cafe: 'CafeOrCoffeeShop',
-  }[place.category] || 'LocalBusiness';
+  };
+  const schemaType = schemaTypeMap[place.category] || 'LocalBusiness';
   
   const schema = {
     "@context": "https://schema.org",
