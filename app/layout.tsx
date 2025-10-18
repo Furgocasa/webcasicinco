@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { Toaster } from 'sonner';
 import Header from '@/components/layout/Header';
+import TrialBanner from '@/components/layout/TrialBanner';
+import PaywallModal from '@/components/auth/PaywallModal';
 import ChatbotFloating from '@/components/ChatbotFloating';
 import PlacesPreloader from '@/components/PlacesPreloader';
 import GoogleAnalytics from '@/components/GoogleAnalytics';
@@ -105,11 +107,13 @@ export default function RootLayout({
           <PageViewTracker />
           <PlacesPreloader />
           <Header />
+          <TrialBanner />
           <main>
             {children}
           </main>
           <ChatbotFloating />
           <WelcomeModal />
+          <PaywallModal />
           <Toaster position="top-right" richColors closeButton />
         </MapProvider>
       </body>

@@ -1,148 +1,131 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import { X, Crown, Zap, Check } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useUserAccess } from '@/lib/hooks/useUserAccess';
+import { X, Lock, Star, Check, Zap } from 'lucide-react';
+import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
-import { PLANS, formatPrice, getIntervalText } from '@/lib/stripe/plans';
 
-interface PaywallModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  trialDaysRemaining?: number;
-  feature?: string; // "mapa", "chatbot", "rutas"
-}
+export default function PaywallModal() {
+  const { needsSubscription, isAdmin, isFreeUser, isInTrial } = useUserAccess();
+  const [isOpen, setIsOpen] = useState(false);
 
-export default function PaywallModal({ 
-  isOpen, 
-  onClose, 
-  trialDaysRemaining = 0,
-  feature = 'esta función'
-}: PaywallModalProps) {
-  const router = useRouter();
+  useEffect(() => {
+    // Mostrar modal si necesita suscripción (trial expirado y sin plan activo)
+    if (needsSubscription && !isAdmin && !isFreeUser && !isInTrial) {
+      setIsOpen(true);
+    } else {
+      setIsOpen(false);
+    }
+  }, [needsSubscription, isAdmin, isFreeUser, isInTrial]);
 
   if (!isOpen) return null;
 
-  const showTrialMessage = trialDaysRemaining > 0;
-  const premiumMonthly = PLANS.premium_monthly;
-  const premiumYearly = PLANS.premium_yearly;
-
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto animate-scale-in">
         {/* Header */}
-        <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 text-white relative">
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 p-2 hover:bg-white/20 rounded-full transition"
-          >
-            <X className="h-5 w-5" />
-          </button>
-          
-          <div className="flex items-center gap-3 mb-2">
-            <Crown className="h-8 w-8" />
-            <h2 className="text-2xl font-bold">
-              {showTrialMessage ? `¡Prueba Gratis Activa!` : '¡Suscríbete Ahora!'}
-            </h2>
+        <div className="relative bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-700 text-white p-8 rounded-t-2xl">
+          <div className="flex items-start justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                <Lock className="h-8 w-8" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold">Tu prueba ha finalizado</h2>
+                <p className="text-indigo-100 text-sm">Continúa explorando los mejores lugares</p>
+              </div>
+            </div>
           </div>
           
-          {showTrialMessage ? (
-            <p className="text-indigo-100 text-sm">
-              Te quedan <span className="font-bold text-white">{trialDaysRemaining} días</span> de prueba gratis
-            </p>
-          ) : (
-            <p className="text-indigo-100 text-sm">
-              Tu período de prueba ha terminado. Suscríbete para continuar disfrutando de {feature}.
-            </p>
-          )}
+          {/* Decorative stars */}
+          <div className="absolute top-4 right-4 flex gap-1">
+            <Star className="h-6 w-6 fill-yellow-300 text-yellow-300" />
+            <Star className="h-6 w-6 fill-yellow-300 text-yellow-300" />
+            <Star className="h-6 w-6 fill-yellow-300 text-yellow-300" />
+          </div>
         </div>
 
-        {/* Planes */}
-        <div className="p-6 space-y-4">
-          {/* Plan Mensual */}
-          <div className="border-2 border-indigo-200 rounded-xl p-4 hover:border-indigo-400 transition">
-            <div className="flex items-center justify-between mb-3">
-              <div>
-                <h3 className="font-bold text-lg text-gray-900">{premiumMonthly.name}</h3>
-                <p className="text-sm text-gray-600">Cancela cuando quieras</p>
-              </div>
-              <div className="text-right">
-                <p className="text-3xl font-bold text-indigo-600">{formatPrice(premiumMonthly.price)}</p>
-                <p className="text-xs text-gray-500">por mes</p>
-              </div>
-            </div>
-            <div className="space-y-2 mb-4">
-              {premiumMonthly.features.slice(0, 5).map((feature, i) => (
-                <div key={i} className="flex items-start gap-2 text-sm">
-                  <Check className="h-4 w-4 text-green-600 shrink-0 mt-0.5" />
-                  <span className="text-gray-700">{feature}</span>
+        {/* Content */}
+        <div className="p-8">
+          {/* Benefits */}
+          <div className="mb-8">
+            <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <Zap className="h-5 w-5 text-indigo-600" />
+              ¿Qué obtienes con Premium?
+            </h3>
+            <div className="grid gap-3">
+              {[
+                'Acceso ilimitado a +3,000 lugares verificados',
+                'Solo sitios con valoración +4.7★',
+                'Planificador de rutas personalizadas',
+                'Mapa interactivo con filtros avanzados',
+                'Actualizaciones semanales de nuevos lugares',
+                'Sin anuncios ni límites',
+              ].map((benefit, index) => (
+                <div key={index} className="flex items-start gap-3">
+                  <div className="flex-shrink-0 mt-0.5">
+                    <Check className="h-5 w-5 text-green-600" />
+                  </div>
+                  <p className="text-gray-700">{benefit}</p>
                 </div>
               ))}
             </div>
-            <Button
-              onClick={() => router.push('/pricing?plan=monthly')}
-              className="w-full bg-indigo-600 hover:bg-indigo-700"
-            >
-              Suscribirse Mensual
-            </Button>
           </div>
 
-          {/* Plan Anual - Destacado */}
-          <div className="border-2 border-purple-400 bg-purple-50 rounded-xl p-4 relative">
-            {/* Badge de ahorro */}
-            <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-              <div className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg flex items-center gap-1">
-                <Zap className="h-3 w-3" />
-                ¡Ahorra 30%!
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between mb-3 mt-2">
-              <div>
-                <h3 className="font-bold text-lg text-gray-900">{premiumYearly.name}</h3>
-                <p className="text-sm text-purple-700 font-semibold">Solo 2.08€/mes</p>
-              </div>
-              <div className="text-right">
-                <p className="text-3xl font-bold text-purple-600">{formatPrice(premiumYearly.price)}</p>
-                <p className="text-xs text-gray-500">por año</p>
-              </div>
-            </div>
-            <div className="space-y-2 mb-4">
-              {premiumYearly.features.slice(0, 5).map((feature, i) => (
-                <div key={i} className="flex items-start gap-2 text-sm">
-                  <Check className="h-4 w-4 text-green-600 shrink-0 mt-0.5" />
-                  <span className="text-gray-700">{feature}</span>
+          {/* Pricing Cards */}
+          <div className="grid sm:grid-cols-2 gap-4 mb-6">
+            {/* Mensual */}
+            <div className="border-2 border-gray-200 rounded-xl p-6 hover:border-indigo-500 transition">
+              <div className="text-center mb-4">
+                <p className="text-sm font-medium text-gray-600 mb-1">Mensual</p>
+                <div className="flex items-baseline justify-center gap-1">
+                  <span className="text-3xl font-bold text-gray-900">9,90€</span>
+                  <span className="text-gray-600">/mes</span>
                 </div>
-              ))}
+              </div>
+              <Link href="/pricing">
+                <Button variant="outline" className="w-full">
+                  Elegir Plan
+                </Button>
+              </Link>
             </div>
-            <Button
-              onClick={() => router.push('/pricing?plan=yearly')}
-              className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
-            >
-              Suscribirse Anual
-            </Button>
-          </div>
 
-          {/* Mensaje de trial */}
-          {showTrialMessage && (
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-              <p className="text-xs text-blue-800 text-center">
-                💡 Suscríbete ahora y continúa sin interrupciones cuando termine tu prueba
-              </p>
+            {/* Anual - Destacado */}
+            <div className="border-2 border-indigo-600 rounded-xl p-6 bg-gradient-to-br from-indigo-50 to-purple-50 relative overflow-hidden">
+              <div className="absolute top-2 right-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                AHORRA 33%
+              </div>
+              <div className="text-center mb-4">
+                <p className="text-sm font-medium text-indigo-600 mb-1">Anual</p>
+                <div className="flex items-baseline justify-center gap-1">
+                  <span className="text-3xl font-bold text-gray-900">79,90€</span>
+                  <span className="text-gray-600">/año</span>
+                </div>
+                <p className="text-xs text-gray-600 mt-1">Solo 6,66€/mes</p>
+              </div>
+              <Link href="/pricing">
+                <Button className="w-full bg-indigo-600 hover:bg-indigo-700">
+                  Elegir Plan
+                </Button>
+              </Link>
             </div>
-          )}
+          </div>
 
           {/* Footer */}
-          <div className="text-center pt-2">
-            <button
-              onClick={onClose}
-              className="text-sm text-gray-500 hover:text-gray-700 underline"
+          <div className="text-center">
+            <p className="text-sm text-gray-500 mb-4">
+              🔒 Pago seguro con Stripe • Cancela cuando quieras • Sin permanencia
+            </p>
+            <Link 
+              href="/perfil"
+              className="text-sm text-indigo-600 hover:text-indigo-700 font-medium"
             >
-              Seguir explorando ({trialDaysRemaining > 0 ? `${trialDaysRemaining} días restantes` : 'sin acceso'})
-            </button>
+              Ver mi estado de suscripción →
+            </Link>
           </div>
         </div>
       </div>
     </div>
   );
 }
-
