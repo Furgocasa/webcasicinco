@@ -53,10 +53,23 @@ export function PlaceContent({ place, tier, tierInfo }: PlaceContentProps) {
   const [visitNotes, setVisitNotes] = useState('');
   const [visitRating, setVisitRating] = useState(0);
 
-  const { isLoaded } = useLoadScript({
-    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '',
+  // ⚠️ IMPORTANTE: La API key debe ser NEXT_PUBLIC_ para funcionar en el cliente
+  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+  
+  const { isLoaded, loadError } = useLoadScript({
+    googleMapsApiKey: apiKey || '',
     libraries,
   });
+
+  // Debug y fallback si no hay API key
+  useEffect(() => {
+    if (!apiKey) {
+      console.error('❌ Falta NEXT_PUBLIC_GOOGLE_MAPS_API_KEY en variables de entorno');
+    }
+    if (loadError) {
+      console.error('❌ Error cargando Google Maps:', loadError);
+    }
+  }, [apiKey, loadError]);
 
   // Cerrar menú al hacer click fuera
   useEffect(() => {
@@ -469,7 +482,20 @@ export function PlaceContent({ place, tier, tierInfo }: PlaceContentProps) {
                 <CardTitle>Ubicación</CardTitle>
               </CardHeader>
               <CardContent>
-                {isLoaded && place.latitude && place.longitude ? (
+                {loadError ? (
+                  <div className="bg-red-50 border border-red-200 rounded-lg h-[300px] flex flex-col items-center justify-center p-4 text-center">
+                    <MapPin className="h-12 w-12 text-red-600 mb-3" />
+                    <p className="text-sm text-red-800 font-medium">Error al cargar el mapa</p>
+                    <p className="text-xs text-red-600 mt-1">Usa el botón de abajo para ver en Google Maps</p>
+                  </div>
+                ) : !isLoaded ? (
+                  <div className="bg-gray-100 rounded-lg h-[300px] flex items-center justify-center">
+                    <div className="text-center">
+                      <MapPin className="h-12 w-12 text-gray-400 animate-pulse mx-auto mb-2" />
+                      <p className="text-sm text-gray-600">Cargando mapa...</p>
+                    </div>
+                  </div>
+                ) : place.latitude && place.longitude ? (
                   <div className="rounded-lg overflow-hidden mb-4">
                     <GoogleMap
                       mapContainerStyle={mapContainerStyle}
