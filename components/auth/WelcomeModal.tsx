@@ -20,26 +20,41 @@ export function WelcomeModal() {
         return;
       }
 
-      // 2. Verificar si el usuario ya tiene un plan activo o es admin
+      // 2. Verificar estado del usuario
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) return;
 
-      // 2a. Verificar si es admin
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
-        .single();
+      // Obtener metadata del usuario
+      const role = user.user_metadata?.role;
+      const isFreeUser = user.user_metadata?.is_free_user === true;
+      const trialEndsAt = user.user_metadata?.trial_ends_at;
 
-      if (profile?.role === 'admin') {
-        // Admin: marcar como visto y no mostrar
+      // 2a. NO mostrar a admin
+      if (role === 'admin') {
         localStorage.setItem('hasSeenWelcome', 'true');
         return;
       }
 
-      // 2b. Verificar si ya tiene suscripción activa
+      // 2b. NO mostrar a usuarios "free" (bypass)
+      if (isFreeUser) {
+        localStorage.setItem('hasSeenWelcome', 'true');
+        return;
+      }
+
+      // 2c. NO mostrar si ya tiene trial activo
+      if (trialEndsAt) {
+        const trialEnd = new Date(trialEndsAt);
+        const now = new Date();
+        if (trialEnd > now) {
+          // Trial activo: marcar como visto
+          localStorage.setItem('hasSeenWelcome', 'true');
+          return;
+        }
+      }
+
+      // 2d. NO mostrar si ya tiene suscripción activa
       const { data: subscription } = await supabase
         .from('subscriptions')
         .select('status')
@@ -48,19 +63,11 @@ export function WelcomeModal() {
         .maybeSingle();
 
       if (subscription) {
-        // Ya tiene plan: marcar como visto y no mostrar
         localStorage.setItem('hasSeenWelcome', 'true');
         return;
       }
 
-      // 2c. Verificar si es usuario "free" (bypass)
-      const isFreeUser = user.user_metadata?.is_free_user;
-      if (isFreeUser) {
-        localStorage.setItem('hasSeenWelcome', 'true');
-        return;
-      }
-
-      // 3. Si llegó aquí, es un nuevo usuario → mostrar modal
+      // 3. Si llegó aquí, es un nuevo usuario sin plan → mostrar modal
       setTimeout(() => setShow(true), 500);
     };
 
