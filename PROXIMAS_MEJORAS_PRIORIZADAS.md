@@ -2,7 +2,7 @@
 
 **Fecha:** 18 de Octubre de 2025  
 **Basado en:** Implementación crítica completada + Auditoría experto  
-**Estado actual:** SSR/SSG ✅ | Trial sin tarjeta ✅ | Sitemap ✅
+**Estado actual:** SSR/SSG ✅ | Trial sin tarjeta ✅ | Sitemap ✅ | Redes Sociales ✅
 
 ---
 
@@ -43,7 +43,45 @@ git push origin main
 
 ---
 
-### **2. Enviar Sitemap a Google Search Console** 📊 **URGENTE**
+### **2. Ejecutar Script de Redes Sociales** 📷 **ALTA**
+**Tiempo estimado:** 2-3 horas (procesamiento automático)  
+**Impacto:** 🔥 **Engagement + Growth orgánico**
+
+#### Pasos:
+1. **Configurar Google Custom Search ID** (opcional):
+   - https://programmablesearchengine.google.com/
+   - Crear engine para `instagram.com/*`
+   - Añadir a `.env.local`: `GOOGLE_SEARCH_ENGINE_ID=xxx`
+
+2. **Opción A: Panel de Admin (Recomendado)**:
+   - Ir a: `https://casicinco.com/admin/redes-sociales`
+   - Procesar 100 lugares primero (validar)
+   - Luego procesar en lotes de 500
+
+3. **Opción B: Script CLI**:
+   ```bash
+   npm run social-media process 100   # Top 100
+   npm run social-media process 500   # Top 500
+   npm run social-media process 3111  # Todos
+   ```
+
+#### Estrategia gradual (recomendada):
+- **Día 1:** Top 100 lugares (validar calidad) - **$0.50**
+- **Día 2:** Top 500 lugares - **$2.50**
+- **Semana 2:** Resto (~2,600 lugares) - **~$0.50**
+- **Total:** ~$3 (80% gratis via scraping)
+
+#### Siguiente paso:
+- Desde cuenta @casicinco de Instagram:
+  - Seguir a todos los lugares con Instagram
+  - Engagement esperado: 20-30% follow back
+  - ~600-900 seguidores orgánicos
+
+**¿Por qué P0?** Engagement con lugares + crecimiento orgánico + mejor UX.
+
+---
+
+### **3. Enviar Sitemap a Google Search Console** 📊 **URGENTE**
 **Tiempo estimado:** 15 minutos  
 **Impacto:** 🔥 **CRÍTICO - Sin esto, Google no indexa rápido**
 

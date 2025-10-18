@@ -16,9 +16,10 @@
 
 - 🗺️ **Mapa Interactivo** - Visualiza lugares por categoría y ubicación
 - 🤖 **Chat IA** - Pregúntale al "Tío Viajero" por recomendaciones
-- 📝 **Blog SEO** - Guías "Top 10" por ciudad/provincia
+- 📝 **Blog SEO** - Guías "Top 10" por ciudad/provincia (SSR/SSG)
 - 📍 **Planificador de Rutas** - Crea itinerarios personalizados
 - 📊 **Analytics** - Descubre tendencias y lugares populares
+- 📷 **Redes Sociales** - Instagram, Facebook, Twitter y TikTok integrados
 
 ---
 
@@ -80,11 +81,13 @@ git push origin main
 - [SISTEMA_FILTRADO.md](SISTEMA_FILTRADO.md) - Filtros avanzados
 - [SISTEMA_MONETIZACION.md](SISTEMA_MONETIZACION.md) - Stripe
 - [IMPLEMENTAR_TRACKING.md](IMPLEMENTAR_TRACKING.md) - Analytics
+- [scripts/README_SOCIAL_MEDIA.md](scripts/README_SOCIAL_MEDIA.md) - Redes Sociales
 
 ### 📊 Analytics:
 - Dashboard de estadísticas: `/admin/estadisticas`
 - Dashboard de conversaciones IA: `/admin/conversaciones`
 - Gestor de blog: `/admin/blog`
+- Gestión de redes sociales: `/admin/redes-sociales`
 
 ---
 
@@ -124,6 +127,7 @@ NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=
 GOOGLE_PLACES_API_KEY=
 GOOGLE_OAUTH_CLIENT_ID=
 GOOGLE_OAUTH_CLIENT_SECRET=
+GOOGLE_SEARCH_ENGINE_ID=    # Opcional: Para búsqueda automática de redes sociales
 
 # OpenAI
 OPENAI_API_KEY=
@@ -142,12 +146,18 @@ NEXT_PUBLIC_APP_URL=https://www.casicinco.com
 ## 📊 Base de Datos
 
 ### Tablas Principales:
-- `places` - Lugares indexados
+- `places` - Lugares indexados (con redes sociales)
 - `blog_posts` - Posts de blog SEO
 - `user_analytics` - Tracking de usuarios
 - `chatbot_analytics` - Conversaciones IA
 - `chat_history` - Historial chatbot
 - `favorites`, `visits`, `lists` - Datos usuario
+
+### Columnas de Redes Sociales en `places`:
+- `instagram_url` - Perfil de Instagram
+- `facebook_url` - Página de Facebook
+- `twitter_url` - Perfil de Twitter/X
+- `tiktok_url` - Perfil de TikTok
 
 ### Migraciones:
 Ejecutar en orden en Supabase → SQL Editor:
@@ -238,6 +248,11 @@ npm run lint         # Linter
 # Generar posts de blog con IA
 npx tsx scripts/generate-blog-posts.ts
 
+# Buscar redes sociales automáticamente
+npm run social-media process 100      # Procesar 100 lugares
+npm run social-media export 100       # Exportar a CSV
+npm run social-media import data.csv  # Importar desde CSV
+
 # Tests
 npm test
 ```
@@ -267,14 +282,15 @@ npm test
 
 ## 🌐 SEO
 
-- ✅ Sitemap.xml automático
+- ✅ **SSR/SSG en fichas de lugares y blog** - generateMetadata + generateStaticParams
+- ✅ **Schema.org** - LocalBusiness, ItemList, BreadcrumbList
+- ✅ **Sitemap segmentado** - sitemap-index.xml (estático, lugares, blog)
 - ✅ Robots.txt configurado
 - ✅ Meta tags dinámicos
 - ✅ Open Graph images
 - ✅ Google Search Console verificado
 - ✅ 29 posts de blog optimizados
 - ✅ URLs amigables
-- ✅ Structured data (preparado)
 
 ---
 

@@ -322,12 +322,68 @@ npm start
 
 ---
 
+---
+
+## 🔗 5. SISTEMA DE REDES SOCIALES (18 OCT 2025 - 22:00h)
+
+**Problema resuelto:**
+- ❌ No había enlaces a redes sociales de los lugares
+- ❌ No se podía seguir a los lugares en Instagram/Facebook
+- ❌ Faltaba conexión con la comunidad
+
+**Solución implementada:**
+
+#### A. Base de datos actualizada:
+```sql
+ALTER TABLE places 
+  ADD COLUMN instagram_url VARCHAR(500),
+  ADD COLUMN facebook_url VARCHAR(500),
+  ADD COLUMN twitter_url VARCHAR(500),
+  ADD COLUMN tiktok_url VARCHAR(500);
+```
+
+#### B. Nuevo panel de admin: `/admin/redes-sociales`
+- ✅ Procesamiento automático con Google Custom Search API
+- ✅ Scraping de websites de lugares (GRATIS)
+- ✅ Progreso en tiempo real con SSE
+- ✅ Exportar/Importar CSV para edición manual
+- ✅ Estadísticas de coste y cobertura
+
+#### C. Script automático: `scripts/find-social-media.ts`
+- ✅ **Método 1:** Scraping de website del lugar (GRATIS - 80% cobertura)
+- ✅ **Método 2:** Google Custom Search API ($0.005/búsqueda - 20% restante)
+- ✅ Comando: `npm run social-media process 100`
+
+#### D. UI actualizada:
+- ✅ Instagram en fichas de lugares (junto a teléfono y web)
+- ✅ Iconos de redes sociales en tabla de gestión de lugares
+- ✅ Enlaces directos a perfiles
+- ✅ Tipos TypeScript actualizados
+
+**Coste estimado:**
+- 80% vía scraping: **GRATIS** ✅
+- 20% vía Google: **~$3 para 3,111 lugares**
+- **Total: ~$3** (vs $31 con IA)
+
+**Archivos creados/modificados:**
+- ✅ `app/admin/redes-sociales/page.tsx` - Panel de admin
+- ✅ `scripts/find-social-media.ts` - Script automático
+- ✅ `scripts/README_SOCIAL_MEDIA.md` - Documentación
+- ✅ `components/places/PlaceContent.tsx` - Instagram en fichas
+- ✅ `app/admin/lugares/page.tsx` - Columna redes sociales
+- ✅ `types/place.ts` - Tipos actualizados
+- ✅ `package.json` - Script `social-media` añadido
+
+---
+
 ## 📚 DOCUMENTACIÓN RELACIONADA
 
 - `ROADMAP_MEJORAS.md` - Próximas mejoras priorizadas
 - `PLAN_ESTRATEGICO_2025_SEO_VIABILIDAD.md` - Estrategia completa
 - `SISTEMA_MONETIZACION.md` - Detalles sistema pagos
 - `ACCIONES_INMEDIATAS_CRITICAS.md` - Contexto de decisiones
+- `scripts/README_SOCIAL_MEDIA.md` - Sistema de redes sociales
+- `MIGRACION_BLOG_SSR_18OCT2025.md` - Migración blog SSR/SSG
 
 ---
 
@@ -341,10 +397,16 @@ npm start
 - [x] Pricing actualizado (trialDays: 0)
 - [x] Sitemap segmentado (index + 3 sub-sitemaps)
 - [x] robots.txt actualizado
+- [x] Blog migrado a SSR/SSG
+- [x] Sistema de redes sociales implementado
+- [x] Columnas de redes sociales en DB
+- [x] Panel admin de redes sociales
+- [x] Instagram en fichas de lugares
 - [x] Sin errores de linting
 - [x] **COMPLETADO:** Ejecutar migración SQL en Supabase ✅
-- [ ] **PENDIENTE:** Deploy a producción
+- [x] **COMPLETADO:** Deploy a producción (commit 74be71d)
 - [ ] **PENDIENTE:** Enviar sitemap a GSC
+- [ ] **PENDIENTE:** Ejecutar script de redes sociales
 - [ ] **PENDIENTE:** Testing con usuarios reales
 
 ---

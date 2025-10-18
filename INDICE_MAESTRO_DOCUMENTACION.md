@@ -87,6 +87,8 @@
 | `SISTEMA_FOTOS_SUPABASE.md` | Gestión de fotos en Supabase |
 | `SISTEMA_MONETIZACION.md` | Sistema de suscripciones |
 | `CHATBOT_TIO_VIAJERO.md` | Chatbot con IA |
+| `scripts/README_SOCIAL_MEDIA.md` | Sistema de redes sociales automático |
+| `MIGRACION_BLOG_SSR_18OCT2025.md` | Migración del blog a SSR/SSG |
 
 ---
 
