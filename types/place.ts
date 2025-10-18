@@ -71,6 +71,10 @@ export interface Place {
   photos?: string[]; // Legacy: photo_reference de Google (backward compatibility)
   photo_urls?: string[]; // NUEVO: URLs de Supabase Storage (ahorra costos)
   google_maps_url?: string;
+  instagram_url?: string | null;
+  facebook_url?: string | null;
+  twitter_url?: string | null;
+  tiktok_url?: string | null;
   published: boolean;
   featured: boolean;
   indexed_at: string;

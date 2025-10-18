@@ -1,268 +1,92 @@
-'use client';
+import { Metadata } from 'next';
+import { createClient } from '@/lib/supabase/server';
+import { BlogListContent } from '@/components/blog/BlogListContent';
 
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { BookOpen, MapPin, Calendar, TrendingUp } from 'lucide-react';
-import { Card } from '@/components/ui/Card';
-import Footer from '@/components/layout/Footer';
-import type { BlogPost } from '@/types/blog';
+// ✅ 1. Metadata estática para el listado del blog
+export const metadata: Metadata = {
+  title: 'Blog - Guías de los Mejores Lugares | Casi Cinco',
+  description: 'Descubre guías completas de los mejores restaurantes, hoteles, bares y cafeterías de España. Solo establecimientos con 4.7+ estrellas verificadas.',
+  keywords: [
+    'mejores restaurantes',
+    'mejores hoteles',
+    'guías de viaje',
+    'españa turismo',
+    'lugares recomendados',
+    'top 10 lugares',
+    '4.7 estrellas',
+  ],
+  openGraph: {
+    title: 'Blog - Guías de Viaje | Casi Cinco',
+    description: 'Guías completas de los mejores lugares de España con +4.7 estrellas',
+    type: 'website',
+  },
+};
 
-export default function BlogPage() {
-  const [posts, setPosts] = useState<BlogPost[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<string>('all');
+// ✅ 2. Componente principal (Server Component)
+export default async function BlogPage() {
+  const supabase = await createClient();
+  
+  // Obtener todos los posts publicados
+  const { data: posts } = await supabase
+    .from('blog_posts')
+    .select('*')
+    .eq('published', true)
+    .lte('created_at', new Date().toISOString())
+    .order('created_at', { ascending: false });
 
-  useEffect(() => {
-    document.title = 'Blog - Guías de los Mejores Lugares | Casi Cinco';
-  }, []);
-
-  useEffect(() => {
-    fetchPosts();
-  }, [filter]);
-
-  const fetchPosts = async () => {
-    try {
-      const url = filter === 'all' 
-        ? '/api/blog' 
-        : `/api/blog?category=${filter}`;
-      
-      const response = await fetch(url);
-      const data = await response.json();
-      
-      if (data.success) {
-        setPosts(data.posts);
+  // ✅ 3. Schema.org para el listado del blog
+  const blogSchema = {
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    "name": "Blog de Casi Cinco",
+    "description": "Guías de los mejores lugares de España con 4.7+ estrellas",
+    "url": "https://casicinco.com/blog",
+    "publisher": {
+      "@type": "Organization",
+      "name": "Casi Cinco",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://casicinco.com/images/logo.png"
       }
-    } catch (error) {
-      console.error('Error loading posts:', error);
-    } finally {
-      setLoading(false);
     }
   };
 
-  const getCategoryEmoji = (category: string) => {
-    const emojis: Record<string, string> = {
-      restaurante: '🍽️',
-      bar: '🍺',
-      cafe: '☕',
-      hotel: '🏨'
-    };
-    return emojis[category] || '📍';
-  };
-
-  const getCategoryLabel = (category: string) => {
-    const labels: Record<string, string> = {
-      restaurante: 'Restaurantes',
-      bar: 'Bares',
-      cafe: 'Cafeterías',
-      hotel: 'Hoteles'
-    };
-    return labels[category] || category;
-  };
-
-  // Helper para construir URL de foto de Google Places
-  const buildPhotoUrl = (photoReference: string, maxwidth: number = 800): string => {
-    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-    if (!apiKey) {
-      console.error('Google Maps API key not found');
-      return '';
-    }
-    return `https://maps.googleapis.com/maps/api/place/photo?maxwidth=${maxwidth}&photo_reference=${photoReference}&key=${apiKey}`;
+  // ItemList de todos los posts
+  const itemListSchema = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "name": "Artículos del Blog",
+    "numberOfItems": posts?.length || 0,
+    "itemListElement": posts?.map((post, index) => ({
+      "@type": "ListItem",
+      "position": index + 1,
+      "item": {
+        "@type": "Article",
+        "headline": post.title,
+        "url": `https://casicinco.com/blog/${post.slug}`,
+        "datePublished": post.created_at,
+        "image": post.featured_image_url || post.first_place_photo
+      }
+    })) || []
   };
 
   return (
     <>
-      <main className="min-h-screen bg-gray-50">
-        {/* HERO */}
-        <section className="relative bg-gradient-to-br from-indigo-600 via-indigo-700 to-gray-800 text-white overflow-hidden py-16 md:py-24">
-          <div className="absolute inset-0 bg-black opacity-10"></div>
-          
-          <div className="relative container mx-auto px-4 z-10">
-            <div className="max-w-4xl mx-auto text-center">
-              <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full mb-6">
-                <BookOpen className="h-4 w-4" />
-                <span className="text-sm font-medium">Blog de Viajes</span>
-              </div>
-
-              <h1 className="text-4xl md:text-5xl font-bold mb-4">
-                Guías de los Mejores Lugares
-              </h1>
-              <p className="text-lg md:text-xl text-white/90 mb-8">
-                Descubre los lugares top de cada ciudad. Solo establecimientos con +4.7 estrellas.
-              </p>
-
-              {/* Filtros */}
-              <div className="flex flex-wrap justify-center gap-3">
-                <button
-                  onClick={() => setFilter('all')}
-                  className={`px-4 py-2 rounded-lg font-medium transition ${
-                    filter === 'all'
-                      ? 'bg-white text-indigo-600'
-                      : 'bg-white/20 backdrop-blur-sm hover:bg-white/30'
-                  }`}
-                >
-                  Todos
-                </button>
-                <button
-                  onClick={() => setFilter('restaurante')}
-                  className={`px-4 py-2 rounded-lg font-medium transition ${
-                    filter === 'restaurante'
-                      ? 'bg-white text-indigo-600'
-                      : 'bg-white/20 backdrop-blur-sm hover:bg-white/30'
-                  }`}
-                >
-                  🍽️ Restaurantes
-                </button>
-                <button
-                  onClick={() => setFilter('bar')}
-                  className={`px-4 py-2 rounded-lg font-medium transition ${
-                    filter === 'bar'
-                      ? 'bg-white text-indigo-600'
-                      : 'bg-white/20 backdrop-blur-sm hover:bg-white/30'
-                  }`}
-                >
-                  🍺 Bares
-                </button>
-                <button
-                  onClick={() => setFilter('cafe')}
-                  className={`px-4 py-2 rounded-lg font-medium transition ${
-                    filter === 'cafe'
-                      ? 'bg-white text-indigo-600'
-                      : 'bg-white/20 backdrop-blur-sm hover:bg-white/30'
-                  }`}
-                >
-                  ☕ Cafeterías
-                </button>
-                <button
-                  onClick={() => setFilter('hotel')}
-                  className={`px-4 py-2 rounded-lg font-medium transition ${
-                    filter === 'hotel'
-                      ? 'bg-white text-indigo-600'
-                      : 'bg-white/20 backdrop-blur-sm hover:bg-white/30'
-                  }`}
-                >
-                  🏨 Hoteles
-                </button>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* POSTS GRID */}
-        <section className="py-16">
-          <div className="container mx-auto px-4">
-            {loading ? (
-              <div className="flex justify-center py-20">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
-              </div>
-            ) : posts.length === 0 ? (
-              <div className="text-center py-20">
-                <BookOpen className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">No hay posts disponibles</h3>
-                <p className="text-gray-600">Vuelve pronto para ver nuevas guías</p>
-              </div>
-            ) : (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
-                {posts.map((post) => {
-                  // Usar la foto del primer lugar si existe, si no usar featured_image_url
-                  let imageUrl = post.featured_image_url;
-                  if (post.first_place_photo) {
-                    // Si es URL completa, usarla directamente
-                    if (post.first_place_photo_is_url) {
-                      imageUrl = post.first_place_photo;
-                    } else {
-                      // Si es photo_reference, construir URL de Google
-                      imageUrl = buildPhotoUrl(post.first_place_photo, 800);
-                    }
-                  }
-
-                  return (
-                    <Link key={post.id} href={`/blog/${post.slug}`}>
-                      <Card className="h-full hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer overflow-hidden">
-                        {/* Imagen destacada */}
-                        {imageUrl && (
-                          <div className="relative h-48 bg-gray-200 overflow-hidden">
-                            <img 
-                              src={imageUrl} 
-                              alt={post.title}
-                              className="w-full h-full object-cover"
-                            />
-                            {/* Badge de categoría sobre la imagen */}
-                            <div className="absolute top-3 left-3 flex items-center gap-2 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-lg shadow-lg">
-                              <span className="text-xl">{getCategoryEmoji(post.category)}</span>
-                              <span className="text-xs font-semibold text-indigo-600">
-                                {getCategoryLabel(post.category)}
-                              </span>
-                            </div>
-                          </div>
-                        )}
-                      
-                      <div className="p-6">
-                        {/* Categoría badge (solo si no hay imagen) */}
-                        {!imageUrl && (
-                          <div className="flex items-center gap-2 mb-4">
-                            <span className="text-2xl">{getCategoryEmoji(post.category)}</span>
-                            <span className="text-sm font-medium text-indigo-600">
-                              {getCategoryLabel(post.category)}
-                            </span>
-                          </div>
-                        )}
-
-                        {/* Título */}
-                        <h2 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2 hover:text-indigo-600 transition">
-                          {post.title}
-                        </h2>
-
-                        {/* Meta descripción */}
-                        <p className="text-gray-600 text-sm mb-4 line-clamp-3">
-                          {post.meta_description}
-                        </p>
-
-                        {/* Ubicación */}
-                        <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
-                          <MapPin className="h-4 w-4" />
-                          <span>{post.location}</span>
-                        </div>
-
-                        {/* Footer */}
-                        <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                          <div className="flex items-center gap-2 text-xs text-gray-500">
-                            <Calendar className="h-3 w-3" />
-                            <span>{new Date(post.created_at).toLocaleDateString('es-ES')}</span>
-                          </div>
-                          <div className="flex items-center gap-1 text-xs text-gray-500">
-                            <TrendingUp className="h-3 w-3" />
-                            <span>{post.views_count} vistas</span>
-                          </div>
-                        </div>
-                      </div>
-                    </Card>
-                  </Link>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        </section>
-
-        {/* CTA */}
-        <section className="py-16 bg-gradient-to-r from-indigo-600 to-indigo-800 text-white">
-          <div className="container mx-auto px-4 text-center">
-            <h2 className="text-3xl font-bold mb-4">¿Quieres explorar más?</h2>
-            <p className="text-lg mb-8 text-white/90">
-              Usa nuestro mapa interactivo para encontrar lugares cerca de ti
-            </p>
-            <Link
-              href="/mapa"
-              className="inline-flex items-center gap-2 bg-white text-indigo-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-50 transition"
-            >
-              <MapPin className="h-5 w-5" />
-              Explorar en el Mapa
-            </Link>
-          </div>
-        </section>
-      </main>
-      <Footer />
+      {/* ✅ Schema.org JSON-LD */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(blogSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }}
+      />
+      
+      {/* ✅ Client Component con UI interactiva */}
+      <BlogListContent initialPosts={posts || []} />
     </>
   );
 }
 
+// ✅ ISR: Revalidar cada 1 hora (para nuevos posts programados)
+export const revalidate = 3600; // 1 hora

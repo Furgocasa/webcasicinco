@@ -217,20 +217,26 @@ sitemap: `${baseUrl}/sitemap-index.xml`
 
 ## 📁 ARCHIVOS MODIFICADOS Y CREADOS
 
-### ✅ Archivos NUEVOS creados (7):
+### ✅ Archivos NUEVOS creados (11):
 1. `components/places/PlaceContent.tsx` - Client Component para fichas
 2. `components/auth/WelcomeModal.tsx` - Modal de bienvenida
-3. `supabase/migrations/001_add_trial_system.sql` - Sistema trial
-4. `app/sitemap-index.xml/route.ts` - Sitemap index
-5. `app/sitemap-static.xml/route.ts` - Sitemap páginas estáticas
-6. `app/sitemap-places.xml/route.ts` - Sitemap lugares
-7. `app/sitemap-blog.xml/route.ts` - Sitemap blog
+3. `components/blog/BlogPostContent.tsx` - Client Component para posts
+4. `components/blog/BlogListContent.tsx` - Client Component para listado blog
+5. `supabase/migrations/001_add_trial_system.sql` - Sistema trial
+6. `app/sitemap-index.xml/route.ts` - Sitemap index
+7. `app/sitemap-static.xml/route.ts` - Sitemap páginas estáticas
+8. `app/sitemap-places.xml/route.ts` - Sitemap lugares
+9. `app/sitemap-blog.xml/route.ts` - Sitemap blog
+10. `MIGRACION_BLOG_SSR_18OCT2025.md` - Documentación migración blog
+11. `PROXIMAS_MEJORAS_PRIORIZADAS.md` - Plan de acción futuro
 
-### ✅ Archivos MODIFICADOS (4):
-1. `app/(public)/[category]/[province]/[slug]/page.tsx` - SSR/SSG
-2. `app/layout.tsx` - Añadido WelcomeModal
-3. `app/(public)/pricing/page.tsx` - Trial a 0 días
-4. `app/robots.ts` - Apunta a sitemap-index
+### ✅ Archivos MODIFICADOS (6):
+1. `app/(public)/[category]/[province]/[slug]/page.tsx` - SSR/SSG fichas
+2. `app/(public)/blog/[slug]/page.tsx` - SSR/SSG posts
+3. `app/(public)/blog/page.tsx` - SSR listado blog
+4. `app/layout.tsx` - Añadido WelcomeModal
+5. `app/(public)/pricing/page.tsx` - Trial a 0 días
+6. `app/robots.ts` - Apunta a sitemap-index
 
 ---
 
@@ -351,7 +357,7 @@ npm start
 
 **Impacto esperado:** Desbloqueo completo de SEO (2,612 páginas indexables) + Conversión 10x mayor (trial sin tarjeta).
 
-**Tiempo total de implementación:** ~4 horas
+**Tiempo total de implementación:** ~6 horas (fichas 4h + blog 2h)
 
 ---
 

@@ -7,11 +7,11 @@
 
 ---
 
-## ⚠️ BLOQUEADORES CRÍTICOS (HACER YA - Semana 1)
+## ✅ BLOQUEADORES CRÍTICOS - COMPLETADOS (18 OCT 2025)
 
-### **1. SSR/SSG en Fichas de Lugares** 🔴 **P0 - ULTRA CRÍTICO**
+### **✅ 1. SSR/SSG en Fichas de Lugares** 🟢 **COMPLETADO**
 
-#### **Problema Actual:**
+#### **Problema Resuelto:**
 - **CRÍTICO:** Fichas usan `'use client'` con fetch en `useEffect`
 - **Consecuencia:** Google ve "Cargando..." permanentemente
 - **Impacto:** **0% de tráfico orgánico en 2,612 fichas**
@@ -74,12 +74,12 @@ export default async function PlaceDetailPage({ params }: Props) {
 ```
 
 **Impacto:** 🔥 Google indexa 2,612 páginas correctamente  
-**Tiempo:** 2 días  
-**Prioridad:** P0 - SIN ESTO, TODO EL SEO ES INÚTIL
+**Tiempo:** 4 horas  
+**Estado:** ✅ **COMPLETADO 18 OCT 2025**
 
 ---
 
-### **2. Schema.org (Datos Estructurados)** 🔴 **P0 - CRÍTICO**
+### **✅ 2. Schema.org (Datos Estructurados)** 🟢 **COMPLETADO**
 
 #### **Problema:**
 - Sin datos estructurados → Sin rich snippets
@@ -121,12 +121,12 @@ export default async function PlaceDetailPage({ params }: Props) {
 ```
 
 **Impacto:** ⭐ Rich snippets en Google = +40% CTR  
-**Tiempo:** 1 día  
-**Prioridad:** P0
+**Tiempo:** Incluido en SSR/SSG  
+**Estado:** ✅ **COMPLETADO 18 OCT 2025**
 
 ---
 
-### **3. Trial SIN Tarjeta (30 días)** 🔴 **P0 - CONVERSIÓN CRÍTICA**
+### **✅ 3. Trial SIN Tarjeta (30 días)** 🟢 **COMPLETADO**
 
 #### **Problema Actual:**
 - Trial de 30 días **REQUIERE tarjeta** en Stripe
@@ -180,12 +180,12 @@ Día 31: Paywall modal "Trial terminado. Suscríbete"
 4. Actualizar `pricing/page.tsx` para quitar `trialDays: 30` en checkout
 
 **Impacto:** 🚀 Conversión visitante → trial: **1% → 10%+**  
-**Tiempo:** 2-3 días  
-**Prioridad:** P0 - CRÍTICO PARA NEGOCIO
+**Tiempo:** 3 horas  
+**Estado:** ✅ **COMPLETADO 18 OCT 2025**
 
 ---
 
-### **4. Sitemap Segmentado + Google Search Console** 🟠 **P1 - ALTA**
+### **✅ 4. Sitemap Segmentado** 🟢 **COMPLETADO**
 
 #### **Estado Actual:**
 - Sitemap único en `app/sitemap.ts`
@@ -221,8 +221,35 @@ Sitemap: https://casicinco.com/sitemap_index.xml
 2. Añadir: `https://casicinco.com/sitemap.xml`
 
 **Impacto:** ⚡ Indexación acelerada  
-**Tiempo:** 4 horas  
-**Prioridad:** P1
+**Tiempo:** 2 horas  
+**Estado:** ✅ **COMPLETADO 18 OCT 2025**
+
+**Pendiente:** Enviar a Google Search Console
+
+---
+
+### **✅ 5. SSR/SSG en Blog** 🟢 **COMPLETADO**
+
+#### **Problema Resuelto:**
+- ❌ Blog usaba `'use client'` igual que fichas
+- ❌ Google no veía contenido de posts
+- ❌ 0% tráfico orgánico desde blog
+
+#### **Solución Implementada:**
+- ✅ Migrado `blog/[slug]/page.tsx` a Server Component
+- ✅ Migrado `blog/page.tsx` a Server Component
+- ✅ Schema.org Article + ItemList + Breadcrumb
+- ✅ generateMetadata() dinámico
+- ✅ generateStaticParams() top 20 posts
+- ✅ ISR inteligente (6h posts, 1h listado)
+
+**Archivos creados:**
+- `components/blog/BlogPostContent.tsx`
+- `components/blog/BlogListContent.tsx`
+
+**Impacto:** 🔥 Posts del blog 100% indexables  
+**Tiempo:** 2 horas  
+**Estado:** ✅ **COMPLETADO 18 OCT 2025**
 
 ---
 
