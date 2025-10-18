@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { GoogleMap, useLoadScript, Marker } from '@react-google-maps/api';
 import { 
   Star, 
   MapPin, 
@@ -33,13 +32,6 @@ import { getPlacePhotoUrl } from '@/lib/utils/photo-helper';
 import { toast } from 'sonner';
 import { trackEvent, EVENTS, CATEGORIES as ANALYTICS_CATEGORIES } from '@/lib/analytics/tracker';
 
-const libraries: ("places")[] = ["places"];
-
-const mapContainerStyle = {
-  width: '100%',
-  height: '300px',
-};
-
 type PlaceContentProps = {
   place: any;
   tier: string;
@@ -53,23 +45,8 @@ export function PlaceContent({ place, tier, tierInfo }: PlaceContentProps) {
   const [visitNotes, setVisitNotes] = useState('');
   const [visitRating, setVisitRating] = useState(0);
 
-  // ⚠️ IMPORTANTE: La API key debe ser NEXT_PUBLIC_ para funcionar en el cliente
-  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-  
-  const { isLoaded, loadError } = useLoadScript({
-    googleMapsApiKey: apiKey || '',
-    libraries,
-  });
-
-  // Debug y fallback si no hay API key
-  useEffect(() => {
-    if (!apiKey) {
-      console.error('❌ Falta NEXT_PUBLIC_GOOGLE_MAPS_API_KEY en variables de entorno');
-    }
-    if (loadError) {
-      console.error('❌ Error cargando Google Maps:', loadError);
-    }
-  }, [apiKey, loadError]);
+  // Usar Google Maps Static API para preview (no requiere JavaScript)
+  // Esto es más rápido, mejor para SEO, y no consume cuota de JavaScript API
 
   // Cerrar menú al hacer click fuera
   useEffect(() => {
@@ -482,34 +459,22 @@ export function PlaceContent({ place, tier, tierInfo }: PlaceContentProps) {
                 <CardTitle>Ubicación</CardTitle>
               </CardHeader>
               <CardContent>
-                {loadError ? (
-                  <div className="bg-red-50 border border-red-200 rounded-lg h-[300px] flex flex-col items-center justify-center p-4 text-center">
-                    <MapPin className="h-12 w-12 text-red-600 mb-3" />
-                    <p className="text-sm text-red-800 font-medium">Error al cargar el mapa</p>
-                    <p className="text-xs text-red-600 mt-1">Usa el botón de abajo para ver en Google Maps</p>
-                  </div>
-                ) : !isLoaded ? (
-                  <div className="bg-gray-100 rounded-lg h-[300px] flex items-center justify-center">
-                    <div className="text-center">
-                      <MapPin className="h-12 w-12 text-gray-400 animate-pulse mx-auto mb-2" />
-                      <p className="text-sm text-gray-600">Cargando mapa...</p>
+                {place.latitude && place.longitude ? (
+                  <div className="rounded-lg overflow-hidden mb-4 relative group cursor-pointer"
+                       onClick={() => place.google_maps_url && window.open(place.google_maps_url, '_blank')}>
+                    {/* Google Maps Static API - Imagen estática del mapa */}
+                    <img
+                      src={`https://maps.googleapis.com/maps/api/staticmap?center=${place.latitude},${place.longitude}&zoom=15&size=600x300&markers=color:red%7C${place.latitude},${place.longitude}&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`}
+                      alt={`Mapa de ${place.name}`}
+                      className="w-full h-[300px] object-cover"
+                      loading="lazy"
+                    />
+                    {/* Overlay para indicar que es clickeable */}
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all flex items-center justify-center">
+                      <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full">
+                        <span className="text-sm font-medium text-gray-900">Haz clic para ver en Google Maps</span>
+                      </div>
                     </div>
-                  </div>
-                ) : place.latitude && place.longitude ? (
-                  <div className="rounded-lg overflow-hidden mb-4">
-                    <GoogleMap
-                      mapContainerStyle={mapContainerStyle}
-                      center={{ lat: place.latitude, lng: place.longitude }}
-                      zoom={15}
-                      options={{
-                        disableDefaultUI: true,
-                        zoomControl: true,
-                      }}
-                    >
-                      <Marker
-                        position={{ lat: place.latitude, lng: place.longitude }}
-                      />
-                    </GoogleMap>
                   </div>
                 ) : (
                   <div className="bg-gray-100 rounded-lg h-[300px] flex items-center justify-center">
