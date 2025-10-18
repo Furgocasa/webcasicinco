@@ -1,795 +1,186 @@
-'use client';
-
-import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { GoogleMap, useLoadScript, Marker } from '@react-google-maps/api';
-import { 
-  Star, 
-  MapPin, 
-  Phone, 
-  Globe, 
-  ExternalLink,
-  Heart,
-  Share2,
-  Navigation,
-  Clock,
-  Euro,
-  Award,
-  TrendingUp,
-  Users,
-  Copy,
-  MessageCircle,
-  Mail,
-  Facebook,
-  Twitter,
-  Linkedin,
-  Check,
-  X
-} from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { Badge } from '@/components/ui/Badge';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
+import { Metadata } from 'next';
+import { notFound } from 'next/navigation';
+import { createClient } from '@/lib/supabase/server';
+import { PlaceContent } from '@/components/places/PlaceContent';
 import { calculateQualityTier, getTierInfo } from '@/lib/utils/tier-calculator';
-import { MarkdownText } from '@/lib/utils/markdown';
-import { getPlacePhotoUrl } from '@/lib/utils/photo-helper';
-import { toast } from 'sonner';
-import { trackEvent, EVENTS, CATEGORIES as ANALYTICS_CATEGORIES } from '@/lib/analytics/tracker';
 
-const libraries: ("places")[] = ["places"];
+type Props = {
+  params: { category: string; province: string; slug: string }
+}
 
-const mapContainerStyle = {
-  width: '100%',
-  height: '300px',
-};
-
-export default function PlaceDetailPage() {
-  const router = useRouter();
-  const params = useParams();
-  const { category, province, slug } = params;
-  const [place, setPlace] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [showShareMenu, setShowShareMenu] = useState(false);
-  const [showVisitModal, setShowVisitModal] = useState(false);
-  const [visitNotes, setVisitNotes] = useState('');
-  const [visitRating, setVisitRating] = useState(0);
-
-  const { isLoaded } = useLoadScript({
-    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '',
-    libraries,
-  });
-
-  useEffect(() => {
-    const fetchPlace = async () => {
-      try {
-        const response = await fetch(`/api/places/by-slug/${slug}`);
-        const data = await response.json();
-        
-        if (data.success) {
-          setPlace(data.place);
-          
-          // 📝 SEO: Actualizar título del navegador con nombre del lugar
-          if (data.place) {
+// 1. ✅ Metadata dinámica para SEO
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const supabase = await createClient();
+  
+  const { data: place } = await supabase
+    .from('places')
+    .select('*')
+    .eq('slug', params.slug)
+    .eq('published', true)
+    .single();
+  
+  if (!place) {
+    return {
+      title: 'Lugar no encontrado | Casi Cinco',
+      description: 'El lugar que buscas no está disponible o ha sido eliminado.',
+    };
+  }
+  
             const categoryNames: Record<string, string> = {
               restaurante: 'Restaurante',
               hotel: 'Hotel',
-              spa: 'Spa',
               bar: 'Bar',
               cafe: 'Cafetería',
-              experiencia: 'Experiencia',
-              monumento: 'Monumento',
-            };
-            
-            const categoryName = categoryNames[data.place.category as string] || '';
-            
-            document.title = `${data.place.name} - ${categoryName} en ${data.place.city}, ${data.place.province} | Casi Cinco`;
-          }
-        }
-      } catch (error) {
-        console.error('Error cargando lugar:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  };
+  
+  const categoryName = categoryNames[place.category] || place.category;
+  
+  return {
+    title: `${place.name} - ${categoryName} ${place.rating}★ en ${place.city}, ${place.province} | Casi Cinco`,
+    description: `${place.name}: ${place.rating}★ con ${place.user_ratings_total} reseñas en ${place.city}. ${place.ai_description?.substring(0, 150) || ''}...`,
+    openGraph: {
+      title: place.name,
+      description: place.ai_description || `${place.name} - ${place.rating}★ en ${place.city}`,
+      images: place.photos && Array.isArray(place.photos) && place.photos.length > 0 
+        ? [place.photos[0]] 
+        : [],
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: place.name,
+      description: place.ai_description?.substring(0, 200) || `${place.name} - ${place.rating}★`,
+    },
+  };
+}
 
-    fetchPlace();
-  }, [slug]);
+// 2. ✅ Pre-generar rutas estáticas (SSG) - Top 100 para empezar
+export async function generateStaticParams() {
+  const supabase = await createClient();
+  
+  const { data: places } = await supabase
+    .from('places')
+    .select('category, province, slug')
+    .eq('published', true)
+    .order('rating', { ascending: false })
+    .order('user_ratings_total', { ascending: false })
+    .limit(100); // Top 100 lugares para SSG, resto ISR
+  
+  return (places || []).map((place) => ({
+    category: place.category,
+    province: place.province,
+    slug: place.slug,
+  }));
+}
 
-  // Cerrar menú al hacer click fuera
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as HTMLElement;
-      if (showShareMenu && !target.closest('.share-menu-container')) {
-        setShowShareMenu(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [showShareMenu]);
-
-  // Limpiar estados al desmontar componente (cuando se navega fuera)
-  useEffect(() => {
-    return () => {
-      setShowShareMenu(false);
-      setShowVisitModal(false);
-      document.body.style.overflow = 'unset';
-    };
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="text-lg">Cargando...</div>
-      </div>
-    );
+// 3. ✅ Componente principal (Server Component)
+export default async function PlaceDetailPage({ params }: Props) {
+  const supabase = await createClient();
+  
+  const { data: place, error } = await supabase
+    .from('places')
+    .select('*')
+    .eq('slug', params.slug)
+    .eq('published', true)
+    .single();
+  
+  if (error || !place) {
+    notFound();
   }
-
-  if (!place) {
-    return (
-      <div className="flex flex-col justify-center items-center min-h-screen">
-        <h1 className="text-2xl font-bold mb-4">Lugar no encontrado</h1>
-        <Button onClick={() => router.push('/mapa')}>
-          Volver al Mapa
-        </Button>
-      </div>
-    );
-  }
-
-  const tier = calculateQualityTier(place.rating, place.review_count);
+  
+  // Calcular tier
+  const tier = calculateQualityTier(place.rating, place.user_ratings_total);
   const tierInfo = getTierInfo(tier);
-  const photoUrl = getPlacePhotoUrl(place, 0, 1200);
-
-  const priceLevel = place.price_level ? '€'.repeat(place.price_level) : null;
-
-  const handleRegisterVisit = async () => {
-    try {
-      const response = await fetch('/api/visits', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          place_id: place.id,
-          notes: visitNotes,
-          rating: visitRating > 0 ? visitRating : null,
-        }),
-      });
-
-      if (response.ok) {
-        toast.success('✅ Visita registrada');
-        setShowVisitModal(false);
-        setVisitNotes('');
-        setVisitRating(0);
-      } else {
-        const data = await response.json();
-        if (response.status === 401) {
-          toast.error('Debes iniciar sesión para registrar visitas');
-          router.push('/login');
-        } else {
-          toast.error(data.error || 'Error al registrar visita');
-        }
-      }
-    } catch (error) {
-      toast.error('Error al registrar visita');
+  
+  // 4. ✅ Schema.org para SEO (LocalBusiness + Rating)
+  const schemaType = {
+    restaurante: 'Restaurant',
+    hotel: 'Hotel',
+    bar: 'BarOrPub',
+    cafe: 'CafeOrCoffeeShop',
+  }[place.category] || 'LocalBusiness';
+  
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": schemaType,
+    "name": place.name,
+    "image": place.photos || [],
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": place.address,
+      "addressLocality": place.city,
+      "addressRegion": place.province,
+      "postalCode": place.postal_code,
+      "addressCountry": "ES"
+    },
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": place.latitude,
+      "longitude": place.longitude
+    },
+    "url": place.website,
+    "telephone": place.phone,
+    "priceRange": place.price_level ? "€".repeat(place.price_level) : undefined,
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": place.rating,
+      "reviewCount": place.user_ratings_total,
+      "bestRating": 5,
+      "worstRating": 1
     }
   };
-
-  const handleToggleFavorite = async () => {
-    try {
-      const response = await fetch('/api/favorites', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ place_id: place.id }),
-      });
-
-      if (response.ok) {
-        toast.success('❤️ Guardado en favoritos');
-      } else if (response.status === 401) {
-        toast.error('Debes iniciar sesión para guardar favoritos');
-        router.push('/login');
+  
+  // Breadcrumb Schema
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Inicio",
+        "item": "https://casicinco.com"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": place.category === 'restaurante' ? 'Restaurantes' : 
+               place.category === 'hotel' ? 'Hoteles' :
+               place.category === 'bar' ? 'Bares' :
+               place.category === 'cafe' ? 'Cafeterías' : place.category,
+        "item": `https://casicinco.com/${place.category}`
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": place.province,
+        "item": `https://casicinco.com/${place.category}/${place.province}`
+      },
+      {
+        "@type": "ListItem",
+        "position": 4,
+        "name": place.name
       }
-    } catch (error) {
-      toast.error('Error al guardar favorito');
-    }
+    ]
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Hero Section con Foto */}
-      <div className="relative h-[400px] bg-gradient-to-br from-indigo-600 to-purple-700">
-        {photoUrl ? (
-          <img 
-            src={photoUrl} 
-            alt={place.name}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-indigo-600 to-purple-700">
-            <span className="text-8xl">{tierInfo.icon}</span>
-          </div>
-        )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
-        
-        {/* Contenido sobre la imagen */}
-        <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-3">
-                  <span className="text-4xl">{tierInfo.icon}</span>
-                  <span className={`px-3 py-1 rounded-full text-sm font-bold bg-gradient-to-r ${tierInfo.color}`}>
-                    {tierInfo.name}
-                  </span>
-                </div>
-                <h1 className="text-5xl font-bold mb-3 drop-shadow-lg">{place.name}</h1>
-                <div className="flex items-center gap-4 mb-2">
-                  <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full">
-                    <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                    <span className="font-bold text-xl">{place.rating}</span>
-                    <span className="text-sm">({place.review_count} reseñas)</span>
-                  </div>
-                  {priceLevel && (
-                    <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full">
-                      <Euro className="h-4 w-4" />
-                      <span className="font-semibold">{priceLevel}</span>
-                    </div>
-                  )}
-                </div>
-                <div className="flex flex-col gap-2">
-                  {/* Categoría del lugar */}
-                  {place.category && (
-                    <div className="flex items-center gap-2 text-white/90 bg-white/10 backdrop-blur-sm px-3 py-1 rounded-full w-fit">
-                      <span className="text-lg">🏷️</span>
-                      <span className="font-medium capitalize">{place.category}</span>
-                    </div>
-                  )}
-                  {/* Ubicación */}
-                  <div className="flex items-center gap-2 text-white/90">
-                    <MapPin className="h-4 w-4" />
-                    <span>{place.city}, {place.province}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Contenido Principal */}
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Columna Principal */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* Descripción */}
-            {place.ai_description && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Award className="h-5 w-5 text-indigo-600" />
-                    Sobre {place.name}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <MarkdownText 
-                    text={place.ai_description}
-                    className="text-gray-700 leading-relaxed text-lg"
-                  />
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Resumen de Reseñas */}
-            {place.ai_review_summary && (
-              <Card className="bg-blue-50 border-blue-200">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-blue-900">
-                    <Users className="h-5 w-5" />
-                    Lo que dicen los clientes
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-blue-900 italic leading-relaxed">
-                    "<MarkdownText text={place.ai_review_summary} className="inline" />"
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Highlights */}
-            {place.ai_highlights?.highlights && place.ai_highlights.highlights.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5 text-green-600" />
-                    Destacados
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid md:grid-cols-2 gap-3">
-                    {place.ai_highlights.highlights.map((highlight: string, index: number) => (
-                      <div key={index} className="flex items-start gap-2 bg-green-50 p-3 rounded-lg">
-                        <span className="text-green-600 mt-0.5">✓</span>
-                        <span className="text-sm text-gray-800">{highlight}</span>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Galería de Fotos */}
-            {/* Galería de fotos - Supabase Storage + Google fallback */}
-            {(() => {
-              const maxPhotos = 6;
-              const photos = [];
-              
-              // Priorizar fotos de Supabase Storage
-              if (place.photo_urls && Array.isArray(place.photo_urls) && place.photo_urls.length > 0) {
-                photos.push(...place.photo_urls.slice(0, maxPhotos).map((url: string, index: number) => ({
-                  src: url,
-                  index,
-                  alt: `${place.name} - Foto ${index + 1}`
-                })));
-              }
-              
-              // Rellenar con fotos de Google si no hay suficientes de Supabase
-              if (photos.length < maxPhotos && place.photos) {
-                // Parsear photos si es string JSON
-                let parsedPhotos = place.photos;
-                if (typeof place.photos === 'string') {
-                  try {
-                    parsedPhotos = JSON.parse(place.photos);
-                  } catch (error) {
-                    console.error('Error parsing photos JSON:', error);
-                    parsedPhotos = [];
-                  }
-                }
-                
-                if (Array.isArray(parsedPhotos) && parsedPhotos.length > 0) {
-                  const remainingSlots = maxPhotos - photos.length;
-                  const googlePhotos = parsedPhotos.slice(0, remainingSlots).map((photoRef: string, index: number) => {
-                    const googleUrl = getPlacePhotoUrl(place, photos.length + index, 600);
-                    return googleUrl ? {
-                      src: googleUrl,
-                      index: photos.length + index,
-                      alt: `${place.name} - Foto ${photos.length + index + 1}`
-                    } : null;
-                  }).filter(Boolean);
-                  
-                  photos.push(...googlePhotos);
-                }
-              }
-              
-              return photos.length > 0 ? (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Galería</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                      {photos.map((photo) => (
-                        <div key={photo.index} className="aspect-square rounded-lg overflow-hidden">
-                          <img
-                            src={photo.src}
-                            alt={photo.alt}
-                            className="w-full h-full object-cover hover:scale-110 transition-transform duration-300 cursor-pointer"
-                            loading="lazy"
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              ) : null;
-            })()}
-          </div>
-
-          {/* Columna Lateral */}
-          <div className="space-y-6">
-            {/* Información de Contacto */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Información</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {place.phone && (
-                  <a 
-                    href={`tel:${place.phone}`}
-                    onClick={() => {
-                      // 🎯 Trackear click en teléfono
-                      trackEvent(EVENTS.PHONE_CLICK, ANALYTICS_CATEGORIES.PLACE, {
-                        place_id: place.id,
-                        place_name: place.name,
-                        place_category: place.category,
-                        place_city: place.city
-                      });
-                    }}
-                    className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg transition group"
-                  >
-                    <Phone className="h-5 w-5 text-indigo-600" />
-                    <span className="text-gray-700 group-hover:text-indigo-600">{place.phone}</span>
-                  </a>
-                )}
-
-                {place.website && (
-                  <a 
-                    href={place.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={() => {
-                      // 🎯 Trackear click en website
-                      trackEvent(EVENTS.WEBSITE_CLICK, ANALYTICS_CATEGORIES.PLACE, {
-                        place_id: place.id,
-                        place_name: place.name,
-                        place_category: place.category,
-                        place_city: place.city,
-                        website_url: place.website
-                      });
-                    }}
-                    className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg transition group"
-                  >
-                    <Globe className="h-5 w-5 text-indigo-600" />
-                    <span className="text-gray-700 group-hover:text-indigo-600">Visitar sitio web</span>
-                    <ExternalLink className="h-4 w-4 ml-auto opacity-0 group-hover:opacity-100 transition" />
-                  </a>
-                )}
-
-                {/* Redes Sociales */}
-                {(place.instagram_url || place.facebook_url || place.twitter_url || place.tiktok_url) && (
-                  <div className="border-t pt-4">
-                    <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                      <Share2 className="h-4 w-4 text-gray-600" />
-                      Redes Sociales
-                    </h4>
-                    <div className="flex flex-wrap gap-2">
-                      {place.instagram_url && (
-                        <a
-                          href={place.instagram_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-2 px-3 py-2 bg-gradient-to-br from-purple-500 via-pink-500 to-orange-500 text-white rounded-lg hover:shadow-lg transition-all"
-                        >
-                          <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-                          </svg>
-                          <span className="text-sm font-medium">Instagram</span>
-                        </a>
-                      )}
-                      
-                      {place.facebook_url && (
-                        <a
-                          href={place.facebook_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-2 px-3 py-2 bg-[#1877F2] text-white rounded-lg hover:shadow-lg transition-all"
-                        >
-                          <Facebook className="h-4 w-4" />
-                          <span className="text-sm font-medium">Facebook</span>
-                        </a>
-                      )}
-                      
-                      {place.twitter_url && (
-                        <a
-                          href={place.twitter_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-2 px-3 py-2 bg-black text-white rounded-lg hover:shadow-lg transition-all"
-                        >
-                          <Twitter className="h-4 w-4" />
-                          <span className="text-sm font-medium">X</span>
-                        </a>
-                      )}
-                      
-                      {place.tiktok_url && (
-                        <a
-                          href={place.tiktok_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-2 px-3 py-2 bg-black text-white rounded-lg hover:shadow-lg transition-all"
-                        >
-                          <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
-                          </svg>
-                          <span className="text-sm font-medium">TikTok</span>
-                        </a>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                <div className="flex items-start gap-3 p-3">
-                  <MapPin className="h-5 w-5 text-indigo-600 flex-shrink-0 mt-0.5" />
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900">Dirección</p>
-                    <p className="text-sm text-gray-600 mt-1">{place.address}</p>
-                  </div>
-                </div>
-
-                {priceLevel && (
-                  <div className="flex items-center gap-3 p-3">
-                    <Euro className="h-5 w-5 text-indigo-600" />
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">Rango de precio</p>
-                      <p className="text-sm text-gray-600 mt-1">{priceLevel}</p>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Mapa */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Ubicación</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {isLoaded && place.latitude && place.longitude ? (
-                  <div className="rounded-lg overflow-hidden mb-4">
-                    <GoogleMap
-                      mapContainerStyle={mapContainerStyle}
-                      center={{ lat: place.latitude, lng: place.longitude }}
-                      zoom={15}
-                      options={{
-                        disableDefaultUI: true,
-                        zoomControl: true,
-                      }}
-                    >
-                      <Marker
-                        position={{ lat: place.latitude, lng: place.longitude }}
-                      />
-                    </GoogleMap>
-                  </div>
-                ) : (
-                  <div className="bg-gray-100 rounded-lg h-[300px] flex items-center justify-center">
-                    <MapPin className="h-12 w-12 text-gray-400" />
-                  </div>
-                )}
-                
-                {place.google_maps_url && (
-                  <Button
-                    onClick={() => {
-                      // 🎯 Trackear click en directions (Google Maps)
-                      trackEvent(EVENTS.DIRECTIONS_CLICK, ANALYTICS_CATEGORIES.PLACE, {
-                        place_id: place.id,
-                        place_name: place.name,
-                        place_category: place.category,
-                        place_city: place.city
-                      });
-                      window.open(place.google_maps_url, '_blank');
-                    }}
-                    variant="outline"
-                    className="w-full"
-                  >
-                    <Navigation className="h-4 w-4 mr-2" />
-                    Ver en Google Maps
-                  </Button>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Acciones */}
-            <Card>
-              <CardContent className="pt-6 space-y-3">
-                <Button
-                  onClick={handleToggleFavorite}
-                  variant="outline"
-                  className="w-full hover:bg-pink-50 hover:border-pink-500"
-                >
-                  <Heart className="h-4 w-4 mr-2" />
-                  Guardar en Favoritos
-                </Button>
-
-                <Button
-                  onClick={() => setShowVisitModal(true)}
-                  className="w-full bg-green-600 hover:bg-green-700 text-white"
-                >
-                  <Check className="h-4 w-4 mr-2" />
-                  Registrar Visita
-                </Button>
-                
-                <div className="relative share-menu-container">
-                  <Button
-                    onClick={() => setShowShareMenu(!showShareMenu)}
-                    variant="outline"
-                    className="w-full"
-                  >
-                    <Share2 className="h-4 w-4 mr-2" />
-                    Compartir
-                  </Button>
-
-                  {/* Menú desplegable de compartir */}
-                  {showShareMenu && (
-                    <div className="absolute bottom-full left-0 right-0 mb-2 bg-white rounded-lg shadow-2xl border-2 border-gray-200 p-2 z-50">
-                      <div className="space-y-1">
-                        {/* Copiar URL */}
-                        <button
-                          onClick={() => {
-                            navigator.clipboard.writeText(window.location.href);
-                            toast.success('✅ Enlace copiado al portapapeles');
-                            setShowShareMenu(false);
-                          }}
-                          className="w-full flex items-center gap-3 px-3 py-2 hover:bg-gray-100 rounded-lg transition text-left"
-                        >
-                          <Copy className="h-4 w-4 text-gray-600" />
-                          <span className="text-sm font-medium text-gray-900">Copiar enlace</span>
-                        </button>
-
-                        {/* WhatsApp */}
-                        <button
-                          onClick={() => {
-                            const text = `¡Mira este lugar increíble! ${place.name} - ⭐ ${place.rating} (${place.review_count} reseñas)`;
-                            const url = `https://wa.me/?text=${encodeURIComponent(text + ' ' + window.location.href)}`;
-                            window.open(url, '_blank');
-                            setShowShareMenu(false);
-                          }}
-                          className="w-full flex items-center gap-3 px-3 py-2 hover:bg-green-50 rounded-lg transition text-left"
-                        >
-                          <MessageCircle className="h-4 w-4 text-green-600" />
-                          <span className="text-sm font-medium text-gray-900">WhatsApp</span>
-                        </button>
-
-                        {/* Facebook */}
-                        <button
-                          onClick={() => {
-                            const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`;
-                            window.open(url, '_blank', 'width=600,height=400');
-                            setShowShareMenu(false);
-                          }}
-                          className="w-full flex items-center gap-3 px-3 py-2 hover:bg-blue-50 rounded-lg transition text-left"
-                        >
-                          <Facebook className="h-4 w-4 text-blue-600" />
-                          <span className="text-sm font-medium text-gray-900">Facebook</span>
-                        </button>
-
-                        {/* Twitter/X */}
-                        <button
-                          onClick={() => {
-                            const text = `${place.name} - ⭐ ${place.rating} (${place.review_count} reseñas) en ${place.city}`;
-                            const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(window.location.href)}`;
-                            window.open(url, '_blank', 'width=600,height=400');
-                            setShowShareMenu(false);
-                          }}
-                          className="w-full flex items-center gap-3 px-3 py-2 hover:bg-gray-100 rounded-lg transition text-left"
-                        >
-                          <Twitter className="h-4 w-4 text-gray-900" />
-                          <span className="text-sm font-medium text-gray-900">Twitter / X</span>
-                        </button>
-
-                        {/* LinkedIn */}
-                        <button
-                          onClick={() => {
-                            const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.href)}`;
-                            window.open(url, '_blank', 'width=600,height=400');
-                            setShowShareMenu(false);
-                          }}
-                          className="w-full flex items-center gap-3 px-3 py-2 hover:bg-blue-50 rounded-lg transition text-left"
-                        >
-                          <Linkedin className="h-4 w-4 text-blue-700" />
-                          <span className="text-sm font-medium text-gray-900">LinkedIn</span>
-                        </button>
-
-                        {/* Email */}
-                        <button
-                          onClick={() => {
-                            const subject = `Te recomiendo: ${place.name}`;
-                            const body = `Encontré este lugar increíble:\n\n${place.name}\n⭐ ${place.rating} (${place.review_count} reseñas)\n📍 ${place.city}, ${place.province}\n\n${window.location.href}`;
-                            window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-                            setShowShareMenu(false);
-                          }}
-                          className="w-full flex items-center gap-3 px-3 py-2 hover:bg-gray-100 rounded-lg transition text-left"
-                        >
-                          <Mail className="h-4 w-4 text-gray-600" />
-                          <span className="text-sm font-medium text-gray-900">Email</span>
-                        </button>
-                      </div>
-
-                      {/* Botón cerrar */}
-                      <div className="border-t border-gray-200 mt-2 pt-2">
-                        <button
-                          onClick={() => setShowShareMenu(false)}
-                          className="w-full text-xs text-gray-500 hover:text-gray-700 py-1"
-                        >
-                          Cerrar
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </div>
-
-      {/* Modal Registrar Visita */}
-      {showVisitModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-bold text-gray-900">Registrar Visita</h3>
-              <button
-                onClick={() => {
-                  setShowVisitModal(false);
-                  setVisitNotes('');
-                  setVisitRating(0);
-                }}
-                className="p-2 hover:bg-gray-100 rounded-lg transition"
-              >
-                <X className="h-5 w-5 text-gray-600" />
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              {/* Nombre del lugar */}
-              <div className="bg-gray-50 p-3 rounded-lg">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-2xl">{tierInfo.icon}</span>
-                  <h4 className="font-semibold text-gray-900">{place.name}</h4>
-                </div>
-                <p className="text-sm text-gray-600">{place.city}, {place.province}</p>
-              </div>
-
-              {/* Rating */}
-              <div>
-                <label className="block text-sm font-medium text-gray-900 mb-2">
-                  ¿Cómo fue tu experiencia? (Opcional)
-                </label>
-                <div className="flex gap-2">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <button
-                      key={star}
-                      onClick={() => setVisitRating(star)}
-                      className="transition-transform hover:scale-110"
-                    >
-                      <Star
-                        className={`h-8 w-8 ${
-                          star <= visitRating
-                            ? 'fill-yellow-400 text-yellow-400'
-                            : 'text-gray-300 hover:text-yellow-400'
-                        }`}
-                      />
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Notas */}
-              <div>
-                <label className="block text-sm font-medium text-gray-900 mb-2">
-                  Notas personales (Opcional)
-                </label>
-                <textarea
-                  value={visitNotes}
-                  onChange={(e) => setVisitNotes(e.target.value)}
-                  placeholder="¿Qué tal fue? ¿Volverías? Tus impresiones..."
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none"
-                  rows={4}
-                />
-              </div>
-
-              {/* Botones */}
-              <div className="flex gap-3 pt-4">
-                <Button
-                  onClick={() => {
-                    setShowVisitModal(false);
-                    setVisitNotes('');
-                    setVisitRating(0);
-                  }}
-                  variant="outline"
-                  className="flex-1"
-                >
-                  Cancelar
-                </Button>
-                <Button
-                  onClick={handleRegisterVisit}
-                  className="flex-1 bg-green-600 hover:bg-green-700"
-                >
-                  <Check className="h-4 w-4 mr-2" />
-                  Registrar
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+    <>
+      {/* ✅ Schema.org JSON-LD para rich snippets */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      
+      {/* ✅ Client Component con UI interactiva */}
+      <PlaceContent place={place} tier={tier} tierInfo={tierInfo} />
+    </>
   );
 }
+
+// ✅ ISR: Revalidar cada 24 horas
+export const revalidate = 86400; // 24 horas

@@ -16,6 +16,9 @@
 |-----------|-------------|---------------|
 | `LEEME_PRIMERO.md` | Guía de inicio rápido | Primera vez |
 | `README.md` | Descripción general del proyecto | Siempre |
+| `ACCIONES_INMEDIATAS_CRITICAS.md` | ⚠️ **BLOQUEADORES CRÍTICOS** - Leer YA | URGENTE |
+| `PLAN_ESTRATEGICO_2025_SEO_VIABILIDAD.md` | Plan estratégico completo SEO + Viabilidad | Obligatorio |
+| `ROADMAP_MEJORAS.md` | Roadmap actualizado con prioridades | Planificación |
 | `FLUJO_COMPLETO_INDEXACION_ENRIQUECIMIENTO.md` | **DOCUMENTO MAESTRO** del sistema | Obligatorio |
 
 ---

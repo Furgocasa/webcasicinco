@@ -17,6 +17,6 @@ export default function robots(): MetadataRoute.Robots {
         '/private/',    // Rutas privadas
       ],
     },
-    sitemap: `${baseUrl}/sitemap.xml`,
+    sitemap: `${baseUrl}/sitemap-index.xml`,
   };
 }

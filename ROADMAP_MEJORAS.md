@@ -1,8 +1,228 @@
 # 🚀 Roadmap de Mejoras - Casi Cinco
 
 **Versión Actual:** 3.0.0 BETA 3.0  
-**Fecha:** 12 de Octubre de 2025  
-**Enfoque:** Mejoras basadas en código actual
+**Fecha:** 18 de Octubre de 2025  
+**Enfoque:** Mejoras críticas SEO + Conversión + UX  
+**Actualizado con:** Auditoría de experto programador
+
+---
+
+## ⚠️ BLOQUEADORES CRÍTICOS (HACER YA - Semana 1)
+
+### **1. SSR/SSG en Fichas de Lugares** 🔴 **P0 - ULTRA CRÍTICO**
+
+#### **Problema Actual:**
+- **CRÍTICO:** Fichas usan `'use client'` con fetch en `useEffect`
+- **Consecuencia:** Google ve "Cargando..." permanentemente
+- **Impacto:** **0% de tráfico orgánico en 2,612 fichas**
+- **Estado:** ❌ Bloqueador SEO total
+
+#### **Solución:**
+```typescript
+// ❌ ANTES: app/(public)/[category]/[province]/[slug]/page.tsx
+'use client';
+export default function PlaceDetailPage() {
+  const [place, setPlace] = useState(null);
+  useEffect(() => {
+    fetch(`/api/places/by-slug/${slug}`).then(...);
+  }, [slug]);
+}
+
+// ✅ DESPUÉS: Server Component con generateMetadata
+import { Metadata } from 'next';
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const place = await fetchPlaceBySlug(params.slug);
+  
+  return {
+    title: `${place.name} - ${place.category} ${place.rating}★ en ${place.city} | Casi Cinco`,
+    description: `${place.name}: ${place.rating}★ con ${place.user_ratings_total} reseñas. ${place.ai_description}`,
+    openGraph: {
+      title: place.name,
+      description: place.ai_description,
+      images: [place.photos[0]],
+      type: 'website',
+    },
+  };
+}
+
+// Pre-generar rutas estáticas (SSG)
+export async function generateStaticParams() {
+  const places = await supabase
+    .from('places')
+    .select('category, province, slug')
+    .eq('published', true);
+  
+  return places.map(p => ({
+    category: p.category,
+    province: p.province,
+    slug: p.slug,
+  }));
+}
+
+// Componente sin 'use client'
+export default async function PlaceDetailPage({ params }: Props) {
+  const place = await fetchPlaceBySlug(params.slug);
+  
+  return (
+    <div>
+      <h1>{place.name}</h1>
+      {/* Contenido renderizado en servidor */}
+    </div>
+  );
+}
+```
+
+**Impacto:** 🔥 Google indexa 2,612 páginas correctamente  
+**Tiempo:** 2 días  
+**Prioridad:** P0 - SIN ESTO, TODO EL SEO ES INÚTIL
+
+---
+
+### **2. Schema.org (Datos Estructurados)** 🔴 **P0 - CRÍTICO**
+
+#### **Problema:**
+- Sin datos estructurados → Sin rich snippets
+- CTR 30-50% más bajo en resultados de Google
+- No aparecen estrellas ⭐ en búsquedas
+
+#### **Solución:**
+```typescript
+// 1. LocalBusiness en fichas individuales
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Restaurant", // Adaptar según categoría
+  "name": place.name,
+  "image": place.photos,
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": place.address,
+    "addressLocality": place.city,
+    "addressRegion": place.province,
+    "addressCountry": "ES"
+  },
+  "geo": {
+    "@type": "GeoCoordinates",
+    "latitude": place.latitude,
+    "longitude": place.longitude
+  },
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": place.rating,
+    "reviewCount": place.user_ratings_total
+  }
+}
+</script>
+
+// 2. ItemList en listados (/mapa, /restaurantes/madrid, etc.)
+// 3. BreadcrumbList en todas las páginas
+// 4. Organization en home
+```
+
+**Impacto:** ⭐ Rich snippets en Google = +40% CTR  
+**Tiempo:** 1 día  
+**Prioridad:** P0
+
+---
+
+### **3. Trial SIN Tarjeta (30 días)** 🔴 **P0 - CONVERSIÓN CRÍTICA**
+
+#### **Problema Actual:**
+- Trial de 30 días **REQUIERE tarjeta** en Stripe
+- Fricción brutal en onboarding
+- Conversión visitante → trial probablemente **<1%**
+
+#### **Solución:**
+**A. Trial se gestiona en Supabase (no en Stripe):**
+```sql
+-- Ya implementado: trigger que da 30 días automáticamente
+CREATE OR REPLACE FUNCTION handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.raw_user_meta_data = jsonb_set(
+    COALESCE(NEW.raw_user_meta_data, '{}'::jsonb),
+    '{trial_ends_at}',
+    to_jsonb((NOW() + INTERVAL '30 days')::text)
+  );
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+```
+
+**B. Modal de bienvenida al primer login:**
+```typescript
+// components/auth/WelcomeModal.tsx (CREAR NUEVO)
+// Mostrar 3 opciones:
+// 1. 🎁 Trial 30 días SIN tarjeta (DESTACADO)
+// 2. ⚡ Premium Mensual 2.99€ (con tarjeta)
+// 3. 👑 Premium Anual 24.99€ (con tarjeta, ahorra 30%)
+```
+
+**C. Flujo mejorado:**
+```
+Usuario se registra
+  ↓
+Modal de bienvenida aparece
+  ↓
+Elige: Trial SIN tarjeta → Acceso inmediato 30 días
+     o: Pago directo → Stripe Checkout
+  ↓
+Día 28: Banner naranja "Quedan 2 días de trial"
+  ↓
+Día 31: Paywall modal "Trial terminado. Suscríbete"
+```
+
+**Cambios técnicos:**
+1. Eliminar `trial_period_days` de Stripe checkout
+2. Trial = metadata en Supabase, no en Stripe
+3. Crear `WelcomeModal.tsx`
+4. Actualizar `pricing/page.tsx` para quitar `trialDays: 30` en checkout
+
+**Impacto:** 🚀 Conversión visitante → trial: **1% → 10%+**  
+**Tiempo:** 2-3 días  
+**Prioridad:** P0 - CRÍTICO PARA NEGOCIO
+
+---
+
+### **4. Sitemap Segmentado + Google Search Console** 🟠 **P1 - ALTA**
+
+#### **Estado Actual:**
+- Sitemap único en `app/sitemap.ts`
+- No enviado a Google Search Console
+- No hay sitemap index
+
+#### **Solución:**
+```xml
+<!-- public/sitemap_index.xml -->
+<sitemapindex>
+  <sitemap>
+    <loc>https://casicinco.com/sitemap-static.xml</loc>
+  </sitemap>
+  <sitemap>
+    <loc>https://casicinco.com/sitemap-places.xml</loc>
+  </sitemap>
+  <sitemap>
+    <loc>https://casicinco.com/sitemap-blog.xml</loc>
+  </sitemap>
+  <sitemap>
+    <loc>https://casicinco.com/sitemap-categories.xml</loc>
+  </sitemap>
+</sitemapindex>
+```
+
+**Actualizar robots.txt:**
+```txt
+Sitemap: https://casicinco.com/sitemap_index.xml
+```
+
+**Enviar a GSC:**
+1. Google Search Console → Sitemaps
+2. Añadir: `https://casicinco.com/sitemap.xml`
+
+**Impacto:** ⚡ Indexación acelerada  
+**Tiempo:** 4 horas  
+**Prioridad:** P1
 
 ---
 
@@ -391,31 +611,133 @@ export const usePlacesStore = create((set) => ({
 
 ---
 
-## 💡 Mi Recomendación de Prioridades:
+## 💡 PRIORIDADES ACTUALIZADAS (Basadas en Auditoría)
 
-### **Semana 1: Estabilidad** 🛡️
-1. Error Handling robusto (2-3h)
-2. Testing básico E2E (4-6h)
-3. Caché inteligente (3-4h)
+### **🚨 Semana 1: BLOQUEADORES CRÍTICOS (P0)**
+**Objetivo:** Desbloquear SEO y conversión
 
-### **Semana 2: Mobile UX** 📱
-4. PWA completa (2-3h)
-5. Animaciones básicas (4-6h)
-6. Bottom nav funcional sin errores (6-8h)
+#### Días 1-2: SSR/SSG en Fichas
+- [ ] Migrar `[category]/[province]/[slug]/page.tsx` a Server Component
+- [ ] Implementar `generateMetadata` para SEO
+- [ ] Implementar `generateStaticParams` para SSG
+- [ ] Probar que Google ve contenido completo
 
-### **Semana 3: Features** ✨
-7. Favoritos mejorados (12-16h)
-8. SEO optimizado (3-4h)
+**Impacto:** 2,612 páginas indexables → Tráfico orgánico desbloqueado
 
-### **Semana 4: Performance** ⚡
-9. Bundle optimization (4-6h)
-10. Virtualización listas (4-6h)
+#### Día 2: Schema.org
+- [ ] LocalBusiness en fichas
+- [ ] ItemList en listados
+- [ ] BreadcrumbList global
+- [ ] Organization en home
+
+**Impacto:** Rich snippets → +40% CTR
+
+#### Días 3-4: Trial sin Tarjeta
+- [ ] Crear `WelcomeModal.tsx`
+- [ ] Eliminar `trial_period_days` de Stripe
+- [ ] Actualizar lógica en `pricing/page.tsx`
+- [ ] Banner de días restantes funcional
+- [ ] Paywall al día 31
+
+**Impacto:** Conversión 1% → 10%+
+
+#### Día 5: Sitemap + GSC
+- [ ] Crear sitemap segmentado
+- [ ] Actualizar robots.txt
+- [ ] Enviar a Google Search Console
 
 ---
 
-## 📊 Quick Wins (Fáciles y Alto Impacto)
+### **🟠 Semana 2: Contenido y Autoridad (P1)**
 
-1. **PWA Manifest** (30 min) → App instalable
-2. **Loading Skeletons** (2h) → UX mejorada
-3. **Error Boundaries** (2h) → No más pantallas blancas
-4. **Cache localStorage** (3h) → Navegación instant
+#### Días 6-7: Guías Editoriales
+- [ ] 15 guías "Mejores [categoría] en [ciudad]"
+- [ ] Contenido humano 100% original
+- [ ] Estructura H1/H2/H3 SEO-friendly
+
+#### Días 8-10: Badge "Selección 4.7"
+- [ ] Diseñar badge físico/digital
+- [ ] Landing `/sello-4-7`
+- [ ] Widget embebible
+- [ ] Outreach a 100 locales
+
+**Objetivo:** 20-30 enlaces naturales
+
+---
+
+### **🟡 Semana 3: Páginas Programáticas (P1-P2)**
+
+#### Días 11-13: Categoría + Ubicación
+- [ ] Crear `/[category]/[location]/page.tsx`
+- [ ] 30 páginas programáticas piloto
+- [ ] Contenido editorial único por ciudad
+- [ ] ISR (revalidación 24h)
+
+#### Días 14-15: Listas por Ocasión
+- [ ] Sistema de tags (celiacos, pet-friendly, brunch, etc.)
+- [ ] 5 listas piloto
+- [ ] Páginas `/listas/[occasion]`
+
+---
+
+### **⚡ Semana 4: Performance y UX (P2)**
+
+1. PWA completa (2-3h)
+2. Error Handling robusto (2-3h)
+3. Caché inteligente (3-4h)
+4. Loading Skeletons (2h)
+5. Bundle optimization (4-6h)
+
+---
+
+## 🎯 KPIs y Objetivos
+
+### **Mes 1 (Días 1-30):**
+- ✅ Páginas indexadas: >500
+- ✅ Conversión trial: >5%
+- ✅ Enlaces desde badges: 20-30
+- ✅ Impresiones GSC: Baseline establecido
+
+### **Mes 2 (Días 31-60):**
+- ✅ Páginas indexadas: >1,000
+- ✅ Conversión trial: >8%
+- ✅ Tráfico orgánico: >1,000 visitas/mes
+- ✅ Keywords Top 10: >50
+
+### **Mes 3 (Días 61-90):**
+- ✅ Páginas indexadas: >2,000
+- ✅ Conversión trial: >10%
+- ✅ Suscriptores totales: 200-350
+- ✅ Enlaces externos: >150
+- ✅ CAC < 10€
+
+---
+
+## 📊 Quick Wins Actualizados (Alto ROI)
+
+### **Implementar ESTA SEMANA:**
+
+1. **SSR en fichas** (2 días) → 🔥 **SIN ESTO, 0 SEO**
+2. **Schema.org** (1 día) → ⭐ Rich snippets (+40% CTR)
+3. **Trial sin tarjeta** (2 días) → 🚀 Conversión 10x
+4. **Sitemap + GSC** (4h) → ⚡ Indexación acelerada
+
+### **Semana siguiente:**
+
+5. **15 guías editoriales** (2 días) → 📝 Contenido para rankear
+6. **Badge + outreach** (2 días) → 🔗 20-30 enlaces
+7. **WelcomeModal** (1 día) → 🎁 UX de onboarding mejorada
+8. **30 páginas programáticas** (3 días) → 📄 Long-tail SEO
+
+---
+
+## 📚 Documentación Relacionada
+
+- `PLAN_ESTRATEGICO_2025_SEO_VIABILIDAD.md` - Estrategia completa
+- `SISTEMA_MONETIZACION.md` - Detalles de pagos actuales
+- `OPTIMIZACION_GOOGLE_API_COMPLETA.md` - Costes optimizados
+- `FLUJO_COMPLETO_INDEXACION_ENRIQUECIMIENTO.md` - Sistema actual
+
+---
+
+**NOTA IMPORTANTE:** Las mejoras de performance y UX (PWA, caché, animaciones) son importantes pero **SECUNDARIAS** hasta que el SEO y la conversión estén desbloqueados. Primero tráfico + usuarios, luego optimizar la experiencia.

@@ -7,6 +7,7 @@ import PlacesPreloader from '@/components/PlacesPreloader';
 import GoogleAnalytics from '@/components/GoogleAnalytics';
 import PageTracker from '@/components/PageTracker';
 import PageViewTracker from '@/components/PageViewTracker';
+import { WelcomeModal } from '@/components/auth/WelcomeModal';
 import { MapProvider } from '@/lib/contexts/MapContext';
 import './globals.css';
 
@@ -108,6 +109,7 @@ export default function RootLayout({
             {children}
           </main>
           <ChatbotFloating />
+          <WelcomeModal />
           <Toaster position="top-right" richColors closeButton />
         </MapProvider>
       </body>

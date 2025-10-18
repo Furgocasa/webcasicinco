@@ -46,7 +46,7 @@ export default function PricingPage() {
         },
         body: JSON.stringify({
           planId,
-          trialDays: 30, // 30 días de prueba gratis
+          trialDays: 0, // Trial sin tarjeta se gestiona en Supabase, no en Stripe
         }),
       });
 
