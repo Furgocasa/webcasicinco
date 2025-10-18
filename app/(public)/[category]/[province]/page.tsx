@@ -1,0 +1,395 @@
+import { Metadata } from 'next';
+import { notFound } from 'next/navigation';
+import { createClient } from '@/lib/supabase/server';
+import { createClient as createClientBrowser } from '@supabase/supabase-js';
+import Link from 'next/link';
+import { Star, MapPin, TrendingUp, ChevronRight, Home } from 'lucide-react';
+import { Card } from '@/components/ui/Card';
+import { Badge } from '@/components/ui/Badge';
+import { getPlacePhotoUrl } from '@/lib/utils/photo-helper';
+import { calculateQualityTier, getTierInfo } from '@/lib/utils/tier-calculator';
+
+type Props = {
+  params: { category: string; province: string }
+}
+
+const VALID_CATEGORIES = ['restaurante', 'bar', 'cafe', 'hotel'];
+
+const CATEGORY_CONFIG: Record<string, {
+  title: string;
+  titleSingular: string;
+  emoji: string;
+  description: string;
+  color: string;
+}> = {
+  restaurante: {
+    title: 'Restaurantes',
+    titleSingular: 'Restaurante',
+    emoji: '🍽️',
+    description: 'Solo restaurantes con mínimo 4.7★ y validación de miles de comensales',
+    color: 'from-blue-700 to-blue-900',
+  },
+  bar: {
+    title: 'Bares',
+    titleSingular: 'Bar',
+    emoji: '🍺',
+    description: 'Los mejores bares con ambiente increíble y valoraciones excepcionales',
+    color: 'from-amber-700 to-amber-900',
+  },
+  cafe: {
+    title: 'Cafeterías',
+    titleSingular: 'Cafetería',
+    emoji: '☕',
+    description: 'Cafeterías de especialidad con los mejores cafés y atención premium',
+    color: 'from-yellow-700 to-yellow-900',
+  },
+  hotel: {
+    title: 'Hoteles',
+    titleSingular: 'Hotel',
+    emoji: '🏨',
+    description: 'Hoteles excepcionales para una estancia inolvidable',
+    color: 'from-blue-700 to-indigo-900',
+  },
+};
+
+// Metadata dinámica para SEO
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { category, province } = params;
+  
+  if (!VALID_CATEGORIES.includes(category)) {
+    return {
+      title: 'Categoría no encontrada | Casi Cinco',
+    };
+  }
+
+  const config = CATEGORY_CONFIG[category];
+  const provinceName = province.charAt(0).toUpperCase() + province.slice(1);
+  
+  // Obtener cantidad de lugares
+  const supabase = await createClient();
+  const { count } = await supabase
+    .from('places')
+    .select('*', { count: 'exact', head: true })
+    .eq('category', category)
+    .eq('province', provinceName)
+    .eq('published', true)
+    .gte('rating', 4.7);
+  
+  const totalPlaces = count || 0;
+  
+  return {
+    title: `Mejores ${config.title} en ${provinceName} +4.7★ (${totalPlaces}) | Casi Cinco`,
+    description: `Descubre los ${totalPlaces} mejores ${config.title.toLowerCase()} de ${provinceName}. ${config.description}. Ordenados por calidad objetiva verificada.`,
+    openGraph: {
+      title: `Top ${config.title} en ${provinceName}`,
+      description: `${totalPlaces} ${config.title.toLowerCase()} excepcionales con mínimo 4.7★ en ${provinceName}`,
+      type: 'website',
+    },
+  };
+}
+
+// Pre-generar rutas estáticas (SSG) para las combinaciones más populares
+export async function generateStaticParams() {
+  const supabase = createClientBrowser(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+  
+  // Obtener todas las combinaciones únicas de categoría + provincia
+  const { data: places } = await supabase
+    .from('places')
+    .select('category, province')
+    .eq('published', true);
+  
+  if (!places) return [];
+  
+  // Crear Set de combinaciones únicas
+  const combinations = new Set<string>();
+  places.forEach(place => {
+    if (place.category && place.province) {
+      combinations.add(`${place.category}|${place.province}`);
+    }
+  });
+  
+  // Convertir a array de params
+  return Array.from(combinations).map(combo => {
+    const [category, province] = combo.split('|');
+    return {
+      category,
+      province: province.toLowerCase().replace(/\s+/g, '-'),
+    };
+  });
+}
+
+// Página principal
+export default async function CategoryProvincePage({ params }: Props) {
+  const { category, province } = params;
+  
+  if (!VALID_CATEGORIES.includes(category)) {
+    notFound();
+  }
+
+  const config = CATEGORY_CONFIG[category];
+  const provinceName = province.charAt(0).toUpperCase() + province.slice(1).replace(/-/g, ' ');
+  
+  const supabase = await createClient();
+  
+  // Obtener lugares de esta categoría y provincia
+  const { data: places, error } = await supabase
+    .from('places')
+    .select('*')
+    .eq('category', category)
+    .eq('province', provinceName)
+    .eq('published', true)
+    .gte('rating', 4.7)
+    .order('rating', { ascending: false })
+    .order('user_ratings_total', { ascending: false })
+    .limit(50);
+  
+  if (error || !places || places.length === 0) {
+    notFound();
+  }
+
+  // Calcular estadísticas
+  const avgRating = (places.reduce((sum, p) => sum + p.rating, 0) / places.length).toFixed(1);
+  const totalReviews = places.reduce((sum, p) => sum + (p.user_ratings_total || 0), 0);
+
+  // Schema.org para SEO
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "name": `Mejores ${config.title} en ${provinceName}`,
+    "description": `Lista de los mejores ${config.title.toLowerCase()} en ${provinceName} con mínimo 4.7 estrellas`,
+    "numberOfItems": places.length,
+    "itemListElement": places.slice(0, 10).map((place, index) => ({
+      "@type": "ListItem",
+      "position": index + 1,
+      "item": {
+        "@type": "LocalBusiness",
+        "name": place.name,
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": place.rating,
+          "reviewCount": place.user_ratings_total,
+          "bestRating": 5
+        }
+      }
+    }))
+  };
+
+  // Breadcrumb Schema
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Inicio",
+        "item": "https://casicinco.com"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": config.title,
+        "item": `https://casicinco.com/${category}`
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": provinceName
+      }
+    ]
+  };
+
+  return (
+    <>
+      {/* Schema.org JSON-LD */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+
+      <div className="min-h-screen bg-gray-50">
+        {/* Hero Section */}
+        <div className={`bg-gradient-to-br ${config.color} text-white py-16 px-4`}>
+          <div className="max-w-7xl mx-auto">
+            {/* Breadcrumbs */}
+            <nav className="flex items-center gap-2 text-sm text-white/80 mb-6">
+              <Link href="/" className="hover:text-white transition flex items-center gap-1">
+                <Home className="h-4 w-4" />
+                Inicio
+              </Link>
+              <ChevronRight className="h-4 w-4" />
+              <Link href={`/${category}`} className="hover:text-white transition">
+                {config.title}
+              </Link>
+              <ChevronRight className="h-4 w-4" />
+              <span className="text-white font-medium">{provinceName}</span>
+            </nav>
+
+            {/* Título principal */}
+            <div className="flex items-center gap-4 mb-4">
+              <span className="text-6xl">{config.emoji}</span>
+              <div>
+                <h1 className="text-4xl md:text-5xl font-bold mb-2">
+                  {config.title} en {provinceName}
+                </h1>
+                <p className="text-xl text-white/90">
+                  {config.description}
+                </p>
+              </div>
+            </div>
+
+            {/* Estadísticas */}
+            <div className="flex flex-wrap gap-6 mt-8">
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg px-6 py-3">
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-5 w-5" />
+                  <span className="text-2xl font-bold">{places.length}</span>
+                </div>
+                <p className="text-sm text-white/80 mt-1">{config.title}</p>
+              </div>
+              
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg px-6 py-3">
+                <div className="flex items-center gap-2">
+                  <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                  <span className="text-2xl font-bold">{avgRating}★</span>
+                </div>
+                <p className="text-sm text-white/80 mt-1">Rating medio</p>
+              </div>
+              
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg px-6 py-3">
+                <div className="flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5" />
+                  <span className="text-2xl font-bold">{totalReviews.toLocaleString()}</span>
+                </div>
+                <p className="text-sm text-white/80 mt-1">Reseñas totales</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Contenido principal */}
+        <div className="max-w-7xl mx-auto px-4 py-12">
+          {/* Descripción SEO */}
+          <div className="bg-white rounded-xl shadow-sm p-8 mb-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">
+              ¿Por qué estos son los mejores {config.title.toLowerCase()} de {provinceName}?
+            </h2>
+            <p className="text-gray-700 leading-relaxed mb-4">
+              En Casi Cinco solo incluimos {config.title.toLowerCase()} con <strong>mínimo 4.7 estrellas</strong> y 
+              cientos de reseñas verificadas. Cada {config.titleSingular.toLowerCase()} en {provinceName} ha sido 
+              validado por miles de clientes reales en Google Maps.
+            </p>
+            <p className="text-gray-700 leading-relaxed">
+              Hemos encontrado <strong>{places.length} {config.title.toLowerCase()}</strong> en {provinceName} que 
+              cumplen nuestros estrictos criterios de calidad. La valoración media es de <strong>{avgRating} estrellas</strong>, 
+              respaldada por <strong>{totalReviews.toLocaleString()} reseñas</strong> de clientes satisfechos.
+            </p>
+          </div>
+
+          {/* Grid de lugares */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {places.map((place, index) => {
+              const tier = calculateQualityTier(place.rating, place.user_ratings_total);
+              const tierInfo = getTierInfo(tier);
+              const photoUrl = getPlacePhotoUrl(place, 0, 600);
+              
+              return (
+                <Link 
+                  key={place.id}
+                  href={`/${place.category}/${place.province}/${place.slug}`}
+                  className="group"
+                >
+                  <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 h-full">
+                    {/* Imagen */}
+                    <div className="relative h-48 bg-gray-200 overflow-hidden">
+                      {photoUrl ? (
+                        <img 
+                          src={photoUrl} 
+                          alt={place.name}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-300 to-gray-400">
+                          <span className="text-6xl">{tierInfo.icon}</span>
+                        </div>
+                      )}
+                      
+                      {/* Badge de posición */}
+                      {index < 3 && (
+                        <div className="absolute top-3 left-3">
+                          <Badge className={`${
+                            index === 0 ? 'bg-yellow-500' :
+                            index === 1 ? 'bg-gray-400' :
+                            'bg-amber-600'
+                          } text-white font-bold`}>
+                            #{index + 1}
+                          </Badge>
+                        </div>
+                      )}
+                      
+                      {/* Tier badge */}
+                      <div className="absolute top-3 right-3">
+                        <Badge className={`bg-gradient-to-r ${tierInfo.color} text-white font-bold`}>
+                          {tierInfo.icon} {tierInfo.name}
+                        </Badge>
+                      </div>
+                    </div>
+                    
+                    {/* Contenido */}
+                    <div className="p-4">
+                      <h3 className="font-bold text-lg text-gray-900 mb-2 group-hover:text-blue-600 transition line-clamp-2">
+                        {place.name}
+                      </h3>
+                      
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="flex items-center gap-1">
+                          <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                          <span className="font-bold text-gray-900">{place.rating}</span>
+                        </div>
+                        <span className="text-sm text-gray-600">
+                          ({place.user_ratings_total?.toLocaleString()} reseñas)
+                        </span>
+                      </div>
+                      
+                      <div className="flex items-center gap-1 text-sm text-gray-600">
+                        <MapPin className="h-4 w-4" />
+                        <span className="line-clamp-1">{place.city}</span>
+                      </div>
+                    </div>
+                  </Card>
+                </Link>
+              );
+            })}
+          </div>
+
+          {/* CTA */}
+          <div className="mt-12 text-center bg-blue-50 rounded-xl p-8">
+            <h3 className="text-2xl font-bold text-gray-900 mb-2">
+              ¿Buscas más opciones?
+            </h3>
+            <p className="text-gray-700 mb-4">
+              Explora todos nuestros {config.title.toLowerCase()} en España
+            </p>
+            <Link href={`/${category}`}>
+              <button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-3 rounded-lg transition">
+                Ver todos los {config.title}
+              </button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+// ISR: Revalidar cada 24 horas
+export const revalidate = 86400;
+
