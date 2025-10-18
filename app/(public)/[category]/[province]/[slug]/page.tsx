@@ -69,7 +69,7 @@ export async function generateStaticParams() {
     .eq('published', true)
     .order('rating', { ascending: false })
     .order('user_ratings_total', { ascending: false })
-    .limit(100); // Top 100 lugares para SSG, resto ISR
+    .limit(100);
   
   return (places || []).map((place) => ({
     category: place.category,
