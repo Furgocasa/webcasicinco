@@ -97,7 +97,7 @@ export default async function PlaceDetailPage({ params }: Props) {
     
     // Calcular tier
     const tier = calculateQualityTier(place.rating, place.user_ratings_total);
-  const tierInfo = getTierInfo(tier);
+    const tierInfo = getTierInfo(tier);
     
     // 4. ✅ Schema.org para SEO (LocalBusiness + Rating)
     const schemaTypeMap: Record<string, string> = {
