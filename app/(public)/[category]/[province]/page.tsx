@@ -130,7 +130,11 @@ export default async function CategoryProvincePage({ params }: Props) {
   }
 
   const config = CATEGORY_CONFIG[category];
-  const provinceName = province.charAt(0).toUpperCase() + province.slice(1).replace(/-/g, ' ');
+  // Normalizar el nombre de provincia desde la URL
+  const provinceName = province
+    .split('-')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
   
   const supabase = await createClient();
   
@@ -157,7 +161,13 @@ export default async function CategoryProvincePage({ params }: Props) {
     .order('user_ratings_total', { ascending: false })
     .limit(10); // Solo Top 10 públicos - resto en el mapa
   
-  if (error || !places || places.length === 0) {
+  // Debug: Log si no hay lugares
+  if (error) {
+    console.error('Error fetching places:', error, { category, provinceName });
+  }
+  
+  if (!places || places.length === 0) {
+    console.log('No places found for:', { category, province, provinceName, totalPlaces });
     notFound();
   }
 
