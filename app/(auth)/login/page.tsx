@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Mail, Lock, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { PasswordInput } from '@/components/ui/PasswordInput';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
@@ -27,6 +28,21 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [loadingGoogle, setLoadingGoogle] = useState(false);
   const [error, setError] = useState('');
+
+  // Detectar errores de OAuth en la URL
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const oauthError = params.get('error');
+    const errorMessage = params.get('message');
+    
+    if (oauthError) {
+      const msg = decodeURIComponent(errorMessage || 'Error en la autenticación con Google');
+      setError(msg);
+      toast.error(msg);
+      // Limpiar la URL
+      window.history.replaceState({}, '', '/login');
+    }
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -141,8 +157,7 @@ export default function LoginPage() {
                 disabled={loading}
               />
 
-              <Input
-                type="password"
+              <PasswordInput
                 label="Contraseña"
                 placeholder="••••••••"
                 value={password}

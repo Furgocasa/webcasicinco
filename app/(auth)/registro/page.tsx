@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Mail, Lock, User, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { PasswordInput } from '@/components/ui/PasswordInput';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
@@ -57,17 +58,39 @@ export default function RegisterPage() {
           data: {
             role: 'user', // Por defecto, todos son usuarios normales
           },
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error de Supabase:', error);
+        throw error;
+      }
 
-      toast.success('¡Cuenta creada! Verifica tu correo electrónico.');
-      router.push('/login');
+      // Verificar si el usuario fue creado
+      if (data.user) {
+        console.log('Usuario creado exitosamente:', data.user.id);
+        
+        // Supabase puede requerir confirmación por email
+        if (data.user.identities && data.user.identities.length === 0) {
+          // Email ya registrado
+          setError('Este email ya está registrado. Intenta iniciar sesión.');
+          toast.error('Email ya registrado');
+        } else {
+          // Usuario creado correctamente
+          toast.success('¡Cuenta creada! Verifica tu correo electrónico para confirmar tu cuenta.');
+          setTimeout(() => {
+            router.push('/login');
+          }, 2000);
+        }
+      } else {
+        throw new Error('No se pudo crear el usuario');
+      }
     } catch (error: any) {
-      console.error('Error en registro:', error);
-      setError(error.message || 'Error al crear la cuenta');
-      toast.error('Error al crear la cuenta');
+      console.error('Error completo en registro:', error);
+      const errorMsg = error.message || 'Error al crear la cuenta';
+      setError(errorMsg);
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -144,8 +167,7 @@ export default function RegisterPage() {
                 disabled={loading}
               />
 
-              <Input
-                type="password"
+              <PasswordInput
                 label="Contraseña"
                 placeholder="••••••••"
                 helperText="Mínimo 6 caracteres"
@@ -155,8 +177,7 @@ export default function RegisterPage() {
                 disabled={loading}
               />
 
-              <Input
-                type="password"
+              <PasswordInput
                 label="Confirmar contraseña"
                 placeholder="••••••••"
                 value={confirmPassword}
