@@ -25,7 +25,7 @@ export async function createClient() {
               ...options,
               // Asegurar que las cookies de autenticación persistan
               maxAge: options.maxAge || 60 * 60 * 24 * 7, // 7 días por defecto
-              httpOnly: false, // Permitir acceso desde JavaScript
+              httpOnly: true, // Cookies seguras para PKCE y auth
               secure: process.env.NODE_ENV === 'production', // HTTPS en producción
               sameSite: 'lax' as const, // Protección CSRF
             };
