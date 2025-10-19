@@ -48,7 +48,16 @@ export async function GET(request: Request) {
         return NextResponse.redirect(new URL('/admin/dashboard', baseUrl));
       }
 
-      console.log('[OAuth Callback] Regular user, redirecting to home');
+      // Detectar si es verificación de email (viene de email confirmation)
+      const isEmailVerification = requestUrl.searchParams.get('type') === 'email' || 
+                                   requestUrl.searchParams.get('type') === 'signup';
+      
+      if (isEmailVerification) {
+        console.log('[OAuth Callback] Email verification, redirecting to confirmation page');
+        return NextResponse.redirect(new URL('/email-verified', baseUrl));
+      }
+
+      console.log('[OAuth Callback] Regular user login (OAuth), redirecting to home');
       return NextResponse.redirect(new URL('/', baseUrl));
     } catch (error: any) {
       console.error('[OAuth Callback] Exception:', error);
