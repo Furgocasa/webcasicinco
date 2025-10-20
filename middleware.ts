@@ -61,11 +61,21 @@ export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   
   try {
-    // Obtener el usuario actual
+    // 🔥 FIX: Obtener PRIMERO la sesión (más confiable que getUser en middleware)
     const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
+      data: { session },
+      error: sessionError,
+    } = await supabase.auth.getSession();
+
+    console.log('🔐 Middleware check:', {
+      path: pathname,
+      hasSession: !!session,
+      sessionError: sessionError?.message,
+      userEmail: session?.user?.email,
+      role: session?.user?.user_metadata?.role,
+    });
+
+    const user = session?.user;
 
     // Rutas que requieren autenticación (pero no admin)
     const protectedRoutes = ['/mapa', '/ruta', '/perfil'];
@@ -75,7 +85,8 @@ export async function middleware(request: NextRequest) {
     const isAdminRoute = pathname.startsWith('/admin');
 
     // Si es ruta protegida (no admin) y no hay usuario → login con parámetro de retorno
-    if (isProtectedRoute && (userError || !user)) {
+    if (isProtectedRoute && (sessionError || !user)) {
+      console.log('❌ Protected route without session, redirecting to login');
       const loginUrl = new URL('/login', request.url);
       loginUrl.searchParams.set('returnTo', pathname);
       return NextResponse.redirect(loginUrl);
@@ -84,8 +95,8 @@ export async function middleware(request: NextRequest) {
     // Si es ruta admin
     if (isAdminRoute) {
       // Si no hay usuario, redirigir a login
-      if (userError || !user) {
-        console.log('No user found, redirecting to login');
+      if (sessionError || !user) {
+        console.log('❌ Admin route: No session found, redirecting to login');
         return NextResponse.redirect(new URL('/login', request.url));
       }
 
@@ -93,15 +104,19 @@ export async function middleware(request: NextRequest) {
       const role = user.user_metadata?.role;
 
       if (role !== 'admin') {
-        console.log('User is not admin, redirecting to home');
+        console.log('❌ Admin route: User is not admin, redirecting to home. User:', user.email, 'Role:', role);
         return NextResponse.redirect(new URL('/', request.url));
       }
 
-      console.log('Admin access granted for:', user.email);
+      console.log('✅ Admin access granted for:', user.email);
     }
   } catch (error) {
-    console.error('Error in middleware auth check:', error);
-    return NextResponse.redirect(new URL('/login', request.url));
+    console.error('❌ Error in middleware auth check:', error);
+    // 🔥 FIX: Solo redirigir a login si es ruta admin o protegida
+    const pathname = request.nextUrl.pathname;
+    if (pathname.startsWith('/admin') || pathname.startsWith('/mapa') || pathname.startsWith('/ruta') || pathname.startsWith('/perfil')) {
+      return NextResponse.redirect(new URL('/login', request.url));
+    }
   }
 
   return response;

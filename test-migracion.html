@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Migración de Fotos - Casi Cinco</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #002196;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #002196;
+        }
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #002196;
+        }
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        input, select, button {
+            padding: 12px 20px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            font-size: 16px;
+        }
+        button {
+            background: #002196;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        button:hover {
+            background: #001166;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .log {
+            background: #1e1e1e;
+            color: #00ff00;
+            padding: 20px;
+            border-radius: 8px;
+            max-height: 500px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .log-line {
+            margin: 5px 0;
+        }
+        .success { color: #00ff00; }
+        .error { color: #ff0000; }
+        .warning { color: #ffaa00; }
+        .info { color: #00aaff; }
+        .progress {
+            width: 100%;
+            height: 30px;
+            background: #f0f0f0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #002196, #0044cc);
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🖼️ Migración de Fotos a Supabase</h1>
+        <p class="subtitle">Panel de control para migrar fotos de Google Places API a Supabase Storage</p>
+
+        <div class="stats" id="stats">
+            <div class="stat-card">
+                <div class="stat-label">Total Lugares</div>
+                <div class="stat-value" id="totalPlaces">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Con Supabase</div>
+                <div class="stat-value" id="withSupabase">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Pendientes</div>
+                <div class="stat-value" id="pending">3050</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Costo Mensual</div>
+                <div class="stat-value" id="cost">$2,135</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <input type="number" id="limit" value="10" min="1" max="100" placeholder="Límite">
+            <select id="category">
+                <option value="">Todas las categorías</option>
+                <option value="restaurante">Restaurantes</option>
+                <option value="bar">Bares</option>
+                <option value="cafe">Cafeterías</option>
+                <option value="hotel">Hoteles</option>
+            </select>
+            <button onclick="getStats()">📊 Ver Estadísticas</button>
+            <button onclick="startMigration(true)" id="dryRunBtn">🔍 Prueba (Dry Run)</button>
+            <button onclick="startMigration(false)" id="migrateBtn">🚀 Migrar</button>
+        </div>
+
+        <div class="progress" id="progressContainer" style="display: none;">
+            <div class="progress-bar" id="progressBar">0%</div>
+        </div>
+
+        <div class="log" id="log">
+            <div class="log-line info">💡 Listo para comenzar. Haz clic en "Ver Estadísticas" o "Migrar".</div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://www.casicinco.com/api/admin/migrate-photos';
+        let isRunning = false;
+
+        function addLog(message, type = 'info') {
+            const log = document.getElementById('log');
+            const line = document.createElement('div');
+            line.className = `log-line ${type}`;
+            line.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            log.appendChild(line);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        function updateProgress(current, total) {
+            const percent = Math.round((current / total) * 100);
+            const progressBar = document.getElementById('progressBar');
+            const progressContainer = document.getElementById('progressContainer');
+            progressContainer.style.display = 'block';
+            progressBar.style.width = percent + '%';
+            progressBar.textContent = `${current}/${total} (${percent}%)`;
+        }
+
+        async function getStats() {
+            try {
+                addLog('📊 Obteniendo estadísticas...', 'info');
+                const response = await fetch(API_URL, {
+                    credentials: 'include'
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    const stats = data.stats;
+                    document.getElementById('totalPlaces').textContent = stats.total;
+                    document.getElementById('withSupabase').textContent = stats.withSupabasePhotos;
+                    document.getElementById('pending').textContent = stats.pendingMigration;
+                    document.getElementById('cost').textContent = `$${stats.estimatedMonthlyCost.toFixed(2)}`;
+                    
+                    addLog(`✅ Total: ${stats.total} lugares`, 'success');
+                    addLog(`   - Con Supabase: ${stats.withSupabasePhotos}`, 'success');
+                    addLog(`   - Solo Google: ${stats.withGooglePhotos}`, 'success');
+                    addLog(`   - Pendientes: ${stats.pendingMigration}`, 'warning');
+                    addLog(`   💰 Costo estimado: $${stats.estimatedMonthlyCost.toFixed(2)}/mes`, 'error');
+                    addLog(`   💚 Ahorro potencial: $${stats.estimatedMonthlySavings.toFixed(2)}/mes`, 'success');
+                } else {
+                    addLog('❌ Error: ' + (data.error || 'Respuesta inválida'), 'error');
+                }
+            } catch (error) {
+                addLog('❌ Error: ' + error.message, 'error');
+                console.error(error);
+            }
+        }
+
+        async function startMigration(dryRun = false) {
+            if (isRunning) {
+                addLog('⚠️ Ya hay una migración en curso', 'warning');
+                return;
+            }
+
+            const limit = parseInt(document.getElementById('limit').value);
+            const category = document.getElementById('category').value;
+
+            if (limit < 1 || limit > 100) {
+                addLog('❌ El límite debe estar entre 1 y 100', 'error');
+                return;
+            }
+
+            const mode = dryRun ? 'DRY RUN (simulación)' : 'MIGRACIÓN REAL';
+            addLog(`\n${'='.repeat(60)}`, 'info');
+            addLog(`🚀 Iniciando ${mode}`, 'info');
+            addLog(`   - Límite: ${limit} lugares`, 'info');
+            addLog(`   - Categoría: ${category || 'Todas'}`, 'info');
+            addLog(`${'='.repeat(60)}\n`, 'info');
+
+            isRunning = true;
+            document.getElementById('dryRunBtn').disabled = true;
+            document.getElementById('migrateBtn').disabled = true;
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        limit,
+                        category: category || undefined,
+                        dryRun
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+
+                if (data.success) {
+                    const stats = data.stats;
+                    
+                    addLog(`\n✅ ${dryRun ? 'Simulación' : 'Migración'} completada`, 'success');
+                    addLog(`   - Total procesados: ${stats.total}`, 'info');
+                    addLog(`   - Exitosos: ${stats.migrated}`, 'success');
+                    addLog(`   - Errores: ${stats.errors}`, stats.errors > 0 ? 'error' : 'info');
+                    addLog(`   - Omitidos: ${stats.skipped}`, 'info');
+                    addLog(`   💰 Ahorro logrado: $${stats.savings.toFixed(2)}/mes`, 'success');
+                    addLog(`   💸 Ahorro anual: $${(stats.savings * 12).toFixed(2)}/año\n`, 'success');
+
+                    if (data.results && data.results.length > 0) {
+                        addLog(`\n📋 Detalle de lugares procesados:`, 'info');
+                        data.results.forEach((result, index) => {
+                            const icon = result.status === 'success' ? '✅' : result.status === 'error' ? '❌' : '⚠️';
+                            const type = result.status === 'success' ? 'success' : result.status === 'error' ? 'error' : 'warning';
+                            addLog(`${icon} [${index + 1}/${data.results.length}] ${result.name}`, type);
+                            if (result.photos) {
+                                addLog(`   └─ ${result.photos} fotos migradas (+$${result.savings.toFixed(2)}/mes)`, 'info');
+                            }
+                            if (result.error) {
+                                addLog(`   └─ Error: ${result.error}`, 'error');
+                            }
+                        });
+                    }
+
+                    // Actualizar estadísticas
+                    await getStats();
+
+                } else {
+                    addLog('❌ Error: ' + (data.error || 'Respuesta inválida'), 'error');
+                }
+
+            } catch (error) {
+                addLog('❌ Error fatal: ' + error.message, 'error');
+                console.error(error);
+            } finally {
+                isRunning = false;
+                document.getElementById('dryRunBtn').disabled = false;
+                document.getElementById('migrateBtn').disabled = false;
+            }
+        }
+
+        // Cargar estadísticas al inicio
+        window.addEventListener('load', () => {
+            addLog('🌐 Panel de migración cargado', 'success');
+            addLog('⚠️  IMPORTANTE: Debes estar logueado como admin en casicinco.com', 'warning');
+            addLog('💡 Tip: Empieza con una prueba (Dry Run) de 5-10 lugares\n', 'info');
+        });
+    </script>
+</body>
+</html>
+

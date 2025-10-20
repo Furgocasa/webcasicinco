@@ -26,10 +26,12 @@ export function useAuth() {
     // Obtener sesión inicial
     const getInitialSession = async () => {
       try {
-        const { data: { session }, error } = await supabase.auth.getSession();
+        // 🔥 FIX: Usar getUser() en lugar de getSession() para forzar verificación
+        // getUser() hace una llamada al servidor y verifica que el token sea válido
+        const { data: { user }, error } = await supabase.auth.getUser();
         
         if (error) {
-          console.error('Error getting session:', error);
+          console.error('Error getting user:', error);
           setAuthState({
             user: null,
             session: null,
@@ -39,10 +41,14 @@ export function useAuth() {
           return;
         }
 
-        const isAdmin = session?.user?.user_metadata?.role === 'admin';
+        // Si hay usuario, obtener la sesión completa
+        const { data: { session } } = await supabase.auth.getSession();
+        const isAdmin = user?.user_metadata?.role === 'admin';
+        
+        console.log('✅ useAuth: Usuario detectado:', user?.email, isAdmin ? '(Admin)' : '(User)');
         
         setAuthState({
-          user: session?.user || null,
+          user: user || null,
           session,
           loading: false,
           isAdmin,

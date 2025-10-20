@@ -1,0 +1,68 @@
+╔════════════════════════════════════════════════════════════╗
+║   INSTRUCCIONES PARA EJECUTAR LA MIGRACIÓN                ║
+╚════════════════════════════════════════════════════════════╝
+
+OPCIÓN 1: EJECUTAR SCRIPT COMPLETO (RECOMENDADO)
+═══════════════════════════════════════════════════════════
+
+1. Abre PowerShell en esta carpeta
+2. Ejecuta:
+
+   powershell -ExecutionPolicy Bypass -File ejecutar-migracion-completa.ps1
+
+   Esto ejecutará los 31 lotes automáticamente (~8-10 horas)
+
+
+OPCIÓN 2: EJECUTAR LOTE POR LOTE MANUALMENTE
+═══════════════════════════════════════════════════════════
+
+1. Abre PowerShell en esta carpeta
+2. Carga las variables de entorno primero:
+
+   Get-Content .env.local | ForEach-Object {
+       if ($_ -match '^([^=]+)=(.*)$') {
+           [Environment]::SetEnvironmentVariable($matches[1], $matches[2], "Process")
+       }
+   }
+
+3. Ejecuta cada lote:
+
+   # Restaurantes (repetir 12 veces)
+   npx tsx scripts/migrate-photos-to-supabase.ts --category restaurante --limit 100
+
+   # Bares (repetir 10 veces)
+   npx tsx scripts/migrate-photos-to-supabase.ts --category bar --limit 100
+
+   # Cafeterías (repetir 5 veces)
+   npx tsx scripts/migrate-photos-to-supabase.ts --category cafe --limit 100
+
+   # Hoteles (repetir 4 veces)
+   npx tsx scripts/migrate-photos-to-supabase.ts --category hotel --limit 100
+
+
+OPCIÓN 3: EJECUTAR TODO DE UNA VEZ (MÁS SIMPLE)
+═══════════════════════════════════════════════════════════
+
+1. Abre PowerShell en esta carpeta
+2. Carga variables:
+
+   Get-Content .env.local | ForEach-Object {
+       if ($_ -match '^([^=]+)=(.*)$') {
+           [Environment]::SetEnvironmentVariable($matches[1], $matches[2], "Process")
+       }
+   }
+
+3. Ejecuta TODO:
+
+   npx tsx scripts/migrate-photos-to-supabase.ts
+
+   (Sin límite, migrará los 3,050 lugares de una vez)
+
+
+═══════════════════════════════════════════════════════════
+
+RECOMENDACIÓN: Usa la OPCIÓN 1 en una terminal separada
+para poder ver el progreso en tiempo real.
+
+═══════════════════════════════════════════════════════════
+

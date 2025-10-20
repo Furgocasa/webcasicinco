@@ -1106,6 +1106,13 @@ export default function MapPage() {
     });
   }, [filteredPlaces, sortBy, userLocation]);
 
+  // 🎯 OPTIMIZACIÓN: Limitar vista de lista a 50 lugares máximo
+  // El mapa sigue mostrando todos, solo la lista lateral se limita para mejor rendimiento
+  const DISPLAY_LIMIT = 50;
+  const displayedPlaces = useMemo(() => {
+    return sortedPlaces.slice(0, DISPLAY_LIMIT);
+  }, [sortedPlaces]);
+
   // Handlers para mobile view
   const handleMobileViewChange = (view: 'map' | 'filters' | 'list') => {
     setMobileView(view);
@@ -1904,6 +1911,17 @@ export default function MapPage() {
                   <div>
                     <h3 className="font-bold text-lg">Lugares Encontrados</h3>
                     <p className="text-sm text-gray-600">{filteredPlaces.length} resultados</p>
+                    
+                    {/* 🎯 MENSAJE INFORMATIVO: Límite visual de 50 lugares */}
+                    {filteredPlaces.length > 50 && (
+                      <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded-lg">
+                        <p className="text-xs text-blue-800">
+                          <span className="font-semibold">Mostrando 50 de {filteredPlaces.length} lugares</span>
+                          <br />
+                          Usa los filtros para refinar tu búsqueda
+                        </p>
+                      </div>
+                    )}
                   </div>
                   <button
                     onClick={() => setShowPlacesList(false)}
@@ -1943,8 +1961,8 @@ export default function MapPage() {
                   <Loader2 className="h-8 w-8 animate-spin text-primary" />
                   <p className="text-sm text-gray-600">Cargando lugares...</p>
                 </div>
-              ) : sortedPlaces.length > 0 ? (
-                sortedPlaces.map((place) => {
+              ) : displayedPlaces.length > 0 ? (
+                displayedPlaces.map((place) => {
                   const tier = calculateQualityTier(place.rating, place.review_count || 0);
                   const tierInfo = getTierInfo(tier);
                   
@@ -2407,16 +2425,27 @@ export default function MapPage() {
             </select>
           </div>
 
+          {/* 🎯 MENSAJE INFORMATIVO MÓVIL: Límite visual */}
+          {!loading && filteredPlaces.length > DISPLAY_LIMIT && (
+            <div className="mx-4 mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-xs text-blue-800 text-center">
+                <span className="font-semibold">Mostrando {DISPLAY_LIMIT} de {filteredPlaces.length} lugares</span>
+                <br />
+                Usa los filtros para refinar tu búsqueda
+              </p>
+            </div>
+          )}
+
           {loading ? (
             <div className="flex justify-center py-8">
               <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
             </div>
-          ) : sortedPlaces.length === 0 ? (
+          ) : displayedPlaces.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
               No se encontraron lugares
             </div>
           ) : (
-            sortedPlaces.slice(0, 50).map((place) => {
+            displayedPlaces.map((place) => {
               const tier = calculateQualityTier(place.rating, place.review_count || 0);
               const tierInfo = getTierInfo(tier);
               

@@ -70,13 +70,18 @@ export default function LoginPage() {
 
       toast.success('¡Bienvenido de nuevo!');
 
+      // 🔥 FIX: Refresh ANTES de redirigir para que el estado se actualice
+      router.refresh();
+      
+      // Pequeña espera para que el router refresh se complete
+      await new Promise(resolve => setTimeout(resolve, 100));
+
       // Redirigir según el rol
       if (isAdmin) {
         router.push('/admin/dashboard');
       } else {
         router.push('/');
       }
-      router.refresh();
     } catch (error: any) {
       console.error('Error en login:', error);
       setError(error.message || 'Error al iniciar sesión');
