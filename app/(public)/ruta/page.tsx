@@ -3,6 +3,7 @@
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { GoogleMap, DirectionsRenderer, Marker, Autocomplete } from '@react-google-maps/api';
 import { useMap } from '@/lib/contexts/MapContext';
+import { useAuth } from '@/lib/hooks/useAuth';
 import { 
   Navigation, 
   MapPin, 
@@ -18,6 +19,7 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import BottomNavigation from '@/components/mobile/BottomNavigation';
 import BottomSheet from '@/components/mobile/BottomSheet';
+import LoginOverlay from '@/components/auth/LoginOverlay';
 import { calculateQualityTier, getTierInfo } from '@/lib/utils/tier-calculator';
 import { getPlacePhotoUrl } from '@/lib/utils/photo-helper';
 import { toast } from 'sonner';
@@ -51,6 +53,7 @@ type Place = {
 export default function RutaPage() {
   // ✅ OPTIMIZACIÓN: Usar contexto del mapa (ahorro 66% en navegaciones)
   const { isLoaded, loadError } = useMap();
+  const { user, loading: authLoading } = useAuth();
 
   const mapRef = useRef<google.maps.Map | null>(null);
   const originAutocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
@@ -375,6 +378,9 @@ export default function RutaPage() {
 
   return (
     <div className="flex flex-col h-[calc(100vh-64px)]">
+      {/* Overlay de Login para usuarios no autenticados */}
+      {!authLoading && !user && <LoginOverlay feature="ruta" />}
+      
       {/* HEADER - Solo desktop */}
       <div className="hidden md:block bg-white border-b border-gray-200 p-4">
         <div className="container mx-auto">

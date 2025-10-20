@@ -1139,6 +1139,9 @@ export default function MapPage() {
   return (
     <div className="flex flex-col h-[calc(100vh-64px)]">
       <div className="flex-1 flex overflow-hidden relative pb-16 md:pb-0">
+        {/* Overlay de Login para usuarios no autenticados */}
+        {!authLoading && !user && <LoginOverlay feature="mapa" />}
+        
         {/* SIDEBAR DE FILTROS - Desktop */}
         <div 
           className={`hidden md:block ${
