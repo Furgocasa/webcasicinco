@@ -279,7 +279,7 @@ export default function RutaPage() {
       // Extraer info de la ruta
       const route = results.routes[0];
       if (route) {
-        // ✅ FIX: Ajustar zoom del mapa para mostrar toda la ruta (especialmente en móvil)
+        // ✅ FIX: Ajustar zoom del mapa para mostrar toda la ruta
         if (mapRef.current) {
           const bounds = new google.maps.LatLngBounds();
           
@@ -291,13 +291,26 @@ export default function RutaPage() {
             });
           });
           
-          // Aplicar bounds con padding para UI (header, controles)
-          mapRef.current.fitBounds(bounds, {
-            top: 100,    // Espacio para header
-            bottom: 100, // Espacio para controles inferiores
-            left: 50,
-            right: 50,
-          });
+          // Aplicar bounds con padding diferente según dispositivo
+          const isMobile = window.innerWidth < 768;
+          
+          if (isMobile) {
+            // Móvil: Más padding para header y controles inferiores
+            mapRef.current.fitBounds(bounds, {
+              top: 150,
+              bottom: 150,
+              left: 20,
+              right: 20,
+            });
+          } else {
+            // PC: Padding mínimo, el DirectionsRenderer ya ajusta bien
+            mapRef.current.fitBounds(bounds, {
+              top: 50,
+              bottom: 50,
+              left: 50,
+              right: 400, // Más espacio a la derecha por el sidebar
+            });
+          }
         }
         
         const leg = route.legs[0];
