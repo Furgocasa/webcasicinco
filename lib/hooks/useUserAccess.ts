@@ -80,12 +80,17 @@ export function useUserAccess(): UserAccessInfo {
         }
 
         // Obtener suscripción activa
-        const { data: subscription } = await supabase
+        const { data: subscription, error: subError } = await supabase
           .from('subscriptions')
           .select('plan, status')
           .eq('user_id', user.id)
           .eq('status', 'active')
-          .single();
+          .maybeSingle(); // ✅ Retorna null si no hay registro (vs .single() que falla con 406)
+
+        // Silenciar error PGRST116 (no rows) - es normal para usuarios sin suscripción
+        if (subError && subError.code !== 'PGRST116') {
+          console.error('Error fetching subscription:', subError);
+        }
 
         const subscriptionPlan = subscription?.plan || null;
         const subscriptionStatus = subscription?.status || null;

@@ -44,12 +44,17 @@ export async function GET(request: NextRequest) {
     }
 
     // Obtener suscripción activa
-    const { data: subscription } = await supabase
+    const { data: subscription, error: subError } = await supabase
       .from('subscriptions')
       .select('plan, status, current_period_end')
       .eq('user_id', user.id)
       .eq('status', 'active')
-      .single();
+      .maybeSingle(); // ✅ Retorna null si no hay registro
+
+    // Silenciar error PGRST116 (no rows) - es normal para usuarios sin suscripción
+    if (subError && subError.code !== 'PGRST116') {
+      console.error('Error fetching subscription:', subError);
+    }
 
     const hasActiveSubscription = subscription?.status === 'active';
 
