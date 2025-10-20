@@ -221,14 +221,14 @@ export default function RutaPage() {
     const finalOrigin = originValueRef.current || origin;
     const finalDestination = destinationValueRef.current || destination;
     
-    // Validar que los valores sean suficientemente específicos
-    if (!finalOrigin || finalOrigin.length < 5) {
-      toast.error('Por favor, introduce un origen válido o selecciona del autocompletado');
+    // Validación simple: solo verificar que no estén vacíos
+    if (!finalOrigin?.trim()) {
+      toast.error('Por favor, introduce un origen');
       return;
     }
     
-    if (!finalDestination || finalDestination.length < 5) {
-      toast.error('Por favor, introduce un destino válido o selecciona del autocompletado');
+    if (!finalDestination?.trim()) {
+      toast.error('Por favor, introduce un destino');
       return;
     }
 
