@@ -77,8 +77,8 @@ export async function middleware(request: NextRequest) {
 
     const user = session?.user;
 
-    // Rutas que requieren autenticación (pero no admin)
-    const protectedRoutes = ['/mapa', '/ruta', '/perfil'];
+    // Rutas que requieren autenticación (solo /perfil, NO /mapa ni /ruta que son públicas)
+    const protectedRoutes = ['/perfil'];
     const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
 
     // Rutas admin
@@ -112,9 +112,9 @@ export async function middleware(request: NextRequest) {
     }
   } catch (error) {
     console.error('❌ Error in middleware auth check:', error);
-    // 🔥 FIX: Solo redirigir a login si es ruta admin o protegida
+    // 🔥 FIX: Solo redirigir a login si es ruta admin o perfil
     const pathname = request.nextUrl.pathname;
-    if (pathname.startsWith('/admin') || pathname.startsWith('/mapa') || pathname.startsWith('/ruta') || pathname.startsWith('/perfil')) {
+    if (pathname.startsWith('/admin') || pathname.startsWith('/perfil')) {
       return NextResponse.redirect(new URL('/login', request.url));
     }
   }
@@ -125,8 +125,6 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     '/admin/:path*',
-    '/mapa/:path*',
-    '/ruta/:path*',
     '/perfil/:path*'
   ],
 };
