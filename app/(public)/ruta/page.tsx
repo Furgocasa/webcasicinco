@@ -279,6 +279,27 @@ export default function RutaPage() {
       // Extraer info de la ruta
       const route = results.routes[0];
       if (route) {
+        // ✅ FIX: Ajustar zoom del mapa para mostrar toda la ruta (especialmente en móvil)
+        if (mapRef.current) {
+          const bounds = new google.maps.LatLngBounds();
+          
+          // Añadir todos los puntos de la ruta a los bounds
+          route.legs.forEach(leg => {
+            leg.steps.forEach(step => {
+              bounds.extend(step.start_location);
+              bounds.extend(step.end_location);
+            });
+          });
+          
+          // Aplicar bounds con padding para UI (header, controles)
+          mapRef.current.fitBounds(bounds, {
+            top: 100,    // Espacio para header
+            bottom: 100, // Espacio para controles inferiores
+            left: 50,
+            right: 50,
+          });
+        }
+        
         const leg = route.legs[0];
         setRouteInfo({
           distance: leg.distance?.text || '',
