@@ -250,6 +250,15 @@ export default function ChatbotFloating() {
             {/* BLOQUEO para usuarios no logueados */}
             {!authLoading && !user && (
               <div className="absolute inset-0 bg-gray-100/95 backdrop-blur-sm flex items-center justify-center z-20 p-6">
+                {/* Botón X para cerrar el overlay */}
+                <button
+                  onClick={() => setIsOpen(false)}
+                  className="absolute top-3 right-3 p-2 rounded-full bg-white hover:bg-gray-100 shadow-lg transition-colors"
+                  title="Cerrar"
+                >
+                  <X className="h-5 w-5 text-gray-600" />
+                </button>
+                
                 <div className="bg-white rounded-2xl p-6 max-w-sm shadow-2xl border-2 border-indigo-200 text-center">
                   <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center">
                     <Lock className="h-8 w-8 text-white" />
