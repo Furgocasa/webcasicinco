@@ -376,9 +376,15 @@ export default function HomePage() {
                   </ul>
                   <Button 
                     onClick={() => {
-                      // Abrir chatbot
-                      const chatButton = document.querySelector('[aria-label="Abrir chat"]') as HTMLButtonElement;
-                      if (chatButton) chatButton.click();
+                      // Abrir el chatbot flotante del Tío Viajero
+                      const chatButton = document.querySelector('button[title="Abrir Tío Viajero IA"]') as HTMLButtonElement;
+                      if (chatButton) {
+                        chatButton.click();
+                        // Scroll suave hacia abajo para ver el chatbot en móvil
+                        setTimeout(() => {
+                          window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }, 100);
+                      }
                     }}
                     className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
                   >
