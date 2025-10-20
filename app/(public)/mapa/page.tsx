@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { GoogleMap, Marker, InfoWindow } from '@react-google-maps/api';
 import { MarkerClusterer } from '@googlemaps/markerclusterer';
 import { useMap } from '@/lib/contexts/MapContext';
+import { useAuth } from '@/lib/hooks/useAuth';
 import { 
   Search, 
   X, 
@@ -22,6 +23,7 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import BottomNavigation from '@/components/mobile/BottomNavigation';
 import BottomSheet from '@/components/mobile/BottomSheet';
+import LoginOverlay from '@/components/auth/LoginOverlay';
 import type { PlaceWithTier, PlaceFilters, QualityTier, ReviewsRange } from '@/types/filters';
 import { calculateQualityTier, getTierMarkerColor, getTierInfo } from '@/lib/utils/tier-calculator';
 import { trackEvent, EVENTS, CATEGORIES as ANALYTICS_CATEGORIES } from '@/lib/analytics/tracker';
