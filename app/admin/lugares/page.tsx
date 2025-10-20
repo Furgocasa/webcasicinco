@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { calculateQualityTier, getTierMarkerColor, getTierInfo } from '@/lib/utils/tier-calculator';
+import { getPlacePhotoUrl } from '@/lib/utils/photo-helper';
 
 const libraries: ("places" | "drawing" | "geometry" | "visualization")[] = ["places"];
 
@@ -546,21 +547,13 @@ export default function LugaresPage() {
                     <div className="w-80 -m-2">
                       {/* Hero con foto */}
                       {(() => {
-                        // Parsear photos si es string JSON
-                        let parsedPhotos = selectedPlace.photos;
-                        if (typeof selectedPlace.photos === 'string') {
-                          try {
-                            parsedPhotos = JSON.parse(selectedPlace.photos);
-                          } catch (error) {
-                            console.error('Error parsing photos JSON:', error);
-                            parsedPhotos = [];
-                          }
-                        }
+                        // ✅ OPTIMIZACIÓN: Usar helper para fotos (prioriza Supabase, ahorra $0.007/foto)
+                        const photoUrl = getPlacePhotoUrl(selectedPlace, 0, 600);
                         
-                        return Array.isArray(parsedPhotos) && parsedPhotos.length > 0 && (
+                        return photoUrl && (
                           <div className="relative h-40 mb-4">
                             <img
-                              src={`https://maps.googleapis.com/maps/api/place/photo?maxwidth=600&photo_reference=${parsedPhotos[0]}&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`}
+                              src={photoUrl}
                               alt={selectedPlace.name}
                               className="w-full h-full object-cover"
                             />
