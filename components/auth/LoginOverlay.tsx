@@ -21,7 +21,7 @@ export default function LoginOverlay({
   };
 
   const defaultDescriptions = {
-    mapa: 'Es necesario registrarse para explorar los 3,547+ lugares excepcionales de España en el mapa interactivo',
+    mapa: 'Es necesario registrarse para explorar los 3.116+ lugares excepcionales de España en el mapa interactivo',
     ruta: 'Es necesario registrarse para planificar rutas personalizadas con paradas en lugares excepcionales'
   };
 
@@ -71,7 +71,7 @@ export default function LoginOverlay({
         {/* Footer con garantías */}
         <div className="mt-6 pt-4 border-t border-gray-200">
           <p className="text-xs text-gray-500">
-            ✓ Acceso inmediato · ✓ 3,547+ lugares verificados · ✓ 100% gratis por 30 días
+            ✓ Acceso inmediato · ✓ 3.116+ lugares verificados · ✓ 100% gratis por 30 días
           </p>
         </div>
       </div>
