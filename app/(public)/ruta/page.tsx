@@ -200,7 +200,11 @@ export default function RutaPage() {
   };
 
   const calculateRoute = async () => {
-    if (!origin || !destination) {
+    // ✅ FIX: Usar refs como fuente de verdad (tienen el valor completo del Autocomplete)
+    const finalOrigin = originValueRef.current || origin;
+    const finalDestination = destinationValueRef.current || destination;
+    
+    if (!finalOrigin || !finalDestination) {
       toast.error('Por favor, introduce origen y destino');
       return;
     }
@@ -209,6 +213,10 @@ export default function RutaPage() {
       toast.error('Google Maps no está cargado');
       return;
     }
+
+    // ✅ Sincronizar estados con refs (para mostrar correctamente en UI)
+    if (finalOrigin !== origin) setOrigin(finalOrigin);
+    if (finalDestination !== destination) setDestination(finalDestination);
 
     // Limpiar solo ruta y lugares, NO los inputs de origen/destino
     setDirectionsResponse(null);
@@ -219,8 +227,8 @@ export default function RutaPage() {
     setCalculating(true);
     
     try {
-      // ✅ Verificar caché primero
-      const cachedRoute = getCachedRoute(origin, destination);
+      // ✅ Verificar caché primero (con valores finales)
+      const cachedRoute = getCachedRoute(finalOrigin, finalDestination);
       
       let results: google.maps.DirectionsResult;
       
@@ -233,13 +241,13 @@ export default function RutaPage() {
         const directionsService = new google.maps.DirectionsService();
         
         results = await directionsService.route({
-          origin: origin,
-          destination: destination,
+          origin: finalOrigin,
+          destination: finalDestination,
           travelMode: google.maps.TravelMode.DRIVING,
         });
         
-        // Guardar en caché
-        saveRouteToCache(origin, destination, results);
+        // Guardar en caché (con valores finales)
+        saveRouteToCache(finalOrigin, finalDestination, results);
         toast.success('✅ Ruta calculada correctamente');
       }
 
