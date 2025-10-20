@@ -200,12 +200,35 @@ export default function RutaPage() {
   };
 
   const calculateRoute = async () => {
-    // ✅ FIX: Usar refs como fuente de verdad (tienen el valor completo del Autocomplete)
+    // ✅ FIX MEJORADO: Capturar valor del Autocomplete justo antes de calcular
+    if (originAutocompleteRef.current) {
+      const place = originAutocompleteRef.current.getPlace();
+      if (place?.formatted_address) {
+        originValueRef.current = place.formatted_address;
+        setOrigin(place.formatted_address);
+      }
+    }
+    
+    if (destinationAutocompleteRef.current) {
+      const place = destinationAutocompleteRef.current.getPlace();
+      if (place?.formatted_address) {
+        destinationValueRef.current = place.formatted_address;
+        setDestination(place.formatted_address);
+      }
+    }
+    
+    // Usar refs como fuente de verdad
     const finalOrigin = originValueRef.current || origin;
     const finalDestination = destinationValueRef.current || destination;
     
-    if (!finalOrigin || !finalDestination) {
-      toast.error('Por favor, introduce origen y destino');
+    // Validar que los valores sean suficientemente específicos
+    if (!finalOrigin || finalOrigin.length < 5) {
+      toast.error('Por favor, introduce un origen válido o selecciona del autocompletado');
+      return;
+    }
+    
+    if (!finalDestination || finalDestination.length < 5) {
+      toast.error('Por favor, introduce un destino válido o selecciona del autocompletado');
       return;
     }
 
@@ -459,7 +482,17 @@ export default function RutaPage() {
                         setOrigin(originValueRef.current);
                       }
                     }}
-                    onKeyPress={(e) => e.key === 'Enter' && calculateRoute()}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        // Dar 150ms a Google Autocomplete para completar
+                        setTimeout(() => {
+                          if (destination) {
+                            calculateRoute();
+                          }
+                        }, 150);
+                      }
+                    }}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#002196] focus:border-transparent text-base"
                   />
                 </Autocomplete>
@@ -507,7 +540,17 @@ export default function RutaPage() {
                         setDestination(destinationValueRef.current);
                       }
                     }}
-                    onKeyPress={(e) => e.key === 'Enter' && calculateRoute()}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        // Dar 150ms a Google Autocomplete para completar
+                        setTimeout(() => {
+                          if (origin) {
+                            calculateRoute();
+                          }
+                        }, 150);
+                      }
+                    }}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#002196] focus:border-transparent text-base"
                   />
                 </Autocomplete>
