@@ -103,16 +103,18 @@ export default function RegisterPage() {
     try {
       const supabase = createClient();
       
-      // Obtener la URL base de la aplicación
-      // En producción, usar NEXT_PUBLIC_APP_URL; en desarrollo, usar origin
-      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
+      // 🔥 FIX: Determinar URL base según dominio actual
+      // Si estamos en casicinco.com, usar esa URL; sino usar localhost
+      const currentHost = typeof window !== 'undefined' ? window.location.hostname : '';
+      const isProduction = currentHost.includes('casicinco.com');
+      const baseUrl = isProduction ? 'https://www.casicinco.com' : 'http://localhost:3000';
+      
+      console.log('🔐 OAuth redirect URL:', `${baseUrl}/auth/callback`, 'Host:', currentHost);
       
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: `${baseUrl}/auth/callback`,
-          // No especificar queryParams.prompt permite a Google decidir automáticamente
-          // Si el usuario ya autorizó, no pedirá confirmación de nuevo
         },
       });
 
