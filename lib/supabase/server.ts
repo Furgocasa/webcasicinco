@@ -20,16 +20,8 @@ export async function createClient() {
         },
         set(name: string, value: string, options: CookieOptions) {
           try {
-            // Configurar cookies con opciones de persistencia
-            const cookieOptions = {
-              ...options,
-              // Asegurar que las cookies de autenticación persistan
-              maxAge: options.maxAge || 60 * 60 * 24 * 7, // 7 días por defecto
-              httpOnly: true, // Cookies seguras para PKCE y auth
-              secure: process.env.NODE_ENV === 'production', // HTTPS en producción
-              sameSite: 'lax' as const, // Protección CSRF
-            };
-            cookieStore.set({ name, value, ...cookieOptions });
+            // 🔥 NO sobreescribir opciones de Supabase - usar las que vienen
+            cookieStore.set({ name, value, ...options });
           } catch (error) {
             // Ignorar errores en set durante el renderizado
             console.warn('Error setting cookie:', error);

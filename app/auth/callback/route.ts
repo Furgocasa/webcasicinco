@@ -28,6 +28,8 @@ export async function GET(request: Request) {
   if (code) {
     try {
       const supabase = await createClient();
+      
+      // 🔥 FIX: Intercambiar código por sesión
       const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
       
       if (exchangeError) {
@@ -42,23 +44,32 @@ export async function GET(request: Request) {
       // Usuario autenticado, verificar si es admin
       const isAdmin = data.user?.user_metadata?.role === 'admin';
       
-      // Redirigir según rol
+      // 🔥 FIX: Crear respuesta con cookies explícitas
+      // Determinar URL de destino
+      let redirectUrl: URL;
       if (isAdmin) {
         console.log('[OAuth Callback] Admin user, redirecting to dashboard');
-        return NextResponse.redirect(new URL('/admin/dashboard', baseUrl));
+        redirectUrl = new URL('/admin/dashboard', baseUrl);
+      } else {
+        const isEmailVerification = requestUrl.searchParams.get('type') === 'email' || 
+                                     requestUrl.searchParams.get('type') === 'signup';
+        
+        if (isEmailVerification) {
+          console.log('[OAuth Callback] Email verification, redirecting to confirmation page');
+          redirectUrl = new URL('/email-verified', baseUrl);
+        } else {
+          console.log('[OAuth Callback] Regular user login (OAuth), redirecting to home');
+          redirectUrl = new URL('/', baseUrl);
+        }
       }
-
-      // Detectar si es verificación de email (viene de email confirmation)
-      const isEmailVerification = requestUrl.searchParams.get('type') === 'email' || 
-                                   requestUrl.searchParams.get('type') === 'signup';
       
-      if (isEmailVerification) {
-        console.log('[OAuth Callback] Email verification, redirecting to confirmation page');
-        return NextResponse.redirect(new URL('/email-verified', baseUrl));
-      }
-
-      console.log('[OAuth Callback] Regular user login (OAuth), redirecting to home');
-      return NextResponse.redirect(new URL('/', baseUrl));
+      // Crear respuesta de redirección
+      const response = NextResponse.redirect(redirectUrl);
+      
+      // Las cookies ya están configuradas por el createClient en el servidor
+      // Solo necesitamos asegurar que la respuesta las propague correctamente
+      return response;
+      
     } catch (error: any) {
       console.error('[OAuth Callback] Exception:', error);
       return NextResponse.redirect(
