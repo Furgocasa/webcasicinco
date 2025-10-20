@@ -137,15 +137,11 @@ export async function processPlace(
       };
     }
 
-    // ✅ AHORA SÍ: Descargar fotos SOLO si toda la IA fue exitosa
-    // Esto ahorra ~70% del coste de fotos (lugares que fallan en IA no descargan fotos)
-    const { supabaseUrls } = await downloadAndUploadPhotosToSupabase(
-      placeDetails.photos || [], 
-      placeDetails.name,
-      placeDetails.place_id,
-      3  // ✅ 3 fotos para velocidad
-    );
-    cost += supabaseUrls.length * 0.007; // $0.007 por foto
+    // ✅ OPTIMIZACIÓN: NO descargar fotos en indexación inicial
+    // Las fotos se descargarán SOLO en fase de enriquecimiento (5 fotos)
+    // Esto evita duplicar descargas (antes: 3 aquí + 5 en enriquecimiento = 8 total)
+    // Ahora: 0 aquí + 5 en enriquecimiento = 5 total → Ahorro 37%
+    const supabaseUrls: string[] = []; // Sin fotos hasta enriquecimiento
 
     // 5. Preparar datos del lugar
     const slug = generatePlaceSlug(placeDetails.name, city);
