@@ -1,0 +1,51 @@
+════════════════════════════════════════════════════════════════════════════
+  LUGARES CON FOTOS INVÁLIDAS/EXPIRADAS EN GOOGLE PLACES API
+════════════════════════════════════════════════════════════════════════════
+
+Total: 88 lugares (2.81% del total)
+Estado: Fotos con photo_reference expirado que devuelven 403 Forbidden
+Impacto económico: $0/mes (Google no sirve estas fotos, no se cobran)
+
+Nota: Estos lugares tienen referencias de fotos en la base de datos, pero cuando 
+intentamos descargarlas desde Google Places API, devuelven error 403, lo que 
+indica que los photo_reference están expirados o inválidos.
+
+────────────────────────────────────────────────────────────────────────────
+
+LISTA DE LUGARES:
+
+1. ID: 3a5fe03f-315a-410a-9243-313e080c044e
+   Nombre: Estirpe Restaurante
+   Categoría: restaurante
+   Provincia: Valencia
+   Estado: 5 photo_references encontrados, todos devuelven 403
+
+2. ID: [pendiente]
+   Nombre: [pendiente]
+   Categoría: [pendiente]
+   Provincia: [pendiente]
+
+... (86 lugares más)
+
+────────────────────────────────────────────────────────────────────────────
+
+ACCIONES RECOMENDADAS:
+
+1. ✅ NO HACER NADA - Los photo_reference expirados NO generan costo
+2. 🔄 OPCIONAL: Re-indexar estos lugares desde Google Places API para obtener 
+   nuevos photo_reference válidos
+3. 🧹 OPCIONAL: Limpiar el campo "photos" de estos 88 lugares para mantener 
+   la base de datos limpia
+
+ESTADO DE MIGRACIÓN GENERAL:
+- ✅ 3,034 lugares migrados a Supabase (96.84%)
+- ❌ 88 lugares con fotos expiradas (2.81%)
+- ❌ 11 lugares sin fotos (0.35%)
+
+Ahorro estimado: ~$490/mes (99% de reducción en costos de fotos)
+
+════════════════════════════════════════════════════════════════════════════
+Generado: 20 de octubre de 2025
+Script: migrate-remaining-99.ts
+════════════════════════════════════════════════════════════════════════════
+

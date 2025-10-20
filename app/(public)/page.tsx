@@ -255,8 +255,153 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* DIFERENCIADORES CLAVE */}
+        {/* HERRAMIENTAS - NUEVA SECCIÓN */}
         <section className="py-20 bg-white">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-6">
+                Tus Herramientas para Experiencias Perfectas
+              </h2>
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                Tres herramientas poderosas para que nunca más tengas una experiencia mediocre
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+              {/* Herramienta 1: Mapa Interactivo */}
+              <Card className="group hover:shadow-2xl transition-all duration-300 border-2 border-gray-100 hover:border-[#002196] overflow-hidden">
+                <div className="relative h-48 bg-gradient-to-br from-[#002196] to-blue-800 flex items-center justify-center overflow-hidden">
+                  <div className="absolute inset-0 bg-black/20"></div>
+                  <MapPin className="h-20 w-20 text-white relative z-10 group-hover:scale-110 transition-transform" />
+                </div>
+                <div className="p-6">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-3">
+                    🗺️ Mapa Interactivo
+                  </h3>
+                  <p className="text-gray-600 mb-4">
+                    Explora <strong>{stats.totalPlaces.toLocaleString('es-ES')}+ lugares excepcionales</strong> en un mapa visual. 
+                    Filtra por categoría, provincia y descubre joyas ocultas cerca de ti.
+                  </p>
+                  <ul className="space-y-2 mb-6">
+                    <li className="flex items-start gap-2 text-sm text-gray-700">
+                      <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0 mt-0.5" />
+                      <span>Visualización geográfica</span>
+                    </li>
+                    <li className="flex items-start gap-2 text-sm text-gray-700">
+                      <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0 mt-0.5" />
+                      <span>Filtros inteligentes</span>
+                    </li>
+                    <li className="flex items-start gap-2 text-sm text-gray-700">
+                      <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0 mt-0.5" />
+                      <span>Descubre cerca de ti</span>
+                    </li>
+                  </ul>
+                  <Button 
+                    onClick={() => router.push('/mapa')}
+                    className="w-full bg-[#002196] hover:bg-[#001570] text-white"
+                  >
+                    Explorar Mapa
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </div>
+              </Card>
+
+              {/* Herramienta 2: Planificador de Rutas */}
+              <Card className="group hover:shadow-2xl transition-all duration-300 border-2 border-gray-100 hover:border-[#ffd935] overflow-hidden">
+                <div className="relative h-48 bg-gradient-to-br from-[#ffd935] to-yellow-600 flex items-center justify-center overflow-hidden">
+                  <div className="absolute inset-0 bg-black/10"></div>
+                  <svg className="h-20 w-20 text-[#002196] relative z-10 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                  </svg>
+                </div>
+                <div className="p-6">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-3">
+                    🛣️ Planificador de Rutas
+                  </h3>
+                  <p className="text-gray-600 mb-4">
+                    Crea <strong>rutas personalizadas</strong> conectando múltiples lugares excepcionales. 
+                    Perfecto para roadtrips y escapadas.
+                  </p>
+                  <ul className="space-y-2 mb-6">
+                    <li className="flex items-start gap-2 text-sm text-gray-700">
+                      <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0 mt-0.5" />
+                      <span>Múltiples paradas</span>
+                    </li>
+                    <li className="flex items-start gap-2 text-sm text-gray-700">
+                      <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0 mt-0.5" />
+                      <span>Optimización automática</span>
+                    </li>
+                    <li className="flex items-start gap-2 text-sm text-gray-700">
+                      <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0 mt-0.5" />
+                      <span>Guarda y comparte</span>
+                    </li>
+                  </ul>
+                  <Button 
+                    onClick={() => router.push('/ruta')}
+                    className="w-full bg-[#ffd935] hover:bg-[#e6c430] text-[#002196] font-bold"
+                  >
+                    Planificar Ruta
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </div>
+              </Card>
+
+              {/* Herramienta 3: Chatbot IA */}
+              <Card className="group hover:shadow-2xl transition-all duration-300 border-2 border-gray-100 hover:border-purple-500 overflow-hidden">
+                <div className="relative h-48 bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center overflow-hidden">
+                  <div className="absolute inset-0 bg-black/20"></div>
+                  <Sparkles className="h-20 w-20 text-white relative z-10 group-hover:scale-110 transition-transform" />
+                </div>
+                <div className="p-6">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-3">
+                    🤖 Chat con IA Viajera
+                  </h3>
+                  <p className="text-gray-600 mb-4">
+                    <strong>Tu asistente personal</strong> que conoce todos los lugares. 
+                    Pregunta lo que quieras en lenguaje natural.
+                  </p>
+                  <ul className="space-y-2 mb-6">
+                    <li className="flex items-start gap-2 text-sm text-gray-700">
+                      <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0 mt-0.5" />
+                      <span>Respuestas instantáneas</span>
+                    </li>
+                    <li className="flex items-start gap-2 text-sm text-gray-700">
+                      <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0 mt-0.5" />
+                      <span>Recomendaciones personalizadas</span>
+                    </li>
+                    <li className="flex items-start gap-2 text-sm text-gray-700">
+                      <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0 mt-0.5" />
+                      <span>Conversa como con un amigo</span>
+                    </li>
+                  </ul>
+                  <Button 
+                    onClick={() => {
+                      // Abrir chatbot
+                      const chatButton = document.querySelector('[aria-label="Abrir chat"]') as HTMLButtonElement;
+                      if (chatButton) chatButton.click();
+                    }}
+                    className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+                  >
+                    Hablar con IA
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </div>
+              </Card>
+            </div>
+
+            {/* Call to Action */}
+            <div className="text-center mt-12">
+              <Card className="max-w-3xl mx-auto p-6 bg-gradient-to-r from-blue-50 to-yellow-50 border-2 border-[#ffd935]">
+                <p className="text-lg text-gray-800">
+                  <strong>💡 Todas estas herramientas</strong> están incluidas en tu prueba gratuita de 30 días
+                </p>
+              </Card>
+            </div>
+          </div>
+        </section>
+
+        {/* DIFERENCIADORES CLAVE */}
+        <section className="py-20 bg-gray-50">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">

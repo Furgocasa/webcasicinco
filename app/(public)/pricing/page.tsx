@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Check, Sparkles, Zap, Crown, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import Footer from '@/components/layout/Footer';
 import { PLANS, formatPrice, getIntervalText, getYearlySavings } from '@/lib/stripe/plans';
 import type { SubscriptionPlan } from '@/types/stripe';
 
@@ -226,6 +227,7 @@ export default function PricingPage() {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Star, MapPin, TrendingUp, ChevronRight, Home } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
+import Footer from '@/components/layout/Footer';
 import { getPlacePhotoUrl } from '@/lib/utils/photo-helper';
 import { calculateQualityTier, getTierInfo } from '@/lib/utils/tier-calculator';
 
@@ -451,6 +452,7 @@ export default async function CategoryProvincePage({ params }: Props) {
           )}
         </div>
       </div>
+      <Footer />
     </>
   );
 }

@@ -30,6 +30,7 @@ import {
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
+import Footer from '@/components/layout/Footer';
 import { MarkdownText } from '@/lib/utils/markdown';
 import { getPlacePhotoUrl } from '@/lib/utils/photo-helper';
 import { toast } from 'sonner';
@@ -744,6 +745,7 @@ export function PlaceContent({ place, tier, tierInfo }: PlaceContentProps) {
           </div>
         </div>
       )}
+      <Footer />
     </div>
   );
 }
