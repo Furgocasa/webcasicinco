@@ -378,9 +378,6 @@ export default function RutaPage() {
 
   return (
     <div className="flex flex-col h-[calc(100vh-64px)]">
-      {/* Overlay de Login para usuarios no autenticados */}
-      {!authLoading && !user && <LoginOverlay feature="ruta" />}
-      
       {/* HEADER - Solo desktop */}
       <div className="hidden md:block bg-white border-b border-gray-200 p-4">
         <div className="container mx-auto">
@@ -582,6 +579,9 @@ export default function RutaPage() {
 
       {/* CONTENIDO PRINCIPAL */}
       <div className="flex-1 flex overflow-hidden relative bg-white pb-16 md:pb-0">
+        {/* Overlay de Login para usuarios no autenticados */}
+        {!authLoading && !user && <LoginOverlay feature="ruta" />}
+        
         {/* Margen izquierdo 8% - Solo desktop */}
         <div style={{ width: '8%' }} className="hidden md:block bg-white flex-shrink-0"></div>
         
