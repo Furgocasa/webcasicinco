@@ -84,6 +84,7 @@ const SPAIN_BOUNDS_FULL = {
 export default function MapPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { user, loading: authLoading } = useAuth();
   const mapRef = useRef<google.maps.Map | null>(null);
   const clustererRef = useRef<MarkerClusterer | null>(null);
   const markersRef = useRef<google.maps.Marker[]>([]);
