@@ -80,7 +80,7 @@ export default function HomePage() {
           <div className="absolute inset-0 bg-black opacity-10"></div>
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
           
-          <div className="relative container mx-auto px-4 py-16 md:py-32">
+          <div className="relative container mx-auto px-4 py-20 md:py-40 pb-24 md:pb-44">
             <div className="max-w-4xl mx-auto text-center">
               {/* Badge */}
               <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-3 md:px-4 py-1.5 md:py-2 rounded-full mb-6 md:mb-8 animate-fade-in">
