@@ -9,7 +9,11 @@ export default function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
           {/* About */}
           <div className="col-span-2 md:col-span-1">
-            <h3 className="text-white font-bold text-lg mb-4">Casi Cinco ⭐</h3>
+            <img 
+              src="/images/casi_cinco_white.png" 
+              alt="Casi Cinco"
+              className="h-8 w-auto mb-4"
+            />
             <p className="text-sm text-gray-400">
               Los mejores lugares de España con mínimo 4.7★ de valoración.
             </p>
