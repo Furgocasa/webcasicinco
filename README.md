@@ -79,9 +79,9 @@ git push origin main
 ### 💡 Sistemas Principales:
 - [CHATBOT_TIO_VIAJERO.md](CHATBOT_TIO_VIAJERO.md) - Chatbot IA
 - [SISTEMA_FILTRADO.md](SISTEMA_FILTRADO.md) - Filtros avanzados
-- [SISTEMA_MONETIZACION.md](SISTEMA_MONETIZACION.md) - Stripe
-- [IMPLEMENTAR_TRACKING.md](IMPLEMENTAR_TRACKING.md) - Analytics
-- [scripts/README_SOCIAL_MEDIA.md](scripts/README_SOCIAL_MEDIA.md) - Redes Sociales
+- **[SISTEMA_MONETIZACION.md](SISTEMA_MONETIZACION.md)** - ✨ Trial 30 días + Stripe (v5.0)
+- **[SISTEMA_REDES_SOCIALES.md](SISTEMA_REDES_SOCIALES.md)** - 📱 Instagram, Facebook, Twitter (v2.0)
+- [scripts/README_SOCIAL_MEDIA.md](scripts/README_SOCIAL_MEDIA.md) - Scripts de scraping
 
 ### 📊 Analytics:
 - Dashboard de estadísticas: `/admin/estadisticas`

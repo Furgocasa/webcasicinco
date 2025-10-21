@@ -1,14 +1,14 @@
 # 💰 Sistema de Monetización - Casi Cinco
 
-**Versión:** 4.0.0  
-**Fecha:** 12 de Octubre de 2025  
-**Estado:** ✅ Implementado
+**Versión:** 5.0.0  
+**Fecha:** 21 de Octubre de 2025  
+**Estado:** ✅ Implementado y Testeado
 
 ---
 
 ## 🎯 Modelo de Negocio
 
-Casi Cinco utiliza un modelo **freemium con trial de 30 días**.
+Casi Cinco utiliza un modelo **freemium con trial de 30 días SIN TARJETA**.
 
 ---
 
@@ -37,27 +37,47 @@ Casi Cinco utiliza un modelo **freemium con trial de 30 días**.
 
 ### 3. 👤 **Usuarios Regulares**
 
-#### Fase 1: Trial de 30 días (REQUIERE TARJETA)
-- ✅ **Todos los nuevos usuarios** obtienen 30 días gratis
-- ✅ Acceso completo a todas las funciones
-- ⚠️ **Requiere tarjeta de crédito** para activar el trial
-- ✅ **No se cobra hasta el día 31** - puedes cancelar antes sin cargos
-- ✅ Banner informativo con días restantes
-- ✅ **Conversión automática** a plan seleccionado al terminar trial
+#### Fase 1: Trial de 30 días (SIN TARJETA) ✨
+- ✅ **Todos los nuevos usuarios** obtienen 30 días gratis automáticamente
+- ✅ Acceso completo a todas las funciones desde el día 1
+- ✨ **NO requiere tarjeta de crédito** para activar el trial
+- 🎉 **WelcomeModal en primer login** con explicación clara del trial
+- ✅ Banner informativo con días restantes (cambia de color según urgencia)
+- 💡 **Opción de suscribirse durante el trial** (respeta días restantes, no cobra hasta expiración)
 
-#### Fase 2: Después del Trial (Día 31)
+#### Fase 2: Trial en Curso (Días 1-30)
+- 🟢 **Banner verde** (días 30-21): "Te quedan X días de trial"
+- 🟡 **Banner amarillo** (días 20-11): Más visible
+- 🟠 **Banner naranja** (días 10-6): Urgencia media
+- 🔴 **Banner rojo** (días 5-1): Urgencia alta con CTA destacado
+- 💬 Usuario puede suscribirse en cualquier momento desde:
+  - WelcomeModal (primer login)
+  - Banner superior
+  - Página de perfil (tab "Suscripción")
+  - Página `/pricing`
+
+#### Fase 3: Trial Expirado (Día 31+)
+- 🔒 **PaywallModal aparece** bloqueando acceso a páginas premium
+- 🌫️ Contenido aparece borroso/grisáceo
+- 📢 Mensaje: "⏰ Tu Trial Ha Finalizado - Para seguir usando las herramientas..."
+- 🎯 **Conversión forzosa**: Usuario debe elegir plan o perder acceso
+
+#### Planes de Suscripción
+
 **Opción A - Premium Mensual:**
 - 💳 **2,99€/mes**
 - Cancela cuando quieras
 - Facturado mensualmente
 - Acceso total a todas las funciones
+- Renovación automática
 
-**Opción B - Premium Anual (Recomendado):**
+**Opción B - Premium Anual (⭐ Recomendado):**
 - 💳 **24,99€/año**
-- ✅ **Ahorra 30%** (2.08€/mes)
+- ✅ **Ahorra 40%** (2,08€/mes vs 2,99€)
 - ✅ Equivale a **10 meses al precio de 12**
 - Facturado anualmente
-- Acceso total + soporte prioritario
+- Acceso total + todas las funciones
+- Badge especial "Plan Anual" en perfil
 
 ---
 
@@ -65,9 +85,10 @@ Casi Cinco utiliza un modelo **freemium con trial de 30 días**.
 
 | Plan | Precio | Trial | Características |
 |------|--------|-------|-----------------|
-| **Gratis** (admin) | 0€ | - | Acceso perpetuo (marcado por admin) |
-| **Mensual** | 2,99€/mes | 30 días | Requiere tarjeta, cobra desde día 31 |
-| **Anual** | 24,99€/año | 30 días | 2,08€/mes, ahorra 10,89€, soporte prioritario |
+| **Gratis** (admin) | 0€ | - | Acceso perpetuo (marcado por admin), badge verde especial |
+| **Trial** | 0€ | 30 días | SIN tarjeta, acceso completo, automático al registrarse |
+| **Mensual** | 2,99€/mes | - | Renovación automática, cancela cuando quieras |
+| **Anual** | 24,99€/año | - | 2,08€/mes, ahorra 40% (10,68€/año), badge especial |
 
 ---
 
@@ -162,47 +183,121 @@ Marca un usuario como gratis (solo admin).
 
 ## 📊 Flujo de Usuario
 
-### Nuevo Usuario:
+### Nuevo Usuario (Experiencia Completa):
 ```
-1. Registro → Selecciona plan (Mensual o Anual)
-2. Introduce tarjeta en Stripe Checkout
-3. Trial de 30 días comienza (sin cobro)
-4. Usa mapa/chatbot/rutas gratis por 30 días
-5. Banner muestra días restantes
-6. Día 7 → Advertencia "quedan 23 días de trial"
-7. Día 31 → Stripe cobra automáticamente 2,99€ o 24,99€
-8. Si cancela antes del día 31 → No se cobra nada
+1. Registro → Email/contraseña o Google OAuth
+2. ✨ Trial de 30 días comienza AUTOMÁTICAMENTE (sin tarjeta)
+3. Primer Login → WelcomeModal aparece:
+   "🎉 ¡Acabas de Iniciar tu Trial Gratuito!"
+   - Explica 30 días sin tarjeta
+   - Muestra opciones de planes (opcional suscribirse ya)
+   - Botón "Empezar a Explorar" para cerrar modal
+4. Días 1-30 → Usa mapa/chatbot/rutas gratis
+5. Banner superior muestra días restantes (color según urgencia)
+6. Puede suscribirse en cualquier momento:
+   - Si se suscribe en día 10 → Trial respetado, cobra en día 31
+   - Introduce tarjeta en Stripe
+   - Estado cambia a "Premium en Trial"
+7. Día 31 → Si NO se suscribió:
+   - PaywallModal aparece (no se puede cerrar)
+   - Contenido bloqueado/borroso
+   - Debe elegir plan para continuar
+8. Después de suscribirse → Acceso total permanente
 ```
 
-### Usuario Existente (sin trial):
+### Usuario con Trial Activo:
 ```
-1. Login → Verificar suscripción
-2. Si no tiene → Paywall modal
-3. Suscribirse o quedarse sin acceso
+1. Login → Banner muestra días restantes
+2. Acceso completo a todo
+3. En perfil → Tab "Suscripción":
+   - Ver días restantes
+   - Fecha de expiración
+   - Botón "Suscribirse Ahora"
+   - Info sobre planes
+4. Puede explorar libremente sin presión
+```
+
+### Usuario con Trial Expirado (sin suscripción):
+```
+1. Login → PaywallModal aparece inmediatamente
+2. No puede cerrar el modal
+3. Contenido detrás aparece borroso
+4. Debe elegir plan:
+   - Mensual 2,99€/mes
+   - Anual 24,99€/año
+5. Al suscribirse → Modal desaparece, acceso restaurado
+```
+
+### Usuario Premium (Suscrito):
+```
+1. Login → Acceso total sin restricciones
+2. Sin banners de trial
+3. En perfil → Tab "Suscripción":
+   - Ver plan actual (Mensual/Anual)
+   - Fecha próxima renovación
+   - Monto a cobrar
+   - Botón "Gestionar Suscripción" (abre Stripe Portal)
+   - Botón "Cambiar de Plan" (Mensual ↔ Anual)
+   - Info: "Al cancelar: No se devuelve dinero, no nuevos cargos"
+4. Puede cancelar desde Stripe Portal:
+   - Acceso hasta fin del período pagado
+   - Luego vuelve a paywall
 ```
 
 ### Usuario Gratis (marcado por admin):
 ```
-1. Login → Acceso total
-2. Sin límites de tiempo
-3. Sin paywall nunca
+1. Login → Acceso total perpetuo
+2. En perfil → Tarjeta verde brillante:
+   "🎁 Usuario Gratis (Cortesía)"
+   Badge: "⭐ GRATIS PARA SIEMPRE"
+   "✨ Acceso gratuito permanente otorgado por el administrador"
+3. Sin banners, sin paywall, nunca
+4. Sin límites de tiempo
 ```
 
 ---
 
 ## 🎨 UX del Paywall
 
-### Banner de Trial:
-- 🟢 **30-8 días:** Banner azul/púrpura
-- 🟠 **7-1 días:** Banner naranja/rojo (advertencia)
-- ⚪ **0 días:** Banner oculto, solo paywall modal
+### WelcomeModal (Primer Login):
+- 🎉 **Aparece automáticamente** en primer login tras registro
+- 🎨 **Diseño elegante** con gradiente indigo-purple
+- 📝 **Mensaje claro:**
+  - "¡Acabas de Iniciar tu Trial Gratuito!"
+  - "30 días sin tarjeta de crédito"
+  - Explica qué puede hacer
+- 📦 **3 opciones presentadas:**
+  - Trial Gratuito (30 días) → Botón: "Empezar a Explorar"
+  - Plan Mensual (2,99€/mes)
+  - Plan Anual (24,99€/año - Ahorra 40%)
+- ✅ **Suscripción opcional** inmediata (respeta trial)
+- 🚪 **Se puede cerrar** fácilmente
+- 💾 **No vuelve a aparecer** (localStorage)
 
-### Paywall Modal:
-- **Diseño elegante** con gradientes
-- **2 planes** lado a lado
-- **Plan anual destacado** con badge "Ahorra 30%"
-- **Botón "Seguir explorando"** si está en trial
-- **Redirección a /pricing** si no tiene acceso
+### TrialBanner (Durante Trial):
+- 📍 **Posición:** Fixed top, debajo del header
+- 🎨 **Color dinámico según días:**
+  - 🟢 Verde (30-21 días): Tranquilo
+  - 🟡 Amarillo (20-11 días): Atención
+  - 🟠 Naranja (10-6 días): Advertencia
+  - 🔴 Rojo (5-1 días): Urgencia
+- 📝 **Texto:** "⏰ Te quedan X días de trial"
+- 🔘 **Botón CTA:** "Suscríbete Ahora" (visible siempre)
+- 📱 **Responsive:** Se adapta a móvil
+
+### PaywallModal (Trial Expirado):
+- 🔒 **Aparece automáticamente** al expirar trial
+- ❌ **No se puede cerrar** (fuerza conversión)
+- 🌫️ **Backdrop oscuro** con blur del contenido
+- 📢 **Mensaje claro:**
+  - "⏰ Tu Trial Ha Finalizado"
+  - "Para poder seguir usando las herramientas, debes elegir uno de estos planes de suscripción:"
+- 📦 **2 planes lado a lado:**
+  - Mensual: 2,99€/mes
+  - Anual: 24,99€/año (Badge: "Ahorra 40%")
+- 🎨 **Diseño elegante** con gradientes indigo-purple
+- 🔘 **Botones grandes** de suscripción
+- 💳 **Redirige a Stripe** al hacer click
 
 ---
 
@@ -343,53 +438,107 @@ WHERE id = 'user-uuid';
 ## 📚 Archivos del Sistema
 
 ### Base de Datos:
-- `supabase/migrations/add_trial_and_free_users.sql` - Migración completa
+- `supabase/migrations/001_add_trial_system.sql` - Migración completa con trial automático
 
 ### Hooks:
-- `lib/hooks/useUserAccess.ts` - Hook principal de acceso
+- `lib/hooks/useUserAccess.ts` - Hook principal de acceso (hasAccess, isInTrial, etc.)
+- `lib/hooks/useAuth.ts` - Hook de autenticación
 
-### Componentes:
-- `components/auth/AccessGuard.tsx` - Guardia de acceso
-- `components/auth/PaywallModal.tsx` - Modal de suscripción
-- `components/layout/TrialBanner.tsx` - Banner de trial
+### Componentes (✅ Actualizados Oct 2025):
+- `components/auth/WelcomeModal.tsx` - ✨ Modal de bienvenida (primer login)
+- `components/auth/PaywallModal.tsx` - 🔒 Modal al expirar trial
+- `components/auth/AccessGuard.tsx` - 🛡️ Guardia de acceso a páginas premium
+- `components/layout/TrialBanner.tsx` - ⏰ Banner con días restantes
+
+### Páginas (✅ Actualizadas):
+- `app/(public)/registro/page.tsx` - Página de registro (NO modificada)
+- `app/(public)/perfil/page.tsx` - ✅ Perfil con tab "Suscripción" mejorado
+- `app/(public)/pricing/page.tsx` - Página de planes
 
 ### APIs:
-- `app/api/user/access/route.ts` - Verificar acceso
-- `app/api/admin/users/set-free/route.ts` - Marcar como gratis
+- `app/api/user/access/route.ts` - Verificar acceso del usuario
+- `app/api/stripe/create-checkout/route.ts` - Crear sesión de Stripe (respeta trial)
+- `app/api/stripe/create-portal/route.ts` - Portal de gestión de Stripe
+- `app/api/stripe/webhook/route.ts` - Webhooks de Stripe
 
 ### Configuración:
-- `lib/stripe/plans.ts` - Planes y precios
+- `lib/stripe/client.ts` - Cliente de Stripe con soporte trial
+- `.env.local` - Variables de entorno (Stripe keys)
 
 ---
 
 ## ✅ Checklist de Implementación
 
+### Backend y Base de Datos:
 - [x] Migración SQL de base de datos
-- [x] Funciones SQL (trial, acceso, marcar gratis)
-- [x] Hook useUserAccess
-- [x] AccessGuard component
-- [x] PaywallModal component
-- [x] TrialBanner component
-- [x] API de verificación de acceso
-- [x] API para marcar usuarios gratis
+- [x] Funciones SQL (trial automático, acceso, marcar gratis)
+- [x] Trigger `handle_new_user()` (asigna trial al registrarse)
+- [x] Función `check_trial_expired()`
+- [x] Función `get_trial_days_remaining()`
+
+### Hooks y Utilidades:
+- [x] Hook `useUserAccess` (completo)
+- [x] Hook `useAuth` (integrado)
+
+### Componentes UI:
+- [x] `WelcomeModal` - Modal de bienvenida mejorado
+- [x] `PaywallModal` - Modal al expirar trial actualizado
+- [x] `TrialBanner` - Banner con colores dinámicos
+- [x] `AccessGuard` - Protección de páginas
+
+### Páginas:
+- [x] `app/(public)/perfil/page.tsx` - Tab suscripción mejorado
+- [x] Usuario FREE visible con badge verde especial
+- [x] Info de cancelación clara
+- [x] Botón "Cambiar de Plan"
+- [x] Página de pricing (`/pricing`)
+
+### APIs y Stripe:
+- [x] API `/api/user/access`
+- [x] API `/api/stripe/create-checkout` (respeta trial)
+- [x] API `/api/stripe/create-portal`
+- [x] API `/api/stripe/webhook`
 - [x] Actualizar precios (2.99€/24.99€)
-- [ ] Integrar AccessGuard en /mapa
-- [ ] Integrar AccessGuard en /ruta  
-- [ ] Integrar TrialBanner en layout
-- [ ] Actualizar página de usuarios (botón marcar gratis)
-- [ ] Testing completo del flujo
+- [x] Lógica trial en Stripe
+
+### Integración:
+- [x] AccessGuard en `/mapa`
+- [x] AccessGuard en `/ruta`
+- [x] AccessGuard en `/chatbot`
+- [x] TrialBanner en layout principal
+- [x] WelcomeModal en layout
+
+### Testing y Deploy:
+- [x] Testing local del flujo completo
+- [x] Commit y push a repositorio
+- [ ] **Deploy a producción** (pendiente)
+- [ ] **Configurar Stripe producción** (pendiente)
+- [ ] Testing en producción
 
 ---
 
 ## 🚀 Próximos Pasos
 
-1. Ejecutar migración SQL en Supabase
-2. Integrar AccessGuard en páginas protegidas
-3. Añadir TrialBanner al layout principal
-4. Actualizar panel de admin de usuarios
-5. Crear página de pricing mejorada
-6. Configurar Stripe con nuevos precios
-7. Testing end-to-end del flujo completo
+### INMEDIATO (Hoy):
+1. ✅ **Deploy a producción** (AWS Amplify)
+2. 🔧 **Configurar Stripe en producción:**
+   - Crear productos (Mensual 2,99€ / Anual 24,99€)
+   - Configurar webhook
+   - Añadir API keys a variables de entorno
+3. 🧪 **Testing end-to-end en producción:**
+   - Registrar usuario de prueba
+   - Verificar WelcomeModal
+   - Probar trial de 30 días
+   - Simular expiración de trial
+   - Verificar PaywallModal
+   - Probar suscripción completa
+
+### CORTO PLAZO (Esta semana):
+4. 📊 **Monitorear métricas:**
+   - Tasa de registro
+   - Conversión trial → pago
+   - Tiempo promedio hasta suscripción
+5. 🎨 **Ajustes UX** según feedback inicial
 
 ---
 
