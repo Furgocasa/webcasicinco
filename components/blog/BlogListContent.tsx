@@ -27,13 +27,7 @@ const getCategoryLabel = (category: string) => {
   return labels[category] || category;
 };
 
-const buildPhotoUrl = (photoReference: string, maxwidth: number = 800): string => {
-  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-  if (!apiKey) {
-    return '';
-  }
-  return `https://maps.googleapis.com/maps/api/place/photo?maxwidth=${maxwidth}&photo_reference=${photoReference}&key=${apiKey}`;
-};
+// Ya no necesitamos buildPhotoUrl porque usamos URLs directas de Supabase
 
 type BlogListContentProps = {
   initialPosts: BlogPost[];
@@ -138,33 +132,29 @@ export function BlogListContent({ initialPosts }: BlogListContentProps) {
             {posts.length > 0 ? (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
                 {posts.map((post) => {
-                  let featuredImage = post.featured_image_url;
-                  if (post.first_place_photo) {
-                    if (post.first_place_photo_is_url) {
-                      featuredImage = post.first_place_photo;
-                    } else {
-                      featuredImage = buildPhotoUrl(post.first_place_photo, 800);
-                    }
-                  }
+                  // Usar la foto del primer lugar (URL directa de Supabase Storage)
+                  const featuredImage = post.first_place_photo || post.featured_image_url || '/images/placeholder.jpg';
 
                   return (
                     <Link key={post.id} href={`/blog/${post.slug}`}>
                       <Card className="overflow-hidden hover:shadow-2xl transition-all duration-300 h-full flex flex-col cursor-pointer">
                         {/* Imagen */}
-                        {featuredImage && (
-                          <div className="relative h-48 overflow-hidden">
-                            <img
-                              src={featuredImage}
-                              alt={post.title}
-                              className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-500"
-                            />
-                            <div className="absolute top-3 left-3">
-                              <span className="bg-indigo-600 text-white px-3 py-1 rounded-full text-xs font-medium">
-                                {getCategoryLabel(post.category)}
-                              </span>
-                            </div>
+                        <div className="relative h-48 overflow-hidden bg-gray-200">
+                          <img
+                            src={featuredImage}
+                            alt={post.title}
+                            className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-500"
+                            onError={(e) => {
+                              // Fallback si la imagen no carga
+                              e.currentTarget.src = '/images/placeholder.jpg';
+                            }}
+                          />
+                          <div className="absolute top-3 left-3">
+                            <span className="bg-indigo-600 text-white px-3 py-1 rounded-full text-xs font-medium">
+                              {getCategoryLabel(post.category)}
+                            </span>
                           </div>
-                        )}
+                        </div>
 
                         {/* Contenido */}
                         <div className="p-6 flex-1 flex flex-col">

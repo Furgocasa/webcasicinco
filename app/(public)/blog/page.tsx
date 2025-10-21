@@ -34,6 +34,54 @@ export default async function BlogPage() {
     .lte('created_at', new Date().toISOString())
     .order('created_at', { ascending: false });
 
+  // Enriquecer cada post con la foto del primer lugar de su Top 10
+  const enrichedPosts = await Promise.all(
+    (posts || []).map(async (post) => {
+      // Obtener el primer lugar (mejor valorado) para este post
+      let placesQuery = supabase
+        .from('places')
+        .select('photo_urls, photos')
+        .eq('category', post.category)
+        .eq('published', true)
+        .gte('rating', 4.7)
+        .order('rating', { ascending: false})
+        .order('review_count', { ascending: false })
+        .limit(1);
+
+      // Filtrar por ubicación
+      if (post.location_type === 'city') {
+        placesQuery = placesQuery.eq('city', post.location);
+      } else if (post.location_type === 'province') {
+        placesQuery = placesQuery.eq('province', post.location);
+      } else if (post.location_type === 'community') {
+        placesQuery = placesQuery.eq('community', post.location);
+      }
+
+      const { data: places } = await placesQuery;
+      const firstPlace = places && places.length > 0 ? places[0] : null;
+
+      // Obtener URL de foto del primer lugar (priorizar Supabase)
+      let photoUrl = null;
+      if (firstPlace) {
+        // Priorizar photo_urls de Supabase Storage
+        if (firstPlace.photo_urls && firstPlace.photo_urls.length > 0) {
+          photoUrl = firstPlace.photo_urls[0]; // URL completa de Supabase
+        }
+        // Fallback a photos (pero ya no usaremos Google Maps API)
+        else if (firstPlace.photos && firstPlace.photos.length > 0) {
+          // Los lugares deberían tener photo_urls en Supabase Storage
+          photoUrl = null; // No usar Google Maps API
+        }
+      }
+
+      return {
+        ...post,
+        first_place_photo: photoUrl,
+        first_place_photo_is_url: true // Siempre es URL de Supabase
+      };
+    })
+  );
+
   // ✅ 3. Schema.org para el listado del blog
   const blogSchema = {
     "@context": "https://schema.org",
@@ -56,8 +104,8 @@ export default async function BlogPage() {
     "@context": "https://schema.org",
     "@type": "ItemList",
     "name": "Artículos del Blog",
-    "numberOfItems": posts?.length || 0,
-    "itemListElement": posts?.map((post, index) => ({
+    "numberOfItems": enrichedPosts?.length || 0,
+    "itemListElement": enrichedPosts?.map((post, index) => ({
       "@type": "ListItem",
       "position": index + 1,
       "item": {
@@ -65,7 +113,7 @@ export default async function BlogPage() {
         "headline": post.title,
         "url": `https://casicinco.com/blog/${post.slug}`,
         "datePublished": post.created_at,
-        "image": post.featured_image_url || post.first_place_photo
+        "image": post.first_place_photo || post.featured_image_url
       }
     })) || []
   };
@@ -83,7 +131,7 @@ export default async function BlogPage() {
       />
       
       {/* ✅ Client Component con UI interactiva */}
-      <BlogListContent initialPosts={posts || []} />
+      <BlogListContent initialPosts={enrichedPosts || []} />
     </>
   );
 }

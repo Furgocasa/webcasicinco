@@ -28,25 +28,13 @@ const getCategoryEmoji = (category: string) => {
   return emojis[category] || '📍';
 };
 
-// Helper para construir URL de foto de Google Places
-const buildPhotoUrl = (photoReference: string, maxwidth: number = 1200): string => {
-  return `https://maps.googleapis.com/maps/api/place/photo?maxwidth=${maxwidth}&photo_reference=${photoReference}&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`;
-};
-
 type BlogPostContentProps = {
   post: BlogPostWithPlaces;
 };
 
 export function BlogPostContent({ post }: BlogPostContentProps) {
-  // Usar la foto del primer lugar si existe
-  let featuredImage = post.featured_image_url;
-  if (post.first_place_photo) {
-    if (post.first_place_photo_is_url) {
-      featuredImage = post.first_place_photo;
-    } else {
-      featuredImage = buildPhotoUrl(post.first_place_photo, 1200);
-    }
-  }
+  // Usar la foto del primer lugar (URL directa de Supabase Storage)
+  const featuredImage = post.first_place_photo || post.featured_image_url;
 
   return (
     <>
@@ -101,15 +89,17 @@ export function BlogPostContent({ post }: BlogPostContentProps) {
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto">
               {/* Imagen destacada */}
-              {featuredImage && (
-                <div className="mb-12 rounded-2xl overflow-hidden shadow-xl">
-                  <img 
-                    src={featuredImage} 
-                    alt={post.title}
-                    className="w-full h-auto object-cover max-h-[500px]"
-                  />
-                </div>
-              )}
+              <div className="mb-12 rounded-2xl overflow-hidden shadow-xl bg-gray-200">
+                <img 
+                  src={featuredImage || '/images/placeholder.jpg'} 
+                  alt={post.title}
+                  className="w-full h-auto object-cover max-h-[500px]"
+                  onError={(e) => {
+                    // Fallback si la imagen no carga
+                    e.currentTarget.src = '/images/placeholder.jpg';
+                  }}
+                />
+              </div>
 
               {/* Intro */}
               <div className="prose prose-lg max-w-none mb-12">

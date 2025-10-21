@@ -28,10 +28,23 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   }
 
-  // Construir URL de imagen destacada
-  let ogImage = post.featured_image_url;
-  if (post.first_place_photo && post.first_place_photo_is_url) {
-    ogImage = post.first_place_photo;
+  // Construir URL de imagen destacada desde el primer lugar
+  let ogImage = post.first_place_photo || post.featured_image_url;
+  
+  // Si no tiene, intentar obtener del primer lugar de la ubicación
+  if (!ogImage) {
+    const { data: places } = await supabase
+      .from('places')
+      .select('photo_urls')
+      .eq('category', post.category)
+      .eq('published', true)
+      .or(`city.eq.${post.location},province.eq.${post.location}`)
+      .order('rating', { ascending: false })
+      .limit(1);
+    
+    if (places && places.length > 0 && places[0].photo_urls && places[0].photo_urls.length > 0) {
+      ogImage = places[0].photo_urls[0];
+    }
   }
   
   return {
@@ -104,8 +117,18 @@ export default async function BlogPostPage({ params }: Props) {
     .order('review_count', { ascending: false })
     .limit(10);
 
+  // Obtener URL de foto del primer lugar (priorizar Supabase)
+  let firstPlacePhotoUrl = post.first_place_photo;
+  if (!firstPlacePhotoUrl && places && places.length > 0) {
+    const firstPlace = places[0];
+    if (firstPlace.photo_urls && firstPlace.photo_urls.length > 0) {
+      firstPlacePhotoUrl = firstPlace.photo_urls[0]; // URL completa de Supabase
+    }
+  }
+
   const postWithPlaces: BlogPostWithPlaces = {
     ...post,
+    first_place_photo: firstPlacePhotoUrl,
     places: places || [],
   };
 
