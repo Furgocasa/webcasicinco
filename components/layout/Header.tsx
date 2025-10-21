@@ -33,11 +33,14 @@ export default function Header() {
           {/* Logo */}
           <Link 
             href="/" 
-            className="flex items-center space-x-2 relative z-10 touch-manipulation"
+            className="flex items-center relative z-10 touch-manipulation"
             style={{ touchAction: 'manipulation' }}
           >
-            <span className="text-base sm:text-xl font-bold text-gray-900">Casi Cinco</span>
-            <span className="text-2xl font-bold text-indigo-600">⭐</span>
+            <img 
+              src="/images/casi_cinco_dark.png" 
+              alt="Casi Cinco"
+              className="h-8 sm:h-10 w-auto"
+            />
           </Link>
 
           {/* Desktop Navigation */}
