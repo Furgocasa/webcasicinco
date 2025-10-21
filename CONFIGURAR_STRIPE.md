@@ -1,7 +1,8 @@
 # 💳 Configurar Stripe - Guía Paso a Paso
 
 **Fecha:** 21 Octubre 2025  
-**Tiempo estimado:** 30-40 minutos
+**Tiempo estimado:** 30-40 minutos  
+**Entorno:** AWS Amplify (Producción) + Local (Desarrollo)
 
 ---
 
@@ -14,8 +15,30 @@ Configurar Stripe para aceptar pagos de suscripciones mensuales (2,99€/mes) y 
 ## 📋 Pre-requisitos
 
 - [ ] Cuenta de Stripe (https://dashboard.stripe.com/register)
-- [ ] Acceso al proyecto en local
-- [ ] Archivo `.env.local` creado
+- [ ] Acceso a AWS Amplify Console
+- [ ] (Opcional) Desarrollo local: Archivo `.env.local`
+
+---
+
+## 🏗️ Entornos de Configuración
+
+Esta guía cubre **dos entornos**:
+
+### **🌍 PRODUCCIÓN (AWS Amplify)** - ⭐ PRINCIPAL
+- **Variables:** Se configuran en AWS Amplify Console → Environment variables
+- **Requiere:** Redeploy después de cada cambio
+- **URL:** https://casicinco.com
+- **Stripe:** Usa keys de **producción** (`sk_live_...`)
+
+### **💻 DESARROLLO LOCAL** - Opcional
+- **Variables:** Se configuran en archivo `.env.local` (no se sube a Git)
+- **Requiere:** Reiniciar servidor (`npm run dev`)
+- **URL:** http://localhost:3000
+- **Stripe:** Usa keys de **test** (`sk_test_...`)
+
+**💡 IMPORTANTE:** 
+- Para que la app en **producción** funcione, debes configurar las variables en **AWS Amplify**
+- El archivo `.env.local` es solo para desarrollo local
 
 ---
 
@@ -58,9 +81,24 @@ sk_test_51xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 **⚠️ IMPORTANTE:** Nunca compartas tu Secret Key públicamente
 
-### 2.3 Añadir a .env.local
+### 2.3 Añadir Variables de Entorno
 
-Crea o edita el archivo `.env.local` en la raíz del proyecto:
+#### **🌍 PRODUCCIÓN (AWS Amplify):**
+
+1. Ve a: **AWS Amplify Console** → Tu App → **Environment variables**
+2. Añade estas variables:
+
+| Key | Value |
+|-----|-------|
+| `STRIPE_SECRET_KEY` | `sk_test_tu_clave_secreta_aqui` |
+| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | `pk_test_tu_clave_publica_aqui` |
+
+3. Click **Save**
+4. **Redeploy** la app para que tome las nuevas variables
+
+#### **💻 DESARROLLO LOCAL (Opcional):**
+
+Si quieres probar en local, crea `.env.local` en la raíz del proyecto:
 
 ```bash
 # Stripe Keys (Test Mode)
@@ -113,9 +151,24 @@ Dentro del producto recién creado:
    - Verás algo como: `price_9J8I7H6G5F4E3D2C1B0A`
    - Este es tu `STRIPE_PREMIUM_YEARLY_PRICE_ID`
 
-### 3.5 Actualizar .env.local
+### 3.5 Añadir Price IDs a Variables de Entorno
 
-Añade los Price IDs al archivo `.env.local`:
+#### **🌍 PRODUCCIÓN (AWS Amplify):**
+
+1. **AWS Amplify Console** → Tu App → **Environment variables**
+2. Añade estas variables:
+
+| Key | Value |
+|-----|-------|
+| `STRIPE_PREMIUM_MONTHLY_PRICE_ID` | `price_1A2B3C4D5E6F7G8H9I0J` |
+| `STRIPE_PREMIUM_YEARLY_PRICE_ID` | `price_9J8I7H6G5F4E3D2C1B0A` |
+
+3. Click **Save**
+4. **Redeploy** la app
+
+#### **💻 DESARROLLO LOCAL (Opcional):**
+
+Añade al archivo `.env.local`:
 
 ```bash
 # IDs de Productos Stripe
@@ -146,11 +199,25 @@ Un webhook permite que Stripe notifique a tu aplicación cuando ocurren eventos 
    - `invoice.payment_failed`
 5. Click **Add endpoint**
 
-### 4.3 Copiar Webhook Secret
+### 4.3 Añadir Webhook Secret
 
 1. Dentro del webhook creado, verás: **Signing secret**
 2. Click **Reveal** y copia el secret
-3. Añade a `.env.local`:
+
+#### **🌍 PRODUCCIÓN (AWS Amplify):**
+
+3. **AWS Amplify Console** → Tu App → **Environment variables**
+4. Añade:
+
+| Key | Value |
+|-----|-------|
+| `STRIPE_WEBHOOK_SECRET` | `whsec_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx` |
+
+5. Click **Save** y **Redeploy**
+
+#### **💻 DESARROLLO LOCAL (Opcional):**
+
+Añade a `.env.local`:
 
 ```bash
 STRIPE_WEBHOOK_SECRET=whsec_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
@@ -177,9 +244,25 @@ stripe listen --forward-to localhost:3000/api/stripe/webhook
 
 ## ✅ PASO 5: Verificar Configuración
 
-### 5.1 Archivo .env.local Completo
+### 5.1 Variables de Entorno Completas
 
-Tu `.env.local` debe tener estas variables Stripe:
+#### **🌍 PRODUCCIÓN (AWS Amplify):**
+
+Verifica que tienes **todas** estas variables en AWS Amplify:
+
+| Variable | Descripción | Ejemplo |
+|----------|-------------|---------|
+| `STRIPE_SECRET_KEY` | Clave secreta Stripe | `sk_test_51A2B3C4D...` |
+| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Clave pública Stripe | `pk_test_51A2B3C4D...` |
+| `STRIPE_PREMIUM_MONTHLY_PRICE_ID` | ID precio mensual | `price_1A2B3C4D...` |
+| `STRIPE_PREMIUM_YEARLY_PRICE_ID` | ID precio anual | `price_9J8I7H6G...` |
+| `STRIPE_WEBHOOK_SECRET` | Secret del webhook | `whsec_xxxxxxxxx` |
+
+**Después de añadir/modificar variables → REDEPLOY obligatorio**
+
+#### **💻 DESARROLLO LOCAL:**
+
+Tu `.env.local` debe tener:
 
 ```bash
 # Stripe Configuration
@@ -190,11 +273,9 @@ STRIPE_PREMIUM_YEARLY_PRICE_ID=price_9J8I7H6G...
 STRIPE_WEBHOOK_SECRET=whsec_xxxxxxxxx
 ```
 
-### 5.2 Reiniciar Servidor de Desarrollo
-
+Reinicia el servidor:
 ```bash
-# Detener el servidor (Ctrl+C)
-# Iniciar nuevamente
+# Ctrl+C para detener
 npm run dev
 ```
 
@@ -301,10 +382,17 @@ SELECT * FROM subscriptions WHERE user_id = 'uuid-del-usuario';
 **Causa:** Falta `STRIPE_PREMIUM_MONTHLY_PRICE_ID` o `STRIPE_PREMIUM_YEARLY_PRICE_ID`
 
 **Solución:**
+
+**En Producción (AWS Amplify):**
 1. Verifica que creaste los precios en Stripe
 2. Copia los Price IDs correctos
-3. Añádelos a `.env.local`
-4. Reinicia el servidor
+3. AWS Amplify Console → Environment variables → Añade las variables
+4. **Redeploy** la aplicación
+5. Espera 5-10 minutos a que complete el deploy
+
+**En Local:**
+1. Añade las variables a `.env.local`
+2. Reinicia el servidor (`npm run dev`)
 
 ---
 
@@ -323,9 +411,19 @@ SELECT * FROM subscriptions WHERE user_id = 'uuid-del-usuario';
 **Causa:** Puede ser que falte `STRIPE_SECRET_KEY` o esté mal configurada
 
 **Solución:**
+
+**En Producción (AWS Amplify):**
+1. AWS Amplify Console → Environment variables
+2. Verifica que `STRIPE_SECRET_KEY` existe
+3. Verifica que empieza con `sk_test_` (test) o `sk_live_` (producción)
+4. Si la modificaste, haz **Redeploy**
+5. Revisa logs: AWS Amplify → Tu App → Build logs
+
+**En Local:**
 1. Verifica que `STRIPE_SECRET_KEY` existe en `.env.local`
-2. Verifica que empieza con `sk_test_` (modo test) o `sk_live_` (producción)
-3. Revisa la consola del servidor para más detalles
+2. Verifica el formato de la key
+3. Reinicia el servidor
+4. Revisa la consola del servidor para más detalles
 
 ---
 
