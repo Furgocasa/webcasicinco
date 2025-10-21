@@ -512,7 +512,7 @@ export default function HomePage() {
                   </li>
                   <li className="flex items-start gap-2">
                     <Check className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
-                    <span className="text-sm text-gray-700">No se cobra hasta día 31</span>
+                    <span className="text-sm text-gray-700">Sin tarjeta hasta el día 31</span>
                   </li>
                 </ul>
                 <Button 
@@ -609,15 +609,15 @@ export default function HomePage() {
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="bg-white p-6 rounded-lg border border-gray-200">
                   <h4 className="font-semibold text-gray-900 mb-2">¿Necesito tarjeta para el trial?</h4>
-                  <p className="text-sm text-gray-600">Sí. Necesitas tarjeta para los 30 días de prueba, pero no cobramos hasta el día 31. Cancela antes sin cargos.</p>
+                  <p className="text-sm text-gray-600">No. Los 30 días de prueba son 100% gratis sin necesidad de tarjeta. La introduces solo cuando decidas suscribirte.</p>
                 </div>
                 <div className="bg-white p-6 rounded-lg border border-gray-200">
                   <h4 className="font-semibold text-gray-900 mb-2">¿Puedo cancelar cuando quiera?</h4>
                   <p className="text-sm text-gray-600">Sí. Cancela en cualquier momento desde tu perfil. Si es antes del día 31, no se cobra nada.</p>
                 </div>
                 <div className="bg-white p-6 rounded-lg border border-gray-200">
-                  <h4 className="font-semibold text-gray-900 mb-2">¿Cuándo se cobra?</h4>
-                  <p className="text-sm text-gray-600">Después de 30 días de prueba. Si no cancelas, se cobra automáticamente 2,99€/mes o 24,99€/año según tu plan.</p>
+                  <h4 className="font-semibold text-gray-900 mb-2">¿Cuándo añado mi tarjeta?</h4>
+                  <p className="text-sm text-gray-600">Cuando decidas suscribirte después del trial. Puedes hacerlo en cualquier momento durante los 30 días o al final del período de prueba.</p>
                 </div>
                 <div className="bg-white p-6 rounded-lg border border-gray-200">
                   <h4 className="font-semibold text-gray-900 mb-2">¿Por qué el plan anual es mejor?</h4>
