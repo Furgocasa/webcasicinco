@@ -395,7 +395,7 @@ export default function MetodologiaPage() {
         </section>
 
         {/* TRANSPARENCIA TOTAL */}
-        <section className="py-20 bg-gradient-to-br from-indigo-900 to-purple-900 text-white">
+        <section className="py-20 bg-[#002196] text-white">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto text-center">
               <h2 className="text-3xl md:text-4xl font-bold mb-6">
@@ -439,7 +439,7 @@ export default function MetodologiaPage() {
         </section>
 
         {/* CTA FINAL */}
-        <section className="py-24 bg-gradient-to-r from-purple-600 to-pink-600 text-white">
+        <section className="py-24 bg-gradient-to-r from-[#002196] to-blue-800 text-white">
           <div className="container mx-auto px-4 text-center">
             <div className="max-w-3xl mx-auto">
               <h2 className="text-4xl font-bold mb-6">
@@ -452,7 +452,7 @@ export default function MetodologiaPage() {
                 <Link href="/mapa">
                   <Button 
                     size="lg"
-                    className="bg-white text-purple-600 hover:bg-gray-100 font-bold px-8 py-6"
+                    className="bg-[#ffd935] text-[#002196] hover:bg-[#e6c430] font-bold px-8 py-6"
                   >
                     Explorar el Mapa
                   </Button>
