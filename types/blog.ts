@@ -3,7 +3,7 @@ export interface BlogPost {
   slug: string;
   title: string;
   meta_description: string;
-  category: 'restaurante' | 'bar' | 'cafe' | 'hotel';
+  category: 'restaurante' | 'bar' | 'hotel';
   location: string;
   location_type: 'city' | 'province' | 'community';
   intro_text: string;

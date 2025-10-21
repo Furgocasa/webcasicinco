@@ -2,7 +2,7 @@
  * Tipos relacionados con lugares
  */
 
-export type PlaceCategory = 'restaurante' | 'hotel' | 'spa' | 'experiencia';
+export type PlaceCategory = 'restaurante' | 'bar' | 'hotel';
 
 // Tipos de Google Places API
 export interface GooglePlaceData {

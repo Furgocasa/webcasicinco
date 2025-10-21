@@ -22,7 +22,6 @@ const getCategoryEmoji = (category: string) => {
   const emojis: Record<string, string> = {
     restaurante: '🍽️',
     bar: '🍺',
-    cafe: '☕',
     hotel: '🏨'
   };
   return emojis[category] || '📍';

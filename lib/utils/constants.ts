@@ -6,7 +6,6 @@
 export const PLACE_CATEGORIES = [
   { value: 'restaurante', label: 'Restaurantes', icon: '🍽️' },
   { value: 'bar', label: 'Bares', icon: '🍺' },
-  { value: 'cafe', label: 'Cafeterías', icon: '☕' },
   { value: 'hotel', label: 'Hoteles', icon: '🏨' },
 ] as const;
 
@@ -14,7 +13,6 @@ export const PLACE_CATEGORIES = [
 export const CATEGORIES: Record<string, string> = {
   restaurante: 'Restaurantes',
   bar: 'Bares',
-  cafe: 'Cafeterías',
   hotel: 'Hoteles',
 };
 

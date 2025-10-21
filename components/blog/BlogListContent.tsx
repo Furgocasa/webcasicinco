@@ -11,7 +11,6 @@ const getCategoryEmoji = (category: string) => {
   const emojis: Record<string, string> = {
     restaurante: '🍽️',
     bar: '🍺',
-    cafe: '☕',
     hotel: '🏨'
   };
   return emojis[category] || '📍';
@@ -21,7 +20,6 @@ const getCategoryLabel = (category: string) => {
   const labels: Record<string, string> = {
     restaurante: 'Restaurantes',
     bar: 'Bares',
-    cafe: 'Cafeterías',
     hotel: 'Hoteles'
   };
   return labels[category] || category;
@@ -110,16 +108,6 @@ export function BlogListContent({ initialPosts }: BlogListContentProps) {
                   }`}
                 >
                   🍺 Bares
-                </button>
-                <button
-                  onClick={() => handleFilterChange('cafe')}
-                  className={`px-4 py-2 rounded-lg font-medium transition ${
-                    filter === 'cafe'
-                      ? 'bg-white text-indigo-600'
-                      : 'bg-white/20 backdrop-blur-sm hover:bg-white/30'
-                  }`}
-                >
-                  ☕ Cafeterías
                 </button>
               </div>
             </div>
