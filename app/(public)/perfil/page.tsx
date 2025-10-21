@@ -53,7 +53,7 @@ export default function PerfilPage() {
       const response = await fetch('/api/user/access');
       const data = await response.json();
       if (data.success) {
-        setAccessInfo(data);
+        setAccessInfo(data.access); // ✅ Guardar solo el objeto access, no todo el response
       }
     } catch (error) {
       console.error('Error cargando info de acceso:', error);
