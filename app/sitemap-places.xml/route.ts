@@ -58,7 +58,3 @@ ${places.map(place => {
     },
   });
 }
-
-// Revalidar cada hora
-export const revalidate = 3600;
-
