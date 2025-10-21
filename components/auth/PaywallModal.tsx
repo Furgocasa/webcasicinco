@@ -32,8 +32,8 @@ export default function PaywallModal() {
                 <Lock className="h-8 w-8" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold">Tu prueba ha finalizado</h2>
-                <p className="text-indigo-100 text-sm">Continúa explorando los mejores lugares</p>
+                <h2 className="text-3xl font-bold mb-2">⏰ Tu Trial Ha Finalizado</h2>
+                <p className="text-indigo-100 text-base">Para poder seguir usando las herramientas, debes elegir uno de estos planes de suscripción:</p>
               </div>
             </div>
           </div>

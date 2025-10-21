@@ -46,6 +46,32 @@ function fetchWebsite(url, timeout = 10000) {
   });
 }
 
+// Lista de palabras/patrones a excluir de Instagram
+const INSTAGRAM_BLACKLIST = [
+  'share', 'explore', 'rsrc.php', 'reel', 'tv', 'stories', 
+  'accounts', 'direct', 'p/', 'embed', 'api', 'static',
+  'oauth', 'login', 'signup', 'developer'
+];
+
+// Validar si un username de Instagram es válido
+function isValidInstagramUsername(username) {
+  if (!username || username.length < 2) return false;
+  
+  // Verificar contra blacklist
+  const lowerUsername = username.toLowerCase();
+  if (INSTAGRAM_BLACKLIST.some(blocked => lowerUsername.includes(blocked))) {
+    return false;
+  }
+  
+  // Solo debe contener letras, números, puntos y guiones bajos
+  if (!/^[a-zA-Z0-9._]+$/.test(username)) return false;
+  
+  // No debe ser solo números o un solo carácter
+  if (/^\d+$/.test(username) || username.length === 1) return false;
+  
+  return true;
+}
+
 // Extraer URLs de redes sociales del HTML
 function extractSocialMedia(html, placeName) {
   const social = {
@@ -67,7 +93,7 @@ function extractSocialMedia(html, placeName) {
     const matches = html.matchAll(pattern);
     for (const match of matches) {
       const username = match[1];
-      if (username && !username.includes('share') && !username.includes('explore')) {
+      if (isValidInstagramUsername(username)) {
         social.instagram = `https://instagram.com/${username}`;
         break;
       }

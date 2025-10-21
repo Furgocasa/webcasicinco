@@ -10,6 +10,7 @@ export function WelcomeModal() {
   const router = useRouter();
   const [show, setShow] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [daysRemaining, setDaysRemaining] = useState(30);
 
   useEffect(() => {
     // Verificar si debe mostrar el modal
@@ -43,12 +44,22 @@ export function WelcomeModal() {
         return;
       }
 
-      // 2c. NO mostrar si ya tiene trial activo
+      // 2c. MOSTRAR si tiene trial activo y recién registrado (28-30 días restantes)
       if (trialEndsAt) {
         const trialEnd = new Date(trialEndsAt);
         const now = new Date();
-        if (trialEnd > now) {
-          // Trial activo: marcar como visto
+        const days = Math.max(0, Math.ceil((trialEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+        
+        setDaysRemaining(days);
+        
+        // Solo mostrar si es usuario recién registrado (28-30 días)
+        if (days >= 28 && days <= 30) {
+          setTimeout(() => setShow(true), 500);
+          return;
+        }
+        
+        // Si tiene menos de 28 días, ya no mostrar (ya vio el modal)
+        if (days < 28) {
           localStorage.setItem('hasSeenWelcome', 'true');
           return;
         }
@@ -89,13 +100,13 @@ export function WelcomeModal() {
     localStorage.setItem('hasSeenWelcome', 'true');
     
     try {
-      // Llamar a Stripe checkout SIN trial (trial se gestiona en Supabase)
+      // Llamar a Stripe checkout CON días restantes de trial (para respetar el trial de Supabase)
       const response = await fetch('/api/stripe/create-checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           planId, 
-          trialDays: 0 // ← IMPORTANTE: Sin trial en Stripe, ya se gestiona en Supabase
+          trialDays: daysRemaining // ✅ Respeta días restantes del trial de Supabase
         }),
       });
 
@@ -119,15 +130,26 @@ export function WelcomeModal() {
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
       <Card className="max-w-2xl w-full p-8 bg-white rounded-2xl shadow-2xl animate-in fade-in zoom-in duration-300">
-        <h2 className="text-3xl font-bold text-center mb-2 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-          ¡Bienvenido a Casi Cinco!
+        <h2 className="text-3xl font-bold text-center mb-3 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+          🎉 ¡Enhorabuena!
         </h2>
-        <p className="text-center text-gray-600 mb-8 text-lg">
-          Elige cómo quieres empezar:
+        <div className="text-center mb-6 space-y-2">
+          <p className="text-xl font-semibold text-gray-900">
+            Has iniciado tu periodo de prueba gratuito
+          </p>
+          <p className="text-gray-600">
+            Podrás utilizar la APP <strong>sin restricciones durante 30 días</strong>
+          </p>
+          <div className="inline-flex items-center gap-2 bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-medium">
+            ✓ Sin tarjeta de crédito · ✓ Sin cargos · ✓ Cancela cuando quieras
+          </div>
+        </div>
+        <p className="text-center text-gray-700 mb-6">
+          Transcurridos esos 30 días deberás elegir tu suscripción:
         </p>
 
         <div className="space-y-4">
-          {/* OPCIÓN 1: Trial Gratis 30 Días - DESTACADA */}
+          {/* OPCIÓN 1: Empezar con Trial - DESTACADA */}
           <button
             onClick={handleFreeTrial}
             disabled={loading}
@@ -140,19 +162,19 @@ export function WelcomeModal() {
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
                   <h3 className="text-xl font-bold text-gray-900">
-                    🎁 Prueba Gratis 30 Días
+                    Empezar Ahora con Trial
                   </h3>
                   <span className="bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full">
                     RECOMENDADO
                   </span>
                 </div>
                 <p className="text-gray-600 text-sm mb-3">
-                  Sin tarjeta · Sin compromiso · Acceso completo a todas las funciones
+                  Usa todas las funciones gratis durante 30 días · Ya está activado
                 </p>
                 <ul className="space-y-1 text-sm text-gray-700 mb-3">
                   <li className="flex items-center gap-2">
                     <span className="text-green-600">✓</span>
-                    <span>Mapa interactivo con 2,600+ lugares</span>
+                    <span>Mapa interactivo con 3,000+ lugares</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <span className="text-green-600">✓</span>
@@ -160,11 +182,11 @@ export function WelcomeModal() {
                   </li>
                   <li className="flex items-center gap-2">
                     <span className="text-green-600">✓</span>
-                    <span>Planificador de rutas</span>
+                    <span>Planificador de rutas personalizado</span>
                   </li>
                 </ul>
                 <div className="inline-flex items-center gap-2 bg-indigo-600 text-white px-5 py-2.5 rounded-lg font-medium text-sm">
-                  <span>Empezar Ahora</span>
+                  <span>Empezar a Explorar</span>
                   <span>→</span>
                 </div>
               </div>
@@ -183,10 +205,10 @@ export function WelcomeModal() {
               </div>
               <div className="flex-1">
                 <h3 className="text-lg font-bold text-gray-900 mb-1">
-                  ⚡ Premium Mensual
+                  ⚡ Suscribirme Ahora - Mensual
                 </h3>
                 <p className="text-gray-600 text-sm mb-2">
-                  2.99€/mes · Cancela cuando quieras
+                  2,99€/mes · Cargo en 30 días · Respeta tu trial
                 </p>
                 <div className="inline-flex items-center gap-2 bg-gray-800 text-white px-4 py-2 rounded-lg font-medium text-sm">
                   <span>Suscribirse</span>
@@ -208,14 +230,14 @@ export function WelcomeModal() {
               <div className="flex-1">
                 <div className="flex items-start justify-between mb-1">
                   <h3 className="text-lg font-bold text-gray-900">
-                    👑 Premium Anual
+                    👑 Suscribirme Ahora - Anual
                   </h3>
                   <span className="bg-gradient-to-r from-orange-500 to-pink-500 text-white text-xs font-bold px-2 py-1 rounded-full">
                     Ahorra 30%
                   </span>
                 </div>
                 <p className="text-gray-600 text-sm mb-2">
-                  24.99€/año · Solo 2.08€/mes · Casi 4 meses gratis
+                  24,99€/año · Cargo en 30 días · Respeta tu trial
                 </p>
                 <div className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-4 py-2 rounded-lg font-medium text-sm">
                   <span>Mejor Valor</span>
@@ -226,7 +248,7 @@ export function WelcomeModal() {
         </div>
 
         <p className="text-center text-gray-500 text-sm mt-6">
-          Puedes cambiar de plan en cualquier momento desde tu perfil
+          Si eliges suscribirte ahora, introducirás tu tarjeta pero <strong>no se te cobrará hasta que finalicen los 30 días</strong>
         </p>
 
         {/* Botón cerrar (pequeño, discreto) */}

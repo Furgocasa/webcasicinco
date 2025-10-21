@@ -697,7 +697,7 @@ export default function PerfilPage() {
                       {/* Estado actual */}
                       <div className={`p-6 rounded-xl border-2 ${
                         accessInfo.isAdmin ? 'bg-gradient-to-r from-gray-900 to-gray-800 border-gray-700 text-white' :
-                        accessInfo.isFreeUser ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-300' :
+                        accessInfo.isFreeUser ? 'bg-gradient-to-r from-green-500 to-emerald-600 border-green-700 text-white' :
                         accessInfo.isInTrial ? 'bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-300' :
                         accessInfo.subscriptionPlan ? 'bg-gradient-to-r from-purple-50 to-indigo-50 border-purple-300' :
                         'bg-gradient-to-r from-orange-50 to-red-50 border-orange-300'
@@ -705,7 +705,7 @@ export default function PerfilPage() {
                         <div className="flex items-start justify-between mb-4">
                           <div>
                             <h3 className={`text-2xl font-bold mb-2 ${
-                              accessInfo.isAdmin ? 'text-white' : 'text-gray-900'
+                              accessInfo.isAdmin || accessInfo.isFreeUser ? 'text-white' : 'text-gray-900'
                             }`}>
                               {accessInfo.isAdmin ? '👑 Admin' :
                                accessInfo.isFreeUser ? '🎁 Usuario Gratis (Cortesía)' :
@@ -715,22 +715,24 @@ export default function PerfilPage() {
                                '❌ Sin Suscripción'}
                             </h3>
                             <p className={`text-sm ${
-                              accessInfo.isAdmin ? 'text-gray-300' : 'text-gray-600'
+                              accessInfo.isAdmin || accessInfo.isFreeUser ? 'text-green-100' : 'text-gray-600'
                             }`}>
                               {accessInfo.isAdmin ? 'Acceso total y perpetuo' :
-                               accessInfo.isFreeUser ? 'Acceso gratuito permanente' :
+                               accessInfo.isFreeUser ? '✨ Acceso gratuito permanente otorgado por el administrador · Sin cargos nunca' :
                                accessInfo.isInTrial ? `Tu trial termina el ${new Date(accessInfo.trialEndsAt).toLocaleDateString('es-ES')}` :
                                accessInfo.subscriptionPlan ? 'Suscripción activa' :
                                'Suscríbete para continuar usando la app'}
                             </p>
                           </div>
-                          {!accessInfo.isAdmin && !accessInfo.isFreeUser && (
+                          {!accessInfo.isAdmin && (
                             <div className={`px-4 py-2 rounded-full font-bold text-sm ${
+                              accessInfo.isFreeUser ? 'bg-white text-green-600 shadow-lg' :
                               accessInfo.isInTrial ? 'bg-blue-600 text-white' :
                               accessInfo.subscriptionPlan ? 'bg-purple-600 text-white' :
                               'bg-orange-600 text-white'
                             }`}>
-                              {accessInfo.isInTrial ? 'TRIAL' :
+                              {accessInfo.isFreeUser ? '⭐ GRATIS PARA SIEMPRE' :
+                               accessInfo.isInTrial ? 'TRIAL' :
                                accessInfo.subscriptionPlan ? 'ACTIVO' :
                                'INACTIVO'}
                             </div>
@@ -814,6 +816,10 @@ export default function PerfilPage() {
                           <li className="flex items-start gap-2">
                             <Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
                             <span>Si cancelas durante el trial (30 días), no se cobra nada</span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <XIcon className="h-4 w-4 text-orange-600 mt-0.5 flex-shrink-0" />
+                            <span><strong>Al cancelar:</strong> No se devuelve el dinero, simplemente no se aplican nuevos cargos al finalizar el período actual</span>
                           </li>
                         </ul>
                       </div>

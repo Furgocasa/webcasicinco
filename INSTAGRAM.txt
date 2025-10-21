@@ -2,8 +2,8 @@
 PERFILES DE INSTAGRAM DE LUGARES EN CASI CINCO
 ================================================================================
 
-Total de lugares con Instagram: 254
-Fecha de generación: 21/10/2025, 15:11:01
+Total de lugares con Instagram: 964
+Fecha de generación: 21/10/2025, 19:55:53
 
 ================================================================================
 
@@ -11,34 +11,53 @@ Fecha de generación: 21/10/2025, 15:11:01
 📍 PROVINCIA: A CORUÑA
 ────────────────────────────────────────────────────────────────────────────────
 
-🍺 BAR
+🏨 HOTEL
 
-1. Tamago café de especialidad
+1. Noro Plaza | Apartamentos Boutique
    📍 A Coruña, A Coruña
-   📸 Instagram: https://instagram.com/rsrc.php
+   📸 Instagram: https://instagram.com/noroplaza
+
+2. Hotel Spa A Quinta Da Auga Relais & Châteaux
+   📍 Santiago de Compostela, A Coruña
+   📸 Instagram: https://instagram.com/aquintadaauga
 
 🍽️ RESTAURANTE
 
-2. Terreo Cocina Casual
+3. Milongas Parrillada A Coruña
+   📍 A Coruña, A Coruña
+   📸 Instagram: https://instagram.com/milongasparrillada
+
+4. SenPan
+   📍 A Coruña, A Coruña
+   📸 Instagram: https://instagram.com/senpanexoticfusion
+
+5. El De Alberto
+   📍 A Coruña, A Coruña
+   📸 Instagram: https://instagram.com/el_de_alberto
+
+6. Pedra Furada Coruña
+   📍 A Coruña, A Coruña
+   📸 Instagram: https://instagram.com/morrofinotaberna
+
+7. Deabejas
+   📍 A Coruña, A Coruña
+   📸 Instagram: https://instagram.com/deabejasgastrobar
+
+8. Terreo Cocina Casual
    📍 A Coruña, A Coruña
    📸 Instagram: https://instagram.com/terreococinacasual
 
+9. Restaurante La Masía
+   📍 A Coruña, A Coruña
+   📸 Instagram: https://instagram.com/restaurante_la_masia
 
-────────────────────────────────────────────────────────────────────────────────
-📍 PROVINCIA: ÁLAVA
-────────────────────────────────────────────────────────────────────────────────
+10. Gazteka
+   📍 A Coruña, A Coruña
+   📸 Instagram: https://instagram.com/gazteka_
 
-🏨 HOTEL
-
-3. Hotel Palacio de Luko
-   📍 Luko, Álava
-   📸 Instagram: https://instagram.com/palaciodeluko
-
-🍽️ RESTAURANTE
-
-4. Comida rápida La Teresa
-   📍 Vitoria-Gasteiz, Álava
-   📸 Instagram: https://instagram.com/rsrc.php
+11. Takeo Tex-Mex Food&Drinks (A Coruña)
+   📍 A Coruña, A Coruña
+   📸 Instagram: https://instagram.com/takeoo.es
 
 
 ────────────────────────────────────────────────────────────────────────────────
@@ -47,21 +66,71 @@ Fecha de generación: 21/10/2025, 15:11:01
 
 🍺 BAR
 
-5. BLUE Café Teatro
+12. BLUE Café Teatro
    📍 Albacete, Albacete
    📸 Instagram: https://instagram.com/bluecafeteatro
 
+🏨 HOTEL
+
+13. MIRALMUNDO Alojamientos Rurales Aýna
+   📍 Ayna, Albacete
+   📸 Instagram: https://instagram.com/miralmundo
+
+14. Hotel Spa Eliá
+   📍 Alcalá del Júcar, Albacete
+   📸 Instagram: https://instagram.com/hotelspaelia
+
 🍽️ RESTAURANTE
 
-6. JAPÓNICO
+15. Tapería Ca La Yaya.
+   📍 Albacete, Albacete
+   📸 Instagram: https://instagram.com/taperiacalayaya
+
+16. Casa Antonio|Restaurante Almansa|
+   📍 Almansa, Albacete
+   📸 Instagram: https://instagram.com/casaantoniorest
+
+17. China Town Restaurante
+   📍 La Roda, Albacete
+   📸 Instagram: https://instagram.com/restauranteschinos
+
+18. Mesón de Pincelín
+   📍 Almansa, Albacete
+   📸 Instagram: https://instagram.com/meson_pincelin
+
+19. Camping Restaurante Río Tus, Yeste, Albacete
+   📍 Albacete, Albacete
+   📸 Instagram: https://instagram.com/campingriotus
+
+20. JAPÓNICO
    📍 Almansa, Albacete
    📸 Instagram: https://instagram.com/restaurante_japonico
 
-7. Raíces Ibéricas La Roda
+21. Taberna La Notaría
+   📍 Caudete, Albacete
+   📸 Instagram: https://instagram.com/lanotariataberna
+
+22. Restaurante Maralba
+   📍 Almansa, Albacete
+   📸 Instagram: https://instagram.com/maralbarestaurante
+
+23. Detroit Albacete “Más Que Desayunos”
+   📍 Albacete, Albacete
+   📸 Instagram: https://instagram.com/detroit_masquedesayunos
+
+24. Bee Fury
+   📍 Villarrobledo, Albacete
+   📸 Instagram: https://instagram.com/bee_fury
+
+25. Café-Bar Ximénez.
+   📍 Villarrobledo, Albacete
+   📸 Instagram: https://instagram.com/ximenezcafebar
+
+26. Raíces Ibéricas La Roda
    📍 La Roda, Albacete
    📸 Instagram: https://instagram.com/raicesibericaswines
 
-8. Sushi Casa
+27. Sushi Casa
    📍 Almansa, Albacete
    📸 Instagram: https://instagram.com/sushicasaalmansa
 
@@ -72,265 +141,737 @@ Fecha de generación: 21/10/2025, 15:11:01
 
 🍺 BAR
 
-9. Anouki's Pub
-   📍 Alicante (Alacant), Alicante
-   📸 Instagram: https://instagram.com/rsrc.php
-
-10. Aya Huma Cocktail Bar Jávea
-   📍 Xàbia, Alicante
-   📸 Instagram: https://instagram.com/v
-
-11. BASSOS
-   📍 Petrer, Alicante
-   📸 Instagram: https://instagram.com/bassos__
-
-12. Bendita Cafetería
+28. Cinco Lobitos Pub
    📍 Torrevieja, Alicante
-   📸 Instagram: https://instagram.com/rsrc.php
+   📸 Instagram: https://instagram.com/cincolobitospub
 
-13. BOGA COFFEE & BEER
-   📍 Villena, Alicante
-   📸 Instagram: https://instagram.com/reel
+29. En el Médio del Fúego
+   📍 Elx, Alicante
+   📸 Instagram: https://instagram.com/mediodelfuego
 
-14. BOTANICA Coffee Experience
-   📍 Elche, Alicante
-   📸 Instagram: https://instagram.com/botanica.coffee.experiences
-
-15. Café de Montaña en Alicante
+30. Floripa - Cocktail Bar Alicante
    📍 Alicante (Alacant), Alicante
-   📸 Instagram: https://instagram.com/rsrc.php
+   📸 Instagram: https://instagram.com/bar.floripa
 
-16. Cafetería & Bar de tapas, Bocaices
-   📍 Alicante (Alacant), Alicante
-   📸 Instagram: https://instagram.com/rsrc.php
-
-17. CaffèMilano-The Italian Coffee House , Jávea
-   📍 Xàbia, Alicante
-   📸 Instagram: https://instagram.com/caffemilanospain
-
-18. CATUAÍ cafe - bar
-   📍 Elche, Alicante
-   📸 Instagram: https://instagram.com/rsrc.php
-
-19. Cervezas Althaia
-   📍 Altea, Alicante
-   📸 Instagram: https://instagram.com/cervezasalthaia
-
-20. Daily Coffee
-   📍 Santa Pola, Alicante
-   📸 Instagram: https://instagram.com/dailycoffee05
-
-21. Discoteca Calle 365 Alicante
+31. Discoteca Calle 365 Alicante
    📍 Alacant, Alicante
    📸 Instagram: https://instagram.com/calle365alicante
 
-22. DSTRITO +57
-   📍 Calpe, Alicante
-   📸 Instagram: https://instagram.com/rsrc.php
+32. ÈNFAsIS Café -Bar
+   📍 Elche, Alicante
+   📸 Instagram: https://instagram.com/mahou_es
 
-23. ESPARCIA CAFÉ Y TÉ
+33. El Refugio de la cerveza
+   📍 Villena, Alicante
+   📸 Instagram: https://instagram.com/elsalondelacerveza
+
+34. Me da igual Gastro-bar & Cocktails Calpe
+   📍 Calpe, Alicante
+   📸 Instagram: https://instagram.com/medaigual_calpe
+
+35. Madness specialty coffee
+   📍 Alicante (Alacant), Alicante
+   📸 Instagram: https://instagram.com/madnesscoffee
+
+36. OBRADOR
+   📍 Petrer, Alicante
+   📸 Instagram: https://instagram.com/obrador_bakery
+
+37. Suitopia Skybar
+   📍 Calpe, Alicante
+   📸 Instagram: https://instagram.com/estimarhotels
+
+38. El Cookie
+   📍 Alacant, Alicante
+   📸 Instagram: https://instagram.com/elcookiealicante
+
+39. Heineken Sports Bar Calpe
+   📍 Calp, Alicante
+   📸 Instagram: https://instagram.com/the_hsb_calpe
+
+40. Mareando la Huerta
+   📍 Alacant, Alicante
+   📸 Instagram: https://instagram.com/mareandolahuerta
+
+41. BASSOS
+   📍 Petrer, Alicante
+   📸 Instagram: https://instagram.com/bassos__
+
+42. Café Gourmand | Pastelería francesa
+   📍 Jávea, Alicante
+   📸 Instagram: https://instagram.com/cafegourmand_javea
+
+43. BLACK MARKET BBQ, DENIA
+   📍 Dénia, Alicante
+   📸 Instagram: https://instagram.com/bbqdenia
+
+44. Coffee and Toffee
+   📍 Torrevieja, Alicante
+   📸 Instagram: https://instagram.com/coffeeandtoffee.es
+
+45. BOTANICA Coffee Experience
+   📍 Elche, Alicante
+   📸 Instagram: https://instagram.com/botanica.coffee.experiences
+
+46. ESPARCIA CAFÉ Y TÉ
    📍 Torrevieja, Alicante
    📸 Instagram: https://instagram.com/esparciacoffee
 
-24. Point Bianco I Specialty Caffé Alicante I Café de especialidad Alicante
+47. Florentine Salón de Te
+   📍 Benidorm, Alicante
+   📸 Instagram: https://instagram.com/florentinesalondete
+
+48. Lovelo Coffee Ride
+   📍 Dehesa de Campoamor, Alicante
+   📸 Instagram: https://instagram.com/lovelocoffeeride
+
+49. Safranera Cafeteria
+   📍 Jávea, Alicante
+   📸 Instagram: https://instagram.com/safranera_cafeteria
+
+50. Cafè paradise altea
+   📍 Altea, Alicante
+   📸 Instagram: https://instagram.com/cafealteaparadise
+
+51. Martisano
+   📍 Alacant, Alicante
+   📸 Instagram: https://instagram.com/martisanoalicante
+
+52. CaffèMilano-The Italian Coffee House , Jávea
+   📍 Xàbia, Alicante
+   📸 Instagram: https://instagram.com/caffemilanospain
+
+53. Picoteo Port
+   📍 Jávea, Alicante
+   📸 Instagram: https://instagram.com/barpicoteoport_xabia
+
+54. Sausalito Premium Club
    📍 Alicante (Alacant), Alicante
-   📸 Instagram: https://instagram.com/pointbianco
+   📸 Instagram: https://instagram.com/sausalito_premium
 
-25. Vino Y Mas San Vicente
-   📍 Sant Vicent del Raspeig, Alicante
-   📸 Instagram: https://instagram.com/rsrc.php
+55. Cervezas Althaia
+   📍 Altea, Alicante
+   📸 Instagram: https://instagram.com/cervezasalthaia
 
-26. Yerbaxàbia
+56. 777 Salón de Juego San Vicente
+   📍 San Vicente del Raspeig, Alicante
+   📸 Instagram: https://instagram.com/galeracafecasino
+
+57. Único Sabor Bar Cafetería
+   📍 Alcoi, Alicante
+   📸 Instagram: https://instagram.com/barcafeteriaunicosabor
+
+58. Daily Coffee
+   📍 Santa Pola, Alicante
+   📸 Instagram: https://instagram.com/dailycoffee05
+
+59. Yerbaxàbia
    📍 Jávea, Alicante
    📸 Instagram: https://instagram.com/yerbaxabia
 
 🏨 HOTEL
 
-27. B&B Casa Rodriguillo - Pinoso
-   📍 El, Alicante
-   📸 Instagram: https://instagram.com/casa_rodriguillo
-
-28. Casa Carmen Altea
-   📍 Altea, Alicante
-   📸 Instagram: https://instagram.com/casacarmenaltea
-
-29. Casa Coline
-   📍 Jávea, Alicante
-   📸 Instagram: https://instagram.com/reel
-
-30. Casa Pura Vida
-   📍 Relleu, Alicante
-   📸 Instagram: https://instagram.com/bedandbreakfastcasapuravida
-
-31. Casatims
+60. ESTIMAR Calpe Suitopia
    📍 Calpe, Alicante
-   📸 Instagram: https://instagram.com/casatims
+   📸 Instagram: https://instagram.com/estimarhotels
 
-32. Dionis Hotel Boutique
-   📍 Xàbia, Alicante
-   📸 Instagram: https://instagram.com/dionishotel
+61. Apartamentos Tito San Nicolás
+   📍 Alicante (Alacant), Alicante
+   📸 Instagram: https://instagram.com/apartamentostito
 
-33. Finca La Cañada
-   📍 el Poble Llevantí, Alicante
-   📸 Instagram: https://instagram.com/finca_lacanada
-
-34. Hostal Luxury Nit i Dia
-   📍 Altea, Alicante
-   📸 Instagram: https://instagram.com/hostal_luxury_nitidia
-
-35. Hotel Abaco Altea
+62. Hotel Abaco Altea
    📍 Altea, Alicante
    📸 Instagram: https://instagram.com/hotelabacoaltea
 
-36. Las Mariposas
+63. Finca La Cañada
+   📍 el Poble Llevantí, Alicante
+   📸 Instagram: https://instagram.com/finca_lacanada
+
+64. Las Mariposas
    📍 La Marina, Alicante
    📸 Instagram: https://instagram.com/lasmariposas_bnb
 
-37. Little Bali Javea
-   📍 les Cansalades, Alicante
-   📸 Instagram: https://instagram.com/littlebali_javea
-
-38. Mansion La Caballusa
+65. Mansion La Caballusa
    📍 la Cavallussa, Alicante
    📸 Instagram: https://instagram.com/mansiontaratata
 
-39. Marina Beach 38
-   📍 Denia, Alicante
-   📸 Instagram: https://instagram.com/marinabeach38
+66. Hotel El Capricho
+   📍 Benialí, Alicante
+   📸 Instagram: https://instagram.com/hotelcaprichocom
 
-40. Mariseta y Tonet
+67. Hostal Perla Blanca Altea
+   📍 Altea, Alicante
+   📸 Instagram: https://instagram.com/alteaperlablanca
+
+68. Casa Bons Aires
+   📍 Alcoi, Alicante
+   📸 Instagram: https://instagram.com/casabonsairesalcoi
+
+69. Cala Lanuza Suites
+   📍 Alicante, Alicante
+   📸 Instagram: https://instagram.com/calalanuzasuites
+
+70. Mariseta y Tonet
    📍 Calpe, Alicante
    📸 Instagram: https://instagram.com/escapadarural
 
-41. Maryvilla
+71. Finca Bellevall.
+   📍 Aspe, Alicante
+   📸 Instagram: https://instagram.com/bellevall.eventos
+
+72. Apartamentos rurales en Alicante La Alqueria Del Pilar
+   📍 Banyeres de Mariola, Alicante
+   📸 Instagram: https://instagram.com/lalqueriadelpilar
+
+73. Casa Timoteo Apartamentos Boutique
+   📍 Alcoi, Alicante
+   📸 Instagram: https://instagram.com/casa_timoteo
+
+74. ESTIMAR Calpe Apartments
+   📍 Calp, Alicante
+   📸 Instagram: https://instagram.com/estimarhotels
+
+75. Casatims
+   📍 Calpe, Alicante
+   📸 Instagram: https://instagram.com/casatims
+
+76. BOHO SUITES DENIA
+   📍 Dénia, Alicante
+   📸 Instagram: https://instagram.com/bohosuitesdenia
+
+77. Hostal Luxury Nit i Dia
+   📍 Altea, Alicante
+   📸 Instagram: https://instagram.com/hostal_luxury_nitidia
+
+78. B&B Casa Rodriguillo - Pinoso
+   📍 El, Alicante
+   📸 Instagram: https://instagram.com/casa_rodriguillo
+
+79. Casa Rural La Laguna
+   📍 Catral, Alicante
+   📸 Instagram: https://instagram.com/wix
+
+80. Hotel Mi AlmaZara
+   📍 Jávea, Alicante
+   📸 Instagram: https://instagram.com/mialmazara_javea
+
+81. Casa del Ríu
+   📍 Beneixama, Alicante
+   📸 Instagram: https://instagram.com/casadelriu
+
+82. Maryvilla
    📍 Calpe, Alicante
    📸 Instagram: https://instagram.com/rent.villas.spain
 
-42. The Luxury Villa at Pleamar 30 Holiday Rental, Punta Prima, Torrevieja, Spain
-   📍 Torrevieja, Alicante
-   📸 Instagram: https://instagram.com/pleamar30_holidayrental
+83. Maison Salva - Hotel Boutique
+   📍 Altea, Alicante
+   📸 Instagram: https://instagram.com/maisonsalva
 
-43. Vista Calpe
-   📍 Calpe, Alicante
-   📸 Instagram: https://instagram.com/villavistacalpe
+84. La Casa de la Menora
+   📍 Onil, Alicante
+   📸 Instagram: https://instagram.com/la_casa_de_la_menora
+
+85. Sunny Vista, Casa Rural,
+   📍 El Pinós, Alicante
+   📸 Instagram: https://instagram.com/benbsunnyvista
+
+86. Alicante Smart Aparthotel
+   📍 Alicante (Alacant), Alicante
+   📸 Instagram: https://instagram.com/alicante_hotelsmart.es
+
+87. The Adelante House
+   📍 Jávea, Alicante
+   📸 Instagram: https://instagram.com/theadelantehouse
+
+88. Casa Carmen Altea
+   📍 Altea, Alicante
+   📸 Instagram: https://instagram.com/casacarmenaltea
+
+89. Marina Beach 38
+   📍 Denia, Alicante
+   📸 Instagram: https://instagram.com/marinabeach38
+
+90. Casa Pura Vida
+   📍 Relleu, Alicante
+   📸 Instagram: https://instagram.com/bedandbreakfastcasapuravida
+
+91. La Sella Premium Lifestyle Apartments
+   📍 Alicante, Alicante
+   📸 Instagram: https://instagram.com/deniamarriottlasella
+
+92. Hotel Gold Arcos
+   📍 Benidorm, Alicante
+   📸 Instagram: https://instagram.com/hotelgoldarcos
+
+93. La Vuelta Boutique Hotel
+   📍 Formentera del Segura, Alicante
+   📸 Instagram: https://instagram.com/lavuelta_finca
+
+94. Higuericas Beach Apartment
+   📍 Pilar de la Horadada, Alicante
+   📸 Instagram: https://instagram.com/costa.blanca.apartment
+
+95. Little Bali Javea
+   📍 les Cansalades, Alicante
+   📸 Instagram: https://instagram.com/littlebali_javea
+
+96. Casa Rural Axier
+   📍 Biar, Alicante
+   📸 Instagram: https://instagram.com/casaaxier
+
+97. Hotel Narcea Santa pola
+   📍 Santa Pola, Alicante
+   📸 Instagram: https://instagram.com/hotelnarcea_santapola
+
+98. Dionis Hotel Boutique
+   📍 Xàbia, Alicante
+   📸 Instagram: https://instagram.com/dionishotel
+
+99. Moona Hostal Altea
+   📍 Altea, Alicante
+   📸 Instagram: https://instagram.com/moona_hostal_altea
 
 🍽️ RESTAURANTE
 
-44. 🐔 Chicken's Carbón ❤️‍🔥 POLLO y Cositas
-   📍 San Vicente del Raspeig, Alicante
-   📸 Instagram: https://instagram.com/rsrc.php
-
-45. Bacacay | Restaurante Argentino Alicante
-   📍 Alacant, Alicante
-   📸 Instagram: https://instagram.com/bacacayparrilla
-
-46. Bulla | Original Burgers & Fries
-   📍 Alicante (Alacant), Alicante
-   📸 Instagram: https://instagram.com/bullaburgers
-
-47. Carnal burger house
-   📍 Alacant, Alicante
-   📸 Instagram: https://instagram.com/rsrc.php
-
-48. Circo Burger
-   📍 Benidorm, Alicante
-   📸 Instagram: https://instagram.com/circoburger
-
-49. EatMyTrip Specialty Coffee & Brunch Alicante
-   📍 Alicante (Alacant), Alicante
-   📸 Instagram: https://instagram.com/eatmytrip
-
-50. GULA. Pizzería 🍕 Pizza napolitana con estilo propio en Alicante.
-   📍 Alicante (Alacant), Alicante
-   📸 Instagram: https://instagram.com/gula.pizzeria
-
-51. Jhonny's Urban Food 🍔🥩🥟😋
-   📍 Benidorm, Alicante
-   📸 Instagram: https://instagram.com/rsrc.php
-
-52. La Barra del Músico
-   📍 Elx, Alicante
-   📸 Instagram: https://instagram.com/labarradelmusico
-
-53. La Brasa Global
-   📍 Elx, Alicante
-   📸 Instagram: https://instagram.com/rsrc.php
-
-54. La Escondida Grill
+100. La Escondida Grill
    📍 Alicante (Alacant), Alicante
    📸 Instagram: https://instagram.com/laescondidagrill
 
-55. La Gustosa, Santa Pola.
+101. Roraima Café Restaurante
    📍 Santa Pola, Alicante
-   📸 Instagram: https://instagram.com/lagustosa.santapola
+   📸 Instagram: https://instagram.com/roraimacaferestaurant
 
-56. LOKO AÇAÍ
+102. La Taverneta del Gos
+   📍 Altea, Alicante
+   📸 Instagram: https://instagram.com/latavernetadelgos
+
+103. Restaurante Porthus by El Charro Negro
    📍 Torrevieja, Alicante
-   📸 Instagram: https://instagram.com/rsrc.php
+   📸 Instagram: https://instagram.com/restauranteporthus
 
-57. Luna De Alberdi
-   📍 Alacant, Alicante
-   📸 Instagram: https://instagram.com/lunadealberdiburger
+104. Restaurante Ca Mezquida
+   📍 Altea, Alicante
+   📸 Instagram: https://instagram.com/camezquida
 
-58. Mamma Mia Ristorante & Pizzeria
-   📍 Benidorm, Alicante
-   📸 Instagram: https://instagram.com/rsrc.php
-
-59. MESA La Marina
-   📍 Dénia, Alicante
-   📸 Instagram: https://instagram.com/mesa_lamarina
-
-60. Nueve Pizzeria Bar Alicante
-   📍 Alicante (Alacant), Alicante
-   📸 Instagram: https://instagram.com/rsrc.php
-
-61. Pizza Da Rico | Pizzeria Alicante
-   📍 Alacant, Alicante
-   📸 Instagram: https://instagram.com/pizzadarico
-
-62. Pizzeria Castaños
-   📍 Alacant, Alicante
-   📸 Instagram: https://instagram.com/pizzeria_castanos
-
-63. Pizzeria cocteleria Rione
-   📍 Benidorm, Alicante
-   📸 Instagram: https://instagram.com/rsrc.php
-
-64. Restaurant (Gastrobar) Distrikt41
-   📍 Alacant, Alicante
-   📸 Instagram: https://instagram.com/distrikt41
-
-65. Restaurante La oficina del gusto
-   📍 Benidorm, Alicante
-   📸 Instagram: https://instagram.com/laoficinadelgusto
-
-66. Restaurante ZINC
-   📍 Alicante, Alicante
-   📸 Instagram: https://instagram.com/restaurantezinc
-
-67. Sono Più
-   📍 Elx, Alicante
-   📸 Instagram: https://instagram.com/sonopiu_focacceria
-
-68. Taco del Paco l Restaurante en Calpe
+105. Bella Mia
    📍 Calpe, Alicante
-   📸 Instagram: https://instagram.com/tacodelpaco
+   📸 Instagram: https://instagram.com/bellamia_calpe
 
-69. Toy Ristorante
-   📍 Dénia, Alicante
-   📸 Instagram: https://instagram.com/toyristorante
+106. Brutal Street | Gustazo Brutal
+   📍 Elx, Alicante
+   📸 Instagram: https://instagram.com/GustazoBrutal
 
-70. Umore Pizza
+107. Aires Burger Bar | Alicante
+   📍 Alicante (Alacant), Alicante
+   📸 Instagram: https://instagram.com/airesburgerbar
+
+108. Wingstation Torrevieja
+   📍 Torrevieja, Alicante
+   📸 Instagram: https://instagram.com/wingstation.torrevieja
+
+109. Asador La Estancia
+   📍 Alicante (Alacant), Alicante
+   📸 Instagram: https://instagram.com/asadorlaestancia
+
+110. Umore Pizza
    📍 Torrevieja, Alicante
    📸 Instagram: https://instagram.com/umorepizza
 
-71. YANKEES BURGER & TEXMEX
-   📍 Torrevieja, Alicante
-   📸 Instagram: https://instagram.com/rsrc.php
+111. Osteria San Gaudenzio
+   📍 Alacant, Alicante
+   📸 Instagram: https://instagram.com/osteria_san_gaudenzio
 
-72. YOKA'S
+112. Taco del Paco l Restaurante en Calpe
+   📍 Calpe, Alicante
+   📸 Instagram: https://instagram.com/tacodelpaco
+
+113. Circo Burger
+   📍 Benidorm, Alicante
+   📸 Instagram: https://instagram.com/circoburger
+
+114. Don Nicolás
+   📍 Alcoi, Alicante
+   📸 Instagram: https://instagram.com/donnicolaslambrusqueria
+
+115. Restaurante Espacio Montoro
+   📍 Alacant, Alicante
+   📸 Instagram: https://instagram.com/espaciomontoro
+
+116. Moon Restaurante San Vicente
+   📍 Sant Vicent del Raspeig, Alicante
+   📸 Instagram: https://instagram.com/moonrestaurante
+
+117. Bombay Hindu restaurant Elche
+   📍 Elx, Alicante
+   📸 Instagram: https://instagram.com/bombayelche2023
+
+118. La Barra del Músico
+   📍 Elx, Alicante
+   📸 Instagram: https://instagram.com/labarradelmusico
+
+119. Restaurante La Finca
+   📍 Elx, Alicante
+   📸 Instagram: https://instagram.com/lafincaelche
+
+120. Restaurante Dexcaro & Ossadía by Carlos G. Moreno
+   📍 Dénia, Alicante
+   📸 Instagram: https://instagram.com/dexcaroyossadia.denia
+
+121. Tula Restaurante
+   📍 Xàbia, Alicante
+   📸 Instagram: https://instagram.com/tula.restaurante
+
+122. Alba Restaurante
+   📍 Alicante (Alacant), Alicante
+   📸 Instagram: https://instagram.com/albarestaurante_es
+
+123. Ñam Restaurante
+   📍 Guardamar del Segura, Alicante
+   📸 Instagram: https://instagram.com/namgastrobar
+
+124. bröns. Breakfast & Lunch
+   📍 Los Dolses, Alicante
+   📸 Instagram: https://instagram.com/bronslazenia
+
+125. Restaurante ZINC
+   📍 Alicante, Alicante
+   📸 Instagram: https://instagram.com/restaurantezinc
+
+126. Restaurante La oficina del gusto
+   📍 Benidorm, Alicante
+   📸 Instagram: https://instagram.com/laoficinadelgusto
+
+127. El Palacete Resto & Brunch
+   📍 Alicante (Alacant), Alicante
+   📸 Instagram: https://instagram.com/elpalaceterestobrunch
+
+128. Chalet Suizo
+   📍 Jávea, Alicante
+   📸 Instagram: https://instagram.com/chalet_suizo_javea
+
+129. CASA LILI JAVEA
+   📍 El Tosalet, Alicante
+   📸 Instagram: https://instagram.com/casalilijavea
+
+130. Ramen Kofuku
+   📍 Petrer, Alicante
+   📸 Instagram: https://instagram.com/ramen_kofuku
+
+131. Estación bar 52 -comida mexicana latina
+   📍 Elx, Alicante
+   📸 Instagram: https://instagram.com/estacionbar52
+
+132. MESA La Marina
+   📍 Dénia, Alicante
+   📸 Instagram: https://instagram.com/mesa_lamarina
+
+133. Lazy Lucy Burger
+   📍 Elx, Alicante
+   📸 Instagram: https://instagram.com/mestizajeelche
+
+134. Nilah Altea
+   📍 Altea, Alicante
+   📸 Instagram: https://instagram.com/nilah_altea
+
+135. Makai Cafe
+   📍 Orihuela, Alicante
+   📸 Instagram: https://instagram.com/makaicafe
+
+136. MERAKI RESTAURANTE, PLAZA DEL CONVENT 6 DENIA ESPAÑA
+   📍 Dénia, Alicante
+   📸 Instagram: https://instagram.com/merakidenia
+
+137. Cala Brisa
+   📍 Xàbia, Alicante
+   📸 Instagram: https://instagram.com/calabrisabeachclub_
+
+138. Pizzeria Alma Libre
+   📍 Alicante (Alacant), Alicante
+   📸 Instagram: https://instagram.com/almalibrepizzeria
+
+139. Raggú Comidas Para Llevar
+   📍 Orihuela, Alicante
+   📸 Instagram: https://instagram.com/raggu__orihuela
+
+140. Callaíto | Restaurante en Santa Pola
+   📍 Santa Pola, Alicante
+   📸 Instagram: https://instagram.com/ca_lla_i_to
+
+141. Restaurante Mágico Campico
+   📍 Petrer, Alicante
+   📸 Instagram: https://instagram.com/magicocampico
+
+142. Smashed Burger
+   📍 Torrevieja, Alicante
+   📸 Instagram: https://instagram.com/glovo_es
+
+143. Sono Più
+   📍 Elx, Alicante
+   📸 Instagram: https://instagram.com/sonopiu_focacceria
+
+144. Beat Restaurant
+   📍 Marisol Park, Alicante
+   📸 Instagram: https://instagram.com/ar.hotels
+
+145. 3F Greens
+   📍 Alicante (Alacant), Alicante
+   📸 Instagram: https://instagram.com/3f_greens
+
+146. Bife Alicante
+   📍 Alicante (Alacant), Alicante
+   📸 Instagram: https://instagram.com/bife_es
+
+147. Convida POKE & Coffee
+   📍 Dénia, Alicante
+   📸 Instagram: https://instagram.com/convida.denia
+
+148. Indian Elephant Restaurant
+   📍 Altea, Alicante
+   📸 Instagram: https://instagram.com/indianelephant_restaurant
+
+149. Restaurante Mediterraneum - Alicante
+   📍 Alicante (Alacant), Alicante
+   📸 Instagram: https://instagram.com/mediterraneum_rest
+
+150. La Polémica
+   📍 San Vicente del Raspeig, Alicante
+   📸 Instagram: https://instagram.com/enlapolemika
+
+151. Restaurante E-Tika Tapas y ceviches.
+   📍 Altea, Alicante
+   📸 Instagram: https://instagram.com/etika_altea
+
+152. Restaurante de Carne - Cabaña Bar
+   📍 Alacant, Alicante
+   📸 Instagram: https://instagram.com/cabanabar.alc
+
+153. El Negro Parrilla Restaurante
+   📍 Altea, Alicante
+   📸 Instagram: https://instagram.com/elnegroparrillarestaurante
+
+154. GULA. Pizzería 🍕 Pizza napolitana con estilo propio en Alicante.
+   📍 Alicante (Alacant), Alicante
+   📸 Instagram: https://instagram.com/gula.pizzeria
+
+155. Cisoria Restaurante
+   📍 Villena, Alicante
+   📸 Instagram: https://instagram.com/cisoria_restaurante
+
+156. Lapsus Bistro
+   📍 Calpe, Alicante
+   📸 Instagram: https://instagram.com/lapsusbistrocalpe
+
+157. Da Nené
+   📍 San Vicente del Raspeig, Alicante
+   📸 Instagram: https://instagram.com/danenerestaurante
+
+158. Restaurante Akitsu Shima
+   📍 Alcoi, Alicante
+   📸 Instagram: https://instagram.com/akitsu.shima
+
+159. Tabula Rasa
+   📍 Alicante (Alacant), Alicante
+   📸 Instagram: https://instagram.com/restaurante_tabularasa
+
+160. Masena
+   📍 Xàbia, Alicante
+   📸 Instagram: https://instagram.com/restaurantemasena
+
+161. Amigos Bistró
+   📍 Benidorm, Alicante
+   📸 Instagram: https://instagram.com/Marinea.es
+
+162. La Ricetta Ristopizza & Bar
+   📍 Alacant, Alicante
+   📸 Instagram: https://instagram.com/laricettaalc
+
+163. Sabor al Fuego restaurante
+   📍 Denia, Alicante
+   📸 Instagram: https://instagram.com/sabor_alfuegodenia
+
+164. Burger Prime
+   📍 Orihuela, Alicante
+   📸 Instagram: https://instagram.com/beprimestreetfood
+
+165. Bulla | Original Burgers & Fries
+   📍 Alicante (Alacant), Alicante
+   📸 Instagram: https://instagram.com/bullaburgers
+
+166. Sabolé (sede Alicante Centro)
+   📍 Alacant, Alicante
+   📸 Instagram: https://instagram.com/sabole.alicante
+
+167. La Zaytuna Restaurante
+   📍 Torrevieja, Alicante
+   📸 Instagram: https://instagram.com/lazaytunarestaurante
+
+168. Circo
+   📍 Alicante (Alacant), Alicante
+   📸 Instagram: https://instagram.com/circoburger
+
+169. NAMS BURGER Halal
+   📍 Torrevieja, Alicante
+   📸 Instagram: https://instagram.com/namstorrevieja
+
+170. La Vaquería del Camp ※ Alicante
+   📍 Alacant, Alicante
+   📸 Instagram: https://instagram.com/lavaqueriadelcampdelx
+
+171. Restaurante Ca Aleix
+   📍 Xàbia, Alicante
+   📸 Instagram: https://instagram.com/caaleixrestaurant
+
+172. Restaurante Koiné Bistró Alicante
+   📍 Alicante (Alacant), Alicante
+   📸 Instagram: https://instagram.com/koine.bistro
+
+173. El Lobo Blanco
+   📍 Alacant, Alicante
+   📸 Instagram: https://instagram.com/loboblancorestaurante
+
+174. Restaurante La Fava
+   📍 Benidorm, Alicante
+   📸 Instagram: https://instagram.com/lafavadebenidorm
+
+175. Restaurante La Casa del Ratón
+   📍 Denia, Alicante
+   📸 Instagram: https://instagram.com/la.casa.del.raton
+
+176. BonAmb
+   📍 Xàbia, Alicante
+   📸 Instagram: https://instagram.com/bonambrestaurant
+
+177. YOKA'S
    📍 Sant Vicent del Raspeig, Alicante
    📸 Instagram: https://instagram.com/yokasbro
+
+178. CAFE INDIA
+   📍 Benidorm, Alicante
+   📸 Instagram: https://instagram.com/ubereats
+
+179. BIG TWINS Burger Playa de San Juan
+   📍 Alacant, Alicante
+   📸 Instagram: https://instagram.com/bigtwinsco
+
+180. La Gustosa, Santa Pola.
+   📍 Santa Pola, Alicante
+   📸 Instagram: https://instagram.com/lagustosa.santapola
+
+181. Luna De Alberdi
+   📍 Alacant, Alicante
+   📸 Instagram: https://instagram.com/lunadealberdiburger
+
+182. Bacacay | Restaurante Argentino Alicante
+   📍 Alacant, Alicante
+   📸 Instagram: https://instagram.com/bacacayparrilla
+
+183. Sal i Fum Restaurante
+   📍 Elx, Alicante
+   📸 Instagram: https://instagram.com/restaurantesalifum
+
+184. Taberna Fuego Lento
+   📍 Elx, Alicante
+   📸 Instagram: https://instagram.com/tabernafuegolento
+
+185. King Food
+   📍 Torrevieja, Alicante
+   📸 Instagram: https://instagram.com/kingfoodhouse
+
+186. Hamburguesería Goiko
+   📍 Alicante (Alacant), Alicante
+   📸 Instagram: https://instagram.com/goiko
+
+187. Asador Skonn | Alicante | Restaurante Barbacoa Armenia
+   📍 Alacant, Alicante
+   📸 Instagram: https://instagram.com/asador_skonn
+
+188. Caval Denia
+   📍 Dénia, Alicante
+   📸 Instagram: https://instagram.com/caval.denia
+
+189. Restaurante Ché Ragazzi - Alicante
+   📍 Alicante (Alacant), Alicante
+   📸 Instagram: https://instagram.com/cheragazzi
+
+190. EatMyTrip Specialty Coffee & Brunch Alicante
+   📍 Alicante (Alacant), Alicante
+   📸 Instagram: https://instagram.com/eatmytrip
+
+191. Indian Restaurant in Altea. CROWN OF INDIA.
+   📍 Altea, Alicante
+   📸 Instagram: https://instagram.com/crownofindia_altea
+
+192. Restaurante Tasty
+   📍 Alicante, Alicante
+   📸 Instagram: https://instagram.com/tastydenia
+
+193. El Cantonet Restaurante-Arrocería
+   📍 Calpe, Alicante
+   📸 Instagram: https://instagram.com/elcantonetcalpe
+
+194. Heladería Anima Dénia
+   📍 Denia, Alicante
+   📸 Instagram: https://instagram.com/heladeria.anima.denia
+
+195. Restaurant (Gastrobar) Distrikt41
+   📍 Alacant, Alicante
+   📸 Instagram: https://instagram.com/distrikt41
+
+196. A Fuego Pizzería
+   📍 Elx, Alicante
+   📸 Instagram: https://instagram.com/afuego.pizzeria
+
+197. La Taberna Del Gourmet
+   📍 Alicante (Alacant), Alicante
+   📸 Instagram: https://instagram.com/latabernadelgourmet
+
+198. Restaurante Aticcook by Ismael Bilbao
+   📍 Denia, Alicante
+   📸 Instagram: https://instagram.com/aticcook.denia
+
+199. Ko Tao Altea
+   📍 Altea, Alicante
+   📸 Instagram: https://instagram.com/kotao.alteaa
+
+200. Toy Ristorante
+   📍 Dénia, Alicante
+   📸 Instagram: https://instagram.com/toyristorante
+
+201. Moana Poké Bar (Torrevieja)
+   📍 Torrevieja, Alicante
+   📸 Instagram: https://instagram.com/moanapokebar
+
+202. Ojo de Agua Comida Callejera Mexicana
+   📍 Santa Pola, Alicante
+   📸 Instagram: https://instagram.com/ojodeaguasantapola
+
+203. BÖFF Restaurant & Bar
+   📍 Alicante (Alacant), Alicante
+   📸 Instagram: https://instagram.com/boff_alicante
+
+204. Restaurante Ché Ragazzi - Fusione Gastronomica Italiana - Elda
+   📍 Elda, Alicante
+   📸 Instagram: https://instagram.com/cheragazzi
+
+205. Kohlanta Elche
+   📍 Elx, Alicante
+   📸 Instagram: https://instagram.com/wedokohlanta
+
+206. La Cocina Del Buen Comer
+   📍 Alacant, Alicante
+   📸 Instagram: https://instagram.com/lacocinadelbuencomer
+
+207. Restaurante Calentura Bistro
+   📍 Calpe, Alicante
+   📸 Instagram: https://instagram.com/calenturabistro
+
+208. Restaurante Sabor Hindú
+   📍 Orihuela, Alicante
+   📸 Instagram: https://instagram.com/sabor.hindu
+
+209. La Parrilla Del Celler
+   📍 Xàbia, Alicante
+   📸 Instagram: https://instagram.com/laparrilladelceller
 
 
 ────────────────────────────────────────────────────────────────────────────────
@@ -339,67 +880,208 @@ Fecha de generación: 21/10/2025, 15:11:01
 
 🍺 BAR
 
-73. La Nube Café
+210. Cafetería Doha
    📍 Almería, Almería
-   📸 Instagram: https://instagram.com/rsrc.php
+   📸 Instagram: https://instagram.com/dohacafeteria
+
+211. Carnicería Divina Pastora
+   📍 Almería, Almería
+   📸 Instagram: https://instagram.com/carniceriadivinapastora
+
+212. Salitre Bar de Vinos
+   📍 Almería, Almería
+   📸 Instagram: https://instagram.com/salitrebardevinos
+
+🏨 HOTEL
+
+213. Casa Rural Cortijo la Tenada
+   📍 Fernán Pérez, Almería
+   📸 Instagram: https://instagram.com/cortijolatenada
+
+214. Murallas de Jayrán Hotel Boutique
+   📍 Almería, Almería
+   📸 Instagram: https://instagram.com/murallasdejayranhotelb
+
+🍽️ RESTAURANTE
+
+215. Restaurante Cuatro Hojas (by Juanjo Carabajal)
+   📍 Almería, Almería
+   📸 Instagram: https://instagram.com/cuatrohojas_gastrobar
+
+216. Restaurante Los Cármenes
+   📍 Almería, Almería
+   📸 Instagram: https://instagram.com/loscarmenesgastrobar
+
+217. Gamberro Napoletano
+   📍 Almería, Almería
+   📸 Instagram: https://instagram.com/gamberronapoletano
+
+218. Restaurante Alquímico. By Olivencia
+   📍 Almería, Almería
+   📸 Instagram: https://instagram.com/grupoolivencia
+
+219. Restaurante Errante
+   📍 Almería, Almería
+   📸 Instagram: https://instagram.com/errante.almeria
+
+220. Restaurante Koisushi Almería
+   📍 Almería, Almería
+   📸 Instagram: https://instagram.com/koisushialmeria
+
+221. AMOЯ Gastronomía Almería
+   📍 Almería, Almería
+   📸 Instagram: https://instagram.com/amorgastronomia_almeria
 
 
 ────────────────────────────────────────────────────────────────────────────────
 📍 PROVINCIA: ASTURIAS
 ────────────────────────────────────────────────────────────────────────────────
 
+🍺 BAR
+
+222. Cafés El Globo SL
+   📍 Salas, Asturias
+   📸 Instagram: https://instagram.com/cafeselglobo
+
+223. Whatever Coffee & Bocados
+   📍 Gijón, Asturias
+   📸 Instagram: https://instagram.com/whatever_gijon
+
 🏨 HOTEL
 
-74. Blau Gran Hotel Las Caldas
+224. Boogalow Hostel
+   📍 Gijón, Asturias
+   📸 Instagram: https://instagram.com/boogalowgijon
+
+225. North Surf House
+   📍 Gijón, Asturias
+   📸 Instagram: https://instagram.com/northsurfhouse
+
+226. Blau Gran Hotel Las Caldas
    📍 Las Caldas, Asturias
    📸 Instagram: https://instagram.com/lascaldas
 
-75. Hotel Pleamar
+227. Hotel Pleamar
    📍 Puerto de Vega, Asturias
    📸 Instagram: https://instagram.com/HotelPleamar
 
+228. ARTIEM Asturias
+   📍 Asturias, Asturias
+   📸 Instagram: https://instagram.com/artiemhotels
+
+229. Hotel Rural La Corolla
+   📍 Villaviciosa, Asturias
+   📸 Instagram: https://instagram.com/hotel_rural_la_corolla
+
+230. Hotel Rural Casona de Cefontes
+   📍 Gijón, Asturias
+   📸 Instagram: https://instagram.com/casonadecefontes
+
+231. Hotel Los Caspios
+   📍 Colunga, Asturias
+   📸 Instagram: https://instagram.com/loscaspioshotel
+
+232. NUVÓ hotel boutique
+   📍 Oviedo, Asturias
+   📸 Instagram: https://instagram.com/bluehoteles
+
+233. Hostel Rural La Figal de Xugabolos, Casazorrina, Salas
+   📍 Casazorrina, Asturias
+   📸 Instagram: https://instagram.com/lafigaldexugabolos
+
 🍽️ RESTAURANTE
 
-76. Aimé Avilés
-   📍 Avilés, Asturias
-   📸 Instagram: https://instagram.com/aime_restaurante
-
-77. La cantina del tiempo
-   📍 Langreo, Asturias
-   📸 Instagram: https://instagram.com/rsrc.php
-
-78. La Tierra
+234. Restaurante Azafrán
    📍 Gijón, Asturias
-   📸 Instagram: https://instagram.com/latierragijon
+   📸 Instagram: https://instagram.com/azafranrestaurantegijon
 
-79. Narbasu Restaurante y Hotel
-   📍 Cereceda, Asturias
-   📸 Instagram: https://instagram.com/narbasu_palacioderubianes
+235. Casa Marcial
+   📍 Arriondas, Parres, Asturias
+   📸 Instagram: https://instagram.com/casamarcial_
 
-80. Restaurante Marcos
+236. Restaurante El Corral del Indianu
+   📍 Arriondas, Asturias
+   📸 Instagram: https://instagram.com/elcorraldelindianu
+
+237. Restaurante Marcos
    📍 Gijón, Asturias
    📸 Instagram: https://instagram.com/restaurantemarcosasturias
 
+238. Humo | Restaurante Gijón
+   📍 Gijón, Asturias
+   📸 Instagram: https://instagram.com/humo_gijon
 
-────────────────────────────────────────────────────────────────────────────────
-📍 PROVINCIA: ÁVILA
-────────────────────────────────────────────────────────────────────────────────
+239. La Senderuela - Proaza - Asturias
+   📍 Proaza, Asturias
+   📸 Instagram: https://instagram.com/lasenderuelaproaza
 
-🍺 BAR
+240. Restaurante Casa Chema
+   📍 Latores, Asturias
+   📸 Instagram: https://instagram.com/restaurante_casa_chema
 
-81. Cafetería Casa Pastel
-   📍 Ávila, Ávila
-   📸 Instagram: https://instagram.com/casapastel_es
+241. Pizzería Trattoria D'Aldo
+   📍 Gijón, Asturias
+   📸 Instagram: https://instagram.com/trattoriadaldo
 
-🏨 HOTEL
+242. La Candelaria de Mela
+   📍 Langreo, Asturias
+   📸 Instagram: https://instagram.com/lacandelariademela
 
-82. Caserío Fuentesclaras
-   📍 Ávila, Ávila
-   📸 Instagram: https://instagram.com/caseriofuentesclaras
+243. La Tabla
+   📍 Gijón, Asturias
+   📸 Instagram: https://instagram.com/restaurantelatabla
 
-83. Hotel Rural El Camino
-   📍 Candeleda, Ávila
-   📸 Instagram: https://instagram.com/hotelruralelcamino
+244. El bucanero
+   📍 Oviedo, Asturias
+   📸 Instagram: https://instagram.com/elbucanero.ovd
+
+245. Restaurante Los Agaves
+   📍 Oviedo, Asturias
+   📸 Instagram: https://instagram.com/restaurantelosagaves
+
+246. Restaurante La Panoya
+   📍 Oviedo, Asturias
+   📸 Instagram: https://instagram.com/mesonlapanoya
+
+247. Narbasu Restaurante y Hotel
+   📍 Cereceda, Asturias
+   📸 Instagram: https://instagram.com/narbasu_palacioderubianes
+
+248. Restaurante Gunea
+   📍 Avilés, Asturias
+   📸 Instagram: https://instagram.com/gunearestaurante
+
+249. Restaurante Alenda
+   📍 Villaviciosa, Asturias
+   📸 Instagram: https://instagram.com/alendarestaurante
+
+250. La Tierra
+   📍 Gijón, Asturias
+   📸 Instagram: https://instagram.com/latierragijon
+
+251. Restaurante Tandoori Cocina India en Gijon
+   📍 Gijón, Asturias
+   📸 Instagram: https://instagram.com/tandoorigijon
+
+252. Restaurante Alkasbah
+   📍 Avilés, Asturias
+   📸 Instagram: https://instagram.com/restaurante_alkasbah
+
+253. Casa Fermín
+   📍 Oviedo, Asturias
+   📸 Instagram: https://instagram.com/casafermin
+
+254. Afuego Restaurante
+   📍 Avilés, Asturias
+   📸 Instagram: https://instagram.com/afuego_restaurante_aviles
+
+255. Aimé Avilés
+   📍 Avilés, Asturias
+   📸 Instagram: https://instagram.com/aime_restaurante
+
+256. Farragua Restaurante
+   📍 Gijón, Asturias
+   📸 Instagram: https://instagram.com/farraguarestaurante
 
 
 ────────────────────────────────────────────────────────────────────────────────
@@ -408,23 +1090,67 @@ Fecha de generación: 21/10/2025, 15:11:01
 
 🏨 HOTEL
 
-84. Akla Hotel Badajoz
+257. Akla Hotel Badajoz
    📍 Badajoz, Badajoz
    📸 Instagram: https://instagram.com/akla.badajoz
 
 🍽️ RESTAURANTE
 
-85. Bar restaurante Pica pollo Dominicano
-   📍 Mérida, Badajoz
-   📸 Instagram: https://instagram.com/rsrc.php
+258. El Centenario restaurante y parrillada
+   📍 Almendralejo, Badajoz
+   📸 Instagram: https://instagram.com/elcentenarioes
 
-86. Bidaia | Restaurante en Badajoz
+259. Restaurante Agallas Gastro & Food
+   📍 Mérida, Badajoz
+   📸 Instagram: https://instagram.com/agallas_merida
+
+260. Taquería del Sur Badajoz
+   📍 Badajoz, Badajoz
+   📸 Instagram: https://instagram.com/taqueriadelsurbadajoz
+
+261. Churrería Cafetería Chocolatería Sanchez
+   📍 Mérida, Badajoz
+   📸 Instagram: https://instagram.com/glovo_es
+
+262. IRISH PUB PEOPLE
+   📍 Don Benito, Badajoz
+   📸 Instagram: https://instagram.com/officialirishpub
+
+263. EL BAR Old School Food
+   📍 Mérida, Badajoz
+   📸 Instagram: https://instagram.com/elbar.oldschoolfood
+
+264. Restaurante Lugaris
+   📍 Badajoz, Badajoz
+   📸 Instagram: https://instagram.com/javiergarcia68
+
+265. La Casa Del Gofre
+   📍 Badajoz, Badajoz
+   📸 Instagram: https://instagram.com/lacasadelgofre
+
+266. Restaurante La Bistrológica
+   📍 Badajoz, Badajoz
+   📸 Instagram: https://instagram.com/la_bistrologica
+
+267. Bidaia | Restaurante en Badajoz
    📍 Badajoz, Badajoz
    📸 Instagram: https://instagram.com/bidaiabadajoz
 
-87. la dicha
+268. Restaurante Martínez Paiva
+   📍 Almendralejo, Badajoz
+   📸 Instagram: https://instagram.com/restaurantemartinezpaiva
+
+269. IKIXAI
    📍 Mérida, Badajoz
-   📸 Instagram: https://instagram.com/rsrc.php
+   📸 Instagram: https://instagram.com/whatsapp
+
+270. Asante café Bar
+   📍 Mérida, Badajoz
+   📸 Instagram: https://instagram.com/asantecafebar
+
+271. La Mafia se Sienta a la Mesa
+   📍 Almendralejo, Badajoz
+   📸 Instagram: https://instagram.com/lamafiarestaurantes
 
 
 ────────────────────────────────────────────────────────────────────────────────
@@ -433,91 +1159,361 @@ Fecha de generación: 21/10/2025, 15:11:01
 
 🍺 BAR
 
-88. Alcabármix
-   📍 L'Hospitalet de Llobregat, Barcelona
-   📸 Instagram: https://instagram.com/alcabarmix
-
-89. AO
-   📍 Badalona, Barcelona
-   📸 Instagram: https://instagram.com/rsrc.php
-
-90. BAR ROSA BARCELONA
-   📍 Barcelona, Barcelona
-   📸 Instagram: https://instagram.com/rosabarcelona_
-
-91. BARBÀRBAR
-   📍 Badalona, Barcelona
-   📸 Instagram: https://instagram.com/barbaarbar
-
-92. Cafetería Cafés Caracas
-   📍 Barcelona, Barcelona
-   📸 Instagram: https://instagram.com/cafescaracas
-
-93. Cafetería Tokio-Barcelona
-   📍 Barcelona, Barcelona
-   📸 Instagram: https://instagram.com/rsrc.php
-
-94. Deluxe coffee Bar
-   📍 Sabadell, Barcelona
-   📸 Instagram: https://instagram.com/rsrc.php
-
-95. La Bodeguita de A Vaquiña Marela
-   📍 L'Hospitalet de Llobregat, Barcelona
-   📸 Instagram: https://instagram.com/avaquinamarela
-
-96. La Cherry Coffee Co.
-   📍 Barcelona, Barcelona
-   📸 Instagram: https://instagram.com/lacherry.coffee
-
-97. Magnolia café
-   📍 Barcelona, Barcelona
-   📸 Instagram: https://instagram.com/p
-
-98. Número Tres bar
-   📍 Barcelona, Barcelona
-   📸 Instagram: https://instagram.com/numerotres_cocktailbar
-
-99. Rec Sabadell
+272. Rec Sabadell
    📍 Sabadell, Barcelona
    📸 Instagram: https://instagram.com/recbrew
 
-100. ReenCuentro
+273. Syra Coffee | Sagrada Familia
+   📍 Barcelona, Barcelona
+   📸 Instagram: https://instagram.com/syracoffee
+
+274. La Cherry Coffee Co.
+   📍 Barcelona, Barcelona
+   📸 Instagram: https://instagram.com/lacherry.coffee
+
+275. Syra Coffee - Born
+   📍 Barcelona, Barcelona
+   📸 Instagram: https://instagram.com/syracoffee
+
+276. Cafès Bofarull - Café de Especialidad
+   📍 Badalona, Barcelona
+   📸 Instagram: https://instagram.com/cafesbofarull
+
+277. Número Tres bar
+   📍 Barcelona, Barcelona
+   📸 Instagram: https://instagram.com/numerotres_cocktailbar
+
+278. Noble Barcelona
+   📍 Barcelona, Barcelona
+   📸 Instagram: https://instagram.com/noble_barcelona
+
+279. BAR ROSA BARCELONA
+   📍 Barcelona, Barcelona
+   📸 Instagram: https://instagram.com/rosabarcelona_
+
+280. Café Café Tinto Colombiano
+   📍 Sabadell, Barcelona
+   📸 Instagram: https://instagram.com/cafetintocolombiano
+
+281. News & Coffee
+   📍 Barcelona, Barcelona
+   📸 Instagram: https://instagram.com/newsandcoffee.eu
+
+282. Tingle Authentic
+   📍 L'Hospitalet de Llobregat, Barcelona
+   📸 Instagram: https://instagram.com/tingle.resto
+
+283. Hemingway Gin & Cocktail Bar
+   📍 Barcelona, Barcelona
+   📸 Instagram: https://instagram.com/hemingway_bcn
+
+284. Space Cowboy
+   📍 Barcelona, Barcelona
+   📸 Instagram: https://instagram.com/spacecowboybcn
+
+285. Afterlife Esports Gamer Bar
+   📍 Barcelona, Barcelona
+   📸 Instagram: https://instagram.com/barafterlife
+
+286. Kserol
+   📍 Barcelona, Barcelona
+   📸 Instagram: https://instagram.com/kserolbistrot
+
+287. Mizuwari Cocktail Bar
+   📍 L'Hospitalet de Llobregat, Barcelona
+   📸 Instagram: https://instagram.com/mizuwaricocktailbar
+
+288. Micu Maku
+   📍 Barcelona, Barcelona
+   📸 Instagram: https://instagram.com/micumaku
+
+289. Alcabármix
+   📍 L'Hospitalet de Llobregat, Barcelona
+   📸 Instagram: https://instagram.com/alcabarmix
+
+290. La Fem
+   📍 Sabadell, Barcelona
+   📸 Instagram: https://instagram.com/lafembeer
+
+291. Kōan Club
+   📍 Barcelona, Barcelona
+   📸 Instagram: https://instagram.com/koanclub
+
+292. Santagloria Coffee & Bakery
+   📍 Terrassa, Barcelona
+   📸 Instagram: https://instagram.com/santagloria_es
+
+293. Corgi Cafe | Eixample
+   📍 Barcelona, Barcelona
+   📸 Instagram: https://instagram.com/corgicafe_bcn
+
+294. Berry Brunch Barcelona
+   📍 Barcelona, Barcelona
+   📸 Instagram: https://instagram.com/berrybrunch.bcn
+
+295. Fa Patxoca
+   📍 Barcelona, Barcelona
+   📸 Instagram: https://instagram.com/fapatxoca28
+
+296. Corgi Cafe | Sagrada
+   📍 Barcelona, Barcelona
+   📸 Instagram: https://instagram.com/corgicafe_bcn
+
+297. Billy Café
+   📍 Barcelona, Barcelona
+   📸 Instagram: https://instagram.com/billybrunch
+
+298. Syra Coffee
+   📍 Barcelona, Barcelona
+   📸 Instagram: https://instagram.com/syracoffee
+
+299. Austral Coffee Bar
+   📍 Barcelona, Barcelona
+   📸 Instagram: https://instagram.com/australcoffeebar
+
+300. El Quinto Moño
+   📍 Barcelona, Barcelona
+   📸 Instagram: https://instagram.com/elquintom
+
+301. ReenCuentro
    📍 Sabadell, Barcelona
    📸 Instagram: https://instagram.com/rcreencuentro
 
+302. La Bodeguita de A Vaquiña Marela
+   📍 L'Hospitalet de Llobregat, Barcelona
+   📸 Instagram: https://instagram.com/avaquinamarela
+
+303. Corgi Cafè | Gòtic
+   📍 Barcelona, Barcelona
+   📸 Instagram: https://instagram.com/corgicafe_bcn
+
+304. The Coffee House Barcelona
+   📍 Barcelona, Barcelona
+   📸 Instagram: https://instagram.com/thecoffeehousebcn
+
+305. Caravelle
+   📍 Barcelona, Barcelona
+   📸 Instagram: https://instagram.com/caravelle31
+
+306. Soul Cafè
+   📍 Barcelona, Barcelona
+   📸 Instagram: https://instagram.com/soulcafebcn
+
+307. Baristes
+   📍 Terrassa, Barcelona
+   📸 Instagram: https://instagram.com/baristes
+
+308. Dalston Coffee
+   📍 Barcelona, Barcelona
+   📸 Instagram: https://instagram.com/dalstoncoffee
+
+309. BARBÀRBAR
+   📍 Badalona, Barcelona
+   📸 Instagram: https://instagram.com/barbaarbar
+
+310. La Whiskeria - Whisky & Cocktail Bar
+   📍 Barcelona, Barcelona
+   📸 Instagram: https://instagram.com/lawhiskeriabcn
+
+311. BORO Bar
+   📍 Barcelona, Barcelona
+   📸 Instagram: https://instagram.com/borobarbcn
+
+312. Marlowe Bar
+   📍 Barcelona, Barcelona
+   📸 Instagram: https://instagram.com/marlowe_bar
+
+313. Cafetería Cafés Caracas
+   📍 Barcelona, Barcelona
+   📸 Instagram: https://instagram.com/cafescaracas
+
+314. BODEGA Biarritz 1881 Tapas bar
+   📍 Barcelona, Barcelona
+   📸 Instagram: https://instagram.com/bodegabiarritz
+
+315. El Vermutet
+   📍 Terrassa, Barcelona
+   📸 Instagram: https://instagram.com/elvermutet_
+
+316. Bar musical Santa Martha BCN
+   📍 Barcelona, Barcelona
+   📸 Instagram: https://instagram.com/santamarthabcn
+
+317. Coffee & Company
+   📍 Badalona, Barcelona
+   📸 Instagram: https://instagram.com/coffee_and_company
+
+🏨 HOTEL
+
+318. Masia Can Canyes - Hotel rural & Spa
+   📍 Sant Llorenç d'Hortons, Barcelona
+   📸 Instagram: https://instagram.com/masiacancanyes
+
+319. Hotel Moli de la Torre
+   📍 Bigues i Riells, Barcelona
+   📸 Instagram: https://instagram.com/hotelmolidelatorre
+
+320. Hotel & Spa Sa Voga
+   📍 Arenys de Mar, Barcelona
+   📸 Instagram: https://instagram.com/savoga
+
+321. Celler Suites
+   📍 Sant Fost de Campsentelles, Barcelona
+   📸 Instagram: https://instagram.com/cellersuitesboutiqueapartments
+
+322. Hotel Condes de Barcelona
+   📍 Barcelona, Barcelona
+   📸 Instagram: https://instagram.com/hotelcondesbcn
+
+323. Espai Apartamentos Progres by Be Barcelona
+   📍 L'Hospitalet de Llobregat, Barcelona
+   📸 Instagram: https://instagram.com/espaiapartamentosprogres
+
 🍽️ RESTAURANTE
 
-101. Asun Brunch & Bakery Barcelona
-   📍 Barcelona, Barcelona
-   📸 Instagram: https://instagram.com/rsrc.php
-
-102. B A R A N S U
-   📍 Terrassa, Barcelona
-   📸 Instagram: https://instagram.com/rsrc.php
-
-103. Capibara
+324. Tariq - Restaurant Indo-Pakistaní Badalona
    📍 Badalona, Barcelona
-   📸 Instagram: https://instagram.com/capibara.bakery
+   📸 Instagram: https://instagram.com/tariqbadalona
 
-104. Casa Nita
+325. Casa Nita
    📍 Terrassa, Barcelona
    📸 Instagram: https://instagram.com/casanitarestaurant
 
-105. Dessi Tadka - Indian Street Food & Restaurant
+326. EatMyTrip | Consell de Cent
+   📍 Barcelona, Barcelona
+   📸 Instagram: https://instagram.com/eatmytrip
+
+327. Cal Tonyina
+   📍 Terrassa, Barcelona
+   📸 Instagram: https://instagram.com/caltonyina
+
+328. Brutal58
+   📍 L'Hospitalet de Llobregat, Barcelona
+   📸 Instagram: https://instagram.com/brutal58.es
+
+329. Intrèpid
+   📍 Sabadell, Barcelona
+   📸 Instagram: https://instagram.com/intrepid_restaurant
+
+330. Restaurant l'Indret
+   📍 Terrassa, Barcelona
+   📸 Instagram: https://instagram.com/restaurantlindret
+
+331. Batea Barcelona
+   📍 Barcelona, Barcelona
+   📸 Instagram: https://instagram.com/bateabarcelona
+
+332. Calmista Restaurant
+   📍 Terrassa, Barcelona
+   📸 Instagram: https://instagram.com/calmistarestaurant
+
+333. Restaurant Casa Amàlia
+   📍 Barcelona, Barcelona
+   📸 Instagram: https://instagram.com/casaamalia1950
+
+334. Lilo Brunch Barcelona | Sagrada Familia
+   📍 Barcelona, Barcelona
+   📸 Instagram: https://instagram.com/lilobrunch
+
+335. Bistró Sagrada
+   📍 Barcelona, Barcelona
+   📸 Instagram: https://instagram.com/restaurantebistrosagrada
+
+336. Restaurant BelleBuòn
+   📍 Barcelona, Barcelona
+   📸 Instagram: https://instagram.com/bellebuonitaliano
+
+337. Dessi Tadka - Indian Street Food & Restaurant
    📍 Badalona, Barcelona
    📸 Instagram: https://instagram.com/dessitadka.badalona
 
-106. Gastroteca Espai Classual
+338. La Terrassa de Pelai
+   📍 Barcelona, Barcelona
+   📸 Instagram: https://instagram.com/laterrassadepelai
+
+339. Bella Venezia
+   📍 Barcelona, Barcelona
+   📸 Instagram: https://instagram.com/bellavenezia_bcn
+
+340. Restaurant Tastavents
+   📍 Badalona, Barcelona
+   📸 Instagram: https://instagram.com/tastavents
+
+341. Billy Brunch
+   📍 Barcelona, Barcelona
+   📸 Instagram: https://instagram.com/billybrunch
+
+342. SENSE SENY | Restaurante Barcelona
+   📍 Barcelona, Barcelona
+   📸 Instagram: https://instagram.com/senseseny
+
+343. La Cucu
+   📍 Sabadell, Barcelona
+   📸 Instagram: https://instagram.com/lacucurestaurant
+
+344. Lilo Brunch | Enric Granados
+   📍 Barcelona, Barcelona
+   📸 Instagram: https://instagram.com/lilobrunch
+
+345. All Day Brunch by Café & Té
+   📍 L'Hospitalet de Llobregat, Barcelona
+   📸 Instagram: https://instagram.com/cafeyte.es
+
+346. EdeNova Restaurant Barcelona
+   📍 Barcelona, Barcelona
+   📸 Instagram: https://instagram.com/edenovabcn
+
+347. Made In Sicily
+   📍 Badalona, Barcelona
+   📸 Instagram: https://instagram.com/made_in_sicily
+
+348. IKOYA Izakaya
+   📍 Barcelona, Barcelona
+   📸 Instagram: https://instagram.com/ikoyaizakaya
+
+349. Gastroteca Espai Classual
    📍 Badalona, Barcelona
    📸 Instagram: https://instagram.com/espai.classual.bdn
 
-107. Oaxaca Café y Brunch
+350. Antara
    📍 Badalona, Barcelona
-   📸 Instagram: https://instagram.com/rsrc.php
+   📸 Instagram: https://instagram.com/antarabdn
 
-108. Restaurant Tastavents
+351. Disfrutar
+   📍 Barcelona, Barcelona
+   📸 Instagram: https://instagram.com/disfrutarbcn
+
+352. Fratè RistoPizzeria
    📍 Badalona, Barcelona
-   📸 Instagram: https://instagram.com/tastavents
+   📸 Instagram: https://instagram.com/frate_ristopizzeria
+
+353. Restaurante La Estrella 1924
+   📍 Barcelona, Barcelona
+   📸 Instagram: https://instagram.com/restaurant_laestrella1924
+
+354. El Glop Gaudí
+   📍 Barcelona, Barcelona
+   📸 Instagram: https://instagram.com/elglopbarcelona
+
+355. Pastisseria Delightcious Cake Shop Cafè
+   📍 Terrassa, Barcelona
+   📸 Instagram: https://instagram.com/delightciouscakes
+
+356. La Forquilla Restaurant
+   📍 Barcelona, Barcelona
+   📸 Instagram: https://instagram.com/laforquillarestaurant
+
+357. Restaurant Espai Versatil
+   📍 Badalona, Barcelona
+   📸 Instagram: https://instagram.com/espai.versatil.bdn
+
+358. Rice Restaurante Sabadell
+   📍 Sabadell, Barcelona
+   📸 Instagram: https://instagram.com/ricesbd
+
+359. Angle Barcelona
+   📍 Barcelona, Barcelona
+   📸 Instagram: https://instagram.com/angle_restaurant
 
 
 ────────────────────────────────────────────────────────────────────────────────
@@ -526,13 +1522,83 @@ Fecha de generación: 21/10/2025, 15:11:01
 
 🍺 BAR
 
-109. BBS Café
+360. Cokooncafé
+   📍 Bilbao, Bizkaia
+   📸 Instagram: https://instagram.com/cokooncafe
+
+361. Dupla Specialty Coffee
+   📍 Bilbao, Bizkaia
+   📸 Instagram: https://instagram.com/duplabilbao
+
+362. BBS Café
    📍 Abadiño-Zelaieta, Bizkaia
    📸 Instagram: https://instagram.com/bbscafedespecialidad
 
+363. Taberna Mikel Bengoa
+   📍 Mesterika, Bizkaia
+   📸 Instagram: https://instagram.com/tabernamikelbengoa
+
+364. Azzurro Arcade Rock Pub
+   📍 Bilbao, Bizkaia
+   📸 Instagram: https://instagram.com/azzurrorockpub
+
+🏨 HOTEL
+
+365. Hotel Luruna | Palacio Larrinaga Mundaka
+   📍 Mundaka, Bizkaia
+   📸 Instagram: https://instagram.com/lurunahotel
+
+366. Garaiko Landetxea
+   📍 Garai (San Migel), Bizkaia
+   📸 Instagram: https://instagram.com/garaiko.landetxea
+
+367. Amalurra EcoHotel y Retreat Center
+   📍 Bizkaia, Bizkaia
+   📸 Instagram: https://instagram.com/amalurrahotel
+
+368. Batimont Suites & Apartments
+   📍 Bilbao, Bizkaia
+   📸 Instagram: https://instagram.com/batimontsuite
+
+369. Casa Rural Mendialai
+   📍 Bizkaia, Bizkaia
+   📸 Instagram: https://instagram.com/mendialaikarrantza
+
 🍽️ RESTAURANTE
 
-110. Restaurante La Viña De Henao Casa De Comidas
+370. Bohemian Lane Pastelería Vegana
+   📍 Bilbao, Bizkaia
+   📸 Instagram: https://instagram.com/bohemianlanebilbao
+
+371. Restaurante La Revelia
+   📍 Amorebieta, Bizkaia
+   📸 Instagram: https://instagram.com/larevelia
+
+372. ETXANOBE
+   📍 Bilbao, Bizkaia
+   📸 Instagram: https://instagram.com/fcanalesetxanobe
+
+373. Duzu Kafe Taberna
+   📍 Durango, Bizkaia
+   📸 Instagram: https://instagram.com/duzukafetaberna
+
+374. Restaurante Petit Komité
+   📍 Galdakao, Bizkaia
+   📸 Instagram: https://instagram.com/restaurantepetitkomite
+
+375. Restaurante Aura
+   📍 Bilbao, Bizkaia
+   📸 Instagram: https://instagram.com/aura.restaurante
+
+376. Mugarra
+   📍 Bilbao, Bizkaia
+   📸 Instagram: https://instagram.com/somosmugarra
+
+377. Restaurante Azurmendi
+   📍 Uria, Bizkaia
+   📸 Instagram: https://instagram.com/azurmendi_atxa
+
+378. Restaurante La Viña De Henao Casa De Comidas
    📍 Bilbao, Bizkaia
    📸 Instagram: https://instagram.com/rest_lavinadehenao
 
@@ -541,42 +1607,43 @@ Fecha de generación: 21/10/2025, 15:11:01
 📍 PROVINCIA: BURGOS
 ────────────────────────────────────────────────────────────────────────────────
 
+🍺 BAR
+
+379. Cafés Santa Rosa, SL
+   📍 Burgos, Burgos
+   📸 Instagram: https://instagram.com/cafessantarosa
+
 🏨 HOTEL
 
-111. Quinta San Francisco
+380. Quinta San Francisco
    📍 Castrojeriz, Burgos
    📸 Instagram: https://instagram.com/hotelquintasanfrancisco
 
 🍽️ RESTAURANTE
 
-112. Aura Gastronómica
+381. Restaurante La Sastrería
+   📍 Burgos, Burgos
+   📸 Instagram: https://instagram.com/squarespace
+
+382. Restaurante Cobo Evolución
+   📍 Burgos, Burgos
+   📸 Instagram: https://instagram.com/oskardiaz_
+
+383. Restaurante El Fogón de Jesusón
+   📍 Burgos, Burgos
+   📸 Instagram: https://instagram.com/elfogondejesuson
+
+384. Asador San Lorenzo
+   📍 Burgos, Burgos
+   📸 Instagram: https://instagram.com/asadorsanlorenzo
+
+385. Aura Gastronómica
    📍 Burgos, Burgos
    📸 Instagram: https://instagram.com/auragastronomica
 
-
-────────────────────────────────────────────────────────────────────────────────
-📍 PROVINCIA: CÁCERES
-────────────────────────────────────────────────────────────────────────────────
-
-🏨 HOTEL
-
-113. Apartamentos El Patio Plaza Mayor Cáceres
-   📍 Cáceres, Cáceres
-   📸 Instagram: https://instagram.com/at_elpatio
-
-114. Apartamentos Plaza Mayor 35
-   📍 Cáceres, Cáceres
-   📸 Instagram: https://instagram.com/atplazamayor35
-
-115. Complejo Rural La Paloma
-   📍 Arroyo de la Luz, Cáceres
-   📸 Instagram: https://instagram.com/complejolapaloma
-
-🍽️ RESTAURANTE
-
-116. Borona Bistró
-   📍 Cáceres, Cáceres
-   📸 Instagram: https://instagram.com/boronabistro
+386. La Fábrica Restaurante
+   📍 Burgos, Burgos
+   📸 Instagram: https://instagram.com/lafabricaburgos
 
 
 ────────────────────────────────────────────────────────────────────────────────
@@ -585,21 +1652,65 @@ Fecha de generación: 21/10/2025, 15:11:01
 
 🍺 BAR
 
-117. Kafeteros
+387. La Inesperada
+   📍 Abionzo, Cantabria
+   📸 Instagram: https://instagram.com/lainesperada_abionzo
+
+388. Nano café
    📍 Santander, Cantabria
-   📸 Instagram: https://instagram.com/kafeteros_
+   📸 Instagram: https://instagram.com/nano.castelar
+
+389. La Fábrica Craft Bar Smach Taproom
+   📍 Santander, Cantabria
+   📸 Instagram: https://instagram.com/cervezasmach
+
+390. La Soldrería
+   📍 Potes, Cantabria
+   📸 Instagram: https://instagram.com/lasoldreria
 
 🏨 HOTEL
 
-118. Posada La Hijuela
+391. Hospedería El Cantio
+   📍 Bárcena, Cantabria
+   📸 Instagram: https://instagram.com/turismoencantabria
+
+392. Hospedaje María Jesús
+   📍 Santillana del Mar, Cantabria
+   📸 Instagram: https://instagram.com/turismoencantabria
+
+393. Posada La Hijuela
    📍 Queveda, Cantabria
    📸 Instagram: https://instagram.com/turismoencantabria
 
 🍽️ RESTAURANTE
 
-119. Restaurante Sotavento
+394. Posada Restaurante Semilla
+   📍 Santa María de Cayón, Cantabria
+   📸 Instagram: https://instagram.com/semillaposadarestaurante
+
+395. Oromo Cafe y Poke
+   📍 Torrelavega, Cantabria
+   📸 Instagram: https://instagram.com/oromocafepoke
+
+396. Restaurante Sotavento
    📍 San Vicente de la Barquera, Cantabria
    📸 Instagram: https://instagram.com/turismoencantabria
+
+397. Laila Restaurante
+   📍 Mompía, Cantabria
+   📸 Instagram: https://instagram.com/lailarestaurante
+
+398. Restaurante La Bicicleta
+   📍 Hoznayo, Cantabria, Cantabria
+   📸 Instagram: https://instagram.com/labicicletarest
+
+399. Restaurante La Gruta de Jose
+   📍 Santander, Cantabria
+   📸 Instagram: https://instagram.com/lagrutadejose
+
+400. Restaurante Cenador de Amós
+   📍 Villaverde de Pontones, Cantabria
+   📸 Instagram: https://instagram.com/cenadordeamos
 
 
 ────────────────────────────────────────────────────────────────────────────────
@@ -608,61 +1719,355 @@ Fecha de generación: 21/10/2025, 15:11:01
 
 🏨 HOTEL
 
-120. Alqueria Calatrava B&B
+401. EL COLMENAR
+   📍 Chóvar, Castellón
+   📸 Instagram: https://instagram.com/colmenar.coliving
+
+402. Alqueria Calatrava B&B
    📍 Burriana, Castellón
    📸 Instagram: https://instagram.com/alqueria_calatrava
 
-121. Hotel aigua oliva
+403. Hotel aigua oliva
    📍 Benicarló, Castellón
    📸 Instagram: https://instagram.com/arc_estudi
 
 🍽️ RESTAURANTE
 
-122. Anhelo Restaurante
+404. Restaurante Pairal
    📍 Castelló de la Plana, Castellón
-   📸 Instagram: https://instagram.com/restaurante_anhelo
+   📸 Instagram: https://instagram.com/restaurantepairalcs
 
-123. Ika Sushi
+405. Restaurante Mediterráneo
+   📍 Grao de Castellón, Castellón
+   📸 Instagram: https://instagram.com/res.mediterraneo
+
+406. Le Bistrot Gastronómico
+   📍 Castelló de la Plana, Castellón
+   📸 Instagram: https://instagram.com/lebistrotcs
+
+407. Irasshai Izakaya Castellón Tasca Japonesa
+   📍 Castelló de la Plana, Castellón
+   📸 Instagram: https://instagram.com/irasshai_izakayacs
+
+408. Restaurante Raúl Resino
    📍 Benicarló, Castellón
-   📸 Instagram: https://instagram.com/ika_sushibenicarlo
+   📸 Instagram: https://instagram.com/raulresinorestaurante
 
-124. Julivert • Menjar per emportar
-   📍 Vila-real, Castellón
-   📸 Instagram: https://instagram.com/rsrc.php
+409. Dyonne's Restaurante
+   📍 Castelló de la Plana, Castellón
+   📸 Instagram: https://instagram.com/dyonnesrestaurante
 
-125. LES DUNES - ARROCERÍA - RESTAURANTE
+410. LES DUNES - ARROCERÍA - RESTAURANTE
    📍 Borriana, Castellón
    📸 Instagram: https://instagram.com/lesdunes_restaurante
 
-126. Restaurante CÚPULA
+411. Restaurante L'Arrosseria
+   📍 Castelló de la Plana, Castellón
+   📸 Instagram: https://instagram.com/larrosseriarestaurante
+
+412. Ika Sushi
+   📍 Benicarló, Castellón
+   📸 Instagram: https://instagram.com/ika_sushibenicarlo
+
+413. Restaurante Macadan
+   📍 Borriana, Castellón
+   📸 Instagram: https://instagram.com/restaurantemacadan
+
+414. Restaurante CÚPULA
    📍 Castellón de la Plana, Castellón
    📸 Instagram: https://instagram.com/cupula.castellon
 
+415. Anhelo Restaurante
+   📍 Castelló de la Plana, Castellón
+   📸 Instagram: https://instagram.com/restaurante_anhelo
+
+416. Santagloria Coffee & Bakery
+   📍 Castelló de la Plana, Castellón
+   📸 Instagram: https://instagram.com/santagloria_es
+
 
 ────────────────────────────────────────────────────────────────────────────────
-📍 PROVINCIA: CÓRDOBA
+📍 PROVINCIA: CIUDAD REAL
 ────────────────────────────────────────────────────────────────────────────────
+
+🍺 BAR
+
+417. La Maison de TeCafé
+   📍 Ciudad Real, Ciudad Real
+   📸 Instagram: https://instagram.com/lamaisondetecafe
+
+418. ONZA
+   📍 Ciudad Real, Ciudad Real
+   📸 Instagram: https://instagram.com/onza_specialtycoffee
+
+419. Churrería JOVI Chocolatería Cafetería Bar.
+   📍 Ciudad Real, Ciudad Real
+   📸 Instagram: https://instagram.com/churreria_jovi
 
 🏨 HOTEL
 
-127. Patio del Posadero - Hotel Boutique
-   📍 Córdoba, Córdoba
-   📸 Instagram: https://instagram.com/hotelpatiodelposadero
+420. Casa Rural "Casa La Abuela Inés"
+   📍 Corral de Calatrava, Ciudad Real
+   📸 Instagram: https://instagram.com/casalaabuelaines
+
+421. Hotel Retiro del Maestre en Almagro
+   📍 Almagro, Ciudad Real
+   📸 Instagram: https://instagram.com/retirodelmaestre_hotelalmagro
 
 
 ────────────────────────────────────────────────────────────────────────────────
 📍 PROVINCIA: CUENCA
 ────────────────────────────────────────────────────────────────────────────────
 
+🍺 BAR
+
+422. Taberna Jovi
+   📍 Cuenca, Cuenca
+   📸 Instagram: https://instagram.com/tabernajovi
+
 🏨 HOTEL
 
-128. Casas Rurales Cuenca - Planeta Chicote
-   📍 Zafra de Záncara, Cuenca
-   📸 Instagram: https://instagram.com/planetachicote
-
-129. Huerto de Mateo Arana
+423. Huerto de Mateo Arana
    📍 Cuenca, Cuenca
    📸 Instagram: https://instagram.com/huertodemateoarana
+
+424. Hospedería del Seminario
+   📍 Cuenca, Cuenca
+   📸 Instagram: https://instagram.com/hospederiadelseminario
+
+425. Green River Hostel
+   📍 Cuenca, Cuenca
+   📸 Instagram: https://instagram.com/hostel.greenriver
+
+426. Luxury Rural Cuenca
+   📍 Nohales, Cuenca
+   📸 Instagram: https://instagram.com/estudiossam
+
+🍽️ RESTAURANTE
+
+427. CASAS COLGADAS | Restaurante
+   📍 Cuenca, Cuenca
+   📸 Instagram: https://instagram.com/casascolgadas.restaurant
+
+
+────────────────────────────────────────────────────────────────────────────────
+📍 PROVINCIA: CÁCERES
+────────────────────────────────────────────────────────────────────────────────
+
+🏨 HOTEL
+
+428. Apartamentos El Patio Plaza Mayor Cáceres
+   📍 Cáceres, Cáceres
+   📸 Instagram: https://instagram.com/at_elpatio
+
+429. Apartamentos El Patio Plaza Santa Clara Cáceres
+   📍 Cáceres, Cáceres
+   📸 Instagram: https://instagram.com/at_elpatio
+
+430. HOTEL BOUTIQUE POSADA DOS ORILLAS
+   📍 Trujillo, Cáceres
+   📸 Instagram: https://instagram.com/dosorillasrestaurante_
+
+431. Apartamentos Plaza Mayor 35
+   📍 Cáceres, Cáceres
+   📸 Instagram: https://instagram.com/atplazamayor35
+
+432. Complejo Rural La Paloma
+   📍 Arroyo de la Luz, Cáceres
+   📸 Instagram: https://instagram.com/complejolapaloma
+
+433. ALOJAMIENTO EL MIAJON DE LOS CASTUOS
+   📍 Valdesalor, Cáceres
+   📸 Instagram: https://instagram.com/bookingcom
+
+🍽️ RESTAURANTE
+
+434. Nolasco | Restaurante en Cáceres
+   📍 Cáceres, Cáceres
+   📸 Instagram: https://instagram.com/restaurantenolasco
+
+435. Restaurante Homarus
+   📍 Cáceres, Cáceres
+   📸 Instagram: https://instagram.com/restaurantehomaruscc
+
+436. Restaurante La Fabiola
+   📍 Cáceres, Cáceres
+   📸 Instagram: https://instagram.com/santistebanparis
+
+437. Restaurante alBalat
+   📍 Cáceres, Cáceres
+   📸 Instagram: https://instagram.com/restaurantealbalat
+
+438. Borona Bistró
+   📍 Cáceres, Cáceres
+   📸 Instagram: https://instagram.com/boronabistro
+
+
+────────────────────────────────────────────────────────────────────────────────
+📍 PROVINCIA: CÁDIZ
+────────────────────────────────────────────────────────────────────────────────
+
+🏨 HOTEL
+
+439. Apartamentos Maier
+   📍 Cádiz, Cádiz
+   📸 Instagram: https://instagram.com/apartamentosmaier
+
+440. La Caleta Qe Hotels
+   📍 Cádiz, Cádiz
+   📸 Instagram: https://instagram.com/qehotels
+
+441. Hotel Olom - Adults recommended
+   📍 Cádiz, Cádiz
+   📸 Instagram: https://instagram.com/hotel.olom
+
+442. Hotel Soho Boutique Columela
+   📍 Cádiz, Cádiz
+   📸 Instagram: https://instagram.com/sohoboutiquehotels
+
+443. BYPILLOW Casa Gades
+   📍 Cádiz, Cádiz
+   📸 Instagram: https://instagram.com/bypillow
+
+🍽️ RESTAURANTE
+
+444. Bahia Cadiz Restaurante 1965
+   📍 Cádiz, Cádiz
+   📸 Instagram: https://instagram.com/bahiacadiz1965
+
+445. Ettu Restaurante
+   📍 Cádiz, Cádiz
+   📸 Instagram: https://instagram.com/ettu.restaurante
+
+
+────────────────────────────────────────────────────────────────────────────────
+📍 PROVINCIA: CÓRDOBA
+────────────────────────────────────────────────────────────────────────────────
+
+🍺 BAR
+
+446. Glace Lounge Bar
+   📍 Córdoba, Córdoba
+   📸 Instagram: https://instagram.com/glacecocktails
+
+447. Taberna La Montillana
+   📍 Córdoba, Córdoba
+   📸 Instagram: https://instagram.com/tabernalamontillana
+
+🏨 HOTEL
+
+448. Patio del Posadero - Hotel Boutique
+   📍 Córdoba, Córdoba
+   📸 Instagram: https://instagram.com/hotelpatiodelposadero
+
+449. Eurostars Azahar
+   📍 Córdoba, Córdoba
+   📸 Instagram: https://instagram.com/eurostarshotels
+
+450. Apartasuites Alberca
+   📍 Córdoba, Córdoba
+   📸 Instagram: https://instagram.com/apartasuitesalberca
+
+451. Hotel Hospes Palacio del Bailío
+   📍 Córdoba, Córdoba
+   📸 Instagram: https://instagram.com/hospeshotels
+
+🍽️ RESTAURANTE
+
+452. Restaurante Umaueyon
+   📍 Córdoba, Córdoba
+   📸 Instagram: https://instagram.com/restauranteumaueyon
+
+453. Vertigo Restaurante
+   📍 Córdoba, Córdoba
+   📸 Instagram: https://instagram.com/experienciavertigo
+
+454. Bodegas Mezquita Ribera
+   📍 Córdoba, Córdoba
+   📸 Instagram: https://instagram.com/bodegasmezquita
+
+455. Bodegas Mezquita Corregidor
+   📍 Córdoba, Córdoba
+   📸 Instagram: https://instagram.com/bodegasmezquita
+
+456. Bodegas Mezquita Céspedes
+   📍 Córdoba, Córdoba
+   📸 Instagram: https://instagram.com/bodegasmezquita
+
+457. Restaurante Ermita de la Candelaria
+   📍 Córdoba, Córdoba
+   📸 Instagram: https://instagram.com/ermitacandelaria
+
+458. Noor Restaurant
+   📍 Córdoba, Córdoba
+   📸 Instagram: https://instagram.com/noorrestaurant
+
+459. Bodegas Mezquita Cruz del Rastro
+   📍 Córdoba, Córdoba
+   📸 Instagram: https://instagram.com/bodegasmezquita
+
+460. Restaurante La Esquinita de la Judería El Patio
+   📍 Córdoba, Córdoba
+   📸 Instagram: https://instagram.com/laesquinitadelajuderiaterraza
+
+461. Restaurante La Cuchara de San Lorenzo
+   📍 Córdoba, Córdoba
+   📸 Instagram: https://instagram.com/lacucharadesanlorenzo
+
+462. Terra Olea
+   📍 Córdoba, Córdoba
+   📸 Instagram: https://instagram.com/terraolea
+
+463. Restaurante El Rincon De Carmen
+   📍 Córdoba, Córdoba
+   📸 Instagram: https://instagram.com/restauranterincondecarmen
+
+
+────────────────────────────────────────────────────────────────────────────────
+📍 PROVINCIA: GIPUZKOA
+────────────────────────────────────────────────────────────────────────────────
+
+🍺 BAR
+
+464. Bar Txepetxa
+   📍 Donostia, Gipuzkoa
+   📸 Instagram: https://instagram.com/bartxepetxa
+
+465. Hogar del Jubilado
+   📍 Ormaiztegi, Gipuzkoa
+   📸 Instagram: https://instagram.com/ormaiztegikultura
+
+466. Syra Coffee - Plaza Gipuzkoa
+   📍 Donostia, Gipuzkoa
+   📸 Instagram: https://instagram.com/syracoffee
+
+🏨 HOTEL
+
+467. Iriarte Jauregia Hotel
+   📍 Gipuzkoa, Gipuzkoa
+   📸 Instagram: https://instagram.com/iriartejauregia
+
+468. Hotel Ixua
+   📍 Eibar, Gipuzkoa
+   📸 Instagram: https://instagram.com/ixuahotela
+
+🍽️ RESTAURANTE
+
+469. Kirkilla
+   📍 Zarautz, Gipuzkoa
+   📸 Instagram: https://instagram.com/kirkilla_enea
+
+470. Restaurante Aittola-Zar Jatetxea
+   📍 Azkoitia, Gipuzkoa
+   📸 Instagram: https://instagram.com/aittola_zar
+
+471. AMA Tolosa
+   📍 San Blas, Gipuzkoa
+   📸 Instagram: https://instagram.com/amatolosa
+
+472. Restaurante Haizea
+   📍 Orio, Gipuzkoa
+   📸 Instagram: https://instagram.com/restaurante_haizea
 
 
 ────────────────────────────────────────────────────────────────────────────────
@@ -671,33 +2076,93 @@ Fecha de generación: 21/10/2025, 15:11:01
 
 🍺 BAR
 
-130. ONIRIA CAFÈ
+473. Bagels & Beers
+   📍 Girona, Girona
+   📸 Instagram: https://instagram.com/bagelsandbeersgi
+
+474. Nykteri's Cocktail Bar
+   📍 Girona, Girona
+   📸 Instagram: https://instagram.com/nykteriscocktailbar
+
+475. ONIRIA CAFÈ
    📍 Girona, Girona
    📸 Instagram: https://instagram.com/oniriacafe
 
+476. Originem
+   📍 Girona, Girona
+   📸 Instagram: https://instagram.com/originem.cat
+
+477. Massana
+   📍 Girona, Girona
+   📸 Instagram: https://instagram.com/restaurantmassana
+
 🏨 HOTEL
 
-131. Equipe Guesthouse
-   📍 Girona, Girona
-   📸 Instagram: https://instagram.com/equipegirona
-
-132. Little Home Girona
+478. Little Home Girona
    📍 Girona, Girona
    📸 Instagram: https://instagram.com/littlehomegirona
 
-133. Naturaki Can Parés
+479. Naturaki Can Parés
    📍 Sant Gregori, Girona
    📸 Instagram: https://instagram.com/naturaki
 
+480. Hotel Boutique Casa Cacao Girona
+   📍 Girona, Girona
+   📸 Instagram: https://instagram.com/hotelcasacacaogirona
+
+481. Equipe Guesthouse
+   📍 Girona, Girona
+   📸 Instagram: https://instagram.com/equipegirona
+
+482. Hotel can bo de pau
+   📍 Salt, Girona
+   📸 Instagram: https://instagram.com/canbodepau
+
+483. Hotel Mas Pelegrí
+   📍 Serinyà, Girona
+   📸 Instagram: https://instagram.com/MasPelegri
+
+484. La19 Allotjament
+   📍 Girona, Girona
+   📸 Instagram: https://instagram.com/wix
+
 🍽️ RESTAURANTE
 
-134. Idle Hands
+485. DIVINUM
+   📍 Girona, Girona
+   📸 Instagram: https://instagram.com/divinumgirona
+
+486. Maison Carne Girona
+   📍 Girona, Girona
+   📸 Instagram: https://instagram.com/maisoncarnebcn
+
+487. Restaurant Armonia
+   📍 Girona, Girona
+   📸 Instagram: https://instagram.com/armoniagirona
+
+488. La Comuna by Bon Dia Residences
+   📍 Girona, Girona
+   📸 Instagram: https://instagram.com/bondiaresidences
+
+489. Idle Hands
    📍 Girona, Girona
    📸 Instagram: https://instagram.com/idlehandsgirona
 
-135. La Comuna by Bon Dia Residences
+490. Fonda d'El Foment
    📍 Girona, Girona
-   📸 Instagram: https://instagram.com/bondiaresidences
+   📸 Instagram: https://instagram.com/fonda_elfoment
+
+491. Restaurant Casa Urreta
+   📍 Girona, Girona
+   📸 Instagram: https://instagram.com/casa_urreta
+
+492. El Celler de Can Roca
+   📍 Girona, Girona
+   📸 Instagram: https://instagram.com/cellercanroca
+
+493. BionBo Club
+   📍 Girona, Girona
+   📸 Instagram: https://instagram.com/bionboclub
 
 
 ────────────────────────────────────────────────────────────────────────────────
@@ -706,17 +2171,77 @@ Fecha de generación: 21/10/2025, 15:11:01
 
 🍺 BAR
 
-136. 3 onzas Cocktail Bar
+494. Atípico
+   📍 Granada, Granada
+   📸 Instagram: https://instagram.com/atipicogr
+
+495. SEDA COFFEE
+   📍 Granada, Granada
+   📸 Instagram: https://instagram.com/seda_coffee
+
+496. Cafetería Massay
+   📍 Granada, Granada
+   📸 Instagram: https://instagram.com/massaycafeteria
+
+497. 3 onzas Cocktail Bar
    📍 Granada, Granada
    📸 Instagram: https://instagram.com/3onzas_granada
 
-137. La Telefónica
+498. Despiertoo Specialty Coffee
+   📍 Granada, Granada
+   📸 Instagram: https://instagram.com/despiertoo
+
+499. Bar Macondo Granada
+   📍 Granada, Granada
+   📸 Instagram: https://instagram.com/macondogranada
+
+500. LA BELLA MERI, Heladería y cafetería
+   📍 Granada, Granada
+   📸 Instagram: https://instagram.com/labellameri25
+
+501. La Telefónica
    📍 Granada, Granada
    📸 Instagram: https://instagram.com/latelefonicagr
 
-138. NOIR Craft Cocktail Bar
+502. NOIR Craft Cocktail Bar
    📍 Granada, Granada
    📸 Instagram: https://instagram.com/noircraftcocktail
+
+🏨 HOTEL
+
+503. Broz Hostel
+   📍 Granada, Granada
+   📸 Instagram: https://instagram.com/brozhostelgranada
+
+504. B&B San Miguel
+   📍 Granada, Granada
+   📸 Instagram: https://instagram.com/bookingcom
+
+505. El Granado Hostel
+   📍 Granada, Granada
+   📸 Instagram: https://instagram.com/elgranadohostel
+
+🍽️ RESTAURANTE
+
+506. cacho&pepe
+   📍 Granada, Granada
+   📸 Instagram: https://instagram.com/cachoepepe
+
+507. Apö | Restaurante Granada
+   📍 Granada, Granada
+   📸 Instagram: https://instagram.com/aporestaurant
+
+508. Restaurante Cala
+   📍 Granada, Granada
+   📸 Instagram: https://instagram.com/restaurantecala.granada
+
+509. La Piccola Carmela
+   📍 Granada, Granada
+   📸 Instagram: https://instagram.com/restaurantescarmela
+
+510. Atelier Casa de Comidas
+   📍 Granada, Granada
+   📸 Instagram: https://instagram.com/comidasatelier
 
 
 ────────────────────────────────────────────────────────────────────────────────
@@ -725,9 +2250,64 @@ Fecha de generación: 21/10/2025, 15:11:01
 
 🍺 BAR
 
-139. Cocktail Blues Gallery
+511. Santagloria Coffe & Bakery Guadalajara
    📍 Guadalajara, Guadalajara
-   📸 Instagram: https://instagram.com/rsrc.php
+   📸 Instagram: https://instagram.com/santagloria_es
+
+512. Cafetería Beecoffee Guadalajara
+   📍 Guadalajara, Guadalajara
+   📸 Instagram: https://instagram.com/beecoffee_es
+
+🏨 HOTEL
+
+513. HOTEL RURAL & SPA LOS ÁNADES
+   📍 Abánades, Guadalajara
+   📸 Instagram: https://instagram.com/hotelrurallosanades
+
+514. Hostal La Granja
+   📍 Yunquera de Henares, Guadalajara
+   📸 Instagram: https://instagram.com/hostalagranja
+
+🍽️ RESTAURANTE
+
+515. El balcón del Dulce
+   📍 La Cabrera, Guadalajara
+   📸 Instagram: https://instagram.com/elbalcondeldulce
+
+516. Creperia Bravos
+   📍 Azuqueca de Henares, Guadalajara
+   📸 Instagram: https://instagram.com/creperiabravos
+
+517. Nöla Restaurante
+   📍 Sigüenza, Guadalajara
+   📸 Instagram: https://instagram.com/nolasiguenza
+
+518. Taberna Primigenia
+   📍 Guadalajara, Guadalajara
+   📸 Instagram: https://instagram.com/lataberna.primigenia
+
+519. El Doncel Restaurante
+   📍 Sigüenza, Guadalajara
+   📸 Instagram: https://instagram.com/enriqueperez_doncel
+
+520. Restaurante Las Llaves | Guadalajara
+   📍 Marchamalo, Guadalajara
+   📸 Instagram: https://instagram.com/restaurante_lasllaves
+
+
+────────────────────────────────────────────────────────────────────────────────
+📍 PROVINCIA: GUIPÚZCOA
+────────────────────────────────────────────────────────────────────────────────
+
+🍽️ RESTAURANTE
+
+521. HIKA Bodega
+   📍 Villabona, Guipúzcoa
+   📸 Instagram: https://instagram.com/hikabodega
+
+522. Restaurante Arroka Berri
+   📍 Hondarribia, Guipúzcoa
+   📸 Instagram: https://instagram.com/sansebastianfoodies
 
 
 ────────────────────────────────────────────────────────────────────────────────
@@ -736,9 +2316,33 @@ Fecha de generación: 21/10/2025, 15:11:01
 
 🍺 BAR
 
-140. Sat Coffee
+523. Sat Coffee
    📍 Huelva, Huelva
    📸 Instagram: https://instagram.com/sat_coffee_oficial
+
+🏨 HOTEL
+
+524. Hostal Huelva Art
+   📍 Huelva, Huelva
+   📸 Instagram: https://instagram.com/hostalhuelvaart
+
+🍽️ RESTAURANTE
+
+525. Restaurante Pura Huelva
+   📍 Huelva, Huelva
+   📸 Instagram: https://instagram.com/barpurahuelva
+
+526. JACUAÇU - La pava negra | Specialty coffee & Gluten free bakery
+   📍 Huelva, Huelva
+   📸 Instagram: https://instagram.com/lapavanegra
+
+527. Restaurante Azabache
+   📍 Huelva, Huelva
+   📸 Instagram: https://instagram.com/restauranteazabache
+
+528. La Mafia se sienta a la mesa
+   📍 Huelva, Huelva
+   📸 Instagram: https://instagram.com/lamafiarestaurantes
 
 
 ────────────────────────────────────────────────────────────────────────────────
@@ -747,23 +2351,45 @@ Fecha de generación: 21/10/2025, 15:11:01
 
 🍺 BAR
 
-141. Café Bar Almeriz
+529. Café Bar Almeriz
    📍 Huesca, Huesca
    📸 Instagram: https://instagram.com/almeriz.cafebar
 
 🏨 HOTEL
 
-142. Hotel Barosse. Adults Only, Charming Acommodation Pyrenees
-   📍 Barós, Huesca
-   📸 Instagram: https://instagram.com/carmina_cirac
-
-143. Hotel Rural Flor de Almendro
+530. Hotel Rural Flor de Almendro
    📍 Loarre, Huesca
    📸 Instagram: https://instagram.com/flordealmendroloarre
 
-144. HOTEL TERRA BONANSA
+531. Hotel Barosse. Adults Only, Charming Acommodation Pyrenees
+   📍 Barós, Huesca
+   📸 Instagram: https://instagram.com/carmina_cirac
+
+532. CASA JUSTO | Casa Rural en Huesca
+   📍 Apiés, Huesca
+   📸 Instagram: https://instagram.com/casa_rural_justo
+
+533. Casa Oliban
+   📍 Arbaniés, Huesca
+   📸 Instagram: https://instagram.com/casa_oliban
+
+534. HOTEL TERRA BONANSA
    📍 Bonansa, Huesca
    📸 Instagram: https://instagram.com/hotelterrabonansa
+
+🍽️ RESTAURANTE
+
+535. Bazul Restaurante
+   📍 Huesca, Huesca
+   📸 Instagram: https://instagram.com/bazul_restaurante
+
+536. Restaurante Tatau
+   📍 Huesca, Huesca
+   📸 Instagram: https://instagram.com/tatauordie
+
+537. Tenis Lounge Club Huesca
+   📍 Huesca, Huesca
+   📸 Instagram: https://instagram.com/tenisloungeclub
 
 
 ────────────────────────────────────────────────────────────────────────────────
@@ -772,42 +2398,96 @@ Fecha de generación: 21/10/2025, 15:11:01
 
 🍺 BAR
 
-145. KA-ORŪ SUSHIBAR & COCKTAIL
+538. Cervecería Bundesbar Jaén
    📍 Jaén, Jaén
-   📸 Instagram: https://instagram.com/ka
+   📸 Instagram: https://instagram.com/bundesbar_jaen
+
+🏨 HOTEL
+
+539. Hotel Apartamentos Fuente Redonda
+   📍 Úbeda, Jaén
+   📸 Instagram: https://instagram.com/fuente.redonda.ubeda
+
+540. Mirador Tierra de Frontera Hotel Microcervecería
+   📍 Alcalá la Real, Jaén
+   📸 Instagram: https://instagram.com/tierradefrontera
 
 🍽️ RESTAURANTE
 
-146. Restaurante Ginger Bistró
+541. Restaurante Ginger Bistró
    📍 Jaén, Jaén
    📸 Instagram: https://instagram.com/restaurantegingerbistro
 
-147. Restaurante Malak
+542. Restaurante Malak
    📍 Jaén, Jaén
    📸 Instagram: https://instagram.com/malakrestaurante
 
-148. Restaurante Radis
+543. Restaurante Bagá
+   📍 Jaén, Jaén
+   📸 Instagram: https://instagram.com/bagajaen
+
+544. Restaurante Radis
    📍 Jaén, Jaén
    📸 Instagram: https://instagram.com/restauranteradis
+
+545. IZAKAYA AJHITO | Taberna gastronómica jaénponesa by Patricia Diaz
+   📍 Jaén, Jaén
+   📸 Instagram: https://instagram.com/ajhito_jaen
 
 
 ────────────────────────────────────────────────────────────────────────────────
 📍 PROVINCIA: LA RIOJA
 ────────────────────────────────────────────────────────────────────────────────
 
+🍺 BAR
+
+546. Stereo Rock & Roll Bar
+   📍 Logroño, La Rioja
+   📸 Instagram: https://instagram.com/stereo_rocknroll_bar
+
+547. Bar Soriano
+   📍 Logroño, La Rioja
+   📸 Instagram: https://instagram.com/callelaureloficial
+
 🏨 HOTEL
 
-149. CASA RURAL EL MIRADOR DE ELOISA
+548. Hotel Santa María Briones
+   📍 Briones, La Rioja
+   📸 Instagram: https://instagram.com/santamariabrioneshotel
+
+549. Hotel Cervaria
+   📍 Cervera Del Rio Alhama, La Rioja
+   📸 Instagram: https://instagram.com/hotelcervaria
+
+550. TEATRISSO HOTEL
+   📍 Cuzcurrita de Río Tirón, La Rioja
+   📸 Instagram: https://instagram.com/teatrisso_hotel
+
+551. CASA RURAL EL MIRADOR DE ELOISA
    📍 Rodezno, La Rioja
    📸 Instagram: https://instagram.com/elmiradordeeloisa
 
-150. Hotel Boutique Posada de Sajazarra - Atención telefónica de 9:00 a 21:00h.
-   📍 Sajazarra, La Rioja
-   📸 Instagram: https://instagram.com/posadadesajazarra
+🍽️ RESTAURANTE
 
-151. Hotel Santa María Briones
+552. Restaurante Allegar
    📍 Briones, La Rioja
    📸 Instagram: https://instagram.com/santamariabrioneshotel
+
+553. Lumbre Restaurante
+   📍 Casalarreina, La Rioja
+   📸 Instagram: https://instagram.com/lumbrerestaurante
+
+554. Aitor Esnal Restaurante
+   📍 Logroño, La Rioja
+   📸 Instagram: https://instagram.com/aitoresnal
+
+555. Restaurante Ikaro Logroño | Ecuador, País Vasco y La Rioja
+   📍 Logroño, La Rioja
+   📸 Instagram: https://instagram.com/restaurante_ikaro
+
+556. Mesón Egüés
+   📍 Logroño, La Rioja
+   📸 Instagram: https://instagram.com/mesonegues
 
 
 ────────────────────────────────────────────────────────────────────────────────
@@ -816,23 +2496,69 @@ Fecha de generación: 21/10/2025, 15:11:01
 
 🍺 BAR
 
-152. BEMBÉ Las Palmas
+557. Makai Café Brunch
+   📍 Las Palmas de Gran Canaria, Las Palmas
+   📸 Instagram: https://instagram.com/makaicafebrunch
+
+558. BEMBÉ Las Palmas
    📍 Las Palmas de Gran Canaria, Las Palmas
    📸 Instagram: https://instagram.com/bembe_laspalmas
 
-153. Kafema specialty coffee
+559. cuptural coffee
    📍 Las Palmas de Gran Canaria, Las Palmas
-   📸 Instagram: https://instagram.com/rsrc.php
+   📸 Instagram: https://instagram.com/cuptural.coffee
+
+🏨 HOTEL
+
+560. Santa Catalina, a Royal Hideaway Hotel
+   📍 Las Palmas de Gran Canaria, Las Palmas
+   📸 Instagram: https://instagram.com/barcelohotelsresorts
+
+561. Open Sea Suites
+   📍 Las Palmas de Gran Canaria, Las Palmas
+   📸 Instagram: https://instagram.com/opensea_suites
+
+562. Casa Sabai
+   📍 Las Palmas de Gran Canaria, Las Palmas
+   📸 Instagram: https://instagram.com/casasabai
+
+563. Boutique Hotel Cordial Malteses
+   📍 Las Palmas de Gran Canaria, Las Palmas
+   📸 Instagram: https://instagram.com/cordialmalteses
+
+564. NC Hostel
+   📍 Las Palmas de Gran Canaria, Las Palmas
+   📸 Instagram: https://instagram.com/nchostel
+
+565. Catalina Plaza Hotel Sostenible
+   📍 Las Palmas de Gran Canaria, Las Palmas
+   📸 Instagram: https://instagram.com/catalinaplazahotelsostenible
 
 🍽️ RESTAURANTE
 
-154. Restaurante Sorondongo
+566. Tabaiba Restaurante
+   📍 Las Palmas de Gran Canaria, Las Palmas
+   📸 Instagram: https://instagram.com/tabaibarestaurante
+
+567. Restaurante Camino al Jamonal
+   📍 Las Palmas de Gran Canaria, Las Palmas
+   📸 Instagram: https://instagram.com/caminoaljamonal
+
+568. Restaurante Sorondongo
    📍 Las Palmas de Gran Canaria, Las Palmas
    📸 Instagram: https://instagram.com/sorondongorestaurante
 
-155. Yori Las Palmas
+569. Rincón de Triana
    📍 Las Palmas de Gran Canaria, Las Palmas
-   📸 Instagram: https://instagram.com/rsrc.php
+   📸 Instagram: https://instagram.com/rincondetrianalp
+
+570. Restaurante Origen SteakHouse Gran Canaria
+   📍 Las Palmas de Gran Canaria, Las Palmas
+   📸 Instagram: https://instagram.com/origensh
+
+571. Restaurante La Niña de Vegueta
+   📍 Las Palmas de Gran Canaria, Las Palmas
+   📸 Instagram: https://instagram.com/becordialhotel
 
 
 ────────────────────────────────────────────────────────────────────────────────
@@ -841,9 +2567,50 @@ Fecha de generación: 21/10/2025, 15:11:01
 
 🍺 BAR
 
-156. Nirmata Specialty Coffee
+572. La Única León
    📍 León, León
-   📸 Instagram: https://instagram.com/rsrc.php
+   📸 Instagram: https://instagram.com/launica_leon
+
+🏨 HOTEL
+
+573. Hostel Quartier León Jabalquinto
+   📍 León, León
+   📸 Instagram: https://instagram.com/quartierleonjabalquinto
+
+574. Slow León Apartamentos Turísticos Passivhaus
+   📍 León, León
+   📸 Instagram: https://instagram.com/slowleonapartamentos
+
+575. 2H Living
+   📍 León, León
+   📸 Instagram: https://instagram.com/2hlivingleon
+
+
+────────────────────────────────────────────────────────────────────────────────
+📍 PROVINCIA: LLEIDA
+────────────────────────────────────────────────────────────────────────────────
+
+🍺 BAR
+
+576. Santagloria Coffee & Bakery
+   📍 Lleida, Lleida
+   📸 Instagram: https://instagram.com/santagloria_es
+
+577. Shishas Paradise
+   📍 Lleida, Lleida
+   📸 Instagram: https://instagram.com/shishas.paradise
+
+🏨 HOTEL
+
+578. El jardí de l'Avet
+   📍 Lleida, Lleida
+   📸 Instagram: https://instagram.com/eljardidelavet
+
+🍽️ RESTAURANTE
+
+579. La casa Italia 101 cappont
+   📍 Lleida, Lleida
+   📸 Instagram: https://instagram.com/whatsapp
 
 
 ────────────────────────────────────────────────────────────────────────────────
@@ -852,25 +2619,41 @@ Fecha de generación: 21/10/2025, 15:11:01
 
 🏨 HOTEL
 
-157. A Palleira de Lola
-   📍 Fontao, Lugo
-   📸 Instagram: https://instagram.com/a_palleira_de_lola
+580. Apartamentos Armanyá
+   📍 Lugo, Lugo
+   📸 Instagram: https://instagram.com/armanya3.lugo
 
-158. Casa da Galbana
-   📍 Friol, Lugo
-   📸 Instagram: https://instagram.com/casagalbana
-
-159. Casa Grande de Láncara
-   📍 Láncara, Lugo
-   📸 Instagram: https://instagram.com/rsrc.php
-
-160. Hotel Casal de Pelaio - Hotel boutique - Hotel cerca de las catedrales
+581. Hotel Casal de Pelaio - Hotel boutique - Hotel cerca de las catedrales
    📍 Vilar, Lugo
    📸 Instagram: https://instagram.com/casal_de_pelaio_
 
+582. EcoCamp San Román by SuitesNature - Camino Primitivo
+   📍 Lugo, Lugo
+   📸 Instagram: https://instagram.com/suitesnature
+
+583. Hotel EsteOeste by Sercotel
+   📍 Lugo, Lugo
+   📸 Instagram: https://instagram.com/sercotelhotels
+
+584. A Palleira de Lola
+   📍 Fontao, Lugo
+   📸 Instagram: https://instagram.com/a_palleira_de_lola
+
+585. Casa da Galbana
+   📍 Friol, Lugo
+   📸 Instagram: https://instagram.com/casagalbana
+
+586. Hotel Mi Norte - Ribadeo
+   📍 Lugo, Lugo
+   📸 Instagram: https://instagram.com/hotelminorte
+
+587. Four Rooms Hostel Lugo
+   📍 Lugo, Lugo
+   📸 Instagram: https://instagram.com/fourrooms.hostel
+
 🍽️ RESTAURANTE
 
-161. O Forno de Catuxa
+588. O Forno de Catuxa
    📍 Lugo, Lugo
    📸 Instagram: https://instagram.com/ofornodecatuxa
 
@@ -881,100 +2664,297 @@ Fecha de generación: 21/10/2025, 15:11:01
 
 🍺 BAR
 
-162. Alchemist 1967
-   📍 Madrid, Madrid
-   📸 Instagram: https://instagram.com/alchemist_1967
-
-163. Ástor gastro-place
-   📍 Madrid, Madrid
-   📸 Instagram: https://instagram.com/restauranteastor
-
-164. Bomber Cocktail Bar, Coctelería
-   📍 Leganés, Madrid
-   📸 Instagram: https://instagram.com/bomber_cocktail_bar
-
-165. H&J Street Bar
-   📍 Leganés, Madrid
-   📸 Instagram: https://instagram.com/hjstreetbar
-
-166. Jade Coctelería Bar
-   📍 Madrid, Madrid
-   📸 Instagram: https://instagram.com/jadecocteleriabar
-
-167. Momus Bar
-   📍 Madrid, Madrid
-   📸 Instagram: https://instagram.com/momus_cocktail_bar
-
-168. Rustico Madrid - Bar de vinos, café de especialidad y focacceria
+589. Rustico Madrid - Bar de vinos, café de especialidad y focacceria
    📍 Madrid, Madrid
    📸 Instagram: https://instagram.com/rusticomadrid
 
-169. Siniestro
+590. Ganesha - Lounge - Cocktail - Shisha
+   📍 Alcalá de Henares, Madrid
+   📸 Instagram: https://instagram.com/ganeshaloungecocktail
+
+591. Bunker Cocktail Bar
    📍 Madrid, Madrid
-   📸 Instagram: https://instagram.com/rsrc.php
+   📸 Instagram: https://instagram.com/bunkercocktailbar
 
-🏨 HOTEL
+592. Brilla Café
+   📍 Alcalá de Henares, Madrid
+   📸 Instagram: https://instagram.com/brillacafe
 
-170. The Pubcrawl Company Madrid
+593. Bucólico Café
    📍 Madrid, Madrid
-   📸 Instagram: https://instagram.com/thepubcrawlcompany
+   📸 Instagram: https://instagram.com/bucolicocafe
 
-🍽️ RESTAURANTE
-
-171. Cervecería Dichosita
+594. Alchemist 1967
    📍 Madrid, Madrid
-   📸 Instagram: https://instagram.com/rsrc.php
+   📸 Instagram: https://instagram.com/alchemist_1967
 
-172. My Healthy Corner
+595. Cervecería la kedada
    📍 Móstoles, Madrid
    📸 Instagram: https://instagram.com/mhc_mostoles
 
-173. Ramen Shifu
-   📍 Leganés, Madrid
-   📸 Instagram: https://instagram.com/ramenshifu_milano
+596. Mauz Madriz | Coctelería
+   📍 Madrid, Madrid
+   📸 Instagram: https://instagram.com/mauz.madriz
 
-174. Restaurante Quinta fase
+597. Jade Coctelería Bar
+   📍 Madrid, Madrid
+   📸 Instagram: https://instagram.com/jadecocteleriabar
+
+598. Glass Bar by SIPS
+   📍 Madrid, Madrid
+   📸 Instagram: https://instagram.com/hotel_urban
+
+599. ROOI ROOK MÓSTOLES
+   📍 Móstoles, Madrid
+   📸 Instagram: https://instagram.com/rooirookhouse
+
+600. Lynch - Food and Cocktails
+   📍 Madrid, Madrid
+   📸 Instagram: https://instagram.com/lynch.madrid
+
+601. Devil’s Cut
+   📍 Madrid, Madrid
+   📸 Instagram: https://instagram.com/devilscut.madrid
+
+602. Bar Agualuna
+   📍 Fuenlabrada, Madrid
+   📸 Instagram: https://instagram.com/agualunacafe
+
+603. Entre Santos Cocktail Bar & Food
+   📍 Madrid, Madrid
+   📸 Instagram: https://instagram.com/entresantosmadrid
+
+604. Angelita Madrid
+   📍 Madrid, Madrid
+   📸 Instagram: https://instagram.com/madridangelita
+
+605. O´Malleys Pub
    📍 Alcalá de Henares, Madrid
-   📸 Instagram: https://instagram.com/quintafase.restaurante
+   📸 Instagram: https://instagram.com/omalleysalcala
 
+606. Ástor gastro-place
+   📍 Madrid, Madrid
+   📸 Instagram: https://instagram.com/restauranteastor
 
-────────────────────────────────────────────────────────────────────────────────
-📍 PROVINCIA: MÁLAGA
-────────────────────────────────────────────────────────────────────────────────
+607. San Diego Coffee Co. Irlandeses
+   📍 Alcalá de Henares, Madrid
+   📸 Instagram: https://instagram.com/sandiegocoffeecorner
 
-🍺 BAR
+608. Cafés 1808
+   📍 Móstoles, Madrid
+   📸 Instagram: https://instagram.com/cafes.1808
 
-175. Ganbaru Coffee
-   📍 Málaga, Málaga
-   📸 Instagram: https://instagram.com/marioperello
+609. Casa Café Madrid
+   📍 Pozuelo de Alarcón, Madrid
+   📸 Instagram: https://instagram.com/drfonsecaa
 
-176. Grand Café Gezellig
-   📍 Málaga, Málaga
-   📸 Instagram: https://instagram.com/grandcafegezellig
+610. Momus Bar
+   📍 Madrid, Madrid
+   📸 Instagram: https://instagram.com/momus_cocktail_bar
 
-177. Renard Cocktail Club
-   📍 Málaga, Málaga
-   📸 Instagram: https://instagram.com/renardcocktailclub
+611. EL LOCO
+   📍 Madrid, Madrid
+   📸 Instagram: https://instagram.com/elloco.madrid
+
+612. H&J Street Bar
+   📍 Leganés, Madrid
+   📸 Instagram: https://instagram.com/hjstreetbar
+
+613. Edén de Huertas Bar de Copas y Cachimbas
+   📍 Madrid, Madrid
+   📸 Instagram: https://instagram.com/edendehuertas
+
+614. Saddle Madrid
+   📍 Madrid, Madrid
+   📸 Instagram: https://instagram.com/Saddlemadrid
+
+615. La Santoría Cocktail Bar
+   📍 Madrid, Madrid
+   📸 Instagram: https://instagram.com/satanmadrid
+
+616. Bomber Cocktail Bar, Coctelería
+   📍 Leganés, Madrid
+   📸 Instagram: https://instagram.com/bomber_cocktail_bar
+
+617. Pub Remembeer's
+   📍 Móstoles, Madrid
+   📸 Instagram: https://instagram.com/jorgeysusanaparramostoles
+
+618. Café Angélica
+   📍 Madrid, Madrid
+   📸 Instagram: https://instagram.com/cafeangelica.es
 
 🏨 HOTEL
 
-178. La Casa de la Abuela Rosy Malaga
-   📍 Málaga, Málaga
-   📸 Instagram: https://instagram.com/lacasadelaabuelarosy
+619. Onefam Sungate Hostal Madrid
+   📍 Centro, Madrid
+   📸 Instagram: https://instagram.com/onefamhostels
+
+620. Hotel BESTPRICE Alcalá
+   📍 Madrid, Madrid
+   📸 Instagram: https://instagram.com/hotelesbestprice
+
+621. 2060 The Newton Hostel
+   📍 Madrid, Madrid
+   📸 Instagram: https://instagram.com/2060hostelandmarket
+
+622. Hotel BESTPRICE Alegría
+   📍 Madrid, Madrid
+   📸 Instagram: https://instagram.com/hotelesbestprice
+
+623. Hostal Siesta & Go (Atocha)
+   📍 Madrid, Madrid
+   📸 Instagram: https://instagram.com/hostalsiestaandgo
+
+624. Hotel en la Sierra de Madrid -Restaurante & SPA CicloLodge
+   📍 Lozoya, Madrid
+   📸 Instagram: https://instagram.com/ciclolodgeelnevero
+
+625. The Pubcrawl Company Madrid
+   📍 Madrid, Madrid
+   📸 Instagram: https://instagram.com/thepubcrawlcompany
+
+626. Casona del Eboni
+   📍 Alcalá de Henares, Madrid
+   📸 Instagram: https://instagram.com/lacasonadeleboni1
 
 🍽️ RESTAURANTE
 
-179. Caravana - Cocina Viajera
-   📍 Málaga, Málaga
-   📸 Instagram: https://instagram.com/rsrc.php
+627. FIERA
+   📍 Madrid, Madrid
+   📸 Instagram: https://instagram.com/fiera_madrid
 
-180. Élite Café
-   📍 Málaga, Málaga
-   📸 Instagram: https://instagram.com/elitecafe_soho
+628. Bloved Restaurante
+   📍 Madrid, Madrid
+   📸 Instagram: https://instagram.com/bloved_restaurant
 
-181. Restaurante Dynamit
-   📍 Málaga, Málaga
-   📸 Instagram: https://instagram.com/rdynamit
+629. Lilo Brunch Madrid | Chueca
+   📍 Madrid, Madrid
+   📸 Instagram: https://instagram.com/lilobrunch
+
+630. Ineffabile Ristorante | Restaurante italiano en Móstoles
+   📍 Móstoles, Madrid
+   📸 Instagram: https://instagram.com/ineffabileristorante
+
+631. CEBO Madrid Restaurant
+   📍 Madrid, Madrid
+   📸 Instagram: https://instagram.com/cebomadrid
+
+632. Manolo Bakes
+   📍 Fuenlabrada, Madrid
+   📸 Instagram: https://instagram.com/manolo_bakes
+
+633. My Healthy Corner
+   📍 Móstoles, Madrid
+   📸 Instagram: https://instagram.com/mhc_mostoles
+
+634. Restaurante Quinta fase
+   📍 Alcalá de Henares, Madrid
+   📸 Instagram: https://instagram.com/quintafase.restaurante
+
+635. Restaurante La Zarza
+   📍 Alcalá de Henares, Madrid
+   📸 Instagram: https://instagram.com/lazarzaalcala
+
+636. La Pasa Gin Bar Restaurante
+   📍 Madrid, Madrid
+   📸 Instagram: https://instagram.com/lapasaginbar
+
+637. Ticuí l Restaurante mexicano Madrid
+   📍 Madrid, Madrid
+   📸 Instagram: https://instagram.com/ticuimadrid
+
+638. Restaurante 1888
+   📍 Alcalá de Henares, Madrid
+   📸 Instagram: https://instagram.com/restaurante.1888
+
+639. Taberna Comienzo
+   📍 Alcalá de Henares, Madrid
+   📸 Instagram: https://instagram.com/tabernacomienzo
+
+640. Raza Madrid Barquillo
+   📍 Madrid, Madrid
+   📸 Instagram: https://instagram.com/RAZAMADRID
+
+641. Brew Wild Pizza Bar
+   📍 Madrid, Madrid
+   📸 Instagram: https://instagram.com/brewwild.madrid
+
+642. La Osita
+   📍 Madrid, Madrid
+   📸 Instagram: https://instagram.com/osobrewco
+
+643. GastroVía 61 – Grupotel Mayorazgo
+   📍 Madrid, Madrid
+   📸 Instagram: https://instagram.com/hotelmayorazgo
+
+644. El Gueridón
+   📍 Móstoles, Madrid
+   📸 Instagram: https://instagram.com/hotelciudaddemostoles
+
+645. Caiko Smokehouse
+   📍 Alcalá de Henares, Madrid
+   📸 Instagram: https://instagram.com/caiko_smokehouse
+
+646. Ramen Shifu
+   📍 Leganés, Madrid
+   📸 Instagram: https://instagram.com/ramenshifu_milano
+
+647. Alusse's Restaurante -Comida Venezolana y fusion Internacional
+   📍 Leganés, Madrid
+   📸 Instagram: https://instagram.com/alussesrestaurante
+
+648. Mojito´s Cocktail bar
+   📍 Madrid, Madrid
+   📸 Instagram: https://instagram.com/mojitos_cocktail_bar
+
+649. Funambulista Bar
+   📍 Madrid, Madrid
+   📸 Instagram: https://instagram.com/funambulistabar
+
+650. Restaurante Madrida
+   📍 Madrid, Madrid
+   📸 Instagram: https://instagram.com/madrida_
+
+651. Bandida Tapas & Cocktail Bar
+   📍 Madrid, Madrid
+   📸 Instagram: https://instagram.com/bandidamadrid
+
+652. Fat Cats Cocktail House
+   📍 Madrid, Madrid
+   📸 Instagram: https://instagram.com/fatcatsmadrid
+
+653. LA FEDERALA MÓSTOLES
+   📍 Móstoles, Madrid
+   📸 Instagram: https://instagram.com/lafederalamx
+
+654. Kuoco
+   📍 Madrid, Madrid
+   📸 Instagram: https://instagram.com/kuocorestaurante
+
+655. Restaurante Fino Bar - Alcalá de Henares
+   📍 Alcalá de Henares, Madrid
+   📸 Instagram: https://instagram.com/finoalcala
+
+656. Compañía de Cervezas Valle del Kahs
+   📍 Madrid, Madrid
+   📸 Instagram: https://instagram.com/cervezasccvk
+
+657. Mangiare Street Italian Food
+   📍 Alcalá de Henares, Madrid
+   📸 Instagram: https://instagram.com/mangiare.es
+
+658. Restaurante Eximio
+   📍 Alcalá de Henares, Madrid
+   📸 Instagram: https://instagram.com/restauranteeximio
+
+659. Nice To Meet You Restaurant & Lounge
+   📍 Madrid, Madrid
+   📸 Instagram: https://instagram.com/nice2madrid
+
+660. más que cervezas
+   📍 Madrid, Madrid
+   📸 Instagram: https://instagram.com/masquecervezas
 
 
 ────────────────────────────────────────────────────────────────────────────────
@@ -983,96 +2963,439 @@ Fecha de generación: 21/10/2025, 15:11:01
 
 🍺 BAR
 
-182. Alma y sabor restaurante
-   📍 Molina de Segura, Murcia
-   📸 Instagram: https://instagram.com/rsrc.php
-
-183. Capricho de Maggels
+661. Madness Coffee
    📍 Cartagena, Murcia
-   📸 Instagram: https://instagram.com/rsrc.php
+   📸 Instagram: https://instagram.com/madnesscoffee
 
-184. La Canija Taberna
+662. La Famosa
    📍 Murcia, Murcia
-   📸 Instagram: https://instagram.com/rsrc.php
+   📸 Instagram: https://instagram.com/lafamosa_bar
 
 🏨 HOTEL
 
-185. Alojamientos Fenix MURCIA
+663. Murcia Park
    📍 Murcia, Murcia
-   📸 Instagram: https://instagram.com/alojamientosfenix
+   📸 Instagram: https://instagram.com/murciapark
 
-186. Casa Lamberdina
-   📍 Lorca, Murcia
-   📸 Instagram: https://instagram.com/benb.casa.lamberdina
+664. Casa Rural Finca Juanamare
+   📍 Yecla, Murcia
+   📸 Instagram: https://instagram.com/finca_juanamare
 
-187. El Mástil Camper Park
+665. Sosiego Hostal de Mar
+   📍 Puerto de Mazarrón, Murcia
+   📸 Instagram: https://instagram.com/sosiegomar
+
+666. El Mástil Camper Park
    📍 La Aljorra, Murcia
    📸 Instagram: https://instagram.com/elmastilcamperpark
 
-188. PLAZA ROOMS
-   📍 Totana, Murcia
-   📸 Instagram: https://instagram.com/plazaroomstotana
+667. Hotel Rural Mula - El Molino de Felipe
+   📍 Mula, Murcia
+   📸 Instagram: https://instagram.com/elmolinodefelipe
+
+668. La Toscana
+   📍 Murcia, Murcia
+   📸 Instagram: https://instagram.com/murcialatoscana
+
+669. Casa Perez BnB
+   📍 Los Pérez, Murcia
+   📸 Instagram: https://instagram.com/casaperezbnb
+
+670. Alojamientos Libertad
+   📍 Yecla, Murcia
+   📸 Instagram: https://instagram.com/alojamientoslibertad
+
+671. HOLIDAYS MIRANA I Alojamiento Yecla
+   📍 Yecla, Murcia
+   📸 Instagram: https://instagram.com/holidaysmirana
+
+672. Casa Lamberdina
+   📍 Lorca, Murcia
+   📸 Instagram: https://instagram.com/benb.casa.lamberdina
+
+673. Apartamentos Turísticos Metrópolis Cartagena Spain
+   📍 Cartagena, Murcia
+   📸 Instagram: https://instagram.com/cartagenaspain_
+
+674. Alojamientos Fenix MURCIA
+   📍 Murcia, Murcia
+   📸 Instagram: https://instagram.com/alojamientosfenix
+
+675. Casa Lumbreras
+   📍 Puerto Lumbreras, Murcia
+   📸 Instagram: https://instagram.com/nelevannieulande
+
+676. Hotel & Restaurante Mirador de Aledo
+   📍 Aledo, Murcia
+   📸 Instagram: https://instagram.com/hotelmiradordealedo
 
 🍽️ RESTAURANTE
 
-189. Brutal Wine Restaurant
+677. Ayana Obrador
+   📍 Lorca, Murcia
+   📸 Instagram: https://instagram.com/ayanaobrador
+
+678. Brutal Wine Restaurant
    📍 Fuente Alamo, Murcia
    📸 Instagram: https://instagram.com/brutalwinerestaurant
 
-190. Como en Napoli “Murcia Centro” - Pizzeria Napolitana
-   📍 Murcia, Murcia
-   📸 Instagram: https://instagram.com/comoennapoli
-
-191. Eh Detroit Más que desayunos
-   📍 Murcia, Murcia
-   📸 Instagram: https://instagram.com/detroit_masquedesayunos
-
-192. El Rancho de Cabo de Palos
-   📍 Cabo de Palos, Murcia
-   📸 Instagram: https://instagram.com/elranchodecabodepalos
-
-193. Estirpe Restaurante
+679. Estirpe Restaurante
    📍 Yecla, Murcia
    📸 Instagram: https://instagram.com/estirpe.restaurante
 
-194. Gastrobar 6 Sentidos
-   📍 Baños y Mendigo, Murcia
-   📸 Instagram: https://instagram.com/gastrobar6sentidos
-
-195. Maldita Cocina
-   📍 Cartagena, Murcia
-   📸 Instagram: https://instagram.com/malditacocinaoficial
-
-196. Nuevos Aires
-   📍 Cartagena, Murcia
-   📸 Instagram: https://instagram.com/rsrc.php
-
-197. Restaurante TR39
-   📍 Molina de Segura, Murcia
-   📸 Instagram: https://instagram.com/rsrc.php
-
-198. RESTAURANTES MURCIA CONJUGOO
+680. RESTAURANTES MURCIA CONJUGOO
    📍 Murcia, Murcia
    📸 Instagram: https://instagram.com/conjugoo
 
-199. TheGlobal
+681. Mondo Napoli
+   📍 Alcantarilla, Murcia
+   📸 Instagram: https://instagram.com/mondonapoli_esp
+
+682. Taúlla
+   📍 Murcia, Murcia
+   📸 Instagram: https://instagram.com/taullarestaurante
+
+683. TheGlobal
    📍 Murcia, Murcia
    📸 Instagram: https://instagram.com/theglobal_casillas
 
-200. Zona Burguer
-   📍 Alcantarilla, Murcia
-   📸 Instagram: https://instagram.com/rsrc.php
+684. Loreto
+   📍 Jumilla, Murcia
+   📸 Instagram: https://instagram.com/restloreto
+
+685. Bodegas Barahonda
+   📍 Yecla, Murcia
+   📸 Instagram: https://instagram.com/barahonda_es
+
+686. Urban Street food
+   📍 Águilas, Murcia
+   📸 Instagram: https://instagram.com/urbanstreetf
+
+687. AlmaBarista
+   📍 Murcia, Murcia
+   📸 Instagram: https://instagram.com/alma.barista
+
+688. Dinamita Burger Bar
+   📍 Santiago y Zaraíche, Murcia
+   📸 Instagram: https://instagram.com/dinamitaburgerbar
+
+689. La Mafia se sienta a la mesa
+   📍 Churra, Murcia
+   📸 Instagram: https://instagram.com/lamafiarestaurantes
+
+690. Perro Limón - Restaurante en Murcia Centro
+   📍 Murcia, Murcia
+   📸 Instagram: https://instagram.com/Marinea.es
+
+691. The Risky Burguer
+   📍 San Benito - Progreso, Murcia
+   📸 Instagram: https://instagram.com/theriskyburger_
+
+692. Como en Napoli “Murcia Centro” - Pizzeria Napolitana
+   📍 Murcia, Murcia
+   📸 Instagram: https://instagram.com/comoennapoli
+
+693. Almo de Juan Guillamón
+   📍 Murcia, Murcia
+   📸 Instagram: https://instagram.com/almorestaurante
+
+694. Cabaña Buenavista
+   📍 El Palmar O Lugar De Don Juan, Murcia
+   📸 Instagram: https://instagram.com/cabanabuenavistamurcia
+
+695. Maldita Cocina
+   📍 Cartagena, Murcia
+   📸 Instagram: https://instagram.com/malditacocinaoficial
+
+696. Kentucky Hamburguesería
+   📍 Molina de Segura, Murcia
+   📸 Instagram: https://instagram.com/kentucky.es
+
+697. Tándem
+   📍 Murcia, Murcia
+   📸 Instagram: https://instagram.com/erestandem_
+
+698. Lionza
+   📍 Murcia, Murcia
+   📸 Instagram: https://instagram.com/lionza.bar
+
+699. RockTaste
+   📍 Molina de Segura, Murcia
+   📸 Instagram: https://instagram.com/rocktaste_
+
+700. Restaurante TexMex
+   📍 Águilas, Murcia
+   📸 Instagram: https://instagram.com/texmexrestauranteaguilas
+
+701. Eh Detroit Más que desayunos
+   📍 Murcia, Murcia
+   📸 Instagram: https://instagram.com/detroit_masquedesayunos
+
+702. TOSTADERO CAFÉS CAVITE
+   📍 Cartagena, Murcia
+   📸 Instagram: https://instagram.com/cafescavite
+
+703. Frases
+   📍 Murcia, Murcia
+   📸 Instagram: https://instagram.com/frasesrest
+
+704. Scabetti
+   📍 Los Belones, Murcia
+   📸 Instagram: https://instagram.com/scabetti.trattorian
+
+705. Canales 5 Brasserie Moderne
+   📍 Cartagena, Murcia
+   📸 Instagram: https://instagram.com/canales5brasseriemoderne
+
+706. BLITZ BURGER Las Torres de Cotillas
+   📍 Las Torres de Cotillas, Murcia
+   📸 Instagram: https://instagram.com/blitzburger_
+
+707. GULA SUPREME Molina de Segura
+   📍 Molina de Segura, Murcia
+   📸 Instagram: https://instagram.com/gulasupreme
+
+708. The Wine Bar (Bar de vinos y tapas)
+   📍 Murcia, Murcia
+   📸 Instagram: https://instagram.com/thewinebar.murcia
+
+709. Santagloria Coffee & Bakery
+   📍 Murcia, Murcia
+   📸 Instagram: https://instagram.com/santagloria_es
+
+710. Restaurante Torombolo Murcia
+   📍 Murcia, Murcia
+   📸 Instagram: https://instagram.com/restaurante_torombolo
+
+711. Restaurante Barahonda
+   📍 Yecla, Murcia
+   📸 Instagram: https://instagram.com/barahonda_es
+
+712. Polea
+   📍 Murcia, Murcia
+   📸 Instagram: https://instagram.com/somospolea
+
+713. El Rancho de Cabo de Palos
+   📍 Cabo de Palos, Murcia
+   📸 Instagram: https://instagram.com/elranchodecabodepalos
+
+714. Detroit Santa Teresa "Más que desayunos"
+   📍 Murcia, Murcia
+   📸 Instagram: https://instagram.com/detroit_masquedesayunos
+
+715. Gastrobar 6 Sentidos
+   📍 Baños y Mendigo, Murcia
+   📸 Instagram: https://instagram.com/gastrobar6sentidos
+
+716. Detroit “Más Que Desayunos” Murcia
+   📍 Murcia, Murcia
+   📸 Instagram: https://instagram.com/detroit_masquedesayunos
+
+717. Aires Burger Bar
+   📍 Murcia, Murcia
+   📸 Instagram: https://instagram.com/airesburgerbar
+
+718. Big Twins Murcia
+   📍 Murcia, Murcia
+   📸 Instagram: https://instagram.com/bigtwinsco
+
+719. La bohéme
+   📍 Murcia, Murcia
+   📸 Instagram: https://instagram.com/laboheme.cafe
+
+720. Temperato Felice Gelato
+   📍 Murcia, Murcia
+   📸 Instagram: https://instagram.com/temperatofelicegelato
+
+721. Flor de Jamaica
+   📍 Murcia, Murcia
+   📸 Instagram: https://instagram.com/flordejamaicaoficial
+
+722. La Cookileria
+   📍 Murcia, Murcia
+   📸 Instagram: https://instagram.com/lacookileria
+
+723. Detroit La Flota “Más Que Desayunos”
+   📍 Murcia, Murcia
+   📸 Instagram: https://instagram.com/detroit_masquedesayunos
+
+
+────────────────────────────────────────────────────────────────────────────────
+📍 PROVINCIA: MÁLAGA
+────────────────────────────────────────────────────────────────────────────────
+
+🍺 BAR
+
+724. Bertani Café Specialty coffee
+   📍 Málaga, Málaga
+   📸 Instagram: https://instagram.com/bertanicafe
+
+725. Santa Catedral | Specialty Coffee Málaga
+   📍 Málaga, Málaga
+   📸 Instagram: https://instagram.com/santacoffeeshop
+
+726. Brownie&Olive - Cafetería y pastelería en Málaga
+   📍 Málaga, Málaga
+   📸 Instagram: https://instagram.com/brownieandolive
+
+727. Grand Café Gezellig
+   📍 Málaga, Málaga
+   📸 Instagram: https://instagram.com/grandcafegezellig
+
+728. Santa Camas | Specialty Coffee Málaga
+   📍 Málaga, Málaga
+   📸 Instagram: https://instagram.com/santacoffeeshop
+
+729. Taberna De Jarana
+   📍 Málaga, Málaga
+   📸 Instagram: https://instagram.com/tabernadejarana
+
+730. Renard Cocktail Club
+   📍 Málaga, Málaga
+   📸 Instagram: https://instagram.com/renardcocktailclub
+
+731. Delicotte Specialty Coffee & Tea
+   📍 Málaga, Málaga
+   📸 Instagram: https://instagram.com/delicotte
+
+732. FOMO Bar
+   📍 Málaga, Málaga
+   📸 Instagram: https://instagram.com/fomo_bar
+
+733. La Tasquita de en Medio
+   📍 Málaga, Málaga
+   📸 Instagram: https://instagram.com/latasquitadeenmedio
+
+734. Santa Soho | Specialty Coffee Málaga
+   📍 Málaga, Málaga
+   📸 Instagram: https://instagram.com/santacoffeeshop
+
+735. Ganbaru Coffee
+   📍 Málaga, Málaga
+   📸 Instagram: https://instagram.com/marioperello
+
+736. Mañana Bar
+   📍 Málaga, Málaga
+   📸 Instagram: https://instagram.com/mananabar
+
+🏨 HOTEL
+
+737. La Casa de la Abuela Rosy Malaga
+   📍 Málaga, Málaga
+   📸 Instagram: https://instagram.com/lacasadelaabuelarosy
+
+738. Literal Hotel
+   📍 Málaga, Málaga
+   📸 Instagram: https://instagram.com/literal_hotel
+
+739. Coeo Hernan Ruiz Rooftop Pool Hostel
+   📍 Málaga, Málaga
+   📸 Instagram: https://instagram.com/coeohouse
+
+🍽️ RESTAURANTE
+
+740. La Alacena de Francis
+   📍 Málaga, Málaga
+   📸 Instagram: https://instagram.com/alacenadefrancis
+
+741. Mura Mura Osteria
+   📍 Málaga, Málaga
+   📸 Instagram: https://instagram.com/muramura_malaga
+
+742. Restaurante Dynamit
+   📍 Málaga, Málaga
+   📸 Instagram: https://instagram.com/rdynamit
+
+743. Romancero Restaurante
+   📍 Málaga, Málaga
+   📸 Instagram: https://instagram.com/romancerorestaurante
+
+744. Blossom Restaurant
+   📍 Málaga, Málaga
+   📸 Instagram: https://instagram.com/restauranteblossom
+
+745. Élite Café
+   📍 Málaga, Málaga
+   📸 Instagram: https://instagram.com/elitecafe_soho
+
+746. The Club Málaga
+   📍 Málaga, Málaga
+   📸 Instagram: https://instagram.com/the_club_co_
+
+747. Restaurante Da Saveria
+   📍 Málaga, Málaga
+   📸 Instagram: https://instagram.com/dasaveria
+
+748. Buenavista Gastrobar
+   📍 Málaga, Málaga
+   📸 Instagram: https://instagram.com/buenavista_gastrobar
 
 
 ────────────────────────────────────────────────────────────────────────────────
 📍 PROVINCIA: NAVARRA
 ────────────────────────────────────────────────────────────────────────────────
 
+🍺 BAR
+
+749. Cafés Barrós
+   📍 Mutilva Baja, Navarra
+   📸 Instagram: https://instagram.com/cafesbarros
+
+750. La Bankada
+   📍 Pamplona, Navarra
+   📸 Instagram: https://instagram.com/la.bankada
+
+751. Naparbier
+   📍 Noáin, Navarra
+   📸 Instagram: https://instagram.com/naparbier
+
 🏨 HOTEL
 
-201. Casa Rural Aldekoa
+752. Mirador de Deyo Hotel Boutique – Hotel & Restaurante
+   📍 Villamayor de Monjardín, Navarra
+   📸 Instagram: https://instagram.com/miradordedeyo
+
+753. Hotel & Spa El Mirador De Ulzama
+   📍 Urrizola-Galain, Navarra
+   📸 Instagram: https://instagram.com/hotelmiradordeulzama
+
+754. Albergue - Hostería de Curtidores
+   📍 Estella, Navarra
+   📸 Instagram: https://instagram.com/hosteriadecurtidores
+
+755. Arantza Hotela - Boutique Hotel Spa Eco "Only Adults"
+   📍 Arantza, Navarra
+   📸 Instagram: https://instagram.com/arantzahotela
+
+756. Albergue Arantzako Aterpea
+   📍 Arantza, Navarra
+   📸 Instagram: https://instagram.com/arantzakoaterpea
+
+757. Casa Rural Aldekoa
    📍 Ziga, Navarra
    📸 Instagram: https://instagram.com/casaruralaldekoa
+
+758. Basoa Suites
+   📍 Larraintzar, Navarra
+   📸 Instagram: https://instagram.com/basoasuites
+
+🍽️ RESTAURANTE
+
+759. Les amis
+   📍 Pamplona, Navarra
+   📸 Instagram: https://instagram.com/lesamispamplona
+
+760. Restaurante Verduarte
+   📍 Pamplona, Navarra
+   📸 Instagram: https://instagram.com/restauranteverduarte
+
+761. LABA
+   📍 Pamplona, Navarra
+   📸 Instagram: https://instagram.com/labasarea
+
+762. El Molino de Urdániz y Origen
+   📍 Urdániz, Navarra
+   📸 Instagram: https://instagram.com/molinodeurdaniz
 
 
 ────────────────────────────────────────────────────────────────────────────────
@@ -1081,15 +3404,60 @@ Fecha de generación: 21/10/2025, 15:11:01
 
 🍺 BAR
 
-202. Antigua o' Renque
+763. El Buen Tapeo gastrobar
    📍 Ourense, Ourense
-   📸 Instagram: https://instagram.com/rsrc.php
+   📸 Instagram: https://instagram.com/el.buen.tapeo
+
+🏨 HOTEL
+
+764. Gandarela Turismo Rural
+   📍 Laias, Ourense
+   📸 Instagram: https://instagram.com/gandarela_turismo_rural
 
 🍽️ RESTAURANTE
 
-203. Restaurante Miguel González
+765. Restaurante O Campanario
+   📍 Luintra, Ourense
+   📸 Instagram: https://instagram.com/restaurante_o_campanario
+
+766. Nova
+   📍 Ourense, Ourense
+   📸 Instagram: https://instagram.com/novarestaurante
+
+767. Restaurante Miguel González
    📍 Ourense, Ourense
    📸 Instagram: https://instagram.com/restaurantemiguelgonzalez
+
+768. Milongas Parrillada Ourense
+   📍 Ourense, Ourense
+   📸 Instagram: https://instagram.com/milongasparrillada
+
+
+────────────────────────────────────────────────────────────────────────────────
+📍 PROVINCIA: PALENCIA
+────────────────────────────────────────────────────────────────────────────────
+
+🍺 BAR
+
+769. saque [Pádel Social Club]
+   📍 Palencia, Palencia
+   📸 Instagram: https://instagram.com/saque.padelsocialclub
+
+🏨 HOTEL
+
+770. Sanmartina Hotel
+   📍 Becerril de Campos, Palencia
+   📸 Instagram: https://instagram.com/sanmartinahotel
+
+🍽️ RESTAURANTE
+
+771. Terra Palencia
+   📍 Palencia, Palencia
+   📸 Instagram: https://instagram.com/terrapalencia
+
+772. Restaurante C&B
+   📍 Palencia, Palencia
+   📸 Instagram: https://instagram.com/cb.bar_restaurante
 
 
 ────────────────────────────────────────────────────────────────────────────────
@@ -1098,27 +3466,51 @@ Fecha de generación: 21/10/2025, 15:11:01
 
 🏨 HOTEL
 
-204. Duerming O Casal Da Martiña
+773. VN CASAL
+   📍 Pontevedra, Pontevedra
+   📸 Instagram: https://instagram.com/hotelruralvncasal
+
+774. Hotel Combarro
+   📍 Casalvito, Pontevedra
+   📸 Instagram: https://instagram.com/combarro_hotel_
+
+775. Attica 21 Vigo Business&Wellness
+   📍 Vigo, Pontevedra
+   📸 Instagram: https://instagram.com/attica21hotels
+
+776. Casas 'A Beira
+   📍 Pontevedra, Pontevedra
+   📸 Instagram: https://instagram.com/casasabeira
+
+777. Duerming O Casal Da Martiña
    📍 O Casal, Pontevedra
    📸 Instagram: https://instagram.com/duermingbeds
 
-205. HOSTEL CHARINO
-   📍 Pontevedra, Pontevedra
-   📸 Instagram: https://instagram.com/hostelcharino
-
-206. Numa Experimental
+778. Numa Experimental
    📍 Tomeza, Pontevedra
    📸 Instagram: https://instagram.com/numa_experimental
 
+779. HOSTEL CHARINO
+   📍 Pontevedra, Pontevedra
+   📸 Instagram: https://instagram.com/hostelcharino
+
+780. Hotel Carlos I Silgar
+   📍 Sanxenxo, Pontevedra
+   📸 Instagram: https://instagram.com/hotelcarlosisilgar
+
 🍽️ RESTAURANTE
 
-207. Donum Bakes
+781. Gumer - Restaurante Pontevedra
    📍 Pontevedra, Pontevedra
-   📸 Instagram: https://instagram.com/rsrc.php
+   📸 Instagram: https://instagram.com/somosgumer
 
-208. Restaurante El Arroz Pontevedra
+782. Trasmallo Restaurante
    📍 Pontevedra, Pontevedra
-   📸 Instagram: https://instagram.com/rsrc.php
+   📸 Instagram: https://instagram.com/trasmallorestaurante
+
+783. Viñoteca Bagos
+   📍 Pontevedra, Pontevedra
+   📸 Instagram: https://instagram.com/bagosvinoteca
 
 
 ────────────────────────────────────────────────────────────────────────────────
@@ -1127,9 +3519,37 @@ Fecha de generación: 21/10/2025, 15:11:01
 
 🍺 BAR
 
-209. Quilombo Café Salamanca Specialty Coffee
+784. The Craft Bar LaBestia
    📍 Salamanca, Salamanca
-   📸 Instagram: https://instagram.com/rsrc.php
+   📸 Instagram: https://instagram.com/labestiacraftbeer
+
+785. Coctelería Niebla
+   📍 Salamanca, Salamanca
+   📸 Instagram: https://instagram.com/nieblasalamanca
+
+🏨 HOTEL
+
+786. Salamanca Suite Studios
+   📍 Salamanca, Salamanca
+   📸 Instagram: https://instagram.com/salamanca_suite_studios
+
+787. Grand Hotel Don Gregorio
+   📍 Salamanca, Salamanca
+   📸 Instagram: https://instagram.com/hoteldongregorio
+
+🍽️ RESTAURANTE
+
+788. UDON Salamanca
+   📍 Salamanca, Salamanca
+   📸 Instagram: https://instagram.com/udon__es
+
+789. Domo Delaire
+   📍 Salamanca, Salamanca
+   📸 Instagram: https://instagram.com/domodelaire
+
+790. El Huerto de Doña Deseada
+   📍 Salamanca, Salamanca
+   📸 Instagram: https://instagram.com/huertodonadeseada
 
 
 ────────────────────────────────────────────────────────────────────────────────
@@ -1138,9 +3558,69 @@ Fecha de generación: 21/10/2025, 15:11:01
 
 🍺 BAR
 
-210. Slow Coffee Tenerife ( Specialty Coffee Roasters )
+791. La Guiri Bar
+   📍 Santa Cruz de Tenerife, Santa Cruz de Tenerife
+   📸 Instagram: https://instagram.com/laguiribar
+
+792. García Bar
+   📍 Santa Cruz de Tenerife, Santa Cruz de Tenerife
+   📸 Instagram: https://instagram.com/garciabartenerife
+
+793. Aquí, Sí - Café y Merienda
+   📍 Santa Cruz de Tenerife, Santa Cruz de Tenerife
+   📸 Instagram: https://instagram.com/aquisi_cafeymerienda
+
+794. Slow Coffee Tenerife ( Specialty Coffee Roasters )
    📍 Santa Cruz de Tenerife, Santa Cruz de Tenerife
    📸 Instagram: https://instagram.com/slowcoffeetenerife
+
+795. El Cucurucho Santa Cruz de Tenerife
+   📍 Santa Cruz de Tenerife, Santa Cruz de Tenerife
+   📸 Instagram: https://instagram.com/Elcucuruchosct
+
+🏨 HOTEL
+
+796. Hi Suites Hotel
+   📍 Santa Cruz de Tenerife, Santa Cruz de Tenerife
+   📸 Instagram: https://instagram.com/hotelhisuitestenerife
+
+797. Laguna Cool Living
+   📍 La Laguna, Santa Cruz de Tenerife
+   📸 Instagram: https://instagram.com/qodeinteractive
+
+798. Emblematico F24 Only Adults
+   📍 Santa Cruz de Tenerife, Santa Cruz de Tenerife
+   📸 Instagram: https://instagram.com/hotelf24
+
+799. Casa Doña Carmela Tenerife
+   📍 Santa Cruz de Tenerife, Santa Cruz de Tenerife
+   📸 Instagram: https://instagram.com/casadonacarmela
+
+800. Hotel Botánico & The Oriental Spa Garden
+   📍 Puerto de la Cruz, Santa Cruz de Tenerife
+   📸 Instagram: https://instagram.com/hotelbotanico
+
+🍽️ RESTAURANTE
+
+801. Con Limón y Sal Santa Cruz
+   📍 Santa Cruz de Tenerife, Santa Cruz de Tenerife
+   📸 Instagram: https://instagram.com/khalifakebabtf
+
+802. Kiki - japanese restaurant
+   📍 Santa Cruz de Tenerife, Santa Cruz de Tenerife
+   📸 Instagram: https://instagram.com/kiki.restaurant
+
+803. Quebracho asador, parrilla
+   📍 Santa Cruz de Tenerife, Santa Cruz de Tenerife
+   📸 Instagram: https://instagram.com/quebrachoasadorargentino
+
+804. The Krass Corner
+   📍 Santa Cruz de Tenerife, Santa Cruz de Tenerife
+   📸 Instagram: https://instagram.com/krassfood
+
+805. Restaurante Etéreo by Pedro Nel
+   📍 Santa Cruz de Tenerife, Santa Cruz de Tenerife
+   📸 Instagram: https://instagram.com/etereo.restaurante
 
 
 ────────────────────────────────────────────────────────────────────────────────
@@ -1149,19 +3629,49 @@ Fecha de generación: 21/10/2025, 15:11:01
 
 🍺 BAR
 
-211. Cafetería Paloma’s
+806. Bar Casa Seve
    📍 Segovia, Segovia
-   📸 Instagram: https://instagram.com/rsrc.php
+   📸 Instagram: https://instagram.com/barcasaseve
 
 🏨 HOTEL
 
-212. HOSTAL LA GRANJA 2 ESTRELLAS
+807. Artesa Suites & Spa
+   📍 Santo Tomé del Puerto, Segovia
+   📸 Instagram: https://instagram.com/artesasuites
+
+808. Hotel Apartamentos ARALSO
+   📍 Segovia, Segovia
+   📸 Instagram: https://instagram.com/hotelapartamentosaralso
+
+809. Apartamentos El Mirador del Alcázar
+   📍 Segovia, Segovia
+   📸 Instagram: https://instagram.com/elmiradordelalcazar
+
+810. HOSTAL LA GRANJA 2 ESTRELLAS
    📍 Urbanización Parque Robledo, Segovia
    📸 Instagram: https://instagram.com/hostallagranja
 
-213. Hotel Apartamentos ARALSO
+811. entreacebedas alojamientos con jardín, chimenea y barbacoa. Familias, amigos o grupos de trabajo. A 1 hora de Madrid.
+   📍 Revenga, Segovia
+   📸 Instagram: https://instagram.com/entreacebedas
+
+812. Finca LASMARGAS
+   📍 Madrona, Segovia
+   📸 Instagram: https://instagram.com/fincalasmargas
+
+🍽️ RESTAURANTE
+
+813. Restaurante Asador La Portada de Mediodía
+   📍 Torrecaballeros, Segovia
+   📸 Instagram: https://instagram.com/laportadademediodia
+
+814. Asador Maribel
    📍 Segovia, Segovia
-   📸 Instagram: https://instagram.com/hotelapartamentosaralso
+   📸 Instagram: https://instagram.com/asadormaribelsegovia
+
+815. Al Nay
+   📍 Segovia, Segovia
+   📸 Instagram: https://instagram.com/al_nay_segovia
 
 
 ────────────────────────────────────────────────────────────────────────────────
@@ -1170,23 +3680,113 @@ Fecha de generación: 21/10/2025, 15:11:01
 
 🍺 BAR
 
-214. Anibal Club | Coctelería de autor en Sevilla
+816. La Embajada de Sevilla
+   📍 Sevilla, Sevilla
+   📸 Instagram: https://instagram.com/hoteleuropasevilla
+
+817. Almazen café
+   📍 Sevilla, Sevilla
+   📸 Instagram: https://instagram.com/almazencafe.sevilla
+
+818. ANANÁS Coffee & Brunch
+   📍 Sevilla, Sevilla
+   📸 Instagram: https://instagram.com/ananasbrunchsevilla
+
+819. Syko Juice & Coffee bar
+   📍 Sevilla, Sevilla
+   📸 Instagram: https://instagram.com/sykocafe
+
+820. Anibal Club | Coctelería de autor en Sevilla
    📍 Sevilla, Sevilla
    📸 Instagram: https://instagram.com/anibalclub
 
-215. Chaman Cocktail Bar
+821. Mehl Cafetería
+   📍 Sevilla, Sevilla
+   📸 Instagram: https://instagram.com/mehlsevilla
+
+822. Chaman Cocktail Bar
    📍 Sevilla, Sevilla
    📸 Instagram: https://instagram.com/chamancocktailbar
 
-216. Selva Coffee
+823. Naked and Famous Cocktail Bar
    📍 Sevilla, Sevilla
-   📸 Instagram: https://instagram.com/rsrc.php
+   📸 Instagram: https://instagram.com/nakedandfamous_
+
+824. Balino Yoga Café
+   📍 Sevilla, Sevilla
+   📸 Instagram: https://instagram.com/balino_yoga_cafe
+
+825. LA OFFI Bar de copas
+   📍 Sevilla, Sevilla
+   📸 Instagram: https://instagram.com/laoffisevilla
+
+826. Bar Cafe Atope
+   📍 Sevilla, Sevilla
+   📸 Instagram: https://instagram.com/atopealameda
+
+827. Islamorada Tapas • Bar
+   📍 Sevilla, Sevilla
+   📸 Instagram: https://instagram.com/islamoradatapasbar
+
+828. Syra Coffee - Las Setas
+   📍 Sevilla, Sevilla
+   📸 Instagram: https://instagram.com/syracoffee
+
+🏨 HOTEL
+
+829. Hotel Hospes las Casas del Rey de Baeza
+   📍 Sevilla, Sevilla
+   📸 Instagram: https://instagram.com/hospeshotels
+
+830. Only YOU Hotel Sevilla
+   📍 Sevilla, Sevilla
+   📸 Instagram: https://instagram.com/onlyyouhotelsevilla
+
+831. Eurostars Guadalquivir
+   📍 Sevilla, Sevilla
+   📸 Instagram: https://instagram.com/eurostarshotels
+
+832. The Loft House Sevilla
+   📍 Sevilla, Sevilla
+   📸 Instagram: https://instagram.com/thelofthousegroup
 
 🍽️ RESTAURANTE
 
-217. Il Ristorantino Dell´Avvocato Sevilla
+833. MALQUERER Restaurante
+   📍 Sevilla, Sevilla
+   📸 Instagram: https://instagram.com/malquerer.restaurant
+
+834. Il Ristorantino Dell´Avvocato Sevilla
    📍 Sevilla, Sevilla
    📸 Instagram: https://instagram.com/ilristorantinosev
+
+835. Bollywood Indian Restaurant Sevilla
+   📍 Sevilla, Sevilla
+   📸 Instagram: https://instagram.com/bollywood.indian_sevilla
+
+836. Atávico | Gastronomía Ancestral & Slow Food Sevilla
+   📍 Sevilla, Sevilla
+   📸 Instagram: https://instagram.com/atavico.restobar
+
+837. Restaurante Petra
+   📍 Sevilla, Sevilla
+   📸 Instagram: https://instagram.com/restaurantepetrasevilla
+
+838. Billy Brunch
+   📍 Sevilla, Sevilla
+   📸 Instagram: https://instagram.com/billybrunch
+
+839. MOKAMBO Alfafa | Brunch Sevilla
+   📍 Sevilla, Sevilla
+   📸 Instagram: https://instagram.com/ketolanders
+
+840. Sr. Cangrejo | Restaurante en Sevilla
+   📍 Sevilla, Sevilla
+   📸 Instagram: https://instagram.com/sr.cangrejosevilla
+
+841. Az-Zait Restaurante
+   📍 Sevilla, Sevilla
+   📸 Instagram: https://instagram.com/restauranteazzait
 
 
 ────────────────────────────────────────────────────────────────────────────────
@@ -1195,23 +3795,64 @@ Fecha de generación: 21/10/2025, 15:11:01
 
 🏨 HOTEL
 
-218. Duruelo Mountain Suites
-   📍 Duruelo de la Sierra, Soria
-   📸 Instagram: https://instagram.com/duruelomountainsuites
+842. Noctis Hotel
+   📍 Soria, Soria
+   📸 Instagram: https://instagram.com/noctishotel
 
-219. Hotel Rural El Cielo Entejado
+843. Hotel DWO Ábaster - Hotel en Soria centro
+   📍 Soria, Soria
+   📸 Instagram: https://instagram.com/dwohotels
+
+844. Hotel Rural El Cielo Entejado
    📍 Tejado, Soria
    📸 Instagram: https://instagram.com/elcieloentejado
 
+845. Duruelo Mountain Suites
+   📍 Duruelo de la Sierra, Soria
+   📸 Instagram: https://instagram.com/duruelomountainsuites
+
+846. Hotel y Spa Convento de San Francisco - Soria
+   📍 Soria, Soria
+   📸 Instagram: https://instagram.com/hotel_sanfranciscosoria
+
 🍽️ RESTAURANTE
 
-220. Rincón Italiano
-   📍 Soria, Soria
-   📸 Instagram: https://instagram.com/rsrc.php
-
-221. TucciTea
+847. TucciTea
    📍 Soria, Soria
    📸 Instagram: https://instagram.com/tuccitea
+
+848. El Tilo de Vallecas
+   📍 Soria, Soria
+   📸 Instagram: https://instagram.com/_eltilodevallecas_
+
+
+────────────────────────────────────────────────────────────────────────────────
+📍 PROVINCIA: TARRAGONA
+────────────────────────────────────────────────────────────────────────────────
+
+🍺 BAR
+
+849. Cafetéo - Tostadero & Cafetería
+   📍 Tarragona, Tarragona
+   📸 Instagram: https://instagram.com/cafeteo.cafe
+
+🍽️ RESTAURANTE
+
+850. El Taller Restaurant
+   📍 Barri del Serrallo, Tarragona
+   📸 Instagram: https://instagram.com/eltallertgn
+
+851. Restaurante Latino - Son's Cubanos
+   📍 Tarragona, Tarragona
+   📸 Instagram: https://instagram.com/sonscubanos
+
+852. Restaurante Braseria la catedral - Restaurante Brasería en Tarragona
+   📍 Tarragona, Tarragona
+   📸 Instagram: https://instagram.com/braserialacatedral18
+
+853. AQ
+   📍 Tarragona, Tarragona
+   📸 Instagram: https://instagram.com/aqtgn
 
 
 ────────────────────────────────────────────────────────────────────────────────
@@ -1220,23 +3861,45 @@ Fecha de generación: 21/10/2025, 15:11:01
 
 🍺 BAR
 
-222. CaffèMilano-The Italian Coffee House, Teruel
+854. CaffèMilano-The Italian Coffee House, Teruel
    📍 Teruel, Teruel
    📸 Instagram: https://instagram.com/caffemilanospain
 
+855. Espacio Luvitien
+   📍 Teruel, Teruel
+   📸 Instagram: https://instagram.com/espacioluvitien
+
 🏨 HOTEL
 
-223. Apartamentos One
+856. Casa Rural Un Sueño en la Baronia
+   📍 Corbalán, Teruel
+   📸 Instagram: https://instagram.com/sueno_baronia
+
+857. Albergue "El Río", Cella - Teruel
+   📍 Cella, Teruel
+   📸 Instagram: https://instagram.com/albergue_el_rio_cella
+
+858. Hotel-spa sensaciones 1877
+   📍 Albarracín, Teruel
+   📸 Instagram: https://instagram.com/hotel1877sensaciones
+
+859. Apartamentos One
    📍 Teruel, Teruel
    📸 Instagram: https://instagram.com/apartamentosone
 
-224. El Castillo de Celia Alojamiento rural
+860. Casa Rural "El Agüelo" Apartamentos Turísticos rurales
+   📍 Cella, Teruel
+   📸 Instagram: https://instagram.com/casadelaguelo
+
+861. El Castillo de Celia Alojamiento rural
    📍 Cubla, Teruel
    📸 Instagram: https://instagram.com/el_castillo_de_celia
 
-225. Hotel-spa sensaciones 1877
-   📍 Albarracín, Teruel
-   📸 Instagram: https://instagram.com/hotel1877sensaciones
+🍽️ RESTAURANTE
+
+862. Asador La Ronda Argentina
+   📍 Teruel, Teruel
+   📸 Instagram: https://instagram.com/asadorlarondaargentina
 
 
 ────────────────────────────────────────────────────────────────────────────────
@@ -1245,15 +3908,45 @@ Fecha de generación: 21/10/2025, 15:11:01
 
 🍺 BAR
 
-226. ringo
+863. IL CAPPUCCINO Specialty coffee
    📍 Toledo, Toledo
-   📸 Instagram: https://instagram.com/rsrc.php
+   📸 Instagram: https://instagram.com/ilcappuccinotoledo
+
+🏨 HOTEL
+
+864. Casón de los López Apartments
+   📍 Toledo, Toledo
+   📸 Instagram: https://instagram.com/casondeloslopezapartments
+
+865. La Posada de Manolo
+   📍 Toledo, Toledo
+   📸 Instagram: https://instagram.com/laposadademanolo
 
 🍽️ RESTAURANTE
 
-227. Restaurante Víctor Sánchez-Beato
+866. Entre Dos Fuegos Restaurante
    📍 Toledo, Toledo
-   📸 Instagram: https://instagram.com/victor_s_beato
+   📸 Instagram: https://instagram.com/entredosaguas_hotelboutique
+
+867. Street & Soul. Vegano - Vegetariano estricto. Restaurante en Toledo
+   📍 Toledo, Toledo
+   📸 Instagram: https://instagram.com/streetandsoultoledo
+
+868. Restaurante Iván Cerdeño-Cigarral del Ángel
+   📍 Toledo, Toledo
+   📸 Instagram: https://instagram.com/restauranteivancerdeno
+
+869. Amor de mis Amores Restaurante Mexicano
+   📍 Toledo, Toledo
+   📸 Instagram: https://instagram.com/carinomio_toledo
+
+870. Restaurante Mexicano La Madrísima
+   📍 Toledo, Toledo
+   📸 Instagram: https://instagram.com/taqueriamexicanalamadrisima
+
+871. La Cábala Restaurante
+   📍 Toledo, Toledo
+   📸 Instagram: https://instagram.com/lacabala_restaurante
 
 
 ────────────────────────────────────────────────────────────────────────────────
@@ -1262,97 +3955,268 @@ Fecha de generación: 21/10/2025, 15:11:01
 
 🍺 BAR
 
-228. Botanista Bar
-   📍 València, Valencia
-   📸 Instagram: https://instagram.com/rsrc.php
+872. Mientras Tanto - restobar • tapas • drinks
+   📍 Valencia, Valencia
+   📸 Instagram: https://instagram.com/mientrastantobar
 
-229. Canela Coffee house
+873. Cafe Valentino
+   📍 Gandia, Valencia
+   📸 Instagram: https://instagram.com/maisonvalentino
+
+874. Canela Coffee house
    📍 Port de Sagunt, Valencia
    📸 Instagram: https://instagram.com/canela_coffee_house
 
-230. La 73 Cocktail Bar Valencia
+875. Lladró Lounge Bar
    📍 València, Valencia
-   📸 Instagram: https://instagram.com/rsrc.php
+   📸 Instagram: https://instagram.com/myrhotels
 
-231. Mafia Café
+876. Elixir Café de Especialidad Arrancapins
+   📍 València, Valencia
+   📸 Instagram: https://instagram.com/shopify
+
+877. Tallat
+   📍 València, Valencia
+   📸 Instagram: https://instagram.com/tallatcoffee
+
+878. Flower Coffee
    📍 Gandia, Valencia
-   📸 Instagram: https://instagram.com/rsrc.php
+   📸 Instagram: https://instagram.com/flowercoffee.es
 
-232. nano - Cafetería
-   📍 Torrent, Valencia
-   📸 Instagram: https://instagram.com/rsrc.php
+879. News & Coffee
+   📍 València, Valencia
+   📸 Instagram: https://instagram.com/newsandcoffee.eu
 
-233. Suculent Café
-   📍 Torrent, Valencia
-   📸 Instagram: https://instagram.com/rsrc.php
-
-234. The Jungle
+880. The Jungle
    📍 València, Valencia
    📸 Instagram: https://instagram.com/thejunglevalencia
 
-235. The People's Coffee
-   📍 Torrent, Valencia
-   📸 Instagram: https://instagram.com/rsrc.php
+881. UNICO Valencia
+   📍 Extramurs, Valencia
+   📸 Instagram: https://instagram.com/unicovalencia
 
-236. VUKA | Café de especialidad Valencia
+882. Tostarte Specialty Coffee - Café de especialidad en Valencia
    📍 València, Valencia
-   📸 Instagram: https://instagram.com/rsrc.php
+   📸 Instagram: https://instagram.com/tostarte_specialtycoffee
+
+883. Alice coffee
+   📍 València, Valencia
+   📸 Instagram: https://instagram.com/alicebrunch.es
+
+884. SiS Coffee House
+   📍 Gandia, Valencia
+   📸 Instagram: https://instagram.com/siscoffeehouse_
+
+885. Café & Aroma Bar
+   📍 Gandia, Valencia
+   📸 Instagram: https://instagram.com/cafe_y_aroma_bar
+
+886. Cafés Climent
+   📍 Gandia, Valencia
+   📸 Instagram: https://instagram.com/cafescliment
+
+887. Mary's Bar & Cafetería
+   📍 Torrent, Valencia
+   📸 Instagram: https://instagram.com/marys.torrent
+
+888. Café Madrigal
+   📍 València, Valencia
+   📸 Instagram: https://instagram.com/madrigal.cafe
+
+889. La Terraza
+   📍 València, Valencia
+   📸 Instagram: https://instagram.com/laterrazavalencia
 
 🏨 HOTEL
 
-237. Eco-hotel Aire de Monte
-   📍 Nàquera, Valencia
-   📸 Instagram: https://instagram.com/rsrc.php
-
-238. El Secanet
-   📍 Algímia d'Alfara, Valencia
-   📸 Instagram: https://instagram.com/elsecanet
-
-239. Hotel Finca La Mixtura & Restaurant Melange
-   📍 Ontinyent, Valencia
-   📸 Instagram: https://instagram.com/finca_la_mixtura
-
-240. La Novieta Boutique Hotel
-   📍 València, Valencia
-   📸 Instagram: https://instagram.com/lanovieta
-
-241. Mariola Secreta SL Casa Rural and Retreat Centre
+890. Mariola Secreta SL Casa Rural and Retreat Centre
    📍 Bocairente, Valencia
    📸 Instagram: https://instagram.com/mariolasecreta
 
-242. Pathos by Mimood Aparthotels
+891. MYR Hotel Puerta Serranos
+   📍 València, Valencia
+   📸 Instagram: https://instagram.com/myrhotels
+
+892. Mythic Valencia
+   📍 València, Valencia
+   📸 Instagram: https://instagram.com/mythicvlc
+
+893. Sweet Hoteles
+   📍 València, Valencia
+   📸 Instagram: https://instagram.com/sweet_hoteles
+
+894. Hotel BESTPRICE Valencia
+   📍 València, Valencia
+   📸 Instagram: https://instagram.com/hotelesbestprice
+
+895. Hotel Finca La Mixtura & Restaurant Melange
+   📍 Ontinyent, Valencia
+   📸 Instagram: https://instagram.com/finca_la_mixtura
+
+896. DOMUS AMABILIS ESTUDIOS EN SAGUNTO VALENCIA
+   📍 Sagunt, Valencia
+   📸 Instagram: https://instagram.com/espai_gaeta_domus_amabilis
+
+897. B&B DOMUS ATILIA
+   📍 Sagunt, Valencia
+   📸 Instagram: https://instagram.com/domusatilia
+
+898. Aila II Hotel Boutique by SingularStays
+   📍 Burjassot, Valencia
+   📸 Instagram: https://instagram.com/singularstays
+
+899. The Valentia Corretgeria
+   📍 València, Valencia
+   📸 Instagram: https://instagram.com/thevalentiahoteles
+
+900. B&B Casa Mil Sueños
+   📍 Ontinyent, Valencia
+   📸 Instagram: https://instagram.com/bb_casa_mil_suenos
+
+901. La Novieta Boutique Hotel
+   📍 València, Valencia
+   📸 Instagram: https://instagram.com/lanovieta
+
+902. Casual Natura Valencia
+   📍 València, Valencia
+   📸 Instagram: https://instagram.com/casualhoteles
+
+903. Pathos by Mimood Aparthotels
    📍 València, Valencia
    📸 Instagram: https://instagram.com/mimoodvalencia
 
-243. VALOLA Boutique Rooms
-   📍 Valencia, Valencia
-   📸 Instagram: https://instagram.com/valola_valencia
+904. Only YOU Hotel Valencia
+   📍 València, Valencia
+   📸 Instagram: https://instagram.com/onlyyouhotelvalencia
+
+905. B&B Casa Vitalidad
+   📍 Ontinyent, Valencia
+   📸 Instagram: https://instagram.com/casa_vitalidad
+
+906. Tradere Hotel Boutique
+   📍 Moncada, Valencia
+   📸 Instagram: https://instagram.com/tradere.residencia.hotel
+
+907. L'Àgora Hotel
+   📍 Bocairente, Valencia
+   📸 Instagram: https://instagram.com/lagora_hotel
+
+908. El Secanet
+   📍 Algímia d'Alfara, Valencia
+   📸 Instagram: https://instagram.com/elsecanet
 
 🍽️ RESTAURANTE
 
-244. Elijo Creer | Resto & Beer
+909. Elijo Creer | Resto & Beer
    📍 Torrent, Valencia
    📸 Instagram: https://instagram.com/elijocreer.es
 
-245. Guava Bakery Torrent - Repostería artesanal
+910. Ricard Camarena Restaurant
+   📍 València, Valencia
+   📸 Instagram: https://instagram.com/ricardcamarena
+
+911. Dragon Kitchen Valencia, Torrent
+   📍 Torrent, Valencia
+   📸 Instagram: https://instagram.com/dragonkitchen__
+
+912. Las Cremositas
+   📍 València, Valencia
+   📸 Instagram: https://instagram.com/lascremositas
+
+913. Restaurante Fum de LLum
+   📍 València, Valencia
+   📸 Instagram: https://instagram.com/fumdellum
+
+914. Guava Bakery Torrent - Repostería artesanal
    📍 Torrent, Valencia
    📸 Instagram: https://instagram.com/guavabakery_eu
 
-246. La Finestreta
-   📍 Gandia, Valencia
-   📸 Instagram: https://instagram.com/rsrc.php
+915. SAPORI DI NAPOLI
+   📍 Torrent, Valencia
+   📸 Instagram: https://instagram.com/saporidinapoli2025
 
-247. Ona Cuina Oberta
+916. La Salita
+   📍 València, Valencia
+   📸 Instagram: https://instagram.com/ucancallmebego
+
+917. Fresh&Food
+   📍 Paterna, Valencia
+   📸 Instagram: https://instagram.com/freshandfoodvalencia
+
+918. La Terrazza (Pza La Virgen)
+   📍 València, Valencia
+   📸 Instagram: https://instagram.com/laterrazzavalencia
+
+919. Coco Social House - Valencia
+   📍 València, Valencia
+   📸 Instagram: https://instagram.com/eatmytrip
+
+920. Meat Market Restaurante
+   📍 València, Valencia
+   📸 Instagram: https://instagram.com/meatmarketrestaurante
+
+921. Ona Cuina Oberta
    📍 Gandia, Valencia
    📸 Instagram: https://instagram.com/onacuinaobertagandia
 
-248. Restaurante Grillo Grill Bar
+922. Restaurante EL BUQUE
+   📍 Torrent, Valencia
+   📸 Instagram: https://instagram.com/elbuque.es
+
+923. Restaurante Grillo Grill Bar
    📍 València, Valencia
    📸 Instagram: https://instagram.com/grillogrillbar
 
-249. SAPORI DI NAPOLI
-   📍 Torrent, Valencia
-   📸 Instagram: https://instagram.com/saporidinapoli2025
+924. Restaurante Asador Argentino Gordon 10
+   📍 València, Valencia
+   📸 Instagram: https://instagram.com/restaurantegordon10valencia
+
+925. La Desayunería
+   📍 València, Valencia
+   📸 Instagram: https://instagram.com/la_desayuneria_official
+
+926. La Terrazza
+   📍 València, Valencia
+   📸 Instagram: https://instagram.com/laterrazzavalencia
+
+927. Saona Heron City Paterna (Kinépolis)
+   📍 Paterna, Valencia
+   📸 Instagram: https://instagram.com/gruposaona
+
+928. Living Bakkali
+   📍 València, Valencia
+   📸 Instagram: https://instagram.com/livingbakkali
+
+929. Espolín Restaurante
+   📍 València, Valencia
+   📸 Instagram: https://instagram.com/espolinrestaurante
+
+930. LatteeFarinaValencia
+   📍 València, Valencia
+   📸 Instagram: https://instagram.com/latteefarinavlc
+
+931. Restaurante Espurnes
+   📍 València, Valencia
+   📸 Instagram: https://instagram.com/restaurante_espurnes
+
+932. Karak
+   📍 València, Valencia
+   📸 Instagram: https://instagram.com/restaurante.karak
+
+933. Asador El Porteño
+   📍 Valencia, Valencia
+   📸 Instagram: https://instagram.com/elportenoasador
+
+
+────────────────────────────────────────────────────────────────────────────────
+📍 PROVINCIA: VALLADOLID
+────────────────────────────────────────────────────────────────────────────────
+
+🏨 HOTEL
+
+934. Spirit Apartamentos Valladolid Centro
+   📍 Valladolid, Valladolid
+   📸 Instagram: https://instagram.com/spirit_hoteles
 
 
 ────────────────────────────────────────────────────────────────────────────────
@@ -1361,34 +4225,160 @@ Fecha de generación: 21/10/2025, 15:11:01
 
 🍽️ RESTAURANTE
 
-250. Gastronomía Bilbao
+935. Sugarra
+   📍 Bilbao, Vizcaya
+   📸 Instagram: https://instagram.com/sugarretan
+
+936. BURGOA RESTAURANTE
+   📍 Bilbao, Vizcaya
+   📸 Instagram: https://instagram.com/restaurante_burgoa
+
+937. RESTAURANTE LASAI
+   📍 Bilbao, Vizcaya
+   📸 Instagram: https://instagram.com/lasaibilbao
+
+938. Hambueysería Amaren
+   📍 Bilbao, Vizcaya
+   📸 Instagram: https://instagram.com/hambueyseria
+
+939. Casa Leotta Getxo
+   📍 Areeta / Las Arenas, Vizcaya
+   📸 Instagram: https://instagram.com/casaleotta
+
+940. Gastronomía Bilbao
    📍 Bilbao, Vizcaya
    📸 Instagram: https://instagram.com/gastronomia_bilbao
 
-251. Getxo Paellas
-   📍 Algorta, Vizcaya
-   📸 Instagram: https://instagram.com/rsrc.php
+941. Rongorri Restaurante
+   📍 Bilbao, Vizcaya
+   📸 Instagram: https://instagram.com/restaurante_rongorri
 
 
 ────────────────────────────────────────────────────────────────────────────────
 📍 PROVINCIA: ZAMORA
 ────────────────────────────────────────────────────────────────────────────────
 
-🍺 BAR
-
-252. Las Jaritas
-   📍 Zamora, Zamora
-   📸 Instagram: https://instagram.com/rsrc.php
-
 🏨 HOTEL
 
-253. A los Ojos del Río Duero
+942. Centrotel Zamora
+   📍 Zamora, Zamora
+   📸 Instagram: https://instagram.com/centrotelzamora
+
+943. Casa Rural en Zamora EntrAmbasOrillas
+   📍 Valcabado, Zamora
+   📸 Instagram: https://instagram.com/entrambasorillas
+
+944. Los Jerónimos
+   📍 La Tuda, Zamora
+   📸 Instagram: https://instagram.com/losjeronimos
+
+945. Casa rural La Casa de las Lilas
+   📍 Santa Clara de Avedillo, Zamora
+   📸 Instagram: https://instagram.com/casaslilas
+
+946. A los Ojos del Río Duero
    📍 Zamora, Zamora
    📸 Instagram: https://instagram.com/a.los.ojos.del.rio.duero
 
 🍽️ RESTAURANTE
 
-254. IL FORNAZZO. Cucina Genuina
+947. IL FORNAZZO. Cucina Genuina
    📍 Zamora, Zamora
    📸 Instagram: https://instagram.com/masaborbakery
+
+
+────────────────────────────────────────────────────────────────────────────────
+📍 PROVINCIA: ZARAGOZA
+────────────────────────────────────────────────────────────────────────────────
+
+🍺 BAR
+
+948. El Caldero Mágico
+   📍 Zaragoza, Zaragoza
+   📸 Instagram: https://instagram.com/elcalderomagico_zaragoza
+
+949. La Trastienda Gastro-Taberna Zaragoza
+   📍 Zaragoza, Zaragoza
+   📸 Instagram: https://instagram.com/latrastiendazaragoza
+
+950. Café de especialidad & Brunch | Q' Chevere Café 2D
+   📍 Zaragoza, Zaragoza
+   📸 Instagram: https://instagram.com/qcheverecafe2d
+
+🍽️ RESTAURANTE
+
+951. Boca Boca
+   📍 Zaragoza, Zaragoza
+   📸 Instagram: https://instagram.com/bocabocazgz
+
+952. Restaurante La Senda
+   📍 Zaragoza, Zaragoza
+   📸 Instagram: https://instagram.com/restaurantelasenda
+
+953. Restaurante Gamberro
+   📍 Zaragoza, Zaragoza
+   📸 Instagram: https://instagram.com/restaurantegamberro
+
+954. Restaurante Mazmorra
+   📍 Zaragoza, Zaragoza
+   📸 Instagram: https://instagram.com/restaurantemazmorra
+
+955. Labamba cook-art
+   📍 Zaragoza, Zaragoza
+   📸 Instagram: https://instagram.com/labamba_restaurante
+
+
+────────────────────────────────────────────────────────────────────────────────
+📍 PROVINCIA: ÁLAVA
+────────────────────────────────────────────────────────────────────────────────
+
+🍽️ RESTAURANTE
+
+956. Tandoori
+   📍 Vitoria-Gasteiz, Álava
+   📸 Instagram: https://instagram.com/tandoorivitoria
+
+957. Restaurante La Bodeguilla Lanciego
+   📍 Vitoria-Gasteiz, Álava
+   📸 Instagram: https://instagram.com/restaurantelanciego
+
+
+────────────────────────────────────────────────────────────────────────────────
+📍 PROVINCIA: ÁVILA
+────────────────────────────────────────────────────────────────────────────────
+
+🍺 BAR
+
+958. Cafetería Casa Pastel
+   📍 Ávila, Ávila
+   📸 Instagram: https://instagram.com/casapastel_es
+
+🏨 HOTEL
+
+959. La Abuela Reme
+   📍 El Fresno, Ávila
+   📸 Instagram: https://instagram.com/la_abuela_reme
+
+960. Hotel Rural El Camino
+   📍 Candeleda, Ávila
+   📸 Instagram: https://instagram.com/hotelruralelcamino
+
+961. Hotel Nabia
+   📍 Candeleda, Ávila
+   📸 Instagram: https://instagram.com/nabiahotel
+
+962. Caserío Fuentesclaras
+   📍 Ávila, Ávila
+   📸 Instagram: https://instagram.com/caseriofuentesclaras
+
+963. Hotel-Spa Viña Real
+   📍 Arévalo, Ávila
+   📸 Instagram: https://instagram.com/hotelspavinareal
+
+🍽️ RESTAURANTE
+
+964. Restaurante Origen Ávila
+   📍 Ávila, Ávila
+   📸 Instagram: https://instagram.com/origen_avila
+
 
