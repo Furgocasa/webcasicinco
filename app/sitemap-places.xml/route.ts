@@ -1,10 +1,8 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@/lib/supabase/server';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+export const dynamic = 'force-dynamic';
+export const revalidate = 300; // 5 minutos
 
 // Función para convertir provincias a slug URL-friendly
 function toSlug(text: string): string {
@@ -17,6 +15,7 @@ function toSlug(text: string): string {
 }
 
 export async function GET() {
+  const supabase = await createClient();
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://casicinco.com';
 
   // Obtener todos los lugares publicados
