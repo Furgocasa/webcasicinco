@@ -66,33 +66,36 @@ export default function Header() {
           </div>
 
           {/* Mobile Quick Nav + Menu - Iconos permanentes en navbar */}
-          <div className="flex md:hidden items-center gap-1">
+          <div className="flex md:hidden items-center gap-0.5">
             <Link 
               href="/mapa"
-              className="p-2.5 hover:bg-indigo-50 rounded-lg transition-colors relative z-10 touch-manipulation"
+              className="flex flex-col items-center gap-0.5 px-2 py-1.5 hover:bg-indigo-50 rounded-lg transition-colors relative z-10 touch-manipulation min-w-[60px]"
               style={{ touchAction: 'manipulation' }}
               aria-label="Mapa"
             >
               <Map className="h-5 w-5 text-indigo-600" />
+              <span className="text-[10px] text-gray-600 font-medium leading-none">Mapa</span>
             </Link>
             <Link 
               href="/ruta"
-              className="p-2.5 hover:bg-indigo-50 rounded-lg transition-colors relative z-10 touch-manipulation"
+              className="flex flex-col items-center gap-0.5 px-2 py-1.5 hover:bg-indigo-50 rounded-lg transition-colors relative z-10 touch-manipulation min-w-[60px]"
               style={{ touchAction: 'manipulation' }}
               aria-label="Rutas"
             >
               <Navigation className="h-5 w-5 text-indigo-600" />
+              <span className="text-[10px] text-gray-600 font-medium leading-none">Rutas</span>
             </Link>
             <Link 
               href="/blog"
-              className="p-2.5 hover:bg-indigo-50 rounded-lg transition-colors relative z-10 touch-manipulation"
+              className="flex flex-col items-center gap-0.5 px-2 py-1.5 hover:bg-indigo-50 rounded-lg transition-colors relative z-10 touch-manipulation min-w-[60px]"
               style={{ touchAction: 'manipulation' }}
               aria-label="Blog"
             >
               <BookOpen className="h-5 w-5 text-indigo-600" />
+              <span className="text-[10px] text-gray-600 font-medium leading-none">Blog</span>
             </Link>
             {/* Separador visual */}
-            <div className="w-px h-6 bg-gray-300 mx-1" />
+            <div className="w-px h-8 bg-gray-300 mx-1" />
           </div>
 
           {/* Auth Buttons - Desktop */}
