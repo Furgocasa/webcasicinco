@@ -20,8 +20,12 @@ export async function POST(request: NextRequest) {
 
     // Verificar que el plan tenga priceId configurado
     if (!plan.stripePriceId) {
+      console.error('❌ Stripe Price ID no configurado para plan:', planId);
+      console.error('Configura en .env.local:');
+      console.error(`  STRIPE_PREMIUM_MONTHLY_PRICE_ID=price_xxxxx (para plan mensual)`);
+      console.error(`  STRIPE_PREMIUM_YEARLY_PRICE_ID=price_xxxxx (para plan anual)`);
       return NextResponse.json(
-        { error: 'Plan no disponible. Configura STRIPE_PRICE_IDs en .env' },
+        { error: `Plan "${plan.name}" no disponible. Falta configurar STRIPE_PRICE_ID en variables de entorno. Revisa la consola del servidor.` },
         { status: 500 }
       );
     }

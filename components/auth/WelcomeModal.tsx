@@ -44,7 +44,7 @@ export function WelcomeModal() {
         return;
       }
 
-      // 2c. MOSTRAR si tiene trial activo y recién registrado (28-30 días restantes)
+      // 2c. MOSTRAR si tiene trial activo y recién registrado
       if (trialEndsAt) {
         const trialEnd = new Date(trialEndsAt);
         const now = new Date();
@@ -52,14 +52,11 @@ export function WelcomeModal() {
         
         setDaysRemaining(days);
         
-        // Solo mostrar si es usuario recién registrado (28-30 días)
-        if (days >= 28 && days <= 30) {
-          setTimeout(() => setShow(true), 500);
-          return;
-        }
+        console.log('🔍 WelcomeModal: Días restantes de trial:', days);
         
-        // Si tiene menos de 28 días, ya no mostrar (ya vio el modal)
-        if (days < 28) {
+        // Si tiene menos de 20 días, probablemente ya vio el modal
+        if (days < 20) {
+          console.log('❌ WelcomeModal: Usuario antiguo (< 20 días), no mostrar');
           localStorage.setItem('hasSeenWelcome', 'true');
           return;
         }
@@ -74,12 +71,14 @@ export function WelcomeModal() {
         .maybeSingle();
 
       if (subscription) {
+        console.log('❌ WelcomeModal: Usuario con suscripción activa, no mostrar');
         localStorage.setItem('hasSeenWelcome', 'true');
         return;
       }
 
-      // 3. Si llegó aquí, es un nuevo usuario sin plan → mostrar modal
-      setTimeout(() => setShow(true), 500);
+      // 3. Si llegó aquí y tiene trial, es un nuevo usuario → MOSTRAR
+      console.log('✅ WelcomeModal: Mostrando modal de bienvenida');
+      setTimeout(() => setShow(true), 1000); // 1 segundo de delay
     };
 
     checkShouldShow();
