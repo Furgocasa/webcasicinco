@@ -94,7 +94,7 @@ Masivo:
 ✅ 2612 lugares (100% España 🇪🇸)
 ✅ 2612 publicados (100%)
 ✅ 0 borradores (0%)
-✅ Categorías válidas: restaurante, bar, cafe, hotel
+✅ Categorías válidas: restaurante, bar, hotel
 ✅ Integridad: 100%
 ```
 

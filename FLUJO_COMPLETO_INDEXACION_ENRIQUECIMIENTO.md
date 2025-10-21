@@ -67,7 +67,7 @@ Buscar y guardar lugares rápidamente, **SIN procesar con IA** (eso se hace desp
 ```
 1. ADMIN CONFIGURA BÚSQUEDA
    ├─ Provincia(s): Ej. Madrid, Barcelona
-   ├─ Categoría(s): restaurante, bar, cafe, hotel
+   ├─ Categoría(s): restaurante, bar, hotel
    └─ Rating mínimo: 4.7 (default)
 
 2. SE CREA TRABAJO EN BD

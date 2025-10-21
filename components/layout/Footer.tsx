@@ -87,11 +87,6 @@ export default function Footer() {
                   Bares
                 </Link>
               </li>
-              <li>
-                <Link href="/cafeteria" className="hover:text-white transition">
-                  Cafeterías
-                </Link>
-              </li>
             </ul>
           </div>
 

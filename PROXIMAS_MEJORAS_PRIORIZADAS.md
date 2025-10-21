@@ -283,7 +283,7 @@ Ejemplos:
 
 export async function generateStaticParams() {
   // Generar todas las combinaciones
-  const categories = ['restaurante', 'hotel', 'bar', 'cafe'];
+  const categories = ['restaurante', 'hotel', 'bar'];
   const locations = ['madrid', 'barcelona', 'valencia', 'sevilla', 'malaga', ...];
   
   const combinations = [];

@@ -65,11 +65,10 @@ Mantén esta separación clara en el código y la UI.
 
 # CATEGORÍAS PERMITIDAS
 ========================
-Solo 4 categorías:
+Solo 3 categorías:
 - restaurante
 - bar
-- cafe
 - hotel
 
-Rechaza cualquier intento de agregar otras categorías (spa, experiencia, etc).
+Rechaza cualquier intento de agregar otras categorías (cafe, cafeteria, spa, experiencia, etc).
 

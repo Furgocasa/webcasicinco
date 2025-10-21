@@ -10,7 +10,7 @@
 
 ## 🌟 ¿Qué es Casi Cinco?
 
-**Casi Cinco** es una plataforma que te ayuda a descubrir los mejores restaurantes, bares, cafeterías y hoteles de España. Solo incluimos lugares con valoración mínima de **4.7 estrellas** en Google Maps.
+**Casi Cinco** es una plataforma que te ayuda a descubrir los mejores restaurantes, bares y hoteles de España. Solo incluimos lugares con valoración mínima de **4.7 estrellas** en Google Maps.
 
 ### 🎯 Características Principales:
 

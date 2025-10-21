@@ -247,7 +247,7 @@ id                 UUID PRIMARY KEY
 google_place_id    TEXT UNIQUE
 name               TEXT NOT NULL
 slug               TEXT UNIQUE NOT NULL
-category           TEXT CHECK (category IN ('restaurante', 'bar', 'cafe', 'hotel'))
+category           TEXT CHECK (category IN ('restaurante', 'bar', 'hotel'))
 country            TEXT DEFAULT 'España'
 province           TEXT NOT NULL
 city               TEXT NOT NULL
@@ -344,7 +344,7 @@ setInterval(() => {
 ```
 
 **Verifica:**
-- ✅ Categorías válidas (solo: restaurante, bar, cafe, hotel)
+- ✅ Categorías válidas (solo: restaurante, bar, hotel)
 - ✅ País válido (solo: España)
 - ✅ Slugs únicos
 - ✅ Enriquecimiento IA
@@ -375,7 +375,7 @@ fetch('/api/admin/places?page=1&limit=10')
 - **Total lugares:** 2612
 - **Publicados:** 2612 (100%)
 - **Borradores:** 0 (0%)
-- **Categorías válidas:** 4 (restaurante, bar, cafe, hotel)
+- **Categorías válidas:** 3 (restaurante, bar, hotel)
 - **País:** España (100%)
 
 ### **Frontend Admin:**

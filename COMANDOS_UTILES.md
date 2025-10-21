@@ -14,7 +14,7 @@
 
 **Qué verifica:**
 - ✅ Total de lugares vs publicados vs borradores
-- ✅ Categorías válidas (restaurante, bar, cafe, hotel)
+- ✅ Categorías válidas (restaurante, bar, hotel)
 - ✅ País válido (España)
 - ✅ Enriquecimiento IA
 - ✅ Fotos presentes
