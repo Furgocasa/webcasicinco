@@ -206,7 +206,7 @@ export default function PricingPage() {
         </div>
 
         {/* FAQs rápidos - IGUAL QUE HOME */}
-        <div className="mt-12 mb-20 max-w-3xl mx-auto">
+        <div className="mt-12 mb-12 max-w-3xl mx-auto">
           <div className="grid md:grid-cols-2 gap-6">
             <div className="bg-white p-6 rounded-lg border border-gray-200">
               <h4 className="font-semibold text-gray-900 mb-2">¿Necesito tarjeta para el trial?</h4>
