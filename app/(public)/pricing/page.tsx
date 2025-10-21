@@ -69,7 +69,8 @@ export default function PricingPage() {
   const yearlySavings = getYearlySavings();
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white pt-20">
+    <>
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white pt-20 pb-20">
       <div className="container mx-auto px-4">
         {/* Header - Igual que home */}
         <div className="text-center mb-12">
@@ -227,7 +228,8 @@ export default function PricingPage() {
           </div>
         </div>
       </div>
-      <Footer />
     </div>
+    <Footer />
+    </>
   );
 }
