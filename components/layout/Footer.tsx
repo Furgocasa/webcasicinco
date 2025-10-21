@@ -12,7 +12,7 @@ export default function Footer() {
             <img 
               src="/images/casi_cinco_white.png" 
               alt="Casi Cinco"
-              className="h-8 w-auto mb-4"
+              className="h-10 w-auto mb-4"
             />
             <p className="text-sm text-gray-400">
               Los mejores lugares de España con mínimo 4.7★ de valoración.
