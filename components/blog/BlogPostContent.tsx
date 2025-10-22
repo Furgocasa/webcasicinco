@@ -39,7 +39,7 @@ export function BlogPostContent({ post }: BlogPostContentProps) {
     <>
       <main className="min-h-screen bg-gray-50">
         {/* HEADER */}
-        <section className="bg-gradient-to-br from-indigo-600 via-indigo-700 to-gray-800 text-white py-12 md:py-20">
+        <section className="bg-gradient-to-br from-[#063971] via-[#052d5a] to-gray-800 text-white py-12 md:py-20">
           <div className="container mx-auto px-4">
             <Link 
               href="/blog"
@@ -139,7 +139,7 @@ export function BlogPostContent({ post }: BlogPostContentProps) {
                             <div className="flex items-start justify-between mb-3">
                               <div>
                                 <div className="flex items-center gap-3 mb-2">
-                                  <span className="text-2xl font-bold text-indigo-600">#{index + 1}</span>
+                                  <span className="text-2xl font-bold text-[#063971]">#{index + 1}</span>
                                   <h3 className="text-xl font-bold text-gray-900">{place.name}</h3>
                                 </div>
                                 <div className="flex items-center gap-4 text-sm text-gray-600">
@@ -205,14 +205,14 @@ export function BlogPostContent({ post }: BlogPostContentProps) {
               )}
 
               {/* CTA */}
-              <div className="bg-gradient-to-r from-indigo-600 to-indigo-800 text-white p-8 rounded-2xl text-center">
+              <div className="bg-gradient-to-r from-[#063971] to-[#052d5a] text-white p-8 rounded-2xl text-center">
                 <h3 className="text-2xl font-bold mb-3">¿Quieres explorar más opciones?</h3>
                 <p className="text-white/90 mb-6">
                   Usa nuestro mapa interactivo o planifica una ruta completa
                 </p>
                 <div className="flex flex-wrap justify-center gap-3">
                   <Link href={`/mapa?category=${post.category}&city=${post.location}`}>
-                    <Button className="bg-white text-indigo-600 hover:bg-gray-50">
+                    <Button className="bg-white text-[#063971] hover:bg-gray-50">
                       <MapPin className="h-4 w-4 mr-2" />
                       Ver en Mapa
                     </Button>

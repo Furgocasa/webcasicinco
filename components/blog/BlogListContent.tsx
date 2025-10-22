@@ -50,7 +50,7 @@ export function BlogListContent({ initialPosts }: BlogListContentProps) {
     <>
       <main className="min-h-screen bg-gray-50">
         {/* HERO */}
-        <section className="relative bg-gradient-to-br from-indigo-600 via-indigo-700 to-gray-800 text-white overflow-hidden py-16 md:py-24">
+        <section className="relative bg-gradient-to-br from-[#063971] via-[#052d5a] to-gray-800 text-white overflow-hidden py-16 md:py-24">
           <div className="absolute inset-0 bg-black opacity-10"></div>
           
           <div className="relative container mx-auto px-4 z-10">
@@ -73,7 +73,7 @@ export function BlogListContent({ initialPosts }: BlogListContentProps) {
                   onClick={() => handleFilterChange('all')}
                   className={`px-4 py-2 rounded-lg font-medium transition ${
                     filter === 'all'
-                      ? 'bg-white text-indigo-600'
+                      ? 'bg-white text-[#063971]'
                       : 'bg-white/20 backdrop-blur-sm hover:bg-white/30'
                   }`}
                 >
@@ -83,7 +83,7 @@ export function BlogListContent({ initialPosts }: BlogListContentProps) {
                   onClick={() => handleFilterChange('restaurante')}
                   className={`px-4 py-2 rounded-lg font-medium transition ${
                     filter === 'restaurante'
-                      ? 'bg-white text-indigo-600'
+                      ? 'bg-white text-[#063971]'
                       : 'bg-white/20 backdrop-blur-sm hover:bg-white/30'
                   }`}
                 >
@@ -93,7 +93,7 @@ export function BlogListContent({ initialPosts }: BlogListContentProps) {
                   onClick={() => handleFilterChange('hotel')}
                   className={`px-4 py-2 rounded-lg font-medium transition ${
                     filter === 'hotel'
-                      ? 'bg-white text-indigo-600'
+                      ? 'bg-white text-[#063971]'
                       : 'bg-white/20 backdrop-blur-sm hover:bg-white/30'
                   }`}
                 >
@@ -103,7 +103,7 @@ export function BlogListContent({ initialPosts }: BlogListContentProps) {
                   onClick={() => handleFilterChange('bar')}
                   className={`px-4 py-2 rounded-lg font-medium transition ${
                     filter === 'bar'
-                      ? 'bg-white text-indigo-600'
+                      ? 'bg-white text-[#063971]'
                       : 'bg-white/20 backdrop-blur-sm hover:bg-white/30'
                   }`}
                 >
@@ -138,7 +138,7 @@ export function BlogListContent({ initialPosts }: BlogListContentProps) {
                             }}
                           />
                           <div className="absolute top-3 left-3">
-                            <span className="bg-indigo-600 text-white px-3 py-1 rounded-full text-xs font-medium">
+                            <span className="bg-[#063971] text-white px-3 py-1 rounded-full text-xs font-medium">
                               {getCategoryLabel(post.category)}
                             </span>
                           </div>
@@ -160,7 +160,7 @@ export function BlogListContent({ initialPosts }: BlogListContentProps) {
                             </span>
                           </div>
 
-                          <h2 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2 hover:text-indigo-600 transition">
+                          <h2 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2 hover:text-[#063971] transition">
                             {post.title}
                           </h2>
 

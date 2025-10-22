@@ -47,21 +47,21 @@ export default function Header() {
           <div className="hidden md:flex items-center space-x-8">
             <Link 
               href="/mapa" 
-              className="text-gray-700 hover:text-indigo-600 transition relative z-10 touch-manipulation"
+              className="text-gray-700 hover:text-brand-blue transition relative z-10 touch-manipulation"
               style={{ touchAction: 'manipulation' }}
             >
               Mapa
             </Link>
             <Link 
               href="/ruta" 
-              className="text-gray-700 hover:text-indigo-600 transition relative z-10 touch-manipulation"
+              className="text-gray-700 hover:text-brand-blue transition relative z-10 touch-manipulation"
               style={{ touchAction: 'manipulation' }}
             >
               Planificar Ruta
             </Link>
             <Link 
               href="/blog" 
-              className="text-gray-700 hover:text-indigo-600 transition relative z-10 touch-manipulation"
+              className="text-gray-700 hover:text-brand-blue transition relative z-10 touch-manipulation"
               style={{ touchAction: 'manipulation' }}
             >
               Blog
@@ -72,29 +72,29 @@ export default function Header() {
           <div className="flex md:hidden items-center gap-0.5">
             <Link 
               href="/mapa"
-              className="flex flex-col items-center gap-0.5 px-2 py-1.5 hover:bg-indigo-50 rounded-lg transition-colors relative z-10 touch-manipulation min-w-[60px]"
+              className="flex flex-col items-center gap-0.5 px-2 py-1.5 hover:bg-blue-50 rounded-lg transition-colors relative z-10 touch-manipulation min-w-[60px]"
               style={{ touchAction: 'manipulation' }}
               aria-label="Mapa"
             >
-              <Map className="h-5 w-5 text-indigo-600" />
+              <Map className="h-5 w-5 text-brand-blue" />
               <span className="text-[10px] text-gray-600 font-medium leading-none">Mapa</span>
             </Link>
             <Link 
               href="/ruta"
-              className="flex flex-col items-center gap-0.5 px-2 py-1.5 hover:bg-indigo-50 rounded-lg transition-colors relative z-10 touch-manipulation min-w-[60px]"
+              className="flex flex-col items-center gap-0.5 px-2 py-1.5 hover:bg-blue-50 rounded-lg transition-colors relative z-10 touch-manipulation min-w-[60px]"
               style={{ touchAction: 'manipulation' }}
               aria-label="Rutas"
             >
-              <Navigation className="h-5 w-5 text-indigo-600" />
+              <Navigation className="h-5 w-5 text-brand-blue" />
               <span className="text-[10px] text-gray-600 font-medium leading-none">Rutas</span>
             </Link>
             <Link 
               href="/blog"
-              className="flex flex-col items-center gap-0.5 px-2 py-1.5 hover:bg-indigo-50 rounded-lg transition-colors relative z-10 touch-manipulation min-w-[60px]"
+              className="flex flex-col items-center gap-0.5 px-2 py-1.5 hover:bg-blue-50 rounded-lg transition-colors relative z-10 touch-manipulation min-w-[60px]"
               style={{ touchAction: 'manipulation' }}
               aria-label="Blog"
             >
-              <BookOpen className="h-5 w-5 text-indigo-600" />
+              <BookOpen className="h-5 w-5 text-brand-blue" />
               <span className="text-[10px] text-gray-600 font-medium leading-none">Blog</span>
             </Link>
             {/* Separador visual */}
@@ -104,7 +104,7 @@ export default function Header() {
           {/* Auth Buttons - Desktop */}
           <div className="hidden md:flex items-center space-x-4">
             {loading ? (
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600"></div>
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-brand-blue"></div>
             ) : user ? (
               <div className="flex items-center space-x-3">
                 {/* Admin link - Solo para admins */}
@@ -129,8 +129,8 @@ export default function Header() {
                     onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                     className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors duration-200"
                   >
-                    <div className="flex items-center justify-center w-8 h-8 bg-indigo-100 rounded-full">
-                      <User className="h-4 w-4 text-indigo-600" />
+                    <div className="flex items-center justify-center w-8 h-8 bg-blue-100 rounded-full">
+                      <User className="h-4 w-4 text-brand-blue" />
                     </div>
                     <ChevronDown className={`h-4 w-4 text-gray-500 transition-transform duration-200 ${isUserMenuOpen ? 'rotate-180' : ''}`} />
                   </button>
@@ -232,14 +232,14 @@ export default function Header() {
               <div className="space-y-6">
                 {loading ? (
                   <div className="flex justify-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-blue"></div>
                   </div>
                 ) : user ? (
                   <>
                     {/* User info card */}
-                    <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-4 mb-2">
+                    <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl p-4 mb-2">
                       <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center">
+                        <div className="w-12 h-12 bg-gradient-to-br from-brand-blue to-brand-blue-dark rounded-full flex items-center justify-center">
                           <User className="h-6 w-6 text-white" />
                         </div>
                         <div className="flex-1 min-w-0">
@@ -253,7 +253,7 @@ export default function Header() {
                     {isAdmin && (
                       <Link
                         href="/admin/dashboard"
-                        className="flex items-center gap-3 px-4 py-4 rounded-xl bg-purple-600 text-white hover:bg-purple-700 transition shadow-lg"
+                        className="flex items-center gap-3 px-4 py-4 rounded-xl bg-brand-blue text-white hover:bg-brand-blue-dark transition shadow-lg"
                         onClick={() => setIsMenuOpen(false)}
                       >
                         <Settings className="h-5 w-5" />
@@ -291,7 +291,7 @@ export default function Header() {
                       </Button>
                     </Link>
                     <Link href="/registro" onClick={() => setIsMenuOpen(false)}>
-                      <Button className="w-full h-12 text-base bg-gradient-to-r from-indigo-600 to-purple-600">
+                      <Button className="w-full h-12 text-base bg-gradient-to-r from-brand-blue to-brand-blue-dark">
                         Registrarse
                       </Button>
                     </Link>
@@ -304,18 +304,18 @@ export default function Header() {
                   <div className="space-y-2">
                     <Link
                       href="/mapa"
-                      className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-indigo-50 transition"
+                      className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-blue-50 transition"
                       onClick={() => setIsMenuOpen(false)}
                     >
-                      <Map className="h-5 w-5 text-indigo-600" />
+                      <Map className="h-5 w-5 text-brand-blue" />
                       <span className="font-medium text-gray-900">Mapa de Lugares</span>
                     </Link>
                     <Link
                       href="/ruta"
-                      className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-indigo-50 transition"
+                      className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-blue-50 transition"
                       onClick={() => setIsMenuOpen(false)}
                     >
-                      <Navigation className="h-5 w-5 text-indigo-600" />
+                      <Navigation className="h-5 w-5 text-brand-blue" />
                       <span className="font-medium text-gray-900">Planificar Ruta</span>
                     </Link>
                   </div>
