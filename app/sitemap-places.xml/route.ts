@@ -25,10 +25,10 @@ export async function GET() {
   // Obtener todos los lugares publicados
   const { data: places } = await supabase
     .from('places')
-    .select('slug, category, province, updated_at, rating, user_ratings_total')
+    .select('slug, category, province, updated_at, rating, review_count')
     .eq('published', true)
     .order('rating', { ascending: false })
-    .order('user_ratings_total', { ascending: false });
+    .order('review_count', { ascending: false });
 
   if (!places || places.length === 0) {
     return new NextResponse('<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></urlset>', {
