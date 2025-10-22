@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/server';
-import { getPlaceDetails } from '@/lib/google/places';
+import { getPlaceDetails, getPlacePhotos } from '@/lib/google/places';
 import { generatePlaceSlug } from '@/lib/utils/slug-generator';
 
 export const dynamic = 'force-dynamic';
@@ -41,6 +41,9 @@ export async function POST(request: NextRequest) {
 
     // Obtener detalles completos del lugar
     const placeDetails = await getPlaceDetails(place_id);
+    
+    // Obtener referencias de fotos por separado
+    const photoReferences = await getPlacePhotos(place_id);
 
     // Verificar requisitos
     if (placeDetails.rating < 4.7) {
@@ -139,7 +142,7 @@ export async function POST(request: NextRequest) {
       website: placeDetails.website || null,
       google_maps_url: placeDetails.url || null,
       price_level: placeDetails.price_level || null,
-      photos: placeDetails.photos?.slice(0, 3).map((p: any) => p.photo_reference) || [],
+      photos: photoReferences.slice(0, 3),
       instagram_url: instagramUrl,
       facebook_url: facebookUrl,
       twitter_url: twitterUrl,
@@ -166,7 +169,7 @@ export async function POST(request: NextRequest) {
       success: true,
       place: newPlace,
       message: 'Lugar añadido correctamente. Pendiente de enriquecimiento IA.',
-      cost: 0.017, // $0.017 por Place Details
+      cost: 0.017, // $0.012 Place Details + $0.005 Photos
     });
 
   } catch (error: any) {

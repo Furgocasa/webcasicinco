@@ -228,13 +228,15 @@ export async function searchNearbyPlaces(
 
 /**
  * Obtiene los detalles completos de un lugar
+ * ✅ OPTIMIZADO: Sin campo 'photos' (ahorro $0.005 por llamada)
+ * Usar getPlacePhotos() si necesitas referencias de fotos
  */
 export async function getPlaceDetails(placeId: string): Promise<GooglePlaceData> {
   try {
     const response = await axios.get(`${PLACES_API_BASE}/details/json`, {
       params: {
         place_id: placeId,
-        fields: 'place_id,name,rating,user_ratings_total,formatted_address,address_components,geometry,price_level,formatted_phone_number,website,photos,reviews,types,url',
+        fields: 'place_id,name,rating,user_ratings_total,formatted_address,address_components,geometry,price_level,formatted_phone_number,website,reviews,types,url',
         language: 'es',
         key: GOOGLE_MAPS_API_KEY,
       },
@@ -248,6 +250,33 @@ export async function getPlaceDetails(placeId: string): Promise<GooglePlaceData>
   } catch (error) {
     console.error('Error getting place details:', error);
     throw error;
+  }
+}
+
+/**
+ * Obtiene solo las referencias de fotos de un lugar
+ * Coste: $0.005 (Atmosphere Data)
+ * Usar solo cuando realmente necesites fotos nuevas
+ */
+export async function getPlacePhotos(placeId: string): Promise<string[]> {
+  try {
+    const response = await axios.get(`${PLACES_API_BASE}/details/json`, {
+      params: {
+        place_id: placeId,
+        fields: 'photos',
+        key: GOOGLE_MAPS_API_KEY,
+      },
+    });
+
+    if (response.data.status !== 'OK') {
+      throw new Error(`Google Places API error: ${response.data.status}`);
+    }
+
+    const photos = response.data.result?.photos || [];
+    return photos.map((p: any) => p.photo_reference);
+  } catch (error) {
+    console.error('Error getting place photos:', error);
+    return [];
   }
 }
 

@@ -40,7 +40,7 @@ export async function processPlace(
   try {
     // 1. Obtener detalles del lugar de Google
     const placeDetails = await getPlaceDetails(placeId);
-    cost += 0.017;
+    cost += 0.012; // ✅ OPTIMIZADO: Sin 'photos' (antes $0.017)
 
     // Verificar si es cadena y debe excluirse
     if (shouldExcludeChain(placeDetails.name, excludeChains)) {

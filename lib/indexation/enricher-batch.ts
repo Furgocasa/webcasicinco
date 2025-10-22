@@ -111,9 +111,14 @@ export async function enrichPendingPlaces(
 
       console.log(`[ENRICHER]   Categoría IA: ${categorization.category} (confianza: ${categorization.confidence})`);
 
-      // 2. Descargar fotos a Supabase
+      // 2. Descargar fotos a Supabase usando referencias ya guardadas en BD
+      // ✅ OPTIMIZACIÓN: No pedimos 'photos' a Google (ahorro $0.005 por lugar)
+      // Las referencias ya están en place.photos desde la indexación
+      const photoReferences = place.photos || [];
+      const photosArray = photoReferences.map((ref: string) => ({ photo_reference: ref }));
+      
       const { supabaseUrls } = await downloadAndUploadPhotosToSupabase(
-        details.photos || [],
+        photosArray,
         place.name,
         place.google_place_id,
         5

@@ -220,7 +220,7 @@ export default async function BlogPostPage({ params }: Props) {
 
   return (
     <>
-      {/* ✅ Schema.org JSON-LD para rich snippets */}
+      {/* ✅ Schema.org JSON-LD para rich snippets - canónicas con www se gestionan via metadataBase */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
