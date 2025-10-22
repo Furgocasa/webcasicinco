@@ -38,7 +38,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   
   return {
     title: `${place.name} - ${categoryName} ${place.rating}★ en ${place.city}, ${place.province} | Casi Cinco`,
-    description: `${place.name}: ${place.rating}★ con ${place.user_ratings_total} reseñas en ${place.city}. ${place.ai_description?.substring(0, 150) || ''}...`,
+    description: `${place.name}: ${place.rating}★ con ${place.review_count} reseñas en ${place.city}. ${place.ai_description?.substring(0, 150) || ''}...`,
     openGraph: {
       title: place.name,
       description: place.ai_description || `${place.name} - ${place.rating}★ en ${place.city}`,
@@ -87,7 +87,7 @@ export default async function PlaceDetailPage({ params }: Props) {
   }
   
   // Calcular tier
-  const tier = calculateQualityTier(place.rating, place.user_ratings_total);
+  const tier = calculateQualityTier(place.rating, place.review_count);
   const tierInfo = getTierInfo(tier);
   
   // Schema.org para SEO
@@ -123,7 +123,7 @@ export default async function PlaceDetailPage({ params }: Props) {
     "aggregateRating": {
       "@type": "AggregateRating",
       "ratingValue": place.rating,
-      "reviewCount": place.user_ratings_total,
+      "reviewCount": place.review_count,
       "bestRating": 5,
       "worstRating": 1
     }

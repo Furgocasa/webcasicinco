@@ -188,7 +188,7 @@ export default async function CategoryProvincePage({ params }: Props) {
 
   // Calcular estadísticas
   const avgRating = (places.reduce((sum, p) => sum + p.rating, 0) / places.length).toFixed(1);
-  const totalReviews = places.reduce((sum, p) => sum + (p.user_ratings_total || 0), 0);
+  const totalReviews = places.reduce((sum, p) => sum + (p.review_count || 0), 0);
 
   // Schema.org para SEO
   const schema = {
@@ -206,7 +206,7 @@ export default async function CategoryProvincePage({ params }: Props) {
         "aggregateRating": {
           "@type": "AggregateRating",
           "ratingValue": place.rating,
-          "reviewCount": place.user_ratings_total,
+          "reviewCount": place.review_count,
           "bestRating": 5
         }
       }

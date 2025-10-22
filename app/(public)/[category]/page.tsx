@@ -165,7 +165,7 @@ export default async function CategoryPage({ params }: Props) {
         "aggregateRating": {
           "@type": "AggregateRating",
           "ratingValue": place.rating,
-          "reviewCount": place.user_ratings_total
+          "reviewCount": place.review_count
         }
       }
     }))
