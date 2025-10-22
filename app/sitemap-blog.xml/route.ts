@@ -7,7 +7,7 @@ const supabase = createClient(
 );
 
 export async function GET() {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://casicinco.com';
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.casicinco.com';
 
   // Obtener todos los posts del blog publicados
   const { data: posts } = await supabase

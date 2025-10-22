@@ -36,7 +36,7 @@ export const metadata: Metadata = {
   authors: [{ name: 'Casi Cinco' }],
   creator: 'Casi Cinco',
   publisher: 'Casi Cinco',
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://www.casicinco.com'),
   openGraph: {
     type: 'website',
     locale: 'es_ES',

@@ -7,7 +7,7 @@ const supabase = createClient(
 );
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://casicinco.com';
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.casicinco.com';
 
   // Obtener todos los lugares PUBLICADOS de la base de datos
   const { data: places } = await supabase
