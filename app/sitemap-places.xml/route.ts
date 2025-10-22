@@ -1,10 +1,4 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 300; // 5 minutos
@@ -20,38 +14,42 @@ function toSlug(text: string): string {
 }
 
 export async function GET() {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://casicinco.com';
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.casicinco.com';
 
-  // Obtener todos los lugares publicados
-  const { data: places, error, count } = await supabase
-    .from('places')
-    .select('slug, category, province, updated_at, rating, review_count', { count: 'exact' })
-    .eq('published', true)
-    .order('rating', { ascending: false })
-    .order('review_count', { ascending: false })
-    .limit(5000);
+  // Obtener lugares desde la API pública que ya funciona en producción
+  const response = await fetch(`${baseUrl}/api/places?limit=5000`, {
+    cache: 'no-store',
+    headers: { 'x-sitemap': '1' },
+  });
 
-  if (error || !places || places.length === 0) {
-    const reason = error ? `<!-- error: ${error.message.replace(/--/g, '')} -->` : '<!-- no-places-found -->';
-    const meta = `<!-- count:${count ?? 0} -->`;
-    const emptyXml = `<?xml version="1.0" encoding="UTF-8"?>\n${reason}${meta}<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></urlset>`;
+  if (!response.ok) {
+    const emptyXml = `<?xml version="1.0" encoding="UTF-8"?>\n<!-- api/places ${response.status} -->\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></urlset>`;
     return new NextResponse(emptyXml, {
       headers: {
         'Content-Type': 'application/xml',
-        'Cache-Control': 'public, max-age=300, s-maxage=300',
+      },
+    });
+  }
+
+  const json: any = await response.json().catch(() => null);
+  const places = Array.isArray(json?.places) ? json.places : [];
+
+  if (!places || places.length === 0) {
+    const emptyXml = `<?xml version="1.0" encoding="UTF-8"?>\n<!-- no-places-from-api -->\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></urlset>`;
+    return new NextResponse(emptyXml, {
+      headers: {
+        'Content-Type': 'application/xml',
       },
     });
   }
 
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${places.map(place => {
+${places.map((place: any) => {
     const lastmod = place.updated_at ? new Date(place.updated_at).toISOString() : new Date().toISOString();
-    // Prioridad más alta para lugares con mejor rating
     const priority = place.rating >= 4.8 ? '0.9' : place.rating >= 4.7 ? '0.8' : '0.7';
-    
     return `  <url>
-    <loc>${baseUrl}/${place.category}/${toSlug(String(place.province || ''))}/${place.slug}</loc>
+    <loc>${baseUrl}/${place.category}/${toSlug(place.province)}/${place.slug}</loc>
     <lastmod>${lastmod}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>${priority}</priority>
