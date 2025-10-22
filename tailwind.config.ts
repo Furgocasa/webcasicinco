@@ -11,9 +11,9 @@ const config: Config = {
       colors: {
         // Colores de marca Casi Cinco
         brand: {
-          blue: '#002196',
-          'blue-dark': '#001570',
-          'blue-darker': '#001050',
+          blue: '#063971',
+          'blue-dark': '#052d5a',
+          'blue-darker': '#042143',
           yellow: '#ffd935',
           'yellow-dark': '#e6c430',
           'yellow-light': '#ffe566',
@@ -21,17 +21,17 @@ const config: Config = {
         },
         // Colores legacy (mantener compatibilidad)
         primary: {
-          DEFAULT: '#002196',
-          50: '#e6e9f7',
-          100: '#ccd4ef',
-          200: '#99a9df',
-          300: '#667dcf',
-          400: '#3352bf',
-          500: '#002196',
-          600: '#001a78',
-          700: '#00145a',
-          800: '#000d3c',
-          900: '#00071e',
+          DEFAULT: '#063971',
+          50: '#e7eef5',
+          100: '#cfdceb',
+          200: '#9fb9d7',
+          300: '#6f97c3',
+          400: '#3f74af',
+          500: '#063971',
+          600: '#052e5a',
+          700: '#042244',
+          800: '#03172d',
+          900: '#020b17',
         },
         secondary: {
           DEFAULT: '#ffd935',

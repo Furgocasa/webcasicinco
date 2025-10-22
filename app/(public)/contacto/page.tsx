@@ -39,7 +39,7 @@ export default function ContactoPage() {
     <>
       <main className="min-h-screen bg-gray-50">
         {/* HERO */}
-        <section className="relative bg-[#002196] text-white overflow-hidden py-12">
+        <section className="relative bg-[#063971] text-white overflow-hidden py-12">
           <div className="container mx-auto px-4">
             <Link 
               href="/"
@@ -134,7 +134,7 @@ export default function ContactoPage() {
                           onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                           required
                           rows={6}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#002196] focus:border-transparent resize-none"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#063971] focus:border-transparent resize-none"
                           placeholder="Cuéntanos con detalle..."
                         />
                       </div>
@@ -142,7 +142,7 @@ export default function ContactoPage() {
                       <Button
                         type="submit"
                         loading={loading}
-                        className="w-full bg-[#002196] text-white hover:bg-[#001570]"
+                        className="w-full bg-[#063971] text-white hover:bg-[#052d5a]"
                       >
                         <Send className="h-4 w-4 mr-2" />
                         Enviar Mensaje
@@ -161,7 +161,7 @@ export default function ContactoPage() {
                       <p className="font-semibold mb-1">Email General</p>
                       <a 
                         href="mailto:hola@casicinco.com"
-                        className="text-[#002196] hover:underline"
+                        className="text-[#063971] hover:underline"
                       >
                         hola@casicinco.com
                       </a>
@@ -170,7 +170,7 @@ export default function ContactoPage() {
                       <p className="font-semibold mb-1">Soporte Técnico</p>
                       <a 
                         href="mailto:soporte@casicinco.com"
-                        className="text-[#002196] hover:underline"
+                        className="text-[#063971] hover:underline"
                       >
                         soporte@casicinco.com
                       </a>
@@ -179,7 +179,7 @@ export default function ContactoPage() {
                       <p className="font-semibold mb-1">Privacidad y Datos</p>
                       <a 
                         href="mailto:privacidad@casicinco.com"
-                        className="text-[#002196] hover:underline"
+                        className="text-[#063971] hover:underline"
                       >
                         privacidad@casicinco.com
                       </a>
@@ -188,7 +188,7 @@ export default function ContactoPage() {
                       <p className="font-semibold mb-1">Legal y Empresas</p>
                       <a 
                         href="mailto:legal@casicinco.com"
-                        className="text-[#002196] hover:underline"
+                        className="text-[#063971] hover:underline"
                       >
                         legal@casicinco.com
                       </a>

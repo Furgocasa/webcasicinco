@@ -13,7 +13,7 @@ export default function CookiesPage() {
     <>
       <main className="min-h-screen bg-white">
         {/* HERO */}
-        <section className="relative bg-[#002196] text-white overflow-hidden py-12">
+        <section className="relative bg-[#063971] text-white overflow-hidden py-12">
           <div className="container mx-auto px-4">
             <Link 
               href="/"
@@ -127,8 +127,8 @@ export default function CookiesPage() {
                 Preguntas sobre cookies:
               </p>
               <ul className="list-disc pl-6 text-gray-700 mb-6 space-y-2">
-                <li>Email: <a href="mailto:privacidad@casicinco.com" className="text-[#002196] hover:underline">privacidad@casicinco.com</a></li>
-                <li>Formulario: <Link href="/contacto" className="text-[#002196] hover:underline">/contacto</Link></li>
+                <li>Email: <a href="mailto:privacidad@casicinco.com" className="text-[#063971] hover:underline">privacidad@casicinco.com</a></li>
+                <li>Formulario: <Link href="/contacto" className="text-[#063971] hover:underline">/contacto</Link></li>
               </ul>
 
               <div className="bg-[#ffd935] bg-opacity-20 p-6 rounded-lg border border-[#ffd935] mt-8">
