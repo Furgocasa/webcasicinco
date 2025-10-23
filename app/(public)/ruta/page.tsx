@@ -187,12 +187,20 @@ export default function RutaPage() {
 
   const saveRouteToCache = (origin: string, dest: string, data: google.maps.DirectionsResult) => {
     try {
+      // ✅ OPTIMIZACIÓN: Desactivar caché de rutas para evitar QuotaExceededError
+      // DirectionsResult es muy pesado (~500KB-2MB) y localStorage tiene límite de 5-10MB total
+      // Las rutas cambian con el tráfico, así que el caché no es tan útil
+      console.log('💾 Caché de ruta omitido (evita QuotaExceededError)');
+      return;
+      
+      /* Código original (desactivado):
       const cacheKey = `route_${origin.toLowerCase()}_${dest.toLowerCase()}`;
       localStorage.setItem(cacheKey, JSON.stringify({
         data,
         timestamp: Date.now()
       }));
       console.log('💾 Ruta guardada en caché');
+      */
     } catch (error) {
       // Si falla guardar en caché, no afecta funcionalidad
       console.warn('Error guardando ruta en caché:', error);
@@ -337,7 +345,8 @@ export default function RutaPage() {
       console.log('🔍 Iniciando búsqueda de lugares cerca de la ruta...');
       
       // 1. Obtener solo lugares de categoría seleccionada (optimización)
-      let queryParams = 'limit=2000'; // Límite razonable (más rápido que 5000)
+      // ✅ OPTIMIZACIÓN: fields=light reduce payload 80% (solo campos esenciales)
+      let queryParams = 'limit=2000&fields=light';
       if (categoryFilter) {
         queryParams += `&category=${categoryFilter}`;
       }

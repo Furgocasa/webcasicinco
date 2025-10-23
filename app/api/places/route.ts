@@ -32,9 +32,17 @@ export async function GET(request: NextRequest) {
     // Quality Tier
     const qualityTier = searchParams.get('qualityTier'); // Puede ser: "diamond,platinum,gold"
     
+    // ✅ OPTIMIZACIÓN: Permitir solicitar solo campos ligeros (reduce payload 80%)
+    const fields = searchParams.get('fields'); // 'light' = solo campos esenciales
+    
     // Paginación - 🚀 NUNCA limitar lugares, siempre cargar todos
     const limit = parseInt(searchParams.get('limit') || '5000');
     const offset = parseInt(searchParams.get('offset') || '0');
+    
+    // Determinar qué campos seleccionar
+    const selectQuery = fields === 'light' 
+      ? 'id,slug,name,category,subcategory,rating,review_count,latitude,longitude,city,province,address,google_maps_url,photos'
+      : '*';
 
     // SOLUCIÓN: Cargar TODOS los lugares en lotes si limit >= 5000
     if (limit >= 5000) {
@@ -48,7 +56,7 @@ export async function GET(request: NextRequest) {
         // Construir query para este lote
         let query = supabase
           .from('places')
-          .select('*', { count: 'exact' })
+          .select(selectQuery, { count: 'exact' })
           .eq('published', true);
 
         // Filtros básicos
@@ -161,7 +169,7 @@ export async function GET(request: NextRequest) {
     // Para límites menores, usar el método normal
     let query = supabase
       .from('places')
-      .select('*', { count: 'exact' })
+      .select(selectQuery, { count: 'exact' })
       .eq('published', true);
 
     // Aplicar filtros...
