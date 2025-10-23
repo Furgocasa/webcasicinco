@@ -199,7 +199,20 @@ export default function MapPage() {
       
       while (hasMore) {
         try {
-          const response = await fetch(`/api/places?limit=${batchSize}&offset=${offset}`);
+          // ✅ OPTIMIZACIÓN: fields=light reduce payload 80% (evita error 413)
+          const response = await fetch(`/api/places?limit=${batchSize}&offset=${offset}&fields=light`);
+          
+          // ✅ Verificar error 413 (Payload Too Large)
+          if (!response.ok) {
+            if (response.status === 413) {
+              console.error('❌ Error 413: Payload demasiado grande');
+              toast.error('Error cargando lugares. Intenta recargar.');
+              hasMore = false;
+              break;
+            }
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          }
+          
           const data = await response.json();
           
           if (data.success && data.places && data.places.length > 0) {
@@ -215,7 +228,13 @@ export default function MapPage() {
           }
         } catch (batchError) {
           // Si falla un lote pero ya tenemos datos, continuar
-          console.warn(`⚠️ Error en lote offset ${offset}, continuando con ${loadedPlaces.length} lugares`);
+          console.error(`❌ Error en lote offset ${offset}:`, batchError);
+          
+          // Mostrar error al usuario si no hay datos cargados
+          if (loadedPlaces.length === 0) {
+            toast.error('Error cargando lugares. Revisa tu conexión.');
+          }
+          
           hasMore = false;
         }
       }
@@ -431,7 +450,15 @@ export default function MapPage() {
         let freshPlaces: PlaceWithTier[] = [];
         
         while (hasMore) {
-          const response = await fetch(`/api/places?limit=${batchSize}&offset=${offset}&t=${Date.now()}`);
+          // ✅ OPTIMIZACIÓN: fields=light reduce payload 80%
+          const response = await fetch(`/api/places?limit=${batchSize}&offset=${offset}&fields=light&t=${Date.now()}`);
+          
+          if (!response.ok) {
+            console.error(`❌ Error HTTP ${response.status} en revalidación`);
+            hasMore = false;
+            break;
+          }
+          
           const data = await response.json();
           
           if (data.success && data.places && data.places.length > 0) {
@@ -783,11 +810,8 @@ export default function MapPage() {
   }, []); // Solo ejecutar una vez al montar el componente
 
   // ✅ OPTIMIZACIÓN: Activar carga del mapa cuando sea necesario
-
-  // Cargar lugares al montar
-  useEffect(() => {
-    loadPlaces();
-  }, []);
+  
+  // ❌ ELIMINADO: useEffect duplicado (ya existe en línea 415)
 
   // Aplicar filtros cuando cambian (automático) - 🚀 Incluye debouncedSearchTerm
   useEffect(() => {

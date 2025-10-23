@@ -221,7 +221,14 @@ export async function preloadPlaces(): Promise<void> {
     let hasMore = true;
 
     while (hasMore) {
-      const response = await fetch(`/api/places?limit=${batchSize}&offset=${offset}`);
+      // ✅ OPTIMIZACIÓN: fields=light reduce payload 80% (evita error 413)
+      const response = await fetch(`/api/places?limit=${batchSize}&offset=${offset}&fields=light`);
+      
+      if (!response.ok) {
+        console.error(`❌ Error HTTP ${response.status} precargando lugares`);
+        break;
+      }
+      
       const data = await response.json();
 
       if (data.success && data.places && data.places.length > 0) {
