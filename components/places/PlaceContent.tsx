@@ -801,7 +801,7 @@ export function PlaceContent({ place, tier, tierInfo }: PlaceContentProps) {
                     });
                   }}
                 >
-                  Crear Cuenta Gratis
+                  Prueba Gratis 30 Días
                 </Button>
               </Link>
             </div>
@@ -809,10 +809,10 @@ export function PlaceContent({ place, tier, tierInfo }: PlaceContentProps) {
             {/* Trust badges */}
             <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-gray-600">
               <span className="flex items-center gap-1">
-                <span className="text-green-600">✓</span> Gratis para siempre
+                <span className="text-green-600">✓</span> 30 días gratis
               </span>
               <span className="flex items-center gap-1">
-                <span className="text-green-600">✓</span> Sin tarjeta
+                <span className="text-green-600">✓</span> Sin permanencia
               </span>
               <span className="flex items-center gap-1">
                 <span className="text-green-600">✓</span> Solo +4.7★
