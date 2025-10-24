@@ -25,7 +25,8 @@ import {
   Check,
   X,
   ChevronRight,
-  Home
+  Home,
+  ArrowRight
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
@@ -745,6 +746,82 @@ export function PlaceContent({ place, tier, tierInfo }: PlaceContentProps) {
           </div>
         </div>
       )}
+
+      {/* CTA Banner de Conversión - Antes del Footer */}
+      <div className="bg-gradient-to-r from-blue-50 via-blue-100 to-blue-50 border-t border-b border-blue-200 py-12 md:py-16">
+        <div className="max-w-4xl mx-auto px-4">
+          <div className="text-center">
+            {/* Icon */}
+            <div className="inline-block mb-4">
+              <span className="text-5xl">🗺️</span>
+            </div>
+            
+            {/* Headline */}
+            <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">
+              ¿Te ha gustado {place.name}?
+            </h3>
+            
+            {/* Description */}
+            <p className="text-lg text-gray-700 mb-2 max-w-2xl mx-auto">
+              Descubre <strong>3,133 lugares excepcionales</strong> como este en toda España.
+            </p>
+            <p className="text-base text-gray-600 mb-6 max-w-2xl mx-auto">
+              Todos con <strong className="text-[#063971]">+4.7★</strong> en Google Maps. 
+              Usa nuestro mapa interactivo, crea rutas y guarda favoritos.
+            </p>
+            
+            {/* CTAs */}
+            <div className="flex flex-col sm:flex-row gap-3 justify-center mb-4">
+              <Link href="/mapa">
+                <Button 
+                  className="bg-[#063971] hover:bg-[#052d5a] text-white px-8 py-3 text-base font-semibold w-full sm:w-auto"
+                  onClick={() => {
+                    trackEvent(EVENTS.PLACE_DETAIL_CLICK, ANALYTICS_CATEGORIES.ENGAGEMENT, {
+                      place_id: place.id,
+                      place_name: place.name,
+                      source: 'cta_banner',
+                      cta_type: 'explore_map'
+                    });
+                  }}
+                >
+                  <MapPin className="h-5 w-5 mr-2" />
+                  Explorar Mapa Interactivo
+                </Button>
+              </Link>
+              <Link href="/registro">
+                <Button 
+                  variant="outline" 
+                  className="border-2 border-[#063971] text-[#063971] hover:bg-blue-50 px-8 py-3 text-base font-semibold w-full sm:w-auto"
+                  onClick={() => {
+                    trackEvent(EVENTS.PLACE_DETAIL_CLICK, ANALYTICS_CATEGORIES.ENGAGEMENT, {
+                      place_id: place.id,
+                      place_name: place.name,
+                      source: 'cta_banner',
+                      cta_type: 'register'
+                    });
+                  }}
+                >
+                  Crear Cuenta Gratis
+                </Button>
+              </Link>
+            </div>
+            
+            {/* Trust badges */}
+            <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-gray-600">
+              <span className="flex items-center gap-1">
+                <span className="text-green-600">✓</span> Gratis para siempre
+              </span>
+              <span className="flex items-center gap-1">
+                <span className="text-green-600">✓</span> Sin tarjeta
+              </span>
+              <span className="flex items-center gap-1">
+                <span className="text-green-600">✓</span> Solo +4.7★
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <Footer />
     </div>
   );

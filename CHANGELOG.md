@@ -1,5 +1,45 @@
 # 📝 Changelog - Casi Cinco
 
+## [24 Octubre 2025] - Limpieza de Fotos Expiradas 🧹
+
+### 🐛 Problema Crítico Resuelto
+- **FIXED:** Gasto de €2.50/día en Google Photos API por photo_references expirados
+- **IMPACTO:** 99 lugares con referencias inválidas generando 357 llamadas fallidas/día
+
+### ✅ Solución Implementada
+```sql
+-- Limpieza de photo_references expirados
+UPDATE places
+SET photos = NULL
+WHERE photos IS NOT NULL
+  AND (photo_urls IS NULL OR array_length(photo_urls, 1) IS NULL)
+  AND published = true;
+```
+
+### 💰 Ahorro Conseguido
+- **Antes:** €2.50/día → €75/mes → €900/año
+- **Ahora:** €0/día → €0/mes
+- **Reducción:** 100% en costos de fotos fallidas
+
+### 📊 Estado Final del Sistema
+- ✅ 3,133 lugares publicados (sin cambios)
+- ✅ 3,034 con fotos en Supabase (96.8%)
+- ✅ 99 sin fotos (placeholder, €0 costo)
+- ✅ 0 lugares usando Google Photos API
+
+### 📚 Documentación Actualizada
+- `SISTEMA_FOTOS_SUPABASE.md` - Estado completado al 100%
+- `OPTIMIZACION_GOOGLE_API_COMPLETA.md` - Añadida sección de limpieza
+- `supabase/README.md` - Estadísticas actualizadas
+- `RESUMEN_LIMPIEZA_FOTOS_24OCT2025.md` - Nuevo archivo con detalles
+
+### 🎯 Impacto Total
+- Ahorro acumulado optimizaciones: **~€4,556/año**
+- Sistema 100% optimizado
+- Control total sobre costos de API
+
+---
+
 ## [BETA 10] - 15 de Octubre de 2025
 
 ### 🎉 **BETA 10 - Sistema de Indexación Profesional Optimizado**

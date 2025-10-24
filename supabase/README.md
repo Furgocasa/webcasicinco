@@ -1,6 +1,23 @@
 # 🗄️ Supabase Setup - Casi Cinco
 
-**Última actualización:** 12 de Octubre de 2025
+**Última actualización:** 24 de Octubre de 2025
+
+---
+
+## 🎉 ESTADO ACTUAL DEL SISTEMA
+
+### **Sistema de Fotos Optimizado (24 Oct 2025)**
+- ✅ **3,034 lugares** con fotos en Supabase Storage (96.8%)
+- ✅ **99 lugares** sin fotos (limpiados, sin costo)
+- ✅ **€0/mes** en Google Photos API
+- ✅ **Ahorro:** ~€75/mes vs antes
+
+### **Estadísticas de Base de Datos**
+- 📊 **3,133 lugares publicados**
+- 📸 **96.8% con fotos migradas**
+- 💰 **Costo fotos:** €0/mes (solo nuevas indexaciones)
+
+---
 
 ## 📋 Instrucciones de Instalación
 

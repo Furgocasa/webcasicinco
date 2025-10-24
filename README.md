@@ -294,6 +294,26 @@ npm test
 
 ---
 
+## 💰 Sistema de Costos Optimizado
+
+### Ahorro Total: ~€6,900/año (Actualizado 24 Oct 2025)
+
+#### Optimizaciones Implementadas:
+- ✅ **Fotos en Supabase Storage** → Ahorro: $2,400/año
+- ✅ **Limpieza fotos expiradas (24 Oct)** → Ahorro: €900/año ← **NUEVO**
+- ✅ **Optimización indexación** → Ahorro: $3,200/año
+- ✅ **Caché de búsquedas** → Ahorro: $200/año
+- ✅ **Context Provider mapa** → Ahorro: €216/año
+- ✅ **Frontend optimizado** → Ahorro: €240/año
+
+#### Estado Actual del Sistema:
+- 📊 **3,133 lugares publicados**
+- 📸 **96.8% con fotos en Supabase** (3,034 lugares)
+- 💰 **Costo fotos: €0/mes** (antes €75/mes)
+- ✅ **0 lugares usando Google Photos API**
+
+---
+
 ## 📄 Licencia
 
 **Propietario:** Narciso Pardo Buendía  

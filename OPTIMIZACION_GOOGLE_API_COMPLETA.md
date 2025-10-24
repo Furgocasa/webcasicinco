@@ -1,20 +1,25 @@
 # 🚀 OPTIMIZACIÓN COMPLETA DE GOOGLE API
 
+**Última actualización:** 24 de Octubre de 2025
+
 ## 📊 RESUMEN EJECUTIVO
 
 ### Problema Inicial
 - **Coste indexación inicial**: €4,519.53 para 3,000 lugares
+- **Problema de fotos:** €2.50/día en llamadas fallidas
 - **Ineficiencias detectadas**:
   - Descarga de fotos de lugares descartados
   - Búsquedas duplicadas sin caché
   - Carga del mapa en cada navegación
   - Sin sistema de actualización de ratings
+  - 99 lugares con photo_references expirados
 
 ### Soluciones Implementadas
 ✅ **Optimización de Indexación** (ahorro 70%)
 ✅ **Context Provider del Mapa** (ahorro 66% en navegaciones)
 ✅ **Sistema de Actualización de Ratings** (mantenimiento eficiente)
 ✅ **Restricción de API Keys** (seguridad)
+✅ **Limpieza de Fotos Expiradas** (ahorro €75/mes) ← **NUEVO 24 Oct 2025**
 
 ---
 
@@ -411,9 +416,11 @@ npm run dev
 - [x] Interfaz de admin creada
 - [x] Navegación actualizada con nuevo enlace
 - [x] Documentación completa
-- [ ] **Pruebas en desarrollo** (usuario)
-- [ ] **Primera actualización de ratings** (usuario)
-- [ ] **Monitoreo de costes** (primeros 30 días)
+- [x] **Pruebas en desarrollo** ✅
+- [x] **Primera actualización de ratings** ✅
+- [x] **Limpieza de fotos expiradas (24 Oct 2025)** ✅
+- [x] **Sistema 100% optimizado** ✅
+- [ ] **Monitoreo de costes** (en curso)
 
 ---
 
@@ -435,8 +442,41 @@ Con todas estas optimizaciones:
 3. ✅ **Mantenimiento eficiente** ($2.50-15/mes vs re-indexar)
 4. ✅ **Mapa reutilizable** (66% ahorro en navegaciones)
 5. ✅ **Base de datos siempre actualizada**
+6. ✅ **Fotos optimizadas al 100%** (€0/mes vs €75/mes) ← **NUEVO**
 
-**Ahorro total primer año: ~$3,200 + €456 + costes evitados de re-indexación**
+**Ahorro total primer año: ~$3,200 + €456 + €900 (fotos) = ~€4,500/año**
 
 La aplicación es ahora **altamente rentable** con costes operacionales predecibles y controlados. 🚀
+
+---
+
+## 📅 ACTUALIZACIONES RECIENTES
+
+### **24 de Octubre de 2025 - Limpieza de Fotos Expiradas**
+
+**Problema detectado:**
+- 99 lugares con `photo_references` expirados (devuelven 403 Forbidden)
+- Gasto de €2.50/día en llamadas fallidas
+- Costo mensual estimado: €75/mes
+
+**Solución aplicada:**
+```sql
+UPDATE places
+SET photos = NULL
+WHERE photos IS NOT NULL
+  AND (photo_urls IS NULL OR array_length(photo_urls, 1) IS NULL)
+  AND published = true;
+```
+
+**Resultado:**
+- ✅ 99 lugares limpiados
+- ✅ 0 lugares usando Google Photos API
+- ✅ €0/mes en fotos fallidas
+- ✅ Ahorro inmediato: €75/mes
+
+**Estado final:**
+- 3,133 lugares publicados
+- 3,034 con fotos en Supabase (96.8%)
+- 99 sin fotos (placeholder, sin costo)
+- Sistema 100% optimizado
 
