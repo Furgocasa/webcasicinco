@@ -279,11 +279,11 @@ export function FurgocasaBanner({
   if (orientation === 'vertical') {
     return (
       <div className="my-8 bg-gradient-to-br from-blue-900 via-blue-800 to-blue-700 rounded-2xl shadow-2xl overflow-hidden relative max-w-md mx-auto h-[700px] flex flex-col">
-        <div className="relative h-64 flex-shrink-0">
+        <div className="relative h-64 flex-shrink-0 overflow-hidden">
           <img 
             src={currentBanner.image}
             alt={`Furgocasa - ${currentBanner.id}`}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover object-center"
             loading="lazy"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
@@ -293,6 +293,7 @@ export function FurgocasaBanner({
               src="/images/furgocasa/logo blanco_500.png"
               alt="Furgocasa Campervans"
               className="h-12"
+              loading="lazy"
             />
           </div>
         </div>
