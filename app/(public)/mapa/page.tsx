@@ -2056,7 +2056,7 @@ export default function MapPage() {
                         <p className="text-xs text-gray-600 line-clamp-1 flex-1">
                           {place.city}, {place.province}
                         </p>
-                        {distance !== null && !place.photos?.length && (
+                        {distance !== null && !place.photo_urls?.length && !place.photos?.length && (
                           <span className="text-xs font-semibold text-blue-600 flex items-center gap-1 ml-2">
                             <MapPin className="h-3 w-3" />
                             {distance < 1 
@@ -2546,7 +2546,7 @@ export default function MapPage() {
                       {place.city}, {place.province}
                     </p>
                     {/* Mostrar distancia solo si no hay foto */}
-                    {distance !== null && !place.photos?.length && (
+                    {distance !== null && !place.photo_urls?.length && !place.photos?.length && (
                       <span className="text-xs font-semibold text-blue-600 flex items-center gap-1 ml-2">
                         <MapPin className="h-3 w-3" />
                         {distance < 1 
