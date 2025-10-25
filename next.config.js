@@ -25,9 +25,15 @@ const nextConfig = {
       bodySizeLimit: '2mb',
     },
   },
-  // ✅ NO exponemos secretos server-side al navegador
-  // Las variables sin NEXT_PUBLIC_ ya están disponibles automáticamente en el servidor
-  // y se configuran en AWS Amplify
+  // ⚠️ TEMPORAL: Exponer variables de entorno server-side explícitamente
+  // TODO: Investigar por qué Next.js no las lee automáticamente en AWS Amplify
+  env: {
+    OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+    GOOGLE_PLACES_API_KEY: process.env.GOOGLE_PLACES_API_KEY,
+    SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
+    STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
+    STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
+  },
 };
 
 module.exports = nextConfig;
