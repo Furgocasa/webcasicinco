@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
     
     // Determinar qué campos seleccionar
     const selectQuery = fields === 'light' 
-      ? 'id,slug,name,category,subcategory,rating,review_count,latitude,longitude,city,province,address,google_maps_url,photo_urls'
+      ? 'id,slug,name,category,subcategory,rating,review_count,latitude,longitude,city,province,region,address,google_maps_url,photo_urls'
       : '*';
 
     // SOLUCIÓN: Cargar TODOS los lugares en lotes si limit >= 5000

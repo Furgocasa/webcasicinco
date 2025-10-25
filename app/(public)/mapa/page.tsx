@@ -424,12 +424,29 @@ export default function MapPage() {
   }, [filteredPlaces, filters, minReviews, maxReviews, debouncedSearchTerm, showFilters, showPlacesList, allPlaces]);
 
   // 🚀 OPTIMIZACIÓN: Calcular opciones con useMemo para evitar recalcular constantemente
-  const availableOptions = useMemo(() => ({
-    communities: Array.from(new Set(allPlaces.map(p => p.region).filter(r => r && r !== 'España' && r !== 'Todas'))).sort(),
-    provinces: Array.from(new Set(allPlaces.map(p => p.province))).filter(Boolean).sort(),
-    categories: Array.from(new Set(allPlaces.map(p => p.category))).filter(Boolean),
-    cities: Array.from(new Set(allPlaces.map(p => p.city))).filter(Boolean).sort(),
-  }), [allPlaces]);
+  const availableOptions = useMemo(() => {
+    // Debug: Ver todas las regiones sin filtrar
+    const allRegions = allPlaces.map(p => p.region);
+    const uniqueRegions = Array.from(new Set(allRegions));
+    console.log('🔍 DEBUG: Regiones únicas encontradas (sin filtrar):', uniqueRegions);
+    console.log('🔍 DEBUG: Total de lugares:', allPlaces.length);
+    
+    // Filtrar comunidades válidas
+    const validCommunities = Array.from(new Set(
+      allPlaces
+        .map(p => p.region)
+        .filter(r => r && r !== 'España' && r !== 'Todas')
+    )).sort();
+    
+    console.log('✅ Comunidades válidas después de filtrar:', validCommunities);
+    
+    return {
+      communities: validCommunities,
+      provinces: Array.from(new Set(allPlaces.map(p => p.province))).filter(Boolean).sort(),
+      categories: Array.from(new Set(allPlaces.map(p => p.category))).filter(Boolean),
+      cities: Array.from(new Set(allPlaces.map(p => p.city))).filter(Boolean).sort(),
+    };
+  }, [allPlaces]);
 
   useEffect(() => {
     loadPlaces();

@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TEST - Banners Furgocasa Dinámicos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .banner-demo {
+            margin-bottom: 4rem;
+            padding: 2rem;
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .demo-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #003d7a;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid #003d7a;
+        }
+    </style>
+</head>
+<body class="p-8 bg-gray-50">
+    <div class="max-w-7xl mx-auto">
+        <header class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-gray-900 mb-2">🚐 Banners Furgocasa DINÁMICOS</h1>
+            <p class="text-gray-600">Sistema de rotación automática con 5 variantes | SEO optimizado | Sin botón cerrar</p>
+            <p class="text-sm text-gray-500 mt-2">🔄 Los banners cambian cada 10 segundos automáticamente</p>
+        </header>
+
+        <div class="bg-blue-50 p-4 rounded-lg mb-8">
+            <p class="text-sm text-blue-900">
+                🎨 <strong>Colores oficiales Furgocasa (azul navy)</strong> · 
+                🔗 <strong>Links SEO con keywords</strong> · 
+                ✅ <strong>DoFollow</strong>
+            </p>
+        </div>
+
+        <!-- ========================================
+             BANNER HORIZONTAL (CON ROTACIÓN AUTOMÁTICA)
+        ======================================== -->
+        <div class="banner-demo">
+            <h2 class="demo-title">📐 Orientación: HORIZONTAL (Rotativo + SEO)</h2>
+            <p class="text-gray-600 mb-4">✅ Ideal para: Blog posts, páginas de lugares, secciones de contenido</p>
+            <p class="text-sm text-blue-600 mb-2">🔄 Rotación automática cada 10 segundos - Variante: <span id="current-variant-h" class="font-bold">Freedom</span></p>
+            
+            <div id="banner-horizontal" class="my-8 bg-gradient-to-br from-blue-900 via-blue-800 to-blue-700 rounded-2xl shadow-2xl overflow-hidden relative h-auto md:h-[280px]">
+                <div class="flex flex-col md:flex-row items-stretch h-full">
+                    <div class="w-full md:w-1/3 flex-shrink-0 h-64 md:h-full">
+                        <img id="h-image" src="images/furgocasa/2019.02.23_1912.JPG" alt="Furgocasa" class="w-full h-full object-cover" />
+                    </div>
+
+                    <div class="w-full md:w-2/3 text-white p-4 md:p-6 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center gap-2 mb-3 flex-wrap">
+                                <img src="images/furgocasa/LOGO BLANCO_500.png" alt="Furgocasa" class="h-8" />
+                                <span class="text-xs bg-white/20 px-2 py-1 rounded-full">Publicidad</span>
+                                <span id="h-badge" class="text-xs bg-white/30 px-2 py-1 rounded-full font-medium"></span>
+                            </div>
+
+                            <h3 id="h-headline" class="text-xl md:text-2xl font-bold mb-2 leading-tight">
+                                Descubre los mejores restaurantes de Madrid con tu casa a cuestas
+                            </h3>
+                            
+                            <p id="h-subheadline" class="text-white/95 mb-4 text-sm md:text-base leading-relaxed">
+                                Alquila una campervan premium y visita todos estos lugares con total libertad.
+                            </p>
+                        </div>
+
+                        <div class="flex flex-col sm:flex-row gap-2 mb-3">
+                            <a id="h-cta-link" href="https://www.furgocasa.com/es/reservar" target="_blank" rel="dofollow" class="bg-white text-blue-900 font-bold py-2.5 px-5 rounded-lg text-center hover:bg-blue-50 transition-all text-sm">
+                                <span id="h-cta">Reservar Ahora</span>
+                            </a>
+                            
+                            <a id="h-secondary-link" href="https://www.furgocasa.com/es/vehiculos-campervans" target="_blank" rel="dofollow" class="border-2 border-white text-white font-semibold py-2.5 px-5 rounded-lg text-center hover:bg-white/10 transition-colors text-sm">
+                                <span id="h-secondary-cta">Ver Campervans</span>
+                            </a>
+                        </div>
+
+                        <div>
+                            <div class="flex items-center justify-between text-xs">
+                                <div class="flex items-center gap-3 text-white/90">
+                                    <a href="https://www.furgocasa.com/es/reservar" target="_blank" rel="dofollow" class="hover:underline">
+                                        📍 Camper Murcia
+                                    </a>
+                                    <a href="https://www.furgocasa.com/es/vehiculos-campervans" target="_blank" rel="dofollow" class="hover:underline">
+                                        🚐 Premium
+                                    </a>
+                                </div>
+
+                                <div id="h-dots" class="flex items-center gap-1.5">
+                                    <button onclick="changeBannerH(0)" class="w-6 h-2 rounded-full bg-white transition-all"></button>
+                                    <button onclick="changeBannerH(1)" class="w-2 h-2 rounded-full bg-white/40 transition-all"></button>
+                                    <button onclick="changeBannerH(2)" class="w-2 h-2 rounded-full bg-white/40 transition-all"></button>
+                                    <button onclick="changeBannerH(3)" class="w-2 h-2 rounded-full bg-white/40 transition-all"></button>
+                                    <button onclick="changeBannerH(4)" class="w-2 h-2 rounded-full bg-white/40 transition-all"></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================
+             BANNER VERTICAL (CON ROTACIÓN AUTOMÁTICA)
+        ======================================== -->
+        <div class="banner-demo">
+            <h2 class="demo-title">📱 Orientación: VERTICAL (Rotativo + SEO)</h2>
+            <p class="text-gray-600 mb-4">✅ Ideal para: Sidebars, secciones destacadas, móvil-first</p>
+            <p class="text-sm text-blue-600 mb-2">🔄 Rotación automática cada 10 segundos - Variante: <span id="current-variant-v" class="font-bold">Freedom</span></p>
+            
+            <div class="max-w-md mx-auto">
+                <div id="banner-vertical" class="my-8 bg-gradient-to-br from-blue-900 via-blue-800 to-blue-700 rounded-2xl shadow-2xl overflow-hidden relative h-[600px] flex flex-col">
+                    <div class="relative h-64 flex-shrink-0">
+                        <img id="v-image" src="images/furgocasa/2019.02.23_1912.JPG" alt="Furgocasa" class="w-full h-full object-cover" />
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                        
+                        <div class="absolute bottom-4 left-4 right-4">
+                            <img src="images/furgocasa/LOGO BLANCO_500.png" alt="Furgocasa" class="h-12" />
+                        </div>
+                    </div>
+
+                    <div class="p-5 text-white flex-1 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center gap-2 mb-3 flex-wrap">
+                                <span class="text-xs bg-white/20 px-2 py-1 rounded-full">Publicidad</span>
+                                <span id="v-badge" class="text-xs bg-white/30 px-2 py-1 rounded-full font-medium"></span>
+                            </div>
+
+                            <h3 id="v-headline" class="text-xl font-bold mb-2 leading-tight">
+                                Descubre los mejores restaurantes de Madrid con tu casa a cuestas
+                            </h3>
+                            
+                            <p id="v-subheadline" class="text-white/95 mb-4 text-sm leading-relaxed">
+                                Alquila una campervan premium y visita todos estos lugares con total libertad.
+                            </p>
+                        </div>
+
+                        <div class="flex flex-col gap-2.5 mb-4">
+                            <a id="v-cta-link" href="https://www.furgocasa.com/es/reservar" target="_blank" rel="dofollow" class="bg-white text-blue-900 font-bold py-2.5 px-5 rounded-lg text-center hover:bg-blue-50 transition-all text-sm">
+                                <span id="v-cta">Reservar Ahora</span>
+                            </a>
+                            
+                            <a id="v-secondary-link" href="https://www.furgocasa.com/es/vehiculos-campervans" target="_blank" rel="dofollow" class="border-2 border-white text-white font-semibold py-2.5 px-5 rounded-lg text-center hover:bg-white/10 transition-colors text-sm">
+                                <span id="v-secondary-cta">Ver Campervans</span>
+                            </a>
+                        </div>
+
+                        <div>
+                            <div class="pt-4 border-t border-white/20">
+                                <div class="flex items-center justify-between mb-3">
+                                    <div class="flex gap-3 text-xs text-white/90">
+                                        <a href="https://www.furgocasa.com/es/reservar" target="_blank" rel="dofollow" class="hover:underline">
+                                            📍 Camper Murcia
+                                        </a>
+                                        <a href="https://www.furgocasa.com/es/vehiculos-campervans" target="_blank" rel="dofollow" class="hover:underline">
+                                            🚐 Premium
+                                        </a>
+                                    </div>
+
+                                    <div id="v-dots" class="flex items-center gap-1.5">
+                                        <button onclick="changeBannerV(0)" class="w-6 h-2 rounded-full bg-white transition-all"></button>
+                                        <button onclick="changeBannerV(1)" class="w-2 h-2 rounded-full bg-white/40 transition-all"></button>
+                                        <button onclick="changeBannerV(2)" class="w-2 h-2 rounded-full bg-white/40 transition-all"></button>
+                                        <button onclick="changeBannerV(3)" class="w-2 h-2 rounded-full bg-white/40 transition-all"></button>
+                                        <button onclick="changeBannerV(4)" class="w-2 h-2 rounded-full bg-white/40 transition-all"></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================
+             BANNER SIDEBAR (CON ROTACIÓN AUTOMÁTICA)
+        ======================================== -->
+        <div class="banner-demo">
+            <h2 class="demo-title">📌 Orientación: SIDEBAR Fijo (Rotativo + SEO)</h2>
+            <p class="text-gray-600 mb-4">✅ Ideal para: Desktop lateral, artículos largos (solo >1024px en producción)</p>
+            <p class="text-sm text-blue-600 mb-2">🔄 Rotación automática cada 10 segundos - Variante: <span id="current-variant-s" class="font-bold">Freedom</span></p>
+            
+            <div class="max-w-sm mx-auto">
+                <div id="banner-sidebar" class="bg-gradient-to-br from-blue-900 via-blue-800 to-blue-700 rounded-xl shadow-2xl overflow-hidden relative h-[540px] flex flex-col">
+                    <div class="relative h-48 flex-shrink-0">
+                        <img id="s-image" src="images/furgocasa/2019.02.23_1912.JPG" alt="Furgocasa" class="w-full h-full object-cover" />
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                    </div>
+
+                    <div class="p-4 text-white flex-1 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center gap-1.5 mb-2 flex-wrap">
+                                <img src="images/furgocasa/LOGO BLANCO_500.png" alt="Furgocasa" class="h-7" />
+                                <span class="text-xs bg-white/20 px-2 py-0.5 rounded-full">Publicidad</span>
+                            </div>
+
+                            <span id="s-badge" class="inline-block text-xs bg-white/30 px-2 py-0.5 rounded-full mb-2"></span>
+
+                            <h3 id="s-headline" class="text-base font-bold mb-1.5 leading-tight">
+                                Descubre los mejores restaurantes de Madrid
+                            </h3>
+                            
+                            <p id="s-subheadline" class="text-white/90 mb-3 text-xs leading-relaxed">
+                                Alquila una campervan premium con total libertad.
+                            </p>
+                        </div>
+
+                        <div>
+                            <a id="s-cta-link" href="https://www.furgocasa.com/es/reservar" target="_blank" rel="dofollow" class="block w-full bg-white text-blue-900 font-bold py-2 px-3 rounded-lg text-center hover:bg-blue-50 transition-colors mb-2 text-sm">
+                                <span id="s-cta">Reservar Ahora</span>
+                            </a>
+                            
+                            <a id="s-secondary-link" href="https://www.furgocasa.com/es/vehiculos-campervans" target="_blank" rel="dofollow" class="block w-full border-2 border-white text-white font-semibold py-2 px-3 rounded-lg text-center hover:bg-white/10 transition-colors mb-3 text-xs">
+                                <span id="s-secondary-cta">Ver Campervans</span>
+                            </a>
+
+                            <div class="flex items-center justify-between text-xs text-white/80">
+                                <a href="https://www.furgocasa.com/es/reservar" target="_blank" rel="dofollow" class="hover:underline text-white/90">
+                                    📍 Camper alquiler
+                                </a>
+                                
+                                <div id="s-dots" class="flex items-center gap-1">
+                                    <button onclick="changeBannerS(0)" class="w-4 h-1.5 rounded-full bg-white transition-all"></button>
+                                    <button onclick="changeBannerS(1)" class="w-1.5 h-1.5 rounded-full bg-white/40 transition-all"></button>
+                                    <button onclick="changeBannerS(2)" class="w-1.5 h-1.5 rounded-full bg-white/40 transition-all"></button>
+                                    <button onclick="changeBannerS(3)" class="w-1.5 h-1.5 rounded-full bg-white/40 transition-all"></button>
+                                    <button onclick="changeBannerS(4)" class="w-1.5 h-1.5 rounded-full bg-white/40 transition-all"></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- INFO SEO -->
+        <div class="banner-demo bg-green-50">
+            <h2 class="demo-title text-green-900">✅ CARACTERÍSTICAS FINALES</h2>
+            
+            <div class="grid md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="font-bold text-lg mb-2">🎯 Sistema de Banners</h3>
+                    <ul class="text-sm text-gray-700 space-y-1">
+                        <li>✅ 5 variantes únicas por banner</li>
+                        <li>✅ Rotación automática cada 10 segundos</li>
+                        <li>✅ Altura fija (sin cambios al rotar)</li>
+                        <li>✅ Sin botón de cerrar (X)</li>
+                        <li>✅ Sin efecto de grisado</li>
+                        <li>✅ Botones dinámicos sin redundancia</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-bold text-lg mb-2">🔗 SEO Optimizado</h3>
+                    <ul class="text-sm text-gray-700 space-y-1">
+                        <li>✅ Links DoFollow con keywords</li>
+                        <li>✅ Anchor text relevante</li>
+                        <li>✅ UTM parameters para tracking</li>
+                        <li>✅ Colores Furgocasa (azul navy)</li>
+                        <li>✅ Frases contextuales con [LOCATION]</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================
+         JAVASCRIPT - SISTEMA DE ROTACIÓN DINÁMICO
+    ======================================== -->
+    <script>
+        // 5 VARIANTES FINALES - Sin redundancia en botones
+            const BANNER_VARIANTS = [
+                {
+                    id: 'freedom',
+                    name: 'Freedom',
+                    image: 'images/furgocasa/2019.02.23_1912.JPG',
+                    headline: 'Descubre los mejores restaurantes de Madrid con tu casa a cuestas',
+                    headlineSidebar: 'Descubre Madrid con tu casa a cuestas',
+                    subheadline: 'Alquila una campervan premium y visita todos estos lugares con total libertad.',
+                    subheadlineSidebar: 'Alquila una campervan premium con total libertad.',
+                    cta: 'Reservar Ahora',
+                    ctaLink: 'https://www.furgocasa.com/es/reservar',
+                    secondaryCta: 'Ver Campervans',
+                    secondaryLink: 'https://www.furgocasa.com/es/vehiculos-campervans'
+                },
+                {
+                    id: 'lifestyle',
+                    name: 'Lifestyle',
+                    image: 'images/furgocasa/AdobeStock_136414223.jpeg',
+                    headline: 'Visita los mejores bares de Barcelona en camper',
+                    headlineSidebar: 'Visita Barcelona en camper premium',
+                    subheadline: 'Campervans de máxima calidad para explorar sin límites. Recogida en Murcia o Madrid.',
+                    subheadlineSidebar: 'Máxima calidad. Recogida en Murcia o Madrid.',
+                    cta: 'Ver Flota',
+                    ctaLink: 'https://www.furgocasa.com/es/vehiculos-campervans',
+                    secondaryCta: 'Reservar Ahora',
+                    secondaryLink: 'https://www.furgocasa.com/es/reservar',
+                    badge: '🚐 Máxima Calidad'
+                },
+                {
+                    id: 'adventure',
+                    name: 'Adventure',
+                    image: 'images/furgocasa/AdobeStock_45125037.jpeg',
+                    headline: 'Visita todos estos lugares de Sevilla con tu camper de alquiler',
+                    headlineSidebar: 'Visita Sevilla con tu camper',
+                    subheadline: 'Especialistas en alquiler de campervans premium. Desde Murcia para toda España. Descuentos hasta -30%.',
+                    subheadlineSidebar: 'Campervans premium desde Murcia. Hasta -30%.',
+                    cta: 'Ver Ofertas',
+                    ctaLink: 'https://www.furgocasa.com/es/reservar',
+                    secondaryCta: 'Ver Modelos',
+                    secondaryLink: 'https://www.furgocasa.com/es/vehiculos-campervans',
+                    badge: '💰 Hasta -30%'
+                },
+                {
+                    id: 'quality',
+                    name: 'Quality',
+                    image: 'images/furgocasa/AdobeStock_136326717.jpeg',
+                    headline: 'Recorre Galicia con una campervan de gran volumen',
+                    headlineSidebar: 'Recorre Galicia en campervan',
+                    subheadline: 'Knaus, Weinsberg, Adria, Challenger... Los mejores modelos para tu escapada.',
+                    subheadlineSidebar: 'Knaus, Weinsberg, Adria... Los mejores modelos.',
+                    cta: 'Explorar Modelos',
+                    ctaLink: 'https://www.furgocasa.com/es/vehiculos-campervans',
+                    secondaryCta: 'Consultar Precio',
+                    secondaryLink: 'https://www.furgocasa.com/es/reservar',
+                    badge: '🏆 Premium'
+                },
+                {
+                    id: 'beach',
+                    name: 'Beach',
+                    image: 'images/furgocasa/AdobeStock_42669967.jpeg',
+                    headline: 'Descubre Málaga durmiendo donde tú elijas con tu camper',
+                    headlineSidebar: 'Descubre Málaga en camper',
+                    subheadline: 'La forma más cómoda de visitar estos lugares. Espacio, confort y libertad.',
+                    subheadlineSidebar: 'Espacio, confort y libertad total.',
+                    cta: 'Reservar',
+                    ctaLink: 'https://www.furgocasa.com/es/reservar',
+                    secondaryCta: 'Ver Vehículos',
+                    secondaryLink: 'https://www.furgocasa.com/es/vehiculos-campervans',
+                    badge: '🏖️ Escapadas'
+                }
+            ];
+
+        // Índices actuales
+        let currentIndexH = 0;
+        let currentIndexV = 0;
+        let currentIndexS = 0;
+        let timerH, timerV, timerS;
+
+        // BANNER HORIZONTAL
+        function updateBannerH(index) {
+            const banner = BANNER_VARIANTS[index];
+            
+            document.getElementById('h-image').src = banner.image;
+            document.getElementById('h-headline').textContent = banner.headline;
+            document.getElementById('h-subheadline').textContent = banner.subheadline;
+            document.getElementById('h-cta').textContent = banner.cta;
+            document.getElementById('h-cta-link').href = banner.ctaLink;
+            document.getElementById('h-secondary-cta').textContent = banner.secondaryCta;
+            document.getElementById('h-secondary-link').href = banner.secondaryLink;
+            
+            if (banner.badge) {
+                document.getElementById('h-badge').textContent = banner.badge;
+                document.getElementById('h-badge').style.display = '';
+            } else {
+                document.getElementById('h-badge').style.display = 'none';
+            }
+            
+            document.getElementById('current-variant-h').textContent = banner.name;
+            
+            // Actualizar dots
+            const dots = document.querySelectorAll('#h-dots button');
+            dots.forEach((dot, i) => {
+                if (i === index) {
+                    dot.className = 'w-6 h-2 rounded-full bg-white transition-all';
+                } else {
+                    dot.className = 'w-2 h-2 rounded-full bg-white/40 transition-all';
+                }
+            });
+        }
+
+        function changeBannerH(index) {
+            currentIndexH = index;
+            updateBannerH(index);
+            clearInterval(timerH);
+            timerH = setInterval(() => {
+                currentIndexH = (currentIndexH + 1) % BANNER_VARIANTS.length;
+                updateBannerH(currentIndexH);
+            }, 10000);
+        }
+
+        // BANNER VERTICAL
+        function updateBannerV(index) {
+            const banner = BANNER_VARIANTS[index];
+            
+            document.getElementById('v-image').src = banner.image;
+            document.getElementById('v-headline').textContent = banner.headline;
+            document.getElementById('v-subheadline').textContent = banner.subheadline;
+            document.getElementById('v-cta').textContent = banner.cta;
+            document.getElementById('v-cta-link').href = banner.ctaLink;
+            document.getElementById('v-secondary-cta').textContent = banner.secondaryCta;
+            document.getElementById('v-secondary-link').href = banner.secondaryLink;
+            
+            if (banner.badge) {
+                document.getElementById('v-badge').textContent = banner.badge;
+                document.getElementById('v-badge').style.display = '';
+            } else {
+                document.getElementById('v-badge').style.display = 'none';
+            }
+            
+            document.getElementById('current-variant-v').textContent = banner.name;
+            
+            // Actualizar dots
+            const dots = document.querySelectorAll('#v-dots button');
+            dots.forEach((dot, i) => {
+                if (i === index) {
+                    dot.className = 'w-6 h-2 rounded-full bg-white transition-all';
+                } else {
+                    dot.className = 'w-2 h-2 rounded-full bg-white/40 transition-all';
+                }
+            });
+        }
+
+        function changeBannerV(index) {
+            currentIndexV = index;
+            updateBannerV(index);
+            clearInterval(timerV);
+            timerV = setInterval(() => {
+                currentIndexV = (currentIndexV + 1) % BANNER_VARIANTS.length;
+                updateBannerV(currentIndexV);
+            }, 10000);
+        }
+
+        // BANNER SIDEBAR
+        function updateBannerS(index) {
+            const banner = BANNER_VARIANTS[index];
+            
+            document.getElementById('s-image').src = banner.image;
+            document.getElementById('s-headline').textContent = banner.headlineSidebar || banner.headline;
+            document.getElementById('s-subheadline').textContent = banner.subheadlineSidebar || banner.subheadline;
+            document.getElementById('s-cta').textContent = banner.cta;
+            document.getElementById('s-cta-link').href = banner.ctaLink;
+            document.getElementById('s-secondary-cta').textContent = banner.secondaryCta;
+            document.getElementById('s-secondary-link').href = banner.secondaryLink;
+            
+            if (banner.badge) {
+                document.getElementById('s-badge').textContent = banner.badge;
+                document.getElementById('s-badge').style.display = '';
+            } else {
+                document.getElementById('s-badge').style.display = 'none';
+            }
+            
+            document.getElementById('current-variant-s').textContent = banner.name;
+            
+            // Actualizar dots
+            const dots = document.querySelectorAll('#s-dots button');
+            dots.forEach((dot, i) => {
+                if (i === index) {
+                    dot.className = 'w-4 h-1.5 rounded-full bg-white transition-all';
+                } else {
+                    dot.className = 'w-1.5 h-1.5 rounded-full bg-white/40 transition-all';
+                }
+            });
+        }
+
+        function changeBannerS(index) {
+            currentIndexS = index;
+            updateBannerS(index);
+            clearInterval(timerS);
+            timerS = setInterval(() => {
+                currentIndexS = (currentIndexS + 1) % BANNER_VARIANTS.length;
+                updateBannerS(currentIndexS);
+            }, 10000);
+        }
+
+        // Iniciar al cargar la página
+        window.onload = function() {
+            console.log('🚐 Sistema de banners Furgocasa iniciado');
+            console.log('📊 Variantes cargadas:', BANNER_VARIANTS.length);
+            
+            // Iniciar rotación automática
+            timerH = setInterval(() => {
+                currentIndexH = (currentIndexH + 1) % BANNER_VARIANTS.length;
+                updateBannerH(currentIndexH);
+            }, 10000);
+            
+            timerV = setInterval(() => {
+                currentIndexV = (currentIndexV + 1) % BANNER_VARIANTS.length;
+                updateBannerV(currentIndexV);
+            }, 10000);
+            
+            timerS = setInterval(() => {
+                currentIndexS = (currentIndexS + 1) % BANNER_VARIANTS.length;
+                updateBannerS(currentIndexS);
+            }, 10000);
+        };
+    </script>
+</body>
+</html>

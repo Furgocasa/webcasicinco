@@ -106,3 +106,4 @@ WHERE published = true
 GROUP BY region
 ORDER BY total DESC;
 
+

@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import Footer from '@/components/layout/Footer';
 import { getPlacePhotoUrl } from '@/lib/utils/photo-helper';
+import { FurgocasaBanner } from '@/components/ad/FurgocasaBanner';
 import type { BlogPostWithPlaces } from '@/types/blog';
 
 // Función para renderizar Markdown básico
@@ -105,6 +106,28 @@ export function BlogPostContent({ post }: BlogPostContentProps) {
                 <div 
                   className="text-gray-700 text-lg leading-relaxed"
                   dangerouslySetInnerHTML={{ __html: renderMarkdown(post.intro_text) }}
+                />
+              </div>
+
+              {/* 🚐 BANNER FURGOCASA - Responsive: Horizontal en Desktop, Vertical en Móvil */}
+              <div className="hidden md:block">
+                <FurgocasaBanner 
+                  variant="blog"
+                  orientation="horizontal"
+                  location={post.location || 'España'}
+                  placeName={post.title}
+                  autoRotate={true}
+                  rotateInterval={10000}
+                />
+              </div>
+              <div className="md:hidden">
+                <FurgocasaBanner 
+                  variant="blog"
+                  orientation="vertical"
+                  location={post.location || 'España'}
+                  placeName={post.title}
+                  autoRotate={true}
+                  rotateInterval={10000}
                 />
               </div>
 
