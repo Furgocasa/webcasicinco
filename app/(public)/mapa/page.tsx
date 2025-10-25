@@ -2505,6 +2505,10 @@ export default function MapPage() {
                           alt={place.name}
                           className="w-full h-32 object-cover rounded-t-xl"
                           loading="lazy"
+                          onError={(e) => {
+                            // Si la imagen falla al cargar, ocultar
+                            e.currentTarget.style.display = 'none';
+                          }}
                         />
                         {/* Badge de distancia en esquina superior derecha */}
                         {distance !== null && (
