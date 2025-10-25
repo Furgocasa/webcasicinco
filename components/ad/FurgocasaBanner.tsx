@@ -182,7 +182,7 @@ export function FurgocasaBanner({
             <div>
               <div className="flex items-center gap-2 mb-3 flex-wrap">
               <img 
-                src="/images/furgocasa/logo blanco_500.png"
+                src="/images/furgocasa/logo_blanco_500.png"
                 alt="Furgocasa Campervans"
                 className="h-8"
                 loading="lazy"
@@ -291,7 +291,7 @@ export function FurgocasaBanner({
           
           <div className="absolute bottom-4 left-4 right-4">
             <img 
-              src="/images/furgocasa/logo blanco_500.png"
+              src="/images/furgocasa/logo_blanco_500.png"
               alt="Furgocasa Campervans"
               className="h-12"
               loading="lazy"
@@ -411,7 +411,7 @@ export function FurgocasaBanner({
             <div>
               <div className="flex items-center gap-1.5 mb-2 flex-wrap">
                 <img 
-                  src="/images/furgocasa/logo blanco_500.png"
+                  src="/images/furgocasa/logo_blanco_500.png"
                   alt="Furgocasa"
                   className="h-7"
                   loading="lazy"
