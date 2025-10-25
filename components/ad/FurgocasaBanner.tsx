@@ -33,10 +33,10 @@ const BANNER_VARIANTS: BannerVariant[] = [
   {
     id: 'freedom',
     image: '/images/furgocasa/2019.02.23_1912.JPG',
-    headline: 'Descubre los mejores restaurantes de [LOCATION] con tu casa a cuestas',
-    headlineSidebar: 'Descubre [LOCATION] con tu casa a cuestas',
-    subheadline: 'Alquila una campervan premium y visita todos estos lugares con total libertad.',
-    subheadlineSidebar: 'Alquila una campervan premium con total libertad.',
+    headline: '¿Quieres visitar los mejores restaurantes de [LOCATION]?',
+    headlineSidebar: 'Visita [LOCATION] en camper',
+    subheadline: 'Alquila una campervan premium en Murcia o Madrid y recorre todos estos lugares con total libertad.',
+    subheadlineSidebar: 'Alquila tu camper en Murcia o Madrid.',
     cta: 'Reservar Ahora',
     ctaLink: '/es/reservar',
     secondaryCta: 'Ver Campervans',
@@ -45,10 +45,10 @@ const BANNER_VARIANTS: BannerVariant[] = [
   {
     id: 'lifestyle',
     image: '/images/furgocasa/AdobeStock_136414223.jpeg',
-    headline: 'Visita los mejores bares de [LOCATION] en camper',
-    headlineSidebar: 'Visita [LOCATION] en camper premium',
-    subheadline: 'Campervans de máxima calidad para explorar sin límites. Recogida en Murcia o Madrid.',
-    subheadlineSidebar: 'Máxima calidad. Recogida en Murcia o Madrid.',
+    headline: '¿Te gustaría conocer los mejores bares de [LOCATION]?',
+    headlineSidebar: 'Explora [LOCATION] en camper',
+    subheadline: 'Recoge tu campervan premium en Murcia o Madrid y explora sin límites. Máxima calidad garantizada.',
+    subheadlineSidebar: 'Recoge en Murcia o Madrid. Máxima calidad.',
     cta: 'Ver Flota',
     ctaLink: '/es/vehiculos-campervans',
     secondaryCta: 'Reservar Ahora',
@@ -58,10 +58,10 @@ const BANNER_VARIANTS: BannerVariant[] = [
   {
     id: 'adventure',
     image: '/images/furgocasa/AdobeStock_45125037.jpeg',
-    headline: 'Visita todos estos lugares de [LOCATION] con tu camper de alquiler',
-    headlineSidebar: 'Visita [LOCATION] con tu camper',
-    subheadline: 'Especialistas en alquiler de campervans premium. Desde Murcia para toda España. Descuentos hasta -30%.',
-    subheadlineSidebar: 'Campervans premium desde Murcia. Hasta -30%.',
+    headline: '¿Planeas recorrer [LOCATION] con toda comodidad?',
+    headlineSidebar: 'Recorre [LOCATION] en camper',
+    subheadline: 'Alquila tu autocaravana en Murcia o Madrid. Especialistas en alquiler premium para toda España. Hasta -30%.',
+    subheadlineSidebar: 'Desde Murcia o Madrid. Hasta -30% descuento.',
     cta: 'Ver Ofertas',
     ctaLink: '/es/reservar',
     secondaryCta: 'Ver Modelos',
@@ -71,10 +71,10 @@ const BANNER_VARIANTS: BannerVariant[] = [
   {
     id: 'quality',
     image: '/images/furgocasa/AdobeStock_136326717.jpeg',
-    headline: 'Recorre [LOCATION] con una campervan de gran volumen',
-    headlineSidebar: 'Recorre [LOCATION] en campervan',
-    subheadline: 'Knaus, Weinsberg, Adria, Challenger... Los mejores modelos para tu escapada.',
-    subheadlineSidebar: 'Knaus, Weinsberg, Adria... Los mejores modelos.',
+    headline: '¿Buscas explorar [LOCATION] con espacio y confort?',
+    headlineSidebar: 'Espacio y confort en [LOCATION]',
+    subheadline: 'Campervans de gran volumen en Murcia y Madrid. Knaus, Weinsberg, Adria, Challenger... Los mejores modelos.',
+    subheadlineSidebar: 'Gran volumen. Murcia y Madrid.',
     cta: 'Explorar Modelos',
     ctaLink: '/es/vehiculos-campervans',
     secondaryCta: 'Consultar Precio',
@@ -84,10 +84,10 @@ const BANNER_VARIANTS: BannerVariant[] = [
   {
     id: 'beach',
     image: '/images/furgocasa/AdobeStock_42669967.jpeg',
-    headline: 'Descubre [LOCATION] durmiendo donde tú elijas con tu camper',
-    headlineSidebar: 'Descubre [LOCATION] en camper',
-    subheadline: 'La forma más cómoda de visitar estos lugares. Espacio, confort y libertad.',
-    subheadlineSidebar: 'Espacio, confort y libertad total.',
+    headline: '¿Quieres descubrir [LOCATION] durmiendo donde elijas?',
+    headlineSidebar: 'Duerme donde quieras en [LOCATION]',
+    subheadline: 'Alquila tu camper en Murcia o Madrid. La forma más cómoda de viajar con espacio, confort y libertad total.',
+    subheadlineSidebar: 'Espacio, confort y libertad.',
     cta: 'Reservar',
     ctaLink: '/es/reservar',
     secondaryCta: 'Ver Vehículos',
@@ -233,20 +233,20 @@ export function FurgocasaBanner({
               <div className="flex items-center justify-between text-xs">
                 <div className="flex items-center gap-3 text-white/90">
                   <a 
-                    href="https://www.furgocasa.com/es/reservar?utm_source=casicinco&utm_medium=seo_link&utm_campaign=alquiler_murcia"
+                    href="https://www.furgocasa.com/es/reservar?utm_source=casicinco&utm_medium=seo_link&utm_campaign=alquiler_camper_murcia"
                     target="_blank"
                     rel="dofollow"
                     className="hover:underline"
                   >
-                    📍 Camper Murcia
+                    🚐 Alquiler camper Murcia
                   </a>
                   <a 
-                    href="https://www.furgocasa.com/es/vehiculos-campervans?utm_source=casicinco&utm_medium=seo_link&utm_campaign=campervans_premium"
+                    href="https://www.furgocasa.com/es/vehiculos-campervans?utm_source=casicinco&utm_medium=seo_link&utm_campaign=alquiler_autocaravana_madrid"
                     target="_blank"
                     rel="dofollow"
                     className="hover:underline"
                   >
-                    🚐 Premium
+                    🏕️ Alquiler autocaravana Madrid
                   </a>
                 </div>
 
@@ -348,20 +348,20 @@ export function FurgocasaBanner({
               <div className="flex items-center justify-between mb-3">
                 <div className="flex gap-3 text-xs text-white/90">
                   <a 
-                    href="https://www.furgocasa.com/es/reservar?utm_source=casicinco&utm_medium=seo_link&utm_campaign=alquiler_murcia"
+                    href="https://www.furgocasa.com/es/reservar?utm_source=casicinco&utm_medium=seo_link&utm_campaign=alquiler_camper_murcia"
                     target="_blank"
                     rel="dofollow"
                     className="hover:underline"
                   >
-                    📍 Camper Murcia
+                    🚐 Alquiler camper Murcia
                   </a>
                   <a 
-                    href="https://www.furgocasa.com/es/vehiculos-campervans?utm_source=casicinco&utm_medium=seo_link&utm_campaign=furgonetas_camper"
+                    href="https://www.furgocasa.com/es/vehiculos-campervans?utm_source=casicinco&utm_medium=seo_link&utm_campaign=alquiler_autocaravana_madrid"
                     target="_blank"
                     rel="dofollow"
                     className="hover:underline"
                   >
-                    🚐 Premium
+                    🏕️ Alquiler autocaravana Madrid
                   </a>
                 </div>
 
@@ -456,12 +456,12 @@ export function FurgocasaBanner({
 
               <div className="flex items-center justify-between text-xs text-white/80">
                 <a 
-                  href="https://www.furgocasa.com/es/reservar?utm_source=casicinco&utm_medium=seo_link&utm_campaign=camper_alquiler"
+                  href="https://www.furgocasa.com/es/reservar?utm_source=casicinco&utm_medium=seo_link&utm_campaign=alquiler_camper_murcia"
                   target="_blank"
                   rel="dofollow"
                   className="hover:underline text-white/90"
                 >
-                  📍 Camper alquiler
+                  🚐 Alquiler camper Murcia
                 </a>
                 
                 {/* Dots horizontales pequeños */}
