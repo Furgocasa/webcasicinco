@@ -168,11 +168,11 @@ export function FurgocasaBanner({
       <div className="my-8 md:my-12 bg-gradient-to-br from-blue-900 via-blue-800 to-blue-700 rounded-2xl shadow-2xl overflow-hidden relative h-auto md:h-[280px]">
         <div className="flex flex-col md:flex-row items-stretch h-full">
           {/* Imagen */}
-          <div className="w-full md:w-1/3 flex-shrink-0 h-64 md:h-full">
+          <div className="w-full md:w-1/3 flex-shrink-0 h-64 md:h-full overflow-hidden">
             <img 
               src={currentBanner.image}
               alt={`Furgocasa - ${currentBanner.id}`}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover object-center"
               loading="lazy"
             />
           </div>
@@ -185,6 +185,7 @@ export function FurgocasaBanner({
                 src="/images/furgocasa/logo blanco_500.png"
                 alt="Furgocasa Campervans"
                 className="h-8"
+                loading="lazy"
               />
                 <span className="text-xs bg-white/20 px-2 py-1 rounded-full backdrop-blur-sm">
                   Publicidad
@@ -396,11 +397,11 @@ export function FurgocasaBanner({
     return (
       <aside className="hidden lg:block fixed right-4 top-24 w-72 xl:w-80 z-40">
         <div className="bg-gradient-to-br from-blue-900 via-blue-800 to-blue-700 rounded-xl shadow-2xl overflow-hidden relative h-[540px] flex flex-col">
-          <div className="relative h-48 flex-shrink-0">
+          <div className="relative h-48 flex-shrink-0 overflow-hidden">
             <img 
               src={currentBanner.image}
               alt={`Furgocasa - ${currentBanner.id}`}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover object-center"
               loading="lazy"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
@@ -413,6 +414,7 @@ export function FurgocasaBanner({
                   src="/images/furgocasa/logo blanco_500.png"
                   alt="Furgocasa"
                   className="h-7"
+                  loading="lazy"
                 />
                 <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full">Publicidad</span>
               </div>
