@@ -425,7 +425,7 @@ export default function MapPage() {
 
   // 🚀 OPTIMIZACIÓN: Calcular opciones con useMemo para evitar recalcular constantemente
   const availableOptions = useMemo(() => ({
-    communities: Array.from(new Set(allPlaces.map(p => p.region).filter(r => r && r !== 'España'))).sort(),
+    communities: Array.from(new Set(allPlaces.map(p => p.region).filter(r => r && r !== 'España' && r !== 'Todas'))).sort(),
     provinces: Array.from(new Set(allPlaces.map(p => p.province))).filter(Boolean).sort(),
     categories: Array.from(new Set(allPlaces.map(p => p.category))).filter(Boolean),
     cities: Array.from(new Set(allPlaces.map(p => p.city))).filter(Boolean).sort(),
