@@ -278,8 +278,8 @@ export function FurgocasaBanner({
   // ============================================
   if (orientation === 'vertical') {
     return (
-      <div className="my-8 bg-gradient-to-br from-blue-900 via-blue-800 to-blue-700 rounded-2xl shadow-2xl overflow-hidden relative max-w-md mx-auto h-[620px] flex flex-col">
-        <div className="relative h-56 flex-shrink-0">
+      <div className="my-8 bg-gradient-to-br from-blue-900 via-blue-800 to-blue-700 rounded-2xl shadow-2xl overflow-hidden relative max-w-md mx-auto h-[700px] flex flex-col">
+        <div className="relative h-64 flex-shrink-0">
           <img 
             src={currentBanner.image}
             alt={`Furgocasa - ${currentBanner.id}`}
@@ -297,9 +297,9 @@ export function FurgocasaBanner({
           </div>
         </div>
 
-        <div className="p-4 text-white flex-1 flex flex-col justify-between min-h-0">
+        <div className="p-5 text-white flex-1 flex flex-col justify-between min-h-0">
           <div className="flex-shrink-0">
-            <div className="flex items-center gap-2 mb-2 flex-wrap">
+            <div className="flex items-center gap-2 mb-3 flex-wrap">
               <span className="text-xs bg-white/20 px-2 py-1 rounded-full backdrop-blur-sm">
                 Publicidad
               </span>
@@ -310,22 +310,22 @@ export function FurgocasaBanner({
               )}
             </div>
 
-            <h3 className="text-lg font-bold mb-2 leading-tight line-clamp-2">
+            <h3 className="text-xl font-bold mb-3 leading-tight line-clamp-2">
               {headline}
             </h3>
             
-            <p className="text-white/95 mb-3 text-sm leading-relaxed line-clamp-3">
+            <p className="text-white/95 mb-4 text-sm leading-relaxed line-clamp-3">
               {subheadline}
             </p>
           </div>
 
-          <div className="flex flex-col gap-2 mb-3 flex-shrink-0">
+          <div className="flex flex-col gap-2.5 mb-4 flex-shrink-0">
             <a
               href={`https://www.furgocasa.com${currentBanner.ctaLink}?utm_source=casicinco&utm_medium=${variant}_banner_vertical&utm_campaign=${currentBanner.id}`}
               target="_blank"
               rel="noopener"
               onClick={() => handleClick('main_cta', currentBanner.id)}
-              className="bg-white text-blue-900 font-bold py-2 px-4 rounded-lg text-center hover:bg-blue-50 transition-all text-sm"
+              className="bg-white text-blue-900 font-bold py-2.5 px-5 rounded-lg text-center hover:bg-blue-50 transition-all text-sm"
             >
               {currentBanner.cta}
             </a>
@@ -336,7 +336,7 @@ export function FurgocasaBanner({
                 target="_blank"
                 rel="noopener"
                 onClick={() => handleClick('secondary_cta', currentBanner.id)}
-                className="border-2 border-white text-white font-semibold py-2 px-4 rounded-lg text-center hover:bg-white/10 transition-colors text-sm"
+                className="border-2 border-white text-white font-semibold py-2.5 px-5 rounded-lg text-center hover:bg-white/10 transition-colors text-sm"
               >
                 {currentBanner.secondaryCta}
               </a>
@@ -344,7 +344,7 @@ export function FurgocasaBanner({
           </div>
 
           <div className="flex-shrink-0">
-            <div className="pt-3 border-t border-white/20">
+            <div className="pt-4 border-t border-white/20">
               <div className="flex items-center justify-between">
                 <div className="flex gap-3 text-xs text-white/90">
                   <a 
