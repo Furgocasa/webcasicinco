@@ -77,8 +77,8 @@ const SPAIN_BOUNDS_PENINSULA = {
 
 // Límites completos incluyendo Canarias y Baleares (para desktop)
 const SPAIN_BOUNDS_FULL = {
-  north: 44.5,    // Más al norte para ver mejor Galicia, Asturias, País Vasco
-  south: 27.5,    // Sur de Canarias (El Hierro)
+  north: 46.0,    // Más margen para centrar el norte (Galicia, Asturias, País Vasco)
+  south: 26.0,    // Más margen para centrar Canarias (El Hierro)
   west: -18.5,    // Oeste de Canarias (La Palma)
   east: 4.5,      // Este de Baleares (Menorca)
 };
