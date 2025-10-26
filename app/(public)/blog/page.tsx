@@ -60,24 +60,21 @@ export default async function BlogPage() {
       const { data: places } = await placesQuery;
       const firstPlace = places && places.length > 0 ? places[0] : null;
 
-      // Obtener URL de foto del primer lugar (priorizar Supabase)
+      // Obtener URL de foto del primer lugar (SOLO Supabase Storage)
       let photoUrl = null;
       if (firstPlace) {
-        // Priorizar photo_urls de Supabase Storage
+        // SOLO usar photo_urls de Supabase Storage (GRATIS)
         if (firstPlace.photo_urls && firstPlace.photo_urls.length > 0) {
           photoUrl = firstPlace.photo_urls[0]; // URL completa de Supabase
         }
-        // Fallback a photos (pero ya no usaremos Google Maps API)
-        else if (firstPlace.photos && firstPlace.photos.length > 0) {
-          // Los lugares deberían tener photo_urls en Supabase Storage
-          photoUrl = null; // No usar Google Maps API
-        }
+        // ❌ NO hacer fallback a photos (photo_reference de Google)
+        // Si no tiene photo_urls, mejor mostrar placeholder que gastar €€€ en Google API
       }
 
       return {
         ...post,
         first_place_photo: photoUrl,
-        first_place_photo_is_url: true // Siempre es URL de Supabase
+        first_place_photo_is_url: !!photoUrl // Si tiene foto, siempre es URL de Supabase
       };
     })
   );

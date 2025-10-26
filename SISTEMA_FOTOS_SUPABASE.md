@@ -1,8 +1,12 @@
 # 📸 Sistema de Fotos en Supabase Storage
 
-**Fecha:** 24 de Octubre de 2025  
+**Fecha:** 26 de Octubre de 2025  
 **Estado:** ✅ COMPLETADO Y OPTIMIZADO AL 100%  
-**Ahorro:** **-99% costos** ($2,520/año → ~$0/año)
+**Ahorro:** **~€45,000/año** (eliminado gasto en Google Photos API)
+
+**📚 Documentación relacionada:**
+- **[`SISTEMA_LLAMADAS_GOOGLE_API.md`](SISTEMA_LLAMADAS_GOOGLE_API.md)** - ⭐ Cuándo y cómo se usa Google API (LEER)
+- **[`FIX_GOOGLE_PHOTOS_API_26OCT2025.md`](FIX_GOOGLE_PHOTOS_API_26OCT2025.md)** - Fix del bug de fallback
 
 ---
 

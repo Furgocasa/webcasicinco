@@ -185,6 +185,8 @@ export default function BuscarLugarPage() {
 
       const data = await res.json();
 
+      console.log('📡 Respuesta del servidor:', data);
+
       if (data.success) {
         setResults(data.places);
         setTotalCost(prev => prev + data.cost);
@@ -195,11 +197,25 @@ export default function BuscarLugarPage() {
           toast.success(`${data.count} lugares encontrados con ≥4.7★`);
         }
       } else {
-        toast.error(data.error || 'No se encontraron resultados');
+        // Mostrar error detallado
+        const errorMsg = data.error || 'No se encontraron resultados';
+        const details = data.details ? `\n${data.details}` : '';
+        const googleStatus = data.googleStatus ? ` (${data.googleStatus})` : '';
+        
+        console.error('❌ Error en búsqueda:', {
+          error: errorMsg,
+          googleStatus: data.googleStatus,
+          details: data.details
+        });
+        
+        toast.error(`${errorMsg}${googleStatus}${details}`, {
+          duration: 5000, // 5 segundos para leer el mensaje
+        });
         setResults([]);
       }
-    } catch (error) {
-      toast.error('Error en la búsqueda');
+    } catch (error: any) {
+      console.error('❌ Error de red:', error);
+      toast.error(`Error en la búsqueda: ${error.message}`);
       setResults([]);
     } finally {
       setSearching(false);

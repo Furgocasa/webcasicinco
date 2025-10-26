@@ -23,9 +23,26 @@ export async function POST(request: NextRequest) {
 
     if (!searchTerm || searchTerm.length < 3) {
       return NextResponse.json({ 
+        success: false,
         error: 'Búsqueda debe tener al menos 3 caracteres' 
       }, { status: 400 });
     }
+
+    // Verificar que la API key existe
+    if (!GOOGLE_PLACES_API_KEY) {
+      console.error('❌ GOOGLE_PLACES_API_KEY no configurada');
+      return NextResponse.json({
+        success: false,
+        error: 'API Key de Google no configurada en el servidor',
+        details: 'Contacta al administrador del sistema'
+      }, { status: 500 });
+    }
+
+    console.log('🔍 Búsqueda manual:', { 
+      searchTerm, 
+      apiKeyExists: true,
+      apiKeyLength: GOOGLE_PLACES_API_KEY.length 
+    });
 
     // Buscar en Google Places Text Search
     const response = await axios.get(
@@ -40,11 +57,39 @@ export async function POST(request: NextRequest) {
       }
     );
 
+    console.log('📡 Google Places API Response:', {
+      status: response.data.status,
+      error_message: response.data.error_message,
+      results_count: response.data.results?.length || 0,
+      searchTerm,
+    });
+
     if (response.data.status !== 'OK') {
-      return NextResponse.json({ 
-        error: 'No se encontraron resultados',
-        places: []
+      // Mapear errores de Google a mensajes amigables
+      const errorMessages: Record<string, string> = {
+        'ZERO_RESULTS': 'No se encontraron lugares que coincidan con tu búsqueda',
+        'REQUEST_DENIED': 'API Key sin permisos. Verifica Google Cloud Console',
+        'INVALID_REQUEST': 'Búsqueda inválida. Intenta con otro término',
+        'OVER_QUERY_LIMIT': 'Límite de consultas excedido. Intenta más tarde',
+        'UNKNOWN_ERROR': 'Error temporal de Google. Intenta de nuevo',
+      };
+
+      const friendlyError = errorMessages[response.data.status] || 'Error desconocido';
+      const detailedError = response.data.error_message || 'Sin detalles adicionales';
+
+      console.error('❌ Google Places API error:', {
+        status: response.data.status,
+        error_message: response.data.error_message,
+        searchTerm,
       });
+      
+      return NextResponse.json({ 
+        success: false,
+        error: friendlyError,
+        googleStatus: response.data.status,
+        details: detailedError,
+        places: []
+      }, { status: 400 });
     }
 
     // Filtrar y formatear resultados

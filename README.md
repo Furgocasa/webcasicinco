@@ -81,6 +81,8 @@ git push origin main
 - [SISTEMA_FILTRADO.md](SISTEMA_FILTRADO.md) - Filtros avanzados
 - **[SISTEMA_MONETIZACION.md](SISTEMA_MONETIZACION.md)** - ✨ Trial 30 días + Stripe (v5.0)
 - **[SISTEMA_REDES_SOCIALES.md](SISTEMA_REDES_SOCIALES.md)** - 📱 Instagram, Facebook, Twitter (v2.0)
+- **[SISTEMA_FOTOS_SUPABASE.md](SISTEMA_FOTOS_SUPABASE.md)** - 📸 Almacenamiento de fotos optimizado
+- **[SISTEMA_LLAMADAS_GOOGLE_API.md](SISTEMA_LLAMADAS_GOOGLE_API.md)** - 🔍 Cuándo y cómo se usa Google API
 - [scripts/README_SOCIAL_MEDIA.md](scripts/README_SOCIAL_MEDIA.md) - Scripts de scraping
 
 ### 📊 Analytics:

@@ -68,16 +68,13 @@ export async function GET(
     
     if (places && places.length > 0) {
       const firstPlace = places[0];
-      // Priorizar photo_urls de Supabase
+      // SOLO usar photo_urls de Supabase Storage (GRATIS)
       if (firstPlace.photo_urls && firstPlace.photo_urls.length > 0) {
-        photoReference = firstPlace.photo_urls[0]; // URL completa
+        photoReference = firstPlace.photo_urls[0]; // URL completa de Supabase
         photoIsUrl = true;
       }
-      // Fallback a photos (photo_reference de Google)
-      else if (firstPlace.photos && firstPlace.photos.length > 0) {
-        photoReference = firstPlace.photos[0]; // photo_reference
-        photoIsUrl = false;
-      }
+      // ❌ NO hacer fallback a photos (photo_reference de Google)
+      // Si no tiene photo_urls, mejor mostrar placeholder que gastar €€€ en Google API
     }
 
     return NextResponse.json({

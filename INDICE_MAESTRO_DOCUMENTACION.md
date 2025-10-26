@@ -84,7 +84,9 @@
 | Documento | Descripción |
 |-----------|-------------|
 | `SISTEMA_FILTRADO.md` | Sistema de filtros avanzados |
-| `SISTEMA_FOTOS_SUPABASE.md` | Gestión de fotos en Supabase |
+| **`SISTEMA_FOTOS_SUPABASE.md`** | Gestión de fotos en Supabase Storage |
+| **`SISTEMA_LLAMADAS_GOOGLE_API.md`** | ⭐ Cuándo y cómo se usa Google API |
+| **`FIX_GOOGLE_PHOTOS_API_26OCT2025.md`** | Fix del bug de fallback (ahorro €3,700/mes) |
 | `SISTEMA_MONETIZACION.md` | Sistema de suscripciones |
 | `CHATBOT_TIO_VIAJERO.md` | Chatbot con IA |
 | `scripts/README_SOCIAL_MEDIA.md` | Sistema de redes sociales automático |
