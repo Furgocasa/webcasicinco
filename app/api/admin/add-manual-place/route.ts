@@ -47,12 +47,21 @@ export async function POST(request: NextRequest) {
 
     // 📸 Descargar y subir fotos a Supabase Storage (ahorra costes futuros)
     console.log('📸 Descargando fotos a Supabase Storage...');
-    const { photoUrls } = await downloadAndUploadPhotosToSupabase(
-      place_id,
+    
+    // Convertir photo_references a formato GooglePlacePhoto
+    const googlePhotos = photoReferences.map(ref => ({
+      photo_reference: ref,
+      height: 1200,
+      width: 1200,
+      html_attributions: []
+    }));
+    
+    const { supabaseUrls } = await downloadAndUploadPhotosToSupabase(
+      googlePhotos,
       placeDetails.name,
-      photoReferences
+      place_id
     );
-    console.log(`✅ ${photoUrls.length} fotos subidas a Supabase`);
+    console.log(`✅ ${supabaseUrls.length} fotos subidas a Supabase`);
 
     // Verificar requisitos
     if (placeDetails.rating < 4.7) {
@@ -152,7 +161,7 @@ export async function POST(request: NextRequest) {
       google_maps_url: placeDetails.url || null,
       price_level: placeDetails.price_level || null,
       photos: photoReferences.slice(0, 3),
-      photo_urls: photoUrls || [], // 📸 URLs de Supabase (GRATIS)
+      photo_urls: supabaseUrls || [], // 📸 URLs de Supabase (GRATIS)
       instagram_url: instagramUrl,
       facebook_url: facebookUrl,
       twitter_url: twitterUrl,
