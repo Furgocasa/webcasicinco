@@ -406,8 +406,8 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* 4. COMIENZA GRATIS, CONTINÚA POR MENOS DE UN CAFÉ - PRICING CON FONDO AZUL GRISEADO 50% */}
-        <section className="py-20 bg-[#063971]/50">
+        {/* 4. COMIENZA GRATIS, CONTINÚA POR MENOS DE UN CAFÉ - PRICING CON FONDO GRIS CLARO */}
+        <section className="py-20 bg-gray-100">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
               <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
