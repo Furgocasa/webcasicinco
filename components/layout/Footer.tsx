@@ -122,7 +122,16 @@ export default function Footer() {
         <div className="border-t border-gray-800 mt-8 pt-6 flex flex-col md:flex-row items-center justify-between text-sm">
           <p className="text-gray-400">© {currentYear} Casi Cinco. Todos los derechos reservados.</p>
           <p className="mt-2 md:mt-0 text-gray-500">
-            Hecho con ❤️ en España
+            Una empresa de{' '}
+            <a 
+              href="https://www.furgocasa.com" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-gray-400 hover:text-white transition-colors underline"
+            >
+              www.furgocasa.com
+            </a>
+            {' '}- Hecho con ❤️ en España
           </p>
         </div>
       </div>
