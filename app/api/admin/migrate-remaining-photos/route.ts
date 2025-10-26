@@ -15,7 +15,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { downloadAndUploadPhotosToSupabase } from '@/lib/google/places';
-import type { GooglePlacePhoto } from '@/types/place';
 
 interface PlaceToMigrate {
   id: string;
@@ -115,36 +114,27 @@ export async function POST(request: NextRequest) {
       try {
         console.log(`\n[${i + 1}/${placesToMigrate.length}] 📸 Migrando: ${place.name}`);
 
-        // Convertir photo_references a formato GooglePlacePhoto
-        const googlePhotos: GooglePlacePhoto[] = place.photos.map(photoRef => ({
-          photo_reference: photoRef,
-          height: 1200,
-          width: 1200,
-          html_attributions: []
-        }));
-
-        // Descargar y subir fotos a Supabase
-        const { supabaseUrls } = await downloadAndUploadPhotosToSupabase(
-          googlePhotos,
-          place.name,
+        // Descargar y subir fotos a Supabase usando las referencias existentes
+        const { photoUrls } = await downloadAndUploadPhotosToSupabase(
           place.google_place_id,
-          5 // Máximo 5 fotos
+          place.name,
+          place.photos
         );
 
-        if (supabaseUrls.length === 0) {
+        if (photoUrls.length === 0) {
           console.log(`   ⚠️ No se pudieron migrar fotos para ${place.name}`);
           errorCount++;
           errors.push({ name: place.name, error: 'No se pudieron descargar las fotos' });
           continue;
         }
 
-        console.log(`   ✅ Subidas ${supabaseUrls.length} fotos para ${place.name}`);
+        console.log(`   ✅ Subidas ${photoUrls.length} fotos para ${place.name}`);
 
         // Actualizar registro en la base de datos
         const { error: updateError } = await supabase
           .from('places')
           .update({
-            photo_urls: supabaseUrls,
+            photo_urls: photoUrls,
             updated_at: new Date().toISOString()
           })
           .eq('id', place.id);
