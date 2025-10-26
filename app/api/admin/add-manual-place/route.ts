@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/server';
-import { getPlaceDetails, getPlacePhotos } from '@/lib/google/places';
+import { getPlaceDetails, getPlacePhotos, downloadAndUploadPhotosToSupabase } from '@/lib/google/places';
 import { generatePlaceSlug } from '@/lib/utils/slug-generator';
 
 export const dynamic = 'force-dynamic';
@@ -44,6 +44,15 @@ export async function POST(request: NextRequest) {
     
     // Obtener referencias de fotos por separado
     const photoReferences = await getPlacePhotos(place_id);
+
+    // 📸 Descargar y subir fotos a Supabase Storage (ahorra costes futuros)
+    console.log('📸 Descargando fotos a Supabase Storage...');
+    const { photoUrls } = await downloadAndUploadPhotosToSupabase(
+      place_id,
+      placeDetails.name,
+      photoReferences
+    );
+    console.log(`✅ ${photoUrls.length} fotos subidas a Supabase`);
 
     // Verificar requisitos
     if (placeDetails.rating < 4.7) {
@@ -143,6 +152,7 @@ export async function POST(request: NextRequest) {
       google_maps_url: placeDetails.url || null,
       price_level: placeDetails.price_level || null,
       photos: photoReferences.slice(0, 3),
+      photo_urls: photoUrls || [], // 📸 URLs de Supabase (GRATIS)
       instagram_url: instagramUrl,
       facebook_url: facebookUrl,
       twitter_url: twitterUrl,
