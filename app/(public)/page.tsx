@@ -74,7 +74,7 @@ export default function HomePage() {
   return (
     <>
       <main className="min-h-screen">
-        {/* HERO SECTION - EL GANCHO */}
+        {/* 1. HERO SECTION - EL GANCHO */}
         <section className="relative bg-[#063971] text-white overflow-hidden">
           {/* Decorative background */}
           <div className="absolute inset-0 bg-black opacity-10"></div>
@@ -151,7 +151,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* PROBLEMA + SOLUCIÓN */}
+        {/* 2. EL PROBLEMA DE ELEGIR */}
         <section className="py-20 bg-gray-50">
           <div className="container mx-auto px-4">
             <div className="max-w-6xl mx-auto">
@@ -255,7 +255,312 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* HISTORIA FURGOCASA - NUEVA SECCIÓN */}
+        {/* 3. TUS HERRAMIENTAS PARA EXPERIENCIAS PERFECTAS */}
+        <section className="py-20 bg-white">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-6">
+                Tus Herramientas para Experiencias Perfectas
+              </h2>
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                Tres herramientas poderosas para que nunca más tengas una experiencia mediocre
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+              {/* Herramienta 1: Mapa Interactivo */}
+              <Card className="group hover:shadow-2xl transition-all duration-300 border-2 border-gray-100 hover:border-[#063971] overflow-hidden">
+                <div className="relative h-48 bg-gradient-to-br from-[#063971] to-blue-800 flex items-center justify-center overflow-hidden">
+                  <div className="absolute inset-0 bg-black/20"></div>
+                  <MapPin className="h-20 w-20 text-white relative z-10 group-hover:scale-110 transition-transform" />
+                </div>
+                <div className="p-6">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-3">
+                    🗺️ Mapa Interactivo
+                  </h3>
+                  <p className="text-gray-600 mb-4">
+                    Explora <strong>{stats.totalPlaces.toLocaleString('es-ES')}+ lugares excepcionales</strong> en un mapa visual. 
+                    Filtra por categoría, provincia y descubre joyas ocultas cerca de ti.
+                  </p>
+                  <ul className="space-y-2 mb-6">
+                    <li className="flex items-start gap-2 text-sm text-gray-700">
+                      <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0 mt-0.5" />
+                      <span>Visualización geográfica</span>
+                    </li>
+                    <li className="flex items-start gap-2 text-sm text-gray-700">
+                      <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0 mt-0.5" />
+                      <span>Filtros inteligentes</span>
+                    </li>
+                    <li className="flex items-start gap-2 text-sm text-gray-700">
+                      <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0 mt-0.5" />
+                      <span>Descubre cerca de ti</span>
+                    </li>
+                  </ul>
+                  <Button 
+                    onClick={() => router.push('/mapa')}
+                    className="w-full bg-[#063971] hover:bg-[#052d5a] text-white"
+                  >
+                    Explorar Mapa
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </div>
+              </Card>
+
+              {/* Herramienta 2: Planificador de Rutas */}
+              <Card className="group hover:shadow-2xl transition-all duration-300 border-2 border-gray-100 hover:border-[#ffd935] overflow-hidden">
+                <div className="relative h-48 bg-gradient-to-br from-[#ffd935] to-yellow-600 flex items-center justify-center overflow-hidden">
+                  <div className="absolute inset-0 bg-black/10"></div>
+                  <svg className="h-20 w-20 text-[#063971] relative z-10 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                  </svg>
+                </div>
+                <div className="p-6">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-3">
+                    🛣️ Planificador de Rutas
+                  </h3>
+                  <p className="text-gray-600 mb-4">
+                    Crea <strong>rutas personalizadas</strong> conectando múltiples lugares excepcionales. 
+                    Perfecto para roadtrips y escapadas.
+                  </p>
+                  <ul className="space-y-2 mb-6">
+                    <li className="flex items-start gap-2 text-sm text-gray-700">
+                      <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0 mt-0.5" />
+                      <span>Múltiples paradas</span>
+                    </li>
+                    <li className="flex items-start gap-2 text-sm text-gray-700">
+                      <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0 mt-0.5" />
+                      <span>Optimización automática</span>
+                    </li>
+                    <li className="flex items-start gap-2 text-sm text-gray-700">
+                      <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0 mt-0.5" />
+                      <span>Guarda y comparte</span>
+                    </li>
+                  </ul>
+                  <Button 
+                    onClick={() => router.push('/ruta')}
+                    className="w-full bg-[#ffd935] hover:bg-[#e6c430] text-[#063971] font-bold"
+                  >
+                    Planificar Ruta
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </div>
+              </Card>
+
+              {/* Herramienta 3: Chatbot IA */}
+              <Card className="group hover:shadow-2xl transition-all duration-300 border-2 border-gray-100 hover:border-purple-500 overflow-hidden">
+                <div className="relative h-48 bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center overflow-hidden">
+                  <div className="absolute inset-0 bg-black/20"></div>
+                  <Sparkles className="h-20 w-20 text-white relative z-10 group-hover:scale-110 transition-transform" />
+                </div>
+                <div className="p-6">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-3">
+                    🤖 Chat con IA Viajera
+                  </h3>
+                  <p className="text-gray-600 mb-4">
+                    <strong>Tu asistente personal</strong> que conoce todos los lugares. 
+                    Pregunta lo que quieras en lenguaje natural.
+                  </p>
+                  <ul className="space-y-2 mb-6">
+                    <li className="flex items-start gap-2 text-sm text-gray-700">
+                      <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0 mt-0.5" />
+                      <span>Respuestas instantáneas</span>
+                    </li>
+                    <li className="flex items-start gap-2 text-sm text-gray-700">
+                      <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0 mt-0.5" />
+                      <span>Recomendaciones personalizadas</span>
+                    </li>
+                    <li className="flex items-start gap-2 text-sm text-gray-700">
+                      <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0 mt-0.5" />
+                      <span>Conversa como con un amigo</span>
+                    </li>
+                  </ul>
+                  <Button 
+                    onClick={() => {
+                      // Abrir el chatbot flotante del Tío Viajero
+                      const chatButton = document.querySelector('button[title="Abrir Tío Viajero IA"]') as HTMLButtonElement;
+                      if (chatButton) {
+                        chatButton.click();
+                        // Scroll suave hacia abajo para ver el chatbot en móvil
+                        setTimeout(() => {
+                          window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }, 100);
+                      }
+                    }}
+                    className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+                  >
+                    Hablar con IA
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </div>
+              </Card>
+            </div>
+
+            {/* Call to Action */}
+            <div className="text-center mt-12">
+              <Card className="max-w-3xl mx-auto p-6 bg-gradient-to-r from-blue-50 to-yellow-50 border-2 border-[#ffd935]">
+                <p className="text-lg text-gray-800">
+                  <strong>💡 Todas estas herramientas</strong> están incluidas en tu prueba gratuita de 30 días
+                </p>
+              </Card>
+            </div>
+          </div>
+        </section>
+
+        {/* 4. COMIENZA GRATIS, CONTINÚA POR MENOS DE UN CAFÉ - PRICING CON FONDO AZUL GRISEADO 50% */}
+        <section className="py-20 bg-[#063971]/50">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-12">
+              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+                Comienza Gratis, Continúa por Menos de un Café
+              </h2>
+              <p className="text-xl text-gray-700 max-w-2xl mx-auto">
+                30 días gratis para probar todo. Luego elige el plan que mejor se adapte a ti.
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+              {/* Plan Trial */}
+              <Card className="border-2 border-gray-200 p-6 hover:shadow-xl transition hover:border-[#d6d8d7] bg-white">
+                <div className="text-center mb-6">
+                  <div className="inline-block p-3 bg-gray-100 rounded-full mb-4">
+                    <Clock className="h-8 w-8 text-gray-600" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Prueba Gratis</h3>
+                  <div className="text-4xl font-bold text-[#063971] mb-2">0€</div>
+                  <p className="text-gray-600">30 días completos</p>
+                </div>
+                <ul className="space-y-3 mb-6">
+                  <li className="flex items-start gap-2">
+                    <Check className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
+                    <span className="text-sm text-gray-700">Acceso total a mapa interactivo</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
+                    <span className="text-sm text-gray-700">Chatbot IA ilimitado</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
+                    <span className="text-sm text-gray-700">Planificador de rutas</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
+                    <span className="text-sm text-gray-700">Sin tarjeta hasta el día 31</span>
+                  </li>
+                </ul>
+                <Button 
+                  onClick={() => router.push('/registro')}
+                  variant="outline"
+                  className="w-full"
+                >
+                  Empezar Gratis
+                </Button>
+              </Card>
+
+              {/* Plan Mensual */}
+              <Card className="border-2 border-[#063971]/30 p-6 hover:shadow-xl transition hover:border-[#063971] bg-white">
+                <div className="text-center mb-6">
+                  <div className="inline-block p-3 bg-blue-50 rounded-full mb-4">
+                    <Zap className="h-8 w-8 text-[#063971]" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Premium Mensual</h3>
+                  <div className="text-4xl font-bold text-[#063971] mb-2">2,99€</div>
+                  <p className="text-gray-600">por mes</p>
+                </div>
+                <ul className="space-y-3 mb-6">
+                  <li className="flex items-start gap-2">
+                    <Check className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
+                    <span className="text-sm text-gray-700">Todo del plan gratis</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
+                    <span className="text-sm text-gray-700">Sin límites de tiempo</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
+                    <span className="text-sm text-gray-700">Nuevos lugares cada semana</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
+                    <span className="text-sm text-gray-700">Cancela cuando quieras</span>
+                  </li>
+                </ul>
+                <Button 
+                  onClick={() => router.push('/pricing?plan=monthly')}
+                  className="w-full bg-[#063971] hover:bg-[#052d5a] text-white"
+                >
+                  Suscribirse
+                </Button>
+              </Card>
+
+              {/* Plan Anual - DESTACADO */}
+              <Card className="border-2 border-[#ffd935] bg-gradient-to-br from-yellow-50 to-white p-6 hover:shadow-2xl transition relative">
+                {/* Badge de ahorro */}
+                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                  <div className="bg-[#ffd935] text-[#063971] px-4 py-1 rounded-full text-sm font-bold shadow-lg">
+                    ¡Ahorra 30%!
+                  </div>
+                </div>
+                
+                <div className="text-center mb-6 mt-2">
+                  <div className="inline-block p-3 bg-[#ffd935]/20 rounded-full mb-4">
+                    <Crown className="h-8 w-8 text-[#063971]" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Premium Anual</h3>
+                  <div className="text-4xl font-bold text-[#063971] mb-2">24,99€</div>
+                  <p className="text-gray-600">por año · Solo 2,08€/mes</p>
+                </div>
+                <ul className="space-y-3 mb-6">
+                  <li className="flex items-start gap-2">
+                    <Check className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
+                    <span className="text-sm text-gray-700 font-medium">Todo del plan mensual</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
+                    <span className="text-sm text-gray-700 font-medium">Casi 4 meses gratis al año</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
+                    <span className="text-sm text-gray-700 font-medium">Soporte prioritario</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
+                    <span className="text-sm text-gray-700 font-medium">Acceso anticipado a nuevos lugares</span>
+                  </li>
+                </ul>
+                <Button 
+                  onClick={() => router.push('/pricing?plan=yearly')}
+                  className="w-full bg-[#063971] hover:bg-[#052d5a] text-white shadow-lg"
+                >
+                  Mejor Valor
+                </Button>
+              </Card>
+            </div>
+
+            {/* FAQs rápidos */}
+            <div className="mt-12 max-w-3xl mx-auto">
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="bg-white p-6 rounded-lg border border-gray-200">
+                  <h4 className="font-semibold text-gray-900 mb-2">¿Necesito tarjeta para el trial?</h4>
+                  <p className="text-sm text-gray-600">No. Los 30 días de prueba son 100% gratis sin necesidad de tarjeta. La introduces solo cuando decidas suscribirte.</p>
+                </div>
+                <div className="bg-white p-6 rounded-lg border border-gray-200">
+                  <h4 className="font-semibold text-gray-900 mb-2">¿Puedo cancelar cuando quiera?</h4>
+                  <p className="text-sm text-gray-600">Sí. Cancela en cualquier momento desde tu perfil. Si es antes del día 31, no se cobra nada.</p>
+                </div>
+                <div className="bg-white p-6 rounded-lg border border-gray-200">
+                  <h4 className="font-semibold text-gray-900 mb-2">¿Cuándo añado mi tarjeta?</h4>
+                  <p className="text-sm text-gray-600">Cuando decidas suscribirte después del trial. Puedes hacerlo en cualquier momento durante los 30 días o al final del período de prueba.</p>
+                </div>
+                <div className="bg-white p-6 rounded-lg border border-gray-200">
+                  <h4 className="font-semibold text-gray-900 mb-2">¿Por qué el plan anual es mejor?</h4>
+                  <p className="text-sm text-gray-600">Ahorras 10,89€ al año (casi 4 meses gratis) y obtienes soporte prioritario.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* 5. DE CAMPERVANS A TU PRÓXIMA AVENTURA - HISTORIA FURGOCASA */}
         <section className="py-20 bg-gradient-to-br from-blue-900 via-[#063971] to-blue-800 text-white relative overflow-hidden">
           {/* Background decorativo */}
           <div className="absolute inset-0 opacity-10">
@@ -422,158 +727,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* HERRAMIENTAS - NUEVA SECCIÓN */}
-        <section className="py-20 bg-white">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-6">
-                Tus Herramientas para Experiencias Perfectas
-              </h2>
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                Tres herramientas poderosas para que nunca más tengas una experiencia mediocre
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-              {/* Herramienta 1: Mapa Interactivo */}
-              <Card className="group hover:shadow-2xl transition-all duration-300 border-2 border-gray-100 hover:border-[#063971] overflow-hidden">
-                <div className="relative h-48 bg-gradient-to-br from-[#063971] to-blue-800 flex items-center justify-center overflow-hidden">
-                  <div className="absolute inset-0 bg-black/20"></div>
-                  <MapPin className="h-20 w-20 text-white relative z-10 group-hover:scale-110 transition-transform" />
-                </div>
-                <div className="p-6">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-3">
-                    🗺️ Mapa Interactivo
-                  </h3>
-                  <p className="text-gray-600 mb-4">
-                    Explora <strong>{stats.totalPlaces.toLocaleString('es-ES')}+ lugares excepcionales</strong> en un mapa visual. 
-                    Filtra por categoría, provincia y descubre joyas ocultas cerca de ti.
-                  </p>
-                  <ul className="space-y-2 mb-6">
-                    <li className="flex items-start gap-2 text-sm text-gray-700">
-                      <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0 mt-0.5" />
-                      <span>Visualización geográfica</span>
-                    </li>
-                    <li className="flex items-start gap-2 text-sm text-gray-700">
-                      <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0 mt-0.5" />
-                      <span>Filtros inteligentes</span>
-                    </li>
-                    <li className="flex items-start gap-2 text-sm text-gray-700">
-                      <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0 mt-0.5" />
-                      <span>Descubre cerca de ti</span>
-                    </li>
-                  </ul>
-                  <Button 
-                    onClick={() => router.push('/mapa')}
-                    className="w-full bg-[#063971] hover:bg-[#052d5a] text-white"
-                  >
-                    Explorar Mapa
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </div>
-              </Card>
-
-              {/* Herramienta 2: Planificador de Rutas */}
-              <Card className="group hover:shadow-2xl transition-all duration-300 border-2 border-gray-100 hover:border-[#ffd935] overflow-hidden">
-                <div className="relative h-48 bg-gradient-to-br from-[#ffd935] to-yellow-600 flex items-center justify-center overflow-hidden">
-                  <div className="absolute inset-0 bg-black/10"></div>
-                  <svg className="h-20 w-20 text-[#063971] relative z-10 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-                  </svg>
-                </div>
-                <div className="p-6">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-3">
-                    🛣️ Planificador de Rutas
-                  </h3>
-                  <p className="text-gray-600 mb-4">
-                    Crea <strong>rutas personalizadas</strong> conectando múltiples lugares excepcionales. 
-                    Perfecto para roadtrips y escapadas.
-                  </p>
-                  <ul className="space-y-2 mb-6">
-                    <li className="flex items-start gap-2 text-sm text-gray-700">
-                      <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0 mt-0.5" />
-                      <span>Múltiples paradas</span>
-                    </li>
-                    <li className="flex items-start gap-2 text-sm text-gray-700">
-                      <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0 mt-0.5" />
-                      <span>Optimización automática</span>
-                    </li>
-                    <li className="flex items-start gap-2 text-sm text-gray-700">
-                      <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0 mt-0.5" />
-                      <span>Guarda y comparte</span>
-                    </li>
-                  </ul>
-                  <Button 
-                    onClick={() => router.push('/ruta')}
-                    className="w-full bg-[#ffd935] hover:bg-[#e6c430] text-[#063971] font-bold"
-                  >
-                    Planificar Ruta
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </div>
-              </Card>
-
-              {/* Herramienta 3: Chatbot IA */}
-              <Card className="group hover:shadow-2xl transition-all duration-300 border-2 border-gray-100 hover:border-purple-500 overflow-hidden">
-                <div className="relative h-48 bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center overflow-hidden">
-                  <div className="absolute inset-0 bg-black/20"></div>
-                  <Sparkles className="h-20 w-20 text-white relative z-10 group-hover:scale-110 transition-transform" />
-                </div>
-                <div className="p-6">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-3">
-                    🤖 Chat con IA Viajera
-                  </h3>
-                  <p className="text-gray-600 mb-4">
-                    <strong>Tu asistente personal</strong> que conoce todos los lugares. 
-                    Pregunta lo que quieras en lenguaje natural.
-                  </p>
-                  <ul className="space-y-2 mb-6">
-                    <li className="flex items-start gap-2 text-sm text-gray-700">
-                      <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0 mt-0.5" />
-                      <span>Respuestas instantáneas</span>
-                    </li>
-                    <li className="flex items-start gap-2 text-sm text-gray-700">
-                      <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0 mt-0.5" />
-                      <span>Recomendaciones personalizadas</span>
-                    </li>
-                    <li className="flex items-start gap-2 text-sm text-gray-700">
-                      <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0 mt-0.5" />
-                      <span>Conversa como con un amigo</span>
-                    </li>
-                  </ul>
-                  <Button 
-                    onClick={() => {
-                      // Abrir el chatbot flotante del Tío Viajero
-                      const chatButton = document.querySelector('button[title="Abrir Tío Viajero IA"]') as HTMLButtonElement;
-                      if (chatButton) {
-                        chatButton.click();
-                        // Scroll suave hacia abajo para ver el chatbot en móvil
-                        setTimeout(() => {
-                          window.scrollTo({ top: 0, behavior: 'smooth' });
-                        }, 100);
-                      }
-                    }}
-                    className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
-                  >
-                    Hablar con IA
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </div>
-              </Card>
-            </div>
-
-            {/* Call to Action */}
-            <div className="text-center mt-12">
-              <Card className="max-w-3xl mx-auto p-6 bg-gradient-to-r from-blue-50 to-yellow-50 border-2 border-[#ffd935]">
-                <p className="text-lg text-gray-800">
-                  <strong>💡 Todas estas herramientas</strong> están incluidas en tu prueba gratuita de 30 días
-                </p>
-              </Card>
-            </div>
-          </div>
-        </section>
-
-        {/* DIFERENCIADORES CLAVE */}
+        {/* 6. POR QUÉ CASI CINCO ES DIFERENTE */}
         <section className="py-20 bg-gray-50">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
@@ -641,167 +795,13 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* TESTIMONIOS - MOVIDO ARRIBA DEL PRICING */}
-        <section className="py-20 bg-white">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-12">
-              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-                Comienza Gratis, Continúa por Menos de un Café
-              </h2>
-              <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                30 días gratis para probar todo. Luego elige el plan que mejor se adapte a ti.
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-              {/* Plan Trial */}
-              <Card className="border-2 border-gray-200 p-6 hover:shadow-xl transition hover:border-[#d6d8d7]">
-                <div className="text-center mb-6">
-                  <div className="inline-block p-3 bg-gray-100 rounded-full mb-4">
-                    <Clock className="h-8 w-8 text-gray-600" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Prueba Gratis</h3>
-                  <div className="text-4xl font-bold text-[#063971] mb-2">0€</div>
-                  <p className="text-gray-600">30 días completos</p>
-                </div>
-                <ul className="space-y-3 mb-6">
-                  <li className="flex items-start gap-2">
-                    <Check className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
-                    <span className="text-sm text-gray-700">Acceso total a mapa interactivo</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
-                    <span className="text-sm text-gray-700">Chatbot IA ilimitado</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
-                    <span className="text-sm text-gray-700">Planificador de rutas</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
-                    <span className="text-sm text-gray-700">Sin tarjeta hasta el día 31</span>
-                  </li>
-                </ul>
-                <Button 
-                  onClick={() => router.push('/registro')}
-                  variant="outline"
-                  className="w-full"
-                >
-                  Empezar Gratis
-                </Button>
-              </Card>
-
-              {/* Plan Mensual */}
-              <Card className="border-2 border-[#063971]/30 p-6 hover:shadow-xl transition hover:border-[#063971]">
-                <div className="text-center mb-6">
-                  <div className="inline-block p-3 bg-blue-50 rounded-full mb-4">
-                    <Zap className="h-8 w-8 text-[#063971]" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Premium Mensual</h3>
-                  <div className="text-4xl font-bold text-[#063971] mb-2">2,99€</div>
-                  <p className="text-gray-600">por mes</p>
-                </div>
-                <ul className="space-y-3 mb-6">
-                  <li className="flex items-start gap-2">
-                    <Check className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
-                    <span className="text-sm text-gray-700">Todo del plan gratis</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
-                    <span className="text-sm text-gray-700">Sin límites de tiempo</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
-                    <span className="text-sm text-gray-700">Nuevos lugares cada semana</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
-                    <span className="text-sm text-gray-700">Cancela cuando quieras</span>
-                  </li>
-                </ul>
-                <Button 
-                  onClick={() => router.push('/pricing?plan=monthly')}
-                  className="w-full bg-[#063971] hover:bg-[#052d5a] text-white"
-                >
-                  Suscribirse
-                </Button>
-              </Card>
-
-              {/* Plan Anual - DESTACADO */}
-              <Card className="border-2 border-[#ffd935] bg-gradient-to-br from-yellow-50 to-white p-6 hover:shadow-2xl transition relative">
-                {/* Badge de ahorro */}
-                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <div className="bg-[#ffd935] text-[#063971] px-4 py-1 rounded-full text-sm font-bold shadow-lg">
-                    ¡Ahorra 30%!
-                  </div>
-                </div>
-                
-                <div className="text-center mb-6 mt-2">
-                  <div className="inline-block p-3 bg-[#ffd935]/20 rounded-full mb-4">
-                    <Crown className="h-8 w-8 text-[#063971]" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Premium Anual</h3>
-                  <div className="text-4xl font-bold text-[#063971] mb-2">24,99€</div>
-                  <p className="text-gray-600">por año · Solo 2,08€/mes</p>
-                </div>
-                <ul className="space-y-3 mb-6">
-                  <li className="flex items-start gap-2">
-                    <Check className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
-                    <span className="text-sm text-gray-700 font-medium">Todo del plan mensual</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
-                    <span className="text-sm text-gray-700 font-medium">Casi 4 meses gratis al año</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
-                    <span className="text-sm text-gray-700 font-medium">Soporte prioritario</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
-                    <span className="text-sm text-gray-700 font-medium">Acceso anticipado a nuevos lugares</span>
-                  </li>
-                </ul>
-                <Button 
-                  onClick={() => router.push('/pricing?plan=yearly')}
-                  className="w-full bg-[#063971] hover:bg-[#052d5a] text-white shadow-lg"
-                >
-                  Mejor Valor
-                </Button>
-              </Card>
-            </div>
-
-            {/* FAQs rápidos */}
-            <div className="mt-12 max-w-3xl mx-auto">
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="bg-white p-6 rounded-lg border border-gray-200">
-                  <h4 className="font-semibold text-gray-900 mb-2">¿Necesito tarjeta para el trial?</h4>
-                  <p className="text-sm text-gray-600">No. Los 30 días de prueba son 100% gratis sin necesidad de tarjeta. La introduces solo cuando decidas suscribirte.</p>
-                </div>
-                <div className="bg-white p-6 rounded-lg border border-gray-200">
-                  <h4 className="font-semibold text-gray-900 mb-2">¿Puedo cancelar cuando quiera?</h4>
-                  <p className="text-sm text-gray-600">Sí. Cancela en cualquier momento desde tu perfil. Si es antes del día 31, no se cobra nada.</p>
-                </div>
-                <div className="bg-white p-6 rounded-lg border border-gray-200">
-                  <h4 className="font-semibold text-gray-900 mb-2">¿Cuándo añado mi tarjeta?</h4>
-                  <p className="text-sm text-gray-600">Cuando decidas suscribirte después del trial. Puedes hacerlo en cualquier momento durante los 30 días o al final del período de prueba.</p>
-                </div>
-                <div className="bg-white p-6 rounded-lg border border-gray-200">
-                  <h4 className="font-semibold text-gray-900 mb-2">¿Por qué el plan anual es mejor?</h4>
-                  <p className="text-sm text-gray-600">Ahorras 10,89€ al año (casi 4 meses gratis) y obtienes soporte prioritario.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* SOCIAL PROOF */}
+        {/* 7. LO QUE DICEN LOS CLIENTES - TESTIMONIOS */}
         <section className="py-20 bg-white">
           <div className="container mx-auto px-4">
             <div className="max-w-6xl mx-auto">
               <div className="text-center mb-12">
                 <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                  Lo que dicen nuestros usuarios
+                  Lo que dicen los clientes
                 </h2>
               </div>
 
@@ -873,7 +873,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* METODOLOGÍA + STATS CONSOLIDADO */}
+        {/* 8. METODOLOGÍA - OBJETIVIDAD, NO OPINIÓN */}
         <section className="py-20 bg-gray-50">
           <div className="container mx-auto px-4">
             <div className="max-w-6xl mx-auto">
