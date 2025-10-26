@@ -114,27 +114,35 @@ export async function POST(request: NextRequest) {
       try {
         console.log(`\n[${i + 1}/${placesToMigrate.length}] 📸 Migrando: ${place.name}`);
 
-        // Descargar y subir fotos a Supabase usando las referencias existentes
-        const { photoUrls } = await downloadAndUploadPhotosToSupabase(
-          place.google_place_id,
+        // Convertir photo_references a formato GooglePlacePhoto
+        const googlePhotos = place.photos.map(ref => ({
+          photo_reference: ref,
+          height: 1200,
+          width: 1200,
+          html_attributions: []
+        }));
+
+        // Descargar y subir fotos a Supabase
+        const { supabaseUrls } = await downloadAndUploadPhotosToSupabase(
+          googlePhotos,
           place.name,
-          place.photos
+          place.google_place_id
         );
 
-        if (photoUrls.length === 0) {
+        if (supabaseUrls.length === 0) {
           console.log(`   ⚠️ No se pudieron migrar fotos para ${place.name}`);
           errorCount++;
           errors.push({ name: place.name, error: 'No se pudieron descargar las fotos' });
           continue;
         }
 
-        console.log(`   ✅ Subidas ${photoUrls.length} fotos para ${place.name}`);
+        console.log(`   ✅ Subidas ${supabaseUrls.length} fotos para ${place.name}`);
 
         // Actualizar registro en la base de datos
         const { error: updateError } = await supabase
           .from('places')
           .update({
-            photo_urls: photoUrls,
+            photo_urls: supabaseUrls,
             updated_at: new Date().toISOString()
           })
           .eq('id', place.id);
