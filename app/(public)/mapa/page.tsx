@@ -1904,16 +1904,18 @@ export default function MapPage() {
                       >
                         Ver Detalles
                       </Button>
-                      {selectedPlace.google_maps_url && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => window.open(selectedPlace.google_maps_url, '_blank')}
-                          className="w-full"
-                        >
-                          Google Maps
-                        </Button>
-                      )}
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => window.open(
+                          selectedPlace.google_maps_url || 
+                          `https://www.google.com/maps/search/?api=1&query=${selectedPlace.latitude},${selectedPlace.longitude}`,
+                          '_blank'
+                        )}
+                        className="w-full"
+                      >
+                        Google Maps
+                      </Button>
                     </div>
 
                     {/* Botones de acción de usuario */}
@@ -2106,19 +2108,21 @@ export default function MapPage() {
                         >
                           Ver Detalles
                         </Button>
-                        {place.google_maps_url && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              window.open(place.google_maps_url, '_blank');
-                            }}
-                            className="flex-1"
-                          >
-                            Google Maps
-                          </Button>
-                        )}
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            window.open(
+                              place.google_maps_url || 
+                              `https://www.google.com/maps/search/?api=1&query=${place.latitude},${place.longitude}`,
+                              '_blank'
+                            );
+                          }}
+                          className="flex-1"
+                        >
+                          Google Maps
+                        </Button>
                       </div>
                     </div>
                   );
@@ -2600,19 +2604,21 @@ export default function MapPage() {
                     >
                       Ver Detalles
                     </Button>
-                    {place.google_maps_url && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          window.open(place.google_maps_url, '_blank');
-                        }}
-                        className="flex-1"
-                      >
-                        Google Maps
-                      </Button>
-                    )}
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        window.open(
+                          place.google_maps_url || 
+                          `https://www.google.com/maps/search/?api=1&query=${place.latitude},${place.longitude}`,
+                          '_blank'
+                        );
+                      }}
+                      className="flex-1"
+                    >
+                      Google Maps
+                    </Button>
                   </div>
                 </div>
               );

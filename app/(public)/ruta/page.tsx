@@ -903,10 +903,14 @@ export default function RutaPage() {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${selectedPlace.latitude},${selectedPlace.longitude}`, '_blank')}
+                        onClick={() => window.open(
+                          selectedPlace.google_maps_url || 
+                          `https://www.google.com/maps/search/?api=1&query=${selectedPlace.latitude},${selectedPlace.longitude}`,
+                          '_blank'
+                        )}
                         className="w-full"
                       >
-                        Cómo Llegar
+                        Google Maps
                       </Button>
                     </div>
                   </div>

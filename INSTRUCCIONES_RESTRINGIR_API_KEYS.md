@@ -54,12 +54,12 @@ En la sección **"API restrictions"**:
 2. **SOLO MARCA ESTAS APIs:**
    - ✅ Maps JavaScript API
    - ✅ Maps Static API ⚠️ **OBLIGATORIO** (para mapas en páginas de detalle)
+   - ✅ Directions API ⚠️ **OBLIGATORIO** (para calcular rutas en /ruta)
 
 3. **DESMARCA TODO LO DEMÁS**, especialmente:
    - ❌ Places API
    - ❌ Places API (New)
    - ❌ Geocoding API
-   - ❌ Directions API
 
 ⚠️ **CRÍTICO:** Si no habilitas **Maps Static API**, los mapas en las páginas de detalle de lugares NO se mostrarán (error 403).
 
