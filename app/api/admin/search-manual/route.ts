@@ -7,11 +7,10 @@ export const dynamic = 'force-dynamic';
 const GOOGLE_PLACES_API_KEY = process.env.GOOGLE_MAPS_API_KEY || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!;
 
 /**
- * POST - Buscar lugares manualmente en Google Places API (New)
+ * POST - Buscar lugares manualmente en Google Places API
  * Útil para añadir lugares específicos que no se capturaron en la indexación automática
  * 
- * Usa Places API (New) con endpoint:
- * https://places.googleapis.com/v1/places:searchText
+ * Usa Places API Text Search (legacy) - Compatible con backend
  */
 export async function POST(request: NextRequest) {
   try {
@@ -41,61 +40,64 @@ export async function POST(request: NextRequest) {
       }, { status: 500 });
     }
 
-    console.log('🔍 Búsqueda manual (Places API New):', { 
+    console.log('🔍 Búsqueda manual:', { 
       searchTerm, 
       apiKeyExists: true,
       apiKeyLength: GOOGLE_PLACES_API_KEY.length 
     });
 
-    // Buscar en Google Places API (New) - Text Search
-    const response = await axios.post(
-      'https://places.googleapis.com/v1/places:searchText',
+    // Buscar en Google Places Text Search (legacy - funciona desde backend)
+    const response = await axios.get(
+      'https://maps.googleapis.com/maps/api/place/textsearch/json',
       {
-        textQuery: searchTerm,
-        languageCode: 'es',
-        regionCode: 'ES',
-      },
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Goog-Api-Key': GOOGLE_PLACES_API_KEY,
-          'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.rating,places.userRatingCount,places.location,places.types,places.photos'
+        params: {
+          query: searchTerm,
+          region: 'es',
+          language: 'es',
+          key: GOOGLE_PLACES_API_KEY,
         },
       }
     );
 
-    console.log('📡 Google Places API (New) Response:', {
-      places_count: response.data.places?.length || 0,
+    console.log('📡 Google Places API Response:', {
+      status: response.data.status,
+      results_count: response.data.results?.length || 0,
       searchTerm,
     });
 
     // Verificar si hay resultados
-    if (!response.data.places || response.data.places.length === 0) {
+    if (response.data.status !== 'OK') {
+      const errorMessages: Record<string, string> = {
+        'ZERO_RESULTS': 'No se encontraron lugares que coincidan con tu búsqueda',
+        'REQUEST_DENIED': 'API Key sin permisos. Verifica Google Cloud Console',
+        'INVALID_REQUEST': 'Búsqueda inválida. Intenta con otro término',
+        'OVER_QUERY_LIMIT': 'Límite de consultas excedido. Intenta más tarde',
+      };
+
+      const friendlyError = errorMessages[response.data.status] || 'Error desconocido';
+      
       return NextResponse.json({ 
         success: false,
-        error: 'No se encontraron lugares que coincidan con tu búsqueda',
-        googleStatus: 'ZERO_RESULTS',
-        details: 'Intenta con otro término de búsqueda',
+        error: friendlyError,
+        googleStatus: response.data.status,
+        details: response.data.error_message || 'Sin detalles adicionales',
         places: []
       }, { status: 400 });
     }
 
     // Filtrar y formatear resultados
-    const places = response.data.places
+    const places = response.data.results
       .filter((place: any) => place.rating >= 4.7) // Solo ≥4.7
       .slice(0, 10) // Máximo 10 resultados
       .map((place: any) => ({
-        place_id: place.id,
-        name: place.displayName?.text || place.displayName,
+        place_id: place.place_id,
+        name: place.name,
         rating: place.rating,
-        user_ratings_total: place.userRatingCount,
-        address: place.formattedAddress,
-        location: {
-          lat: place.location?.latitude,
-          lng: place.location?.longitude,
-        },
+        user_ratings_total: place.user_ratings_total,
+        address: place.formatted_address,
+        location: place.geometry.location,
         types: place.types || [],
-        photos: place.photos?.slice(0, 1).map((p: any) => p.name) || [],
+        photos: place.photos?.slice(0, 1).map((p: any) => p.photo_reference) || [],
       }));
 
     return NextResponse.json({
