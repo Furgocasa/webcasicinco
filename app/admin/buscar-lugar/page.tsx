@@ -21,156 +21,19 @@ export default function BuscarLugarPage() {
   const [selectedPlace, setSelectedPlace] = useState<any>(null);
   const [adding, setAdding] = useState(false);
   const [totalCost, setTotalCost] = useState(0);
-  
-  // Estados para autocompletado
-  const [suggestions, setSuggestions] = useState<any[]>([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1);
-  const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
-  
-  // Referencias
-  const autocompleteService = useRef<google.maps.places.AutocompleteService | null>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const suggestionsTimeoutRef = useRef<NodeJS.Timeout>();
 
-  // Inicializar servicio de autocompletado cuando Google Maps esté cargado
-  useEffect(() => {
-    if (isLoaded && !autocompleteService.current) {
-      autocompleteService.current = new google.maps.places.AutocompleteService();
-    }
-  }, [isLoaded]);
-
-  // Función para obtener sugerencias
-  const fetchSuggestions = async (input: string) => {
-    if (!input || input.length < 2 || !autocompleteService.current) {
-      setSuggestions([]);
-      setShowSuggestions(false);
-      return;
-    }
-
-    setIsLoadingSuggestions(true);
-
-    try {
-      autocompleteService.current.getPlacePredictions(
-        {
-          input,
-          componentRestrictions: { country: 'es' },
-          types: ['establishment'],
-          language: 'es',
-        },
-        (predictions, status) => {
-          setIsLoadingSuggestions(false);
-          
-          if (status === google.maps.places.PlacesServiceStatus.OK && predictions) {
-            setSuggestions(predictions);
-            setShowSuggestions(true);
-            setSelectedSuggestionIndex(-1);
-          } else {
-            setSuggestions([]);
-            setShowSuggestions(false);
-          }
-        }
-      );
-    } catch (error) {
-      console.error('Error fetching suggestions:', error);
-      setIsLoadingSuggestions(false);
-      setSuggestions([]);
-      setShowSuggestions(false);
-    }
-  };
-
-  // Manejar cambios en el input con debounce
-  const handleInputChange = (value: string) => {
-    setSearchTerm(value);
-    
-    // Limpiar timeout anterior
-    if (suggestionsTimeoutRef.current) {
-      clearTimeout(suggestionsTimeoutRef.current);
-    }
-
-    // Esperar 300ms antes de buscar sugerencias (debounce)
-    suggestionsTimeoutRef.current = setTimeout(() => {
-      fetchSuggestions(value);
-    }, 300);
-  };
-
-  // Manejar selección de sugerencia
-  const handleSelectSuggestion = (suggestion: google.maps.places.AutocompletePrediction) => {
-    setSearchTerm(suggestion.description);
-    setSuggestions([]);
-    setShowSuggestions(false);
-    setSelectedSuggestionIndex(-1);
-  };
-
-  // Manejar navegación con teclado
+  // Manejar Enter en el input
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (!showSuggestions || suggestions.length === 0) {
-      if (e.key === 'Enter') {
-        handleSearch();
-      }
-      return;
-    }
-
-    switch (e.key) {
-      case 'ArrowDown':
-        e.preventDefault();
-        setSelectedSuggestionIndex(prev => 
-          prev < suggestions.length - 1 ? prev + 1 : prev
-        );
-        break;
-      case 'ArrowUp':
-        e.preventDefault();
-        setSelectedSuggestionIndex(prev => prev > 0 ? prev - 1 : -1);
-        break;
-      case 'Enter':
-        e.preventDefault();
-        if (selectedSuggestionIndex >= 0) {
-          handleSelectSuggestion(suggestions[selectedSuggestionIndex]);
-        } else {
-          handleSearch();
-        }
-        break;
-      case 'Escape':
-        setShowSuggestions(false);
-        setSelectedSuggestionIndex(-1);
-        break;
+    if (e.key === 'Enter') {
+      handleSearch();
     }
   };
-
-  // Cerrar sugerencias al hacer clic fuera
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (inputRef.current && !inputRef.current.contains(event.target as Node)) {
-        setShowSuggestions(false);
-        setSelectedSuggestionIndex(-1);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
-
-  // Limpiar timeout al desmontar
-  useEffect(() => {
-    return () => {
-      if (suggestionsTimeoutRef.current) {
-        clearTimeout(suggestionsTimeoutRef.current);
-      }
-    };
-  }, []);
 
   const handleSearch = async () => {
     if (!searchTerm || searchTerm.length < 3) {
       toast.error('Escribe al menos 3 caracteres');
       return;
     }
-
-    // Cerrar sugerencias
-    setShowSuggestions(false);
-    setSuggestions([]);
-    setSelectedSuggestionIndex(-1);
 
     setSearching(true);
     setResults([]);
@@ -275,64 +138,17 @@ export default function BuscarLugarPage() {
       <Card className="mb-6">
         <CardContent className="pt-6">
           <div className="flex gap-3">
-            <div className="flex-1 relative" ref={inputRef}>
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 z-10" />
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
               <input
                 type="text"
                 placeholder="Ej: Restaurante El Patio, Madrid"
                 value={searchTerm}
-                onChange={(e) => handleInputChange(e.target.value)}
+                onChange={(e) => setSearchTerm(e.target.value)}
                 onKeyDown={handleKeyDown}
-                onFocus={() => {
-                  // Mostrar sugerencias si ya hay búsqueda previa
-                  if (searchTerm.length >= 2 && suggestions.length > 0) {
-                    setShowSuggestions(true);
-                  }
-                }}
                 className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary transition-all"
                 disabled={searching}
               />
-              
-              {/* Dropdown de sugerencias estilo Google */}
-              {showSuggestions && suggestions.length > 0 && (
-                <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-xl max-h-[400px] overflow-y-auto">
-                  {suggestions.map((suggestion, index) => (
-                    <div
-                      key={suggestion.place_id}
-                      onClick={() => handleSelectSuggestion(suggestion)}
-                      onMouseEnter={() => setSelectedSuggestionIndex(index)}
-                      className={`px-4 py-3 cursor-pointer transition-colors border-b border-gray-100 last:border-b-0 ${
-                        index === selectedSuggestionIndex
-                          ? 'bg-blue-50'
-                          : 'hover:bg-gray-50'
-                      }`}
-                    >
-                      <div className="flex items-start gap-3">
-                        <MapPin className={`h-4 w-4 mt-0.5 flex-shrink-0 ${
-                          index === selectedSuggestionIndex ? 'text-blue-600' : 'text-gray-400'
-                        }`} />
-                        <div className="flex-1 min-w-0">
-                          <div className={`font-medium text-sm ${
-                            index === selectedSuggestionIndex ? 'text-blue-900' : 'text-gray-900'
-                          }`}>
-                            {suggestion.structured_formatting.main_text}
-                          </div>
-                          <div className="text-xs text-gray-500 truncate mt-0.5">
-                            {suggestion.structured_formatting.secondary_text}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-              
-              {/* Indicador de carga */}
-              {isLoadingSuggestions && (
-                <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                  <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
-                </div>
-              )}
             </div>
             <Button onClick={handleSearch} disabled={searching} size="lg">
               {searching ? (
