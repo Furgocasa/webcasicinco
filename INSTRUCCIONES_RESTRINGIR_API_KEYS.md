@@ -53,13 +53,15 @@ En la sección **"API restrictions"**:
 
 2. **SOLO MARCA ESTAS APIs:**
    - ✅ Maps JavaScript API
-   - ✅ Maps Static API (opcional, si la usas)
+   - ✅ Maps Static API ⚠️ **OBLIGATORIO** (para mapas en páginas de detalle)
 
 3. **DESMARCA TODO LO DEMÁS**, especialmente:
    - ❌ Places API
    - ❌ Places API (New)
    - ❌ Geocoding API
    - ❌ Directions API
+
+⚠️ **CRÍTICO:** Si no habilitas **Maps Static API**, los mapas en las páginas de detalle de lugares NO se mostrarán (error 403).
 
 4. Haz clic en **"SAVE"**
 
@@ -100,7 +102,7 @@ En **"API restrictions"**:
 
 3. **DESMARCA:**
    - ❌ Maps JavaScript API
-   - ❌ Maps Static API
+   - ❌ Maps Static API (NO se usa en backend)
    - ❌ Todo lo demás
 
 4. Haz clic en **"SAVE"**
@@ -194,7 +196,7 @@ GOOGLE_PLACES_API_KEY = [???]
    Dominios: casicinco.com, *.amplifyapp.com, localhost
    
    API restrictions: Restrict key
-   APIs habilitadas: SOLO Maps JavaScript API
+   APIs habilitadas: Maps JavaScript API + Maps Static API
    ```
 
 2. **Backend Key (sin restricción de dominio):**
@@ -295,5 +297,6 @@ Si tienes problemas:
 
 ---
 
-**Última actualización:** 17 de Octubre 2025
+**Última actualización:** 26 de Octubre 2025  
+**Cambios:** ✅ Maps Static API ahora obligatoria para frontend
 

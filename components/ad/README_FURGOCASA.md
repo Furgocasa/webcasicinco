@@ -104,16 +104,28 @@ Las variantes se configuran en el array `BANNER_VARIANTS` dentro del componente.
 />
 ```
 
-### **Páginas de Lugares** (Pendiente)
+### **Páginas de Lugares** ✅ IMPLEMENTADO (Responsive)
 ```tsx
-// components/places/PlaceContent.tsx (después de descripción)
+// components/places/PlaceContent.tsx (línea ~308, después de Highlights)
+
+// Detecta automáticamente el tamaño de pantalla:
+// - Móvil (<768px): Banner VERTICAL optimizado
+// - Desktop (≥768px): Banner HORIZONTAL con más espacio
+
 <FurgocasaBanner 
   variant="place"
-  orientation="horizontal"  // o "vertical" para pruebas
+  orientation={isMobile ? "vertical" : "horizontal"}  // 🔄 Dinámico
   location={place.province || place.city}
   placeName={place.name}
+  autoRotate={true}
+  rotateInterval={10000}
 />
 ```
+
+**Beneficios:**
+- 📱 Mejor experiencia en móvil con banner vertical dedicado
+- 💻 Aprovecha el espacio horizontal en desktop
+- 🔄 Cambia automáticamente al redimensionar ventana
 
 ### **Home** (Pendiente)
 ```tsx

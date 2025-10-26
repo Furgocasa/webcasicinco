@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Mail, Lock, User, AlertCircle } from 'lucide-react';
+import { Mail, Lock, User, AlertCircle, Gift, X, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { PasswordInput } from '@/components/ui/PasswordInput';
@@ -29,6 +29,19 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [loadingGoogle, setLoadingGoogle] = useState(false);
   const [error, setError] = useState('');
+  const [showModal, setShowModal] = useState(false);
+
+  // Mostrar modal al cargar la página (solo una vez por sesión)
+  useEffect(() => {
+    const hasSeenModal = sessionStorage.getItem('free-trial-modal-seen');
+    if (!hasSeenModal) {
+      // Esperar 1 segundo para mejor UX
+      setTimeout(() => {
+        setShowModal(true);
+        sessionStorage.setItem('free-trial-modal-seen', 'true');
+      }, 1000);
+    }
+  }, []);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -130,19 +143,120 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-primary/10 via-white to-secondary/10 px-4">
-      <div className="w-full max-w-md">
-        {/* Logo */}
-        <Link href="/" className="mb-8 flex items-center justify-center space-x-2">
-          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-secondary">
-            <span className="text-2xl font-bold text-white">5</span>
-          </div>
-          <span className="text-2xl font-bold text-gray-900">
-            Casi <span className="text-primary">Cinco</span>
-          </span>
-        </Link>
+    <>
+      {/* Modal Emergente - 30 Días Gratis */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-300">
+          <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 animate-in zoom-in duration-300">
+            {/* Botón cerrar */}
+            <button
+              onClick={() => setShowModal(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+              aria-label="Cerrar"
+            >
+              <X className="h-6 w-6" />
+            </button>
 
-        <Card>
+            {/* Contenido */}
+            <div className="text-center">
+              {/* Icono animado */}
+              <div className="mb-6 relative inline-block">
+                <div className="absolute inset-0 bg-gradient-to-br from-[#063971] to-[#ffd935] opacity-20 blur-xl rounded-full animate-pulse"></div>
+                <div className="relative bg-gradient-to-br from-[#063971] to-blue-600 rounded-full p-4">
+                  <Gift className="h-12 w-12 text-white" />
+                </div>
+                <div className="absolute -top-1 -right-1">
+                  <Sparkles className="h-6 w-6 text-[#ffd935] animate-pulse" />
+                </div>
+              </div>
+
+              {/* Título */}
+              <h2 className="text-3xl font-bold text-gray-900 mb-3">
+                ¡30 Días Gratis!
+              </h2>
+              
+              {/* Descripción */}
+              <p className="text-lg text-gray-700 mb-2">
+                Regístrate ahora y disfruta de <strong className="text-[#063971]">30 días completos</strong> de acceso premium
+              </p>
+              
+              {/* Beneficios */}
+              <div className="bg-gradient-to-br from-blue-50 to-yellow-50 rounded-xl p-4 mb-6">
+                <ul className="text-sm text-gray-700 space-y-2 text-left">
+                  <li className="flex items-center gap-2">
+                    <span className="text-green-500 text-lg">✓</span>
+                    <span>Sin tarjeta de crédito</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="text-green-500 text-lg">✓</span>
+                    <span>Acceso completo a todos los lugares</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="text-green-500 text-lg">✓</span>
+                    <span>Favoritos ilimitados</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="text-green-500 text-lg">✓</span>
+                    <span>Cancela cuando quieras</span>
+                  </li>
+                </ul>
+              </div>
+
+              {/* CTA */}
+              <Button
+                onClick={() => setShowModal(false)}
+                className="w-full bg-gradient-to-r from-[#063971] to-blue-600 hover:from-[#063971]/90 hover:to-blue-700 text-white font-bold text-lg py-6"
+              >
+                ¡Empezar Ahora! 🚀
+              </Button>
+
+              <p className="text-xs text-gray-500 mt-3">
+                Prueba todo sin compromiso
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-primary/10 via-white to-secondary/10 px-4">
+        <div className="w-full max-w-md">
+          {/* Logo */}
+          <Link href="/" className="mb-8 flex items-center justify-center space-x-2">
+            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-secondary">
+              <span className="text-2xl font-bold text-white">5</span>
+            </div>
+            <span className="text-2xl font-bold text-gray-900">
+              Casi <span className="text-primary">Cinco</span>
+            </span>
+          </Link>
+
+          {/* Banner destacado - 30 días gratis */}
+          <div className="mb-6 overflow-hidden rounded-2xl bg-gradient-to-r from-[#063971] via-blue-600 to-[#063971] p-[2px] shadow-lg">
+            <div className="bg-white rounded-[14px] p-6">
+              <div className="flex items-center gap-4">
+                <div className="flex-shrink-0">
+                  <div className="bg-gradient-to-br from-[#063971] to-blue-600 rounded-full p-3">
+                    <Gift className="h-8 w-8 text-white" />
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="text-xl font-bold text-gray-900">
+                      30 Días Gratis
+                    </h3>
+                    <span className="bg-[#ffd935] text-[#063971] text-xs font-bold px-2 py-1 rounded-full">
+                      SIN TARJETA
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-600">
+                    Acceso completo sin compromiso. Cancela cuando quieras.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <Card>
           <CardHeader>
             <CardTitle>Crear cuenta</CardTitle>
             <p className="text-sm text-gray-600">
@@ -238,7 +352,8 @@ export default function RegisterPage() {
             </form>
           </CardContent>
         </Card>
+        </div>
       </div>
-    </div>
+    </>
   );
 }

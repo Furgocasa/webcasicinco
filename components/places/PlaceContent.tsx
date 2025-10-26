@@ -36,6 +36,7 @@ import { MarkdownText } from '@/lib/utils/markdown';
 import { getPlacePhotoUrl } from '@/lib/utils/photo-helper';
 import { toast } from 'sonner';
 import { trackEvent, EVENTS, CATEGORIES as ANALYTICS_CATEGORIES } from '@/lib/analytics/tracker';
+import { FurgocasaBanner } from '@/components/ad/FurgocasaBanner';
 
 type PlaceContentProps = {
   place: any;
@@ -49,6 +50,7 @@ export function PlaceContent({ place, tier, tierInfo }: PlaceContentProps) {
   const [showVisitModal, setShowVisitModal] = useState(false);
   const [visitNotes, setVisitNotes] = useState('');
   const [visitRating, setVisitRating] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
 
   // Convertir provincia a slug para URLs (Málaga → malaga)
   const provinceSlug = place.province
@@ -58,8 +60,25 @@ export function PlaceContent({ place, tier, tierInfo }: PlaceContentProps) {
     .replace(/\s+/g, '-')
     .replace(/[^a-z0-9-]/g, '') || place.province;
 
+  // Obtener la API key de Google Maps desde variable de entorno
+  const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+
   // Usar Google Maps Static API para preview (no requiere JavaScript)
   // Esto es más rápido, mejor para SEO, y no consume cuota de JavaScript API
+
+  // Detectar si es móvil para mostrar banner optimizado
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    // Verificar al montar
+    checkMobile();
+    
+    // Escuchar cambios de tamaño
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Cerrar menú al hacer click fuera
   useEffect(() => {
@@ -285,6 +304,16 @@ export function PlaceContent({ place, tier, tierInfo }: PlaceContentProps) {
               </Card>
             )}
 
+            {/* Banner Furgocasa - Responsive según dispositivo */}
+            <FurgocasaBanner 
+              variant="place"
+              orientation={isMobile ? "vertical" : "horizontal"}
+              location={place.province || place.city}
+              placeName={place.name}
+              autoRotate={true}
+              rotateInterval={10000}
+            />
+
             {/* Galería de Fotos */}
             {(() => {
               const maxPhotos = 6;
@@ -492,12 +521,29 @@ export function PlaceContent({ place, tier, tierInfo }: PlaceContentProps) {
                   <div className="rounded-lg overflow-hidden mb-4 relative group cursor-pointer"
                        onClick={() => place.google_maps_url && window.open(place.google_maps_url, '_blank')}>
                     {/* Google Maps Static API - Imagen estática del mapa */}
-                    <img
-                      src={`https://maps.googleapis.com/maps/api/staticmap?center=${place.latitude},${place.longitude}&zoom=15&size=600x300&markers=color:red%7C${place.latitude},${place.longitude}&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`}
-                      alt={`Mapa de ${place.name}`}
-                      className="w-full h-[300px] object-cover"
-                      loading="lazy"
-                    />
+                    {googleMapsApiKey ? (
+                      <img
+                        src={`https://maps.googleapis.com/maps/api/staticmap?center=${place.latitude},${place.longitude}&zoom=15&size=600x300&markers=color:red%7C${place.latitude},${place.longitude}&key=${googleMapsApiKey}`}
+                        alt={`Mapa de ${place.name}`}
+                        className="w-full h-[300px] object-cover"
+                        loading="lazy"
+                        onError={(e) => {
+                          // Si falla la carga, mostrar placeholder
+                          const target = e.target as HTMLImageElement;
+                          target.style.display = 'none';
+                          if (target.parentElement) {
+                            const placeholder = document.createElement('div');
+                            placeholder.className = 'bg-gray-100 rounded-lg h-[300px] flex items-center justify-center';
+                            placeholder.innerHTML = '<svg class="h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>';
+                            target.parentElement.insertBefore(placeholder, target);
+                          }
+                        }}
+                      />
+                    ) : (
+                      <div className="bg-gray-100 rounded-lg h-[300px] flex items-center justify-center">
+                        <MapPin className="h-12 w-12 text-gray-400" />
+                      </div>
+                    )}
                     {/* Overlay para indicar que es clickeable */}
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all flex items-center justify-center">
                       <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full">

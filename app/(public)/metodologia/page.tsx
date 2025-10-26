@@ -63,6 +63,66 @@ export default function MetodologiaPage() {
           </div>
         </section>
 
+        {/* HISTORIA - POR QUÉ NACIÓ CASI CINCO */}
+        <section className="py-20 bg-gradient-to-br from-blue-50 to-white">
+          <div className="container mx-auto px-4">
+            <div className="max-w-5xl mx-auto">
+              <div className="text-center mb-12">
+                <div className="inline-flex items-center gap-2 bg-[#063971]/10 px-4 py-2 rounded-full mb-4">
+                  <span className="text-2xl">🚐</span>
+                  <span className="text-sm font-medium text-[#063971]">El origen de nuestra obsesión por la calidad</span>
+                </div>
+                <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                  Por Qué Nació Casi Cinco
+                </h2>
+                <p className="text-xl text-gray-600">
+                  No creamos esta metodología por teoría. La creamos por necesidad real.
+                </p>
+              </div>
+
+              <div className="grid md:grid-cols-3 gap-6 mb-12">
+                <Card className="p-6 border-2 border-[#063971]/20 hover:border-[#063971] transition-all">
+                  <div className="text-4xl mb-4">📅</div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">2018: El Inicio</h3>
+                  <p className="text-gray-600 text-sm">
+                    Fundamos <strong>Furgocasa</strong>, alquilando campervans premium. 
+                    Nuestros clientes viajaban por España buscando los mejores lugares.
+                  </p>
+                </Card>
+
+                <Card className="p-6 border-2 border-red-200 bg-red-50">
+                  <div className="text-4xl mb-4">😰</div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">El Dolor Diario</h3>
+                  <p className="text-gray-600 text-sm">
+                    <strong>"¿Dónde comemos?"</strong> Cada día, docenas de preguntas. 
+                    Pasábamos horas investigando. Y aún así, muchas veces fallábamos.
+                  </p>
+                </Card>
+
+                <Card className="p-6 border-2 border-[#ffd935] bg-gradient-to-br from-yellow-50 to-white">
+                  <div className="text-4xl mb-4">💡</div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">2024: La Solución</h3>
+                  <p className="text-gray-600 text-sm">
+                    Creamos <strong>Casi Cinco</strong>: un sistema que automatiza lo que hacíamos 
+                    manualmente. <strong>Matemática objetiva, no opiniones</strong>.
+                  </p>
+                </Card>
+              </div>
+
+              <Card className="p-8 bg-gradient-to-r from-[#063971] to-blue-800 text-white text-center">
+                <p className="text-lg md:text-xl leading-relaxed">
+                  <strong>Esta metodología no es teórica.</strong>
+                  <br />
+                  Es el resultado de <span className="text-[#ffd935]">6 años</span> resolviendo este problema cada día 
+                  para cientos de familias viajeras.
+                  <br /><br />
+                  <span className="text-[#ffd935] font-bold">Ahora está al alcance de todos.</span>
+                </p>
+              </Card>
+            </div>
+          </div>
+        </section>
+
         {/* EL PROBLEMA */}
         <section className="py-20 bg-white">
           <div className="container mx-auto px-4">
@@ -340,6 +400,118 @@ export default function MetodologiaPage() {
                     {' = '}
                     <span className="font-mono bg-[#063971] text-white px-3 py-1 rounded">Objetividad Garantizada</span>
                   </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* CASO DE USO REAL - EJEMPLO PASO A PASO */}
+        <section className="py-20 bg-gradient-to-br from-yellow-50 via-blue-50 to-white">
+          <div className="container mx-auto px-4">
+            <div className="max-w-5xl mx-auto">
+              <div className="text-center mb-12">
+                <div className="inline-flex items-center gap-2 bg-[#ffd935]/20 px-4 py-2 rounded-full mb-4">
+                  <span className="text-2xl">👤</span>
+                  <span className="text-sm font-medium text-[#063971]">Ejemplo real</span>
+                </div>
+                <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                  Cómo Funciona en la Práctica
+                </h2>
+                <p className="text-xl text-gray-600">
+                  María busca un restaurante en Sevilla. Así es como Casi Cinco la ayuda.
+                </p>
+              </div>
+
+              <div className="space-y-6">
+                {/* Paso 1: Situación Tradicional */}
+                <Card className="p-6 md:p-8 bg-white border-2 border-gray-200">
+                  <div className="flex items-start gap-6">
+                    <div className="bg-red-100 text-red-600 rounded-full w-12 h-12 flex items-center justify-center flex-shrink-0 font-bold text-xl">
+                      ❌
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-xl font-bold text-gray-900 mb-3">Método Tradicional (Google Maps)</h3>
+                      <div className="space-y-2 text-gray-700 text-sm">
+                        <p>1. María busca "restaurantes Sevilla" → <strong>2,847 resultados</strong></p>
+                        <p>2. Ve un 4.9★ con 8 reseñas → ¿Es bueno?</p>
+                        <p>3. Ve un 4.6★ con 3,200 reseñas → ¿Es mejor?</p>
+                        <p>4. Lee 30 reseñas contradictorias → <strong>Confusión total</strong></p>
+                        <p>5. Elige uno "al azar" porque está cansada → <strong>30 minutos perdidos</strong></p>
+                        <p className="text-red-600 font-semibold mt-4">Resultado: Experiencia mediocre. Dinero mal gastado.</p>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+
+                {/* Paso 2: Con Casi Cinco */}
+                <Card className="p-6 md:p-8 bg-gradient-to-br from-green-50 to-blue-50 border-2 border-[#063971]">
+                  <div className="flex items-start gap-6">
+                    <div className="bg-[#063971] text-white rounded-full w-12 h-12 flex items-center justify-center flex-shrink-0 font-bold text-xl">
+                      ✨
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-xl font-bold text-[#063971] mb-3">Método Casi Cinco</h3>
+                      <div className="space-y-3">
+                        <div className="bg-white p-4 rounded-lg border-l-4 border-[#063971]">
+                          <p className="text-gray-700 text-sm mb-2">
+                            <strong>1. Filtro automático 4.7★+</strong>
+                          </p>
+                          <p className="text-gray-600 text-xs">
+                            De 2,847 resultados → Solo 43 lugares excepcionales. 
+                            El 98.5% descartado automáticamente.
+                          </p>
+                        </div>
+
+                        <div className="bg-white p-4 rounded-lg border-l-4 border-[#ffd935]">
+                          <p className="text-gray-700 text-sm mb-2">
+                            <strong>2. Ordenamiento inteligente</strong>
+                          </p>
+                          <p className="text-gray-600 text-xs">
+                            El sistema prioriza: 4.8★ con 2,400 reseñas (💎 Diamante) 
+                            sobre 4.9★ con 12 reseñas. <strong>Validación masiva gana.</strong>
+                          </p>
+                        </div>
+
+                        <div className="bg-white p-4 rounded-lg border-l-4 border-green-500">
+                          <p className="text-gray-700 text-sm mb-2">
+                            <strong>3. IA resume por ella</strong>
+                          </p>
+                          <p className="text-gray-600 text-xs">
+                            "Destacado por su auténtica cocina andaluza y servicio excepcional. 
+                            Los clientes mencionan las croquetas caseras y el trato familiar."
+                          </p>
+                        </div>
+
+                        <div className="bg-white p-4 rounded-lg border-l-4 border-purple-500">
+                          <p className="text-gray-700 text-sm mb-2">
+                            <strong>4. Decisión en 30 segundos</strong>
+                          </p>
+                          <p className="text-gray-600 text-xs">
+                            María elige cualquiera de los top 5. Todos son objetivamente excelentes.
+                          </p>
+                        </div>
+
+                        <p className="text-green-700 font-semibold text-sm mt-4 bg-green-100 p-3 rounded-lg">
+                          ✅ Resultado: Experiencia excepcional garantizada. Tiempo ahorrado: 29 minutos.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+
+                {/* Comparación Final */}
+                <div className="grid md:grid-cols-2 gap-6 mt-8">
+                  <div className="text-center p-6 bg-red-50 rounded-xl border-2 border-red-200">
+                    <div className="text-4xl mb-2">😰</div>
+                    <p className="text-2xl font-bold text-red-900 mb-2">30 minutos</p>
+                    <p className="text-sm text-gray-600">Perdidos leyendo reseñas</p>
+                  </div>
+                  <div className="text-center p-6 bg-green-50 rounded-xl border-2 border-green-500">
+                    <div className="text-4xl mb-2">⚡</div>
+                    <p className="text-2xl font-bold text-green-900 mb-2">30 segundos</p>
+                    <p className="text-sm text-gray-600">Con decisión objetiva</p>
+                  </div>
                 </div>
               </div>
             </div>

@@ -107,3 +107,4 @@ GROUP BY region
 ORDER BY total DESC;
 
 
+
