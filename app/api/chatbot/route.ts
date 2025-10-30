@@ -16,6 +16,8 @@ type SearchParams = {
   isNationalRanking?: boolean;
   textSearch?: string; // 🆕 Búsqueda textual en ai_description para subcategorías (cocina mexicana, italiana, etc.)
   priceLevel?: number; // 🆕 Filtro por nivel de precio (1=barato, 2=medio, 3=caro)
+  userCoords?: { lat: number; lng: number }; // 🆕 Coordenadas GPS para búsqueda por proximidad
+  radiusKm?: number; // 🆕 Radio de búsqueda en km
 };
 
 const CATEGORY_SYNONYMS: Record<string, string[]> = {
@@ -65,13 +67,16 @@ function detectCategory(message: string): string | undefined {
 
 function parseIntent(
   message: string,
-  detectedLocation?: { city: string; province: string; region: string }
+  detectedLocation?: { city: string; province: string; region: string },
+  userCoords?: { lat: number; lng: number } // 🆕 Coordenadas GPS directas
 ): {
   category?: string; city?: string; province?: string; region?: string;
   topN?: number; excludeCapital?: boolean; explicitProvince?: boolean;
   textSearch?: string; // 🆕 Para búsqueda de subcategorías
   usesLocation?: boolean; // 📍 Indica si se usó ubicación del usuario
   priceLevel?: number; // 🆕 Nivel de precio detectado
+  userCoords?: { lat: number; lng: number }; // 🆕 Coordenadas GPS para búsqueda por proximidad
+  radiusKm?: number; // 🆕 Radio de búsqueda en km
 } {
   const msg = message.toLowerCase();
   const category = detectCategory(msg);
@@ -181,8 +186,8 @@ function parseIntent(
   let usesLocation = false;
   
   // Si tiene palabra de proximidad y NO tiene ciudad/provincia especificada manualmente,
-  // usar la ubicación detectada
-  if (hasProximityKeyword && !city && !province && detectedLocation) {
+  // usar la ubicación detectada con coordenadas GPS para búsqueda por proximidad real
+  if (hasProximityKeyword && !city && !province && detectedLocation && userCoords) {
     usesLocation = true;
     return {
       category,
@@ -194,7 +199,9 @@ function parseIntent(
       explicitProvince,
       textSearch,
       usesLocation,
-      priceLevel
+      priceLevel,
+      userCoords,      // 🆕 Pasar coordenadas GPS para búsqueda por distancia real
+      radiusKm: 50     // 🆕 Buscar en radio de 50km
     };
   }
 
@@ -202,6 +209,30 @@ function parseIntent(
 }
 
 async function searchPlacesTool(supabase: any, params: SearchParams) {
+  // 🆕 Si hay coordenadas GPS, usar búsqueda por proximidad real con PostGIS
+  if (params.userCoords) {
+    console.log(`📍 Búsqueda por proximidad: lat=${params.userCoords.lat}, lng=${params.userCoords.lng}, radio=${params.radiusKm || 50}km`);
+    
+    const { data, error } = await supabase.rpc('search_places_by_proximity', {
+      user_lat: params.userCoords.lat,
+      user_lng: params.userCoords.lng,
+      radius_meters: (params.radiusKm || 50) * 1000, // Convertir km a metros
+      place_category: params.category || null,
+      price_level_filter: params.priceLevel || null,
+      text_search_term: params.textSearch || null,
+      result_limit: params.limit
+    });
+    
+    if (error) {
+      console.error('❌ Error en búsqueda por proximidad:', error);
+      // Fallback a búsqueda normal si falla
+    } else {
+      console.log(`✅ Encontrados ${data?.length || 0} lugares por proximidad`);
+      return data || [];
+    }
+  }
+  
+  // Búsqueda normal por ciudad/provincia (texto)
   let query = supabase
     .from('places')
     .select('id, name, slug, category, rating, review_count, city, province, region, address, phone, website, ai_description, subcategory, price_level')
@@ -448,7 +479,7 @@ export async function POST(request: NextRequest) {
     // ---------------------------------------------
     // Agente: detectar intención y ejecutar tool
     // ---------------------------------------------
-    const intent = parseIntent(message, detectedLocation);
+    const intent = parseIntent(message, detectedLocation, location); // 🆕 Pasar coordenadas GPS
     console.log('🎯 Intent parseado:', JSON.stringify(intent, null, 2));
     const requestedCategory = intent.category;
     const targetN = intent.topN || 5;
@@ -457,13 +488,35 @@ export async function POST(request: NextRequest) {
     let provincesFromRegion: string[] | undefined;
     if (intent.region) provincesFromRegion = REGION_TO_PROVINCES[intent.region];
 
-    // Buscar por prioridad: provincia explícita/“fuera de la capital” -> ciudad -> provincia -> región -> cercano -> ranking nacional
+    // Buscar por prioridad: 
+    // 1. Proximidad GPS (si hay coordenadas y palabras clave)
+    // 2. Provincia explícita/"fuera de la capital" 
+    // 3. Ciudad 
+    // 4. Provincia 
+    // 5. Región 
+    // 6. Cercano 
+    // 7. Ranking nacional
     let candidates: any[] = [];
     const capitalToExclude = intent.excludeCapital && intent.province
       ? (CAPITAL_BY_PROVINCE[intent.province] || intent.province)
       : undefined;
 
-    if (intent.explicitProvince || (intent.province && intent.excludeCapital)) {
+    // 🆕 PRIORIDAD 1: Búsqueda por proximidad GPS real
+    if (intent.userCoords && intent.usesLocation) {
+      console.log(`🌍 Búsqueda por proximidad GPS activada`);
+      candidates = await searchPlacesTool(supabase, {
+        category: requestedCategory,
+        textSearch: intent.textSearch,
+        priceLevel: intent.priceLevel,
+        userCoords: intent.userCoords,
+        radiusKm: intent.radiusKm,
+        limit: contextLimit,
+      });
+      console.log(`📍 Encontrados ${candidates.length} lugares por proximidad GPS`);
+    }
+
+    // Si no hay búsqueda por GPS o no encontró nada, usar búsquedas textuales
+    if (candidates.length === 0 && (intent.explicitProvince || (intent.province && intent.excludeCapital))) {
       candidates = await searchPlacesTool(supabase, {
         category: requestedCategory,
         province: intent.province,
