@@ -168,8 +168,32 @@ function parseIntent(
   // Heurística básica para provincia/ciudad: coincidencia literal con capitalizadas comunes
   const PROVINCES = ['Madrid','Barcelona','Valencia','Alicante','Castellón','Sevilla','Cádiz','Huelva','Córdoba','Málaga','Granada','Jaén','Almería','Murcia','Toledo','Segovia','Guadalajara','Ávila'];
   const CITIES = ['València','Valencia','Sevilla','Málaga','Cádiz','Córdoba','Granada','Huelva','Jaén','Almería','Madrid','Murcia','Alicante','Castellón','Toledo','Segovia','Guadalajara','Ávila'];
+  
+  // 🆕 Casos ambiguos donde ciudad = provincia = CCAA
+  const AMBIGUOUS_LOCATIONS = ['Madrid', 'Murcia', 'Valencia', 'Alicante', 'Barcelona', 'Sevilla', 'Málaga', 'Córdoba', 'Granada'];
+  
   if (!province) province = PROVINCES.find(p => msg.includes(p.toLowerCase()));
-  const city = CITIES.find(c => msg.includes(c.toLowerCase()));
+  let city = CITIES.find(c => msg.includes(c.toLowerCase()));
+
+  // 🆕 DESAMBIGUACIÓN: Si es un lugar ambiguo y NO especifica "ciudad de X", asumir PROVINCIA
+  // Palabras que indican que habla de la CIUDAD específicamente:
+  const cityKeywords = /\b(ciudad de|capital de|centro de|downtown|casco|barrio)\b/i;
+  const provinceKeywords = /\b(provincia de|toda|resto de|fuera de la capital|alrededores de)\b/i;
+  
+  if (city && province && city.toLowerCase() === province.toLowerCase() && AMBIGUOUS_LOCATIONS.includes(city)) {
+    // Caso ambiguo detectado
+    if (cityKeywords.test(msg)) {
+      // Usuario dijo explícitamente "ciudad de Murcia" → buscar solo ciudad
+      province = undefined; // No buscar por provincia
+    } else if (provinceKeywords.test(msg)) {
+      // Usuario dijo "provincia de Murcia" o "toda Murcia" → buscar provincia
+      city = undefined; // No buscar por ciudad
+    } else {
+      // 🎯 AMBIGUO sin palabras clave → DEFAULT: PROVINCIA (más común)
+      // Usuario suele querer ver opciones de toda la provincia, no solo capital
+      city = undefined;
+    }
+  }
 
   // Detectar "afueras", "alrededores", "cerca de pero no en"
   const excludeCapital = /fuera de la capital|resto de la provincia|sin capital|pueblos|municipios|afueras de|alrededores de|cercan[ií]as de|cerca de (?!.*\ben\b)|extrarradio|fuera de la ciudad|provincia de \w+ pero no en|cerca pero no en/.test(msg);
