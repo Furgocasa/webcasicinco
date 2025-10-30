@@ -15,6 +15,7 @@ type SearchParams = {
   excludeCity?: string;
   isNationalRanking?: boolean;
   textSearch?: string; // 🆕 Búsqueda textual en ai_description para subcategorías (cocina mexicana, italiana, etc.)
+  priceLevel?: number; // 🆕 Filtro por nivel de precio (1=barato, 2=medio, 3=caro)
 };
 
 const CATEGORY_SYNONYMS: Record<string, string[]> = {
@@ -66,6 +67,7 @@ function parseIntent(
   topN?: number; excludeCapital?: boolean; explicitProvince?: boolean;
   textSearch?: string; // 🆕 Para búsqueda de subcategorías
   usesLocation?: boolean; // 📍 Indica si se usó ubicación del usuario
+  priceLevel?: number; // 🆕 Nivel de precio detectado
 } {
   const msg = message.toLowerCase();
   const category = detectCategory(msg);
@@ -112,6 +114,18 @@ function parseIntent(
       break;
     }
   }
+  
+  // 💰 Detectar nivel de precio
+  let priceLevel: number | undefined;
+  const priceKeywords = {
+    barato: ['barato', 'baratos', 'económico', 'económicos', 'economico', 'economicos', 'low cost', 'asequible', 'asequibles', 'precio bajo'],
+    medio: ['medio', 'medios', 'moderado', 'moderados', 'razonable', 'razonables', 'precio medio'],
+    caro: ['caro', 'caros', 'premium', 'lujo', 'exclusivo', 'exclusivos', 'gourmet', 'alto standing', 'precio alto']
+  };
+  
+  if (priceKeywords.barato.some(k => msg.includes(k))) priceLevel = 1; // € o €€
+  if (priceKeywords.medio.some(k => msg.includes(k))) priceLevel = 2; // €€
+  if (priceKeywords.caro.some(k => msg.includes(k))) priceLevel = 3; // €€€ o €€€€
   
   // Detectar número específico: "top 5", "mejores 10", etc.
   const topMatch = msg.match(/(?:top|mejores?)\s*(\d+)/);
@@ -175,17 +189,18 @@ function parseIntent(
       excludeCapital,
       explicitProvince,
       textSearch,
-      usesLocation
+      usesLocation,
+      priceLevel
     };
   }
 
-  return { category, city: finalCity, province, region, topN, excludeCapital, explicitProvince, textSearch, usesLocation };
+  return { category, city: finalCity, province, region, topN, excludeCapital, explicitProvince, textSearch, usesLocation, priceLevel };
 }
 
 async function searchPlacesTool(supabase: any, params: SearchParams) {
   let query = supabase
     .from('places')
-    .select('id, name, slug, category, rating, review_count, city, province, region, address, phone, website, ai_description, subcategory')
+    .select('id, name, slug, category, rating, review_count, city, province, region, address, phone, website, ai_description, subcategory, price_level')
     .eq('published', true);
 
   if (params.category) query = query.eq('category', params.category);
@@ -199,6 +214,20 @@ async function searchPlacesTool(supabase: any, params: SearchParams) {
     // Primero intentar buscar en subcategory (exacto, más rápido)
     // Si no hay, buscar en ai_description, name, ai_review_summary (texto)
     query = query.or(`subcategory.eq.${params.textSearch},ai_description.ilike.%${params.textSearch}%,name.ilike.%${params.textSearch}%,ai_review_summary.ilike.%${params.textSearch}%`);
+  }
+
+  // 💰 FILTRO POR NIVEL DE PRECIO
+  if (params.priceLevel) {
+    if (params.priceLevel === 1) {
+      // Económico: price_level 1 o 2
+      query = query.in('price_level', [1, 2]);
+    } else if (params.priceLevel === 2) {
+      // Medio: price_level 2
+      query = query.eq('price_level', 2);
+    } else if (params.priceLevel === 3) {
+      // Caro: price_level 3 o 4
+      query = query.in('price_level', [3, 4]);
+    }
   }
 
   // Sistema de tiers flexible:
@@ -427,7 +456,8 @@ export async function POST(request: NextRequest) {
         category: requestedCategory,
         province: intent.province,
         excludeCity: capitalToExclude,
-        textSearch: intent.textSearch, // 🆕 Búsqueda por subcategoría
+        textSearch: intent.textSearch,
+        priceLevel: intent.priceLevel,
         limit: contextLimit,
       });
     }
@@ -435,7 +465,8 @@ export async function POST(request: NextRequest) {
       candidates = await searchPlacesTool(supabase, {
         category: requestedCategory,
         city: intent.city,
-        textSearch: intent.textSearch, // 🆕 Búsqueda por subcategoría
+        textSearch: intent.textSearch,
+        priceLevel: intent.priceLevel,
         limit: contextLimit,
       });
     }
@@ -443,7 +474,8 @@ export async function POST(request: NextRequest) {
       candidates = await searchPlacesTool(supabase, {
         category: requestedCategory,
         province: intent.province,
-        textSearch: intent.textSearch, // 🆕 Búsqueda por subcategoría
+        textSearch: intent.textSearch,
+        priceLevel: intent.priceLevel,
         limit: contextLimit,
       });
     }
@@ -451,7 +483,8 @@ export async function POST(request: NextRequest) {
       candidates = await searchPlacesTool(supabase, {
         category: requestedCategory,
         provinces: provincesFromRegion,
-        textSearch: intent.textSearch, // 🆕 Búsqueda por subcategoría
+        textSearch: intent.textSearch,
+        priceLevel: intent.priceLevel,
         limit: contextLimit,
       });
     }
@@ -461,7 +494,8 @@ export async function POST(request: NextRequest) {
         candidates = await searchPlacesTool(supabase, {
           category: requestedCategory,
           provinces: near,
-          textSearch: intent.textSearch, // 🆕 Búsqueda por subcategoría
+          textSearch: intent.textSearch,
+          priceLevel: intent.priceLevel,
           limit: contextLimit,
         });
       }
@@ -469,7 +503,8 @@ export async function POST(request: NextRequest) {
     if (candidates.length === 0 && requestedCategory) {
       candidates = await searchPlacesTool(supabase, {
         category: requestedCategory,
-        textSearch: intent.textSearch, // 🆕 Búsqueda por subcategoría
+        textSearch: intent.textSearch,
+        priceLevel: intent.priceLevel,
         limit: contextLimit,
         isNationalRanking: true,  // Fallback nacional: mínimo 500 reseñas
       });
