@@ -1,5 +1,108 @@
 # 📝 Changelog - Casi Cinco
 
+## [30 Octubre 2025] - Chatbot con Geolocalización y Búsqueda Avanzada 🌍
+
+### 🆕 Nueva Funcionalidad: Geolocalización
+- **IMPLEMENTADO:** Sistema de geolocalización en Tío Viajero
+- **FEATURE:** Detección automática de ubicación del usuario
+- **FEATURE:** Búsquedas por proximidad ("restaurante cerca", "hotel aquí")
+- **FEATURE:** Geocodificación inversa (coords → ciudad/provincia) via Google Geocoding API
+- **UX:** Indicador visual verde cuando la ubicación está compartida
+- **UX:** Toast amigable al compartir ubicación
+- **PRIVACY:** Sistema opt-in (solicita permiso explícito)
+- **PRIVACY:** No se guarda ubicación en BD (solo en sesión)
+
+### 🔍 Búsqueda Avanzada por Tipo de Comida
+- **AMPLIADO:** 25+ tipos de cocina/comida soportados
+- **AGREGADO:** Hamburguesa, setas, paella, bocadillos, brunch
+- **AGREGADO:** Tailandesa, coreana, cocido, vino, cerveza
+- **MEJORADO:** Detección inteligente en descripciones IA
+- **BUSCA EN:** `ai_description`, `subcategory`, `name`, `ai_review_summary`
+
+### 📍 Palabras Clave de Proximidad
+```
+cerca, aquí, por aquí, en mi zona, cerca de mí,
+alrededor, cercano, por donde estoy, en esta zona
+```
+
+### 🛠️ Cambios Técnicos
+- **ADDED:** `getCityAndProvinceFromCoords()` en `lib/google/geocoding.ts`
+- **MODIFIED:** `app/api/chatbot/route.ts` - Soporte para parámetro `location`
+- **MODIFIED:** `parseIntent()` - Detección de palabras de proximidad
+- **MODIFIED:** `components/ChatbotFloating.tsx` - Captura de ubicación
+- **UPDATED:** `docs/systems/CHATBOT_TIO_VIAJERO.md` - Nueva documentación
+
+### 🎯 Ejemplos de Uso
+```
+📍 Usuario en Valencia
+👤: "restaurante de pescado cerca"
+🤖: [Detecta Valencia] Los mejores restaurantes de pescado en Valencia...
+
+👤: "hamburguesa por aquí"
+🤖: [Detecta Valencia] Hamburgueserías en Valencia...
+
+👤: "setas en mi zona"
+🤖: [Detecta Valencia] Restaurantes especializados en setas...
+```
+
+---
+
+## [26 Octubre 2025] - Reorganización Completa de Documentación v3.0.0 📚
+
+### ✨ Nueva Estructura Profesional
+- **REORGANIZADO:** Documentación completa del proyecto con estructura profesional y escalable
+- **REDUCCIÓN:** 85% menos archivos en raíz (de 40+ a solo 6)
+- **MEJORA:** Navegabilidad y mantenibilidad significativamente mejoradas
+
+### 📁 Nueva Estructura
+```
+📁 Raíz (6 archivos esenciales)
+├── README.md
+├── LEEME_PRIMERO.md
+├── CHANGELOG.md
+├── INDICE_MAESTRO_DOCUMENTACION.md
+├── COMANDOS_UTILES.md
+└── CONEXION_FRONTEND_BACKEND.md
+
+📁 docs/
+├── strategy/    → 5 archivos estratégicos (P0-P3, roadmaps)
+├── systems/     → 9 documentos técnicos de sistemas
+├── guides/      → 9 guías paso a paso (setup, deploy)
+└── archive/     → 45+ archivos históricos organizados
+    ├── snapshots/   → Estados del sistema por fecha
+    ├── sessions/    → Resúmenes de sesiones
+    ├── fixes/       → Fixes históricos
+    └── migrations/  → Migraciones históricas
+```
+
+### 🔄 Archivos Movidos
+- ✅ 5 documentos estratégicos → `docs/strategy/`
+- ✅ 9 documentos de sistemas → `docs/systems/`
+- ✅ 9 guías de configuración → `docs/guides/`
+- ✅ 8 snapshots fechados → `docs/archive/snapshots/`
+- ✅ 2 obsoletos → `docs/archive/`
+
+### ❌ Archivos Eliminados
+- ❌ `ARCHIVOS_A_ELIMINAR.md` (meta-documento obsoleto)
+
+### 📝 Documentos Actualizados
+- ✅ `INDICE_MAESTRO_DOCUMENTACION.md` v3.0.0 - Nueva estructura completa
+- ✅ `README.md` - Referencias actualizadas a nueva estructura
+- ✅ `LEEME_PRIMERO.md` v3.0.0 - Completamente reescrito
+
+### 🎯 Beneficios
+- ✅ Estructura profesional y escalable
+- ✅ Navegación intuitiva por tipo de documento
+- ✅ Fácil onboarding para nuevos desarrolladores
+- ✅ Mejor mantenibilidad a largo plazo
+- ✅ Separación clara entre docs activos e históricos
+
+### 📚 Documentación
+- `docs/archive/snapshots/REORGANIZACION_DOCS_26OCT2025.md` - Detalles completos
+- `INDICE_MAESTRO_DOCUMENTACION.md` - Índice maestro actualizado
+
+---
+
 ## [24 Octubre 2025] - Limpieza de Fotos Expiradas 🧹
 
 ### 🐛 Problema Crítico Resuelto

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { MessageCircle, X, Send, Loader2, Bot, RotateCcw, Lock } from 'lucide-react';
+import { MessageCircle, X, Send, Loader2, Bot, RotateCcw, Lock, MapPin } from 'lucide-react';
 import { Button } from './ui/Button';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/hooks/useAuth';
@@ -36,6 +36,11 @@ export default function ChatbotFloating() {
     return `session_${Date.now()}`;
   });
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  
+  // 📍 Estado de ubicación
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [locationCity, setLocationCity] = useState<string | null>(null);
+  const [locationDenied, setLocationDenied] = useState(false);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -106,6 +111,37 @@ export default function ChatbotFloating() {
     }
   }, [isOpen]);
 
+  // 📍 Solicitar ubicación cuando se abre el chat
+  useEffect(() => {
+    if (isOpen && !userLocation && !locationDenied && 'geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const location = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          };
+          setUserLocation(location);
+          console.log('📍 Ubicación obtenida:', location);
+          
+          // Mostrar notificación amigable
+          toast.success('📍 Ubicación compartida', {
+            description: 'El Tío Viajero puede recomendarte lugares cerca de ti'
+          });
+        },
+        (error) => {
+          console.log('❌ Ubicación denegada o no disponible:', error.message);
+          setLocationDenied(true);
+          // No mostrar error, es opcional
+        },
+        {
+          enableHighAccuracy: false, // No necesitamos precisión extrema
+          timeout: 5000,
+          maximumAge: 300000 // Cache de 5 minutos
+        }
+      );
+    }
+  }, [isOpen, userLocation, locationDenied]);
+
   const loadChatHistory = async () => {
     setLoadingHistory(true);
     try {
@@ -148,6 +184,7 @@ export default function ChatbotFloating() {
         body: JSON.stringify({
           message: userMessage,
           session_id: sessionId,
+          location: userLocation, // 📍 Incluir ubicación si está disponible
         }),
       });
 
@@ -295,6 +332,16 @@ export default function ChatbotFloating() {
               </div>
             )}
 
+            {/* Indicador de ubicación */}
+            {!loadingHistory && userLocation && (
+              <div className="bg-green-50 rounded-lg p-3 border border-green-200 flex items-center gap-2">
+                <MapPin className="h-4 w-4 text-green-600 flex-shrink-0" />
+                <p className="text-xs text-green-700">
+                  <strong>Ubicación compartida</strong> - Puedes preguntar por lugares "cerca de mí"
+                </p>
+              </div>
+            )}
+
             {/* Mensaje de bienvenida */}
             {!loadingHistory && messages.length === 0 && (
               <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg p-4 border-2 border-amber-200">
@@ -318,7 +365,8 @@ export default function ChatbotFloating() {
                     <ul className="text-xs text-amber-700 mt-2 space-y-1 ml-2">
                       <li>🍽️ "¿Dónde comer en Madrid?"</li>
                       <li>🏨 "Hotel en Barcelona cerca del mar"</li>
-                      <li>🗺️ "Ruta de Toledo a Galicia"</li>
+                      {userLocation && <li>📍 "Restaurante de pescado cerca de mí"</li>}
+                      {!userLocation && <li>🗺️ "Ruta de Toledo a Galicia"</li>}
                       <li>💎 "Qué son los tiers?"</li>
                     </ul>
                   </div>

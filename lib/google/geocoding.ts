@@ -126,3 +126,34 @@ export function getCountryFromGeocodeResult(result: GeocodeResult): string {
 export function getPostalCodeFromGeocodeResult(result: GeocodeResult): string {
   return extractAddressComponent(result, 'postal_code') || '';
 }
+
+/**
+ * Convierte coordenadas en ciudad y provincia (para chatbot)
+ */
+export async function getCityAndProvinceFromCoords(
+  latitude: number,
+  longitude: number
+): Promise<{ city: string; province: string; region: string } | null> {
+  try {
+    const result = await reverseGeocode(latitude, longitude);
+    
+    const city = getCityFromGeocodeResult(result);
+    const province = getProvinceFromGeocodeResult(result);
+    const region = getRegionFromGeocodeResult(result);
+    
+    // Verificar que al menos tengamos provincia
+    if (!province) {
+      console.warn('No se pudo obtener provincia desde coordenadas');
+      return null;
+    }
+    
+    return {
+      city: city || province, // Si no hay ciudad específica, usar provincia
+      province,
+      region
+    };
+  } catch (error) {
+    console.error('Error obteniendo ubicación desde coordenadas:', error);
+    return null;
+  }
+}

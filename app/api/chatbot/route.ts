@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { chatbotResponse } from '@/lib/ai/openai';
 import { createClient } from '@/lib/supabase/server';
+import { getCityAndProvinceFromCoords } from '@/lib/google/geocoding';
 
 // ---------------------------------------------
 // Tools del agente (búsqueda en BD)
@@ -57,10 +58,14 @@ function detectCategory(message: string): string | undefined {
   return undefined;
 }
 
-function parseIntent(message: string): {
+function parseIntent(
+  message: string,
+  detectedLocation?: { city: string; province: string; region: string }
+): {
   category?: string; city?: string; province?: string; region?: string;
   topN?: number; excludeCapital?: boolean; explicitProvince?: boolean;
   textSearch?: string; // 🆕 Para búsqueda de subcategorías
+  usesLocation?: boolean; // 📍 Indica si se usó ubicación del usuario
 } {
   const msg = message.toLowerCase();
   const category = detectCategory(msg);
@@ -69,21 +74,36 @@ function parseIntent(message: string): {
   let textSearch: string | undefined;
   
   const cuisineKeywords: Record<string, string[]> = {
-    'mexicana': ['mexicana', 'mexicano', 'mejicana', 'mejicano', 'tacos', 'burritos', 'tex-mex', 'azteca'],
-    'italiana': ['italiana', 'italiano', 'pizza', 'pasta', 'pizzería', 'pizzeria', 'trattoria', 'osteria', 'ristorante'],
-    'japonesa': ['japonesa', 'japones', 'japonés', 'sushi', 'ramen', 'yakitori', 'izakaya', 'nikkei'],
-    'china': ['china', 'chino', 'wok', 'dim sum', 'cantones', 'cantonés'],
-    'india': ['india', 'indio', 'hindu', 'hindú', 'curry', 'tandoori', 'masala'],
-    'mariscos': ['mariscos', 'marisco', 'pescado', 'marisquería', 'marisqueria', 'pescadería', 'pescaderia'],
-    'vegetariana': ['vegetariana', 'vegetariano', 'vegano', 'vegana', 'vegan'],
-    'tapas': ['tapas', 'pinchos', 'pintxos', 'taberna'],
-    'asador': ['asador', 'parrilla', 'carne', 'brasa', 'churrasco', 'churrascaria'],
-    'mediterránea': ['mediterránea', 'mediterranea'],
-    'francesa': ['francesa', 'frances', 'francés', 'bistro', 'brasserie'],
-    'peruana': ['peruana', 'peruano', 'ceviche', 'pisco'],
-    'argentina': ['argentina', 'argentino', 'pampa'],
-    'árabe': ['árabe', 'arabe', 'libanesa', 'libanes', 'kebab', 'falafel'],
-    'fusión': ['fusión', 'fusion', 'contemporánea', 'contemporanea', 'creativa'],
+    // Cocinas por país/región
+    'mexicana': ['mexicana', 'mexicano', 'mejicana', 'mejicano', 'tacos', 'burritos', 'tex-mex', 'azteca', 'quesadilla', 'enchilada'],
+    'italiana': ['italiana', 'italiano', 'pizza', 'pasta', 'pizzería', 'pizzeria', 'trattoria', 'osteria', 'ristorante', 'lasaña', 'carbonara', 'risotto'],
+    'japonesa': ['japonesa', 'japones', 'japonés', 'sushi', 'ramen', 'yakitori', 'izakaya', 'nikkei', 'tempura', 'udon', 'sashimi', 'maki'],
+    'china': ['china', 'chino', 'wok', 'dim sum', 'cantones', 'cantonés', 'pato pekinés', 'arroz tres delicias'],
+    'india': ['india', 'indio', 'hindu', 'hindú', 'curry', 'tandoori', 'masala', 'tikka'],
+    'francesa': ['francesa', 'frances', 'francés', 'bistro', 'brasserie', 'foie', 'ratatouille'],
+    'peruana': ['peruana', 'peruano', 'ceviche', 'pisco', 'causa', 'anticucho'],
+    'argentina': ['argentina', 'argentino', 'pampa', 'choripán', 'empanada argentina'],
+    'árabe': ['árabe', 'arabe', 'libanesa', 'libanes', 'kebab', 'falafel', 'shawarma', 'hummus'],
+    'tailandesa': ['tailandesa', 'tailandes', 'tailandés', 'pad thai', 'tom yum', 'curry tailandés'],
+    'coreana': ['coreana', 'coreano', 'kimchi', 'bibimbap', 'bulgogi', 'barbacoa coreana'],
+    'mediterránea': ['mediterránea', 'mediterranea', 'levantina'],
+    'fusión': ['fusión', 'fusion', 'contemporánea', 'contemporanea', 'creativa', 'autor', 'vanguardia', 'gastronómica'],
+    
+    // Tipo de comida/establecimiento
+    'mariscos': ['mariscos', 'marisco', 'pescado', 'marisquería', 'marisqueria', 'pescadería', 'pescaderia', 'pulpo', 'gambas', 'langosta', 'bogavante', 'centollo', 'mejillones', 'almejas', 'navajas', 'percebes', 'cigalas'],
+    'carne': ['asador', 'parrilla', 'carne', 'brasa', 'churrasco', 'churrascaria', 'chuleta', 'chuletón', 'entrecot', 'solomillo', 'costilla', 'cordero', 'cochinillo'],
+    'tapas': ['tapas', 'pinchos', 'pintxos', 'taberna', 'mesón', 'tasca', 'bar de tapas'],
+    'vegetariana': ['vegetariana', 'vegetariano', 'vegano', 'vegana', 'vegan', 'plant-based', 'healthy'],
+    'hamburguesa': ['hamburguesa', 'hamburguesería', 'hamburgueseria', 'burger', 'smash burger', 'hamburguesas'],
+    'sushi': ['sushi', 'sashimi', 'maki', 'nigiri', 'japonés', 'japonesa'],
+    'rice': ['arroz', 'paella', 'arroz negro', 'arroz caldoso', 'arrocería', 'arroceria'],
+    'cocido': ['cocido', 'puchero', 'olla', 'cuchara', 'legumbres'],
+    'setas': ['setas', 'hongos', 'boletus', 'níscalos', 'seta de cardo', 'trufa', 'micología'],
+    'postres': ['postres', 'pastelería', 'pasteleria', 'repostería', 'reposteria', 'dulces', 'tartas', 'chocolate'],
+    'bocadillos': ['bocadillo', 'bocadillos', 'bocatería', 'bocateria', 'sandwich', 'sándwich'],
+    'brunch': ['brunch', 'desayuno', 'breakfast', 'tostadas'],
+    'cerveza': ['cerveza', 'cervezas', 'cervecería', 'cerveceria', 'beer'],
+    'vino': ['vino', 'vinoteca', 'enoteca', 'bodega', 'maridaje'],
   };
 
   for (const [cuisine, keywords] of Object.entries(cuisineKeywords)) {
@@ -132,7 +152,34 @@ function parseIntent(message: string): {
   const excludeCapital = /fuera de la capital|resto de la provincia|sin capital|pueblos|municipios|afueras de|alrededores de|cercan[ií]as de|cerca de (?!.*\ben\b)|extrarradio|fuera de la ciudad|provincia de \w+ pero no en|cerca pero no en/.test(msg);
   const finalCity = explicitProvince ? undefined : city;
 
-  return { category, city: finalCity, province, region, topN, excludeCapital, explicitProvince, textSearch };
+  // 📍 Detectar palabras clave de proximidad para usar ubicación
+  const proximityKeywords = [
+    'cerca', 'aquí', 'aqui', 'por aquí', 'por aqui', 'en mi zona', 
+    'cerca de mí', 'cerca de mi', 'alrededor', 'cercano', 'cercanos',
+    'por donde estoy', 'en esta zona', 'en la zona', 'por la zona'
+  ];
+  
+  const hasProximityKeyword = proximityKeywords.some(keyword => msg.includes(keyword));
+  let usesLocation = false;
+  
+  // Si tiene palabra de proximidad y NO tiene ciudad/provincia especificada manualmente,
+  // usar la ubicación detectada
+  if (hasProximityKeyword && !city && !province && detectedLocation) {
+    usesLocation = true;
+    return {
+      category,
+      city: detectedLocation.city,
+      province: detectedLocation.province,
+      region: detectedLocation.region,
+      topN,
+      excludeCapital,
+      explicitProvince,
+      textSearch,
+      usesLocation
+    };
+  }
+
+  return { category, city: finalCity, province, region, topN, excludeCapital, explicitProvince, textSearch, usesLocation };
 }
 
 async function searchPlacesTool(supabase: any, params: SearchParams) {
@@ -237,7 +284,7 @@ function checkRateLimit(identifier: string): boolean {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { message, session_id } = body;
+    const { message, session_id, location } = body; // 📍 Añadir location
 
     // Validación mejorada de entrada
     if (!message || typeof message !== 'string') {
@@ -341,10 +388,27 @@ export async function POST(request: NextRequest) {
     // Añadir configuración al contexto
     context.chatbotConfig = chatbotConfig;
 
+    // 📍 Procesar ubicación si está disponible
+    let detectedLocation: { city: string; province: string; region: string } | undefined;
+    
+    if (location && location.lat && location.lng) {
+      console.log(`📍 Ubicación recibida: ${location.lat}, ${location.lng}`);
+      try {
+        const geoResult = await getCityAndProvinceFromCoords(location.lat, location.lng);
+        if (geoResult) {
+          detectedLocation = geoResult;
+          console.log(`📍 Ubicación detectada: ${geoResult.city}, ${geoResult.province}`);
+        }
+      } catch (error) {
+        console.error('Error geocodificando ubicación:', error);
+        // Continuar sin ubicación si falla
+      }
+    }
+
     // ---------------------------------------------
     // Agente: detectar intención y ejecutar tool
     // ---------------------------------------------
-    const intent = parseIntent(message);
+    const intent = parseIntent(message, detectedLocation);
     const requestedCategory = intent.category;
     const targetN = intent.topN || 5;
     const contextLimit = Math.min(targetN * 3, 100);
