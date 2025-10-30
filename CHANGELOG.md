@@ -1,8 +1,35 @@
 # 📝 Changelog - Casi Cinco
 
-## [30 Octubre 2025] - Chatbot con Geolocalización y Búsqueda Avanzada 🌍
+## [30 Octubre 2025] - Chatbot con GPS REAL + Desambiguación Inteligente 🗺️
 
-### 🆕 Nueva Funcionalidad: Geolocalización
+### 🚀 MEJORA CRÍTICA: Búsqueda por Proximidad GPS REAL
+- **IMPLEMENTADO:** Función PostGIS `search_places_by_proximity` en Supabase
+- **FEATURE:** Búsqueda por coordenadas GPS + radio (metros) con `ST_DWithin`
+- **FEATURE:** Cálculo de distancia exacta (km) con `ST_Distance`
+- **FEATURE:** Índice espacial GiST para búsquedas instantáneas
+- **MEJORA:** Ordena por distancia real (no por nombre de ciudad)
+- **RETORNA:** Campo `distance_km` para cada lugar
+- **EJEMPLO:** Usuario en Níjar → Encuentra restaurantes en radio 50km (Almería, El Ejido, etc.)
+- **PRIORIDAD:** Búsqueda GPS es prioridad 1 cuando hay coords + keyword proximidad
+
+### 🧠 MEJORA: Desambiguación Inteligente (Ciudad = Provincia)
+- **PROBLEMA:** "restaurantes de Murcia" → ¿Ciudad o provincia?
+- **SOLUCIÓN:** Default = PROVINCIA completa (más útil)
+- **CASOS:** Madrid, Murcia, Valencia, Barcelona, Alicante, Sevilla, Málaga, Córdoba, Granada
+- **ESPECÍFICO:** "ciudad de Murcia" → Solo capital
+- **ESPECÍFICO:** "provincia de Murcia" → Toda provincia
+- **ESPECÍFICO:** "toda Murcia" → Toda provincia
+- **ESPECÍFICO:** "centro de Murcia" → Solo capital
+- **VENTAJA:** Usuario ve más opciones por defecto
+
+### 📝 MEJORA: System Prompt y User Context Actualizados
+- **GEOLOCALIZACIÓN Y PROXIMIDAD:** IA sabe que con GPS los lugares vienen ordenados por distance_km
+- **INSTRUCCIÓN:** Mencionar distancias: "Restaurante X a 8.5km de ti"
+- **CASOS AMBIGUOS:** IA sabe que "Murcia" = provincia completa por defecto
+- **USER CONTEXT:** Estructura más clara con nota sobre GPS y distance_km
+- **COHERENCIA:** Prompt refleja la nueva lógica de búsqueda
+
+### 🆕 Funcionalidad Original: Geolocalización
 - **IMPLEMENTADO:** Sistema de geolocalización en Tío Viajero
 - **FEATURE:** Detección automática de ubicación del usuario
 - **FEATURE:** Búsquedas por proximidad ("restaurante cerca", "hotel aquí")
@@ -26,23 +53,47 @@ alrededor, cercano, por donde estoy, en esta zona
 ```
 
 ### 🛠️ Cambios Técnicos
+- **ADDED:** `supabase/migrations/20251030_search_places_by_proximity.sql` - Función PostGIS
+- **ADDED:** `docs/guides/EJECUTAR_MIGRACION_POSTGIS.md` - Guía de ejecución
 - **ADDED:** `getCityAndProvinceFromCoords()` en `lib/google/geocoding.ts`
-- **MODIFIED:** `app/api/chatbot/route.ts` - Soporte para parámetro `location`
-- **MODIFIED:** `parseIntent()` - Detección de palabras de proximidad
+- **MODIFIED:** `app/api/chatbot/route.ts` - SearchParams con `userCoords` y `radiusKm`
+- **MODIFIED:** `parseIntent()` - Detección de proximidad + desambiguación ciudad/provincia
+- **MODIFIED:** `searchPlacesTool()` - Prioridad 1 a RPC `search_places_by_proximity`
+- **MODIFIED:** `lib/ai/openai.ts` - System Prompt + User Context actualizados
 - **MODIFIED:** `components/ChatbotFloating.tsx` - Captura de ubicación
-- **UPDATED:** `docs/systems/CHATBOT_TIO_VIAJERO.md` - Nueva documentación
+- **UPDATED:** `docs/systems/CHATBOT_TIO_VIAJERO.md` - Documentación completa
 
 ### 🎯 Ejemplos de Uso
+
+**ANTES (búsqueda por texto):**
 ```
-📍 Usuario en Valencia
-👤: "restaurante de pescado cerca"
-🤖: [Detecta Valencia] Los mejores restaurantes de pescado en Valencia...
+📍 Usuario en Níjar (Almería) - GPS: 36.97, -2.03
+👤: "restaurantes cerca de mí"
+🤖: ❌ "No tengo restaurantes en Níjar"
+Razón: Buscaba por nombre ciudad "Níjar" (no hay lugares indexados en Níjar)
+```
 
-👤: "hamburguesa por aquí"
-🤖: [Detecta Valencia] Hamburgueserías en Valencia...
+**DESPUÉS (búsqueda por GPS):**
+```
+📍 Usuario en Níjar (Almería) - GPS: 36.97, -2.03
+👤: "restaurantes cerca de mí"
+🤖: ✅ "Los mejores restaurantes cerca de ti:
+      1. Casa Puga - ⭐4.8 (1234 reseñas) a 15.2km de ti en Almería
+      2. Restaurante Terraza - ⭐4.7 (890 reseñas) a 18.5km de ti en Almería
+      3. Los Mellizos - ⭐4.7 (756 reseñas) a 16.8km de ti en Almería"
+Razón: Busca en radio 50km desde coordenadas GPS, ordena por distancia
+```
 
-👤: "setas en mi zona"
-🤖: [Detecta Valencia] Restaurantes especializados en setas...
+**CASOS AMBIGUOS:**
+```
+👤: "restaurantes de Murcia"
+🤖: ✅ Busca en TODA la provincia (Murcia, Cartagena, Lorca, etc.)
+
+👤: "restaurantes en ciudad de Murcia"
+🤖: ✅ Busca SOLO en la capital
+
+👤: "hoteles de Madrid"
+🤖: ✅ Busca en TODA la provincia (Madrid, Alcalá, Getafe, etc.)
 ```
 
 ---
