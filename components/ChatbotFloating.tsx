@@ -359,6 +359,11 @@ export default function ChatbotFloating() {
                     <p className="text-sm text-amber-800">
                       Soy el Tío Viajero, tu guía experto por España. He recorrido cada rincón y conozco los mejores secretos.
                     </p>
+                    {userLocation && (
+                      <p className="text-xs text-green-700 mt-2 font-medium">
+                        📍 Tengo tu ubicación. Puedes preguntarme por lugares "cerca" o "aquí"
+                      </p>
+                    )}
                     <p className="text-sm text-amber-800 mt-2">
                       Pregúntame lo que quieras:
                     </p>
@@ -366,7 +371,8 @@ export default function ChatbotFloating() {
                       <li>🍽️ "¿Dónde comer en Madrid?"</li>
                       <li>🏨 "Hotel en Barcelona cerca del mar"</li>
                       {userLocation && <li>📍 "Restaurante de pescado cerca de mí"</li>}
-                      {!userLocation && <li>🗺️ "Ruta de Toledo a Galicia"</li>}
+                      {userLocation && <li>🍔 "Hamburguesería económica aquí"</li>}
+                      {!userLocation && <li>🗺️ "Mejores hoteles de Málaga"</li>}
                       <li>💎 "Qué son los tiers?"</li>
                     </ul>
                   </div>
