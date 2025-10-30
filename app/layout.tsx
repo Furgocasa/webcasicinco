@@ -113,7 +113,7 @@ export default function RootLayout({
           </main>
           <ChatbotFloating />
           <WelcomeModal />
-          <PaywallModal />
+          {/* PaywallModal desactivado - Solo bloqueo visual en páginas protegidas */}
           <Toaster position="top-right" richColors closeButton />
         </MapProvider>
       </body>
