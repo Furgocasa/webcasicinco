@@ -431,6 +431,13 @@ export async function POST(request: NextRequest) {
         if (geoResult) {
           detectedLocation = geoResult;
           console.log(`📍 Ubicación detectada: ${geoResult.city}, ${geoResult.province}`);
+          
+          // 🆕 AÑADIR ubicación al contexto para que la IA la vea
+          context.userLocation = {
+            city: geoResult.city,
+            province: geoResult.province,
+            region: geoResult.region
+          };
         }
       } catch (error) {
         console.error('Error geocodificando ubicación:', error);

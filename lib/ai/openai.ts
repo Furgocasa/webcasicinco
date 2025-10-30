@@ -393,6 +393,7 @@ IMPORTANTE
   const userContext = `${bestIntroInstruction ? bestIntroInstruction + '\n\n' : ''}📊 DATOS CONTEXTUALES:
 - Lugares totales en plataforma: ${context?.placesCount || 0}
 - Categorías disponibles: ${Object.entries(context?.categoryStats || {}).map(([cat, count]) => `${cat}(${count})`).join(', ')}
+${context?.userLocation ? `\n📍 UBICACIÓN DEL USUARIO: ${context.userLocation.city}, ${context.userLocation.province}, ${context.userLocation.region}` : ''}
 
 ${placesContext || '⚠️ No hay lugares disponibles en este momento.'}
 
@@ -402,6 +403,9 @@ PREGUNTA DEL USUARIO: ${userMessage}`;
   console.log(`🎯 System prompt: ${systemPrompt.length} chars`);
   console.log(`📍 User context incluye lugares: ${placesContext.length > 0}`);
   console.log(`📊 Lugares en contexto: ${(placesContext.match(/\d+\./g) || []).length}`);
+  if (context?.userLocation) {
+    console.log(`📍 Ubicación incluida en contexto: ${context.userLocation.city}, ${context.userLocation.province}`);
+  }
 
   try {
     const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
