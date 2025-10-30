@@ -1,0 +1,811 @@
+================================================================================
+🎩 TÍO VIAJERO - DOCUMENTACIÓN COMPLETA DEL AGENTE IA
+================================================================================
+Última actualización: 30 Octubre 2025
+Modelo: OpenAI GPT-4o-mini
+Estado: Funcional con limitaciones
+================================================================================
+
+📋 ÍNDICE:
+----------
+1. ¿QUÉ ES EL TÍO VIAJERO?
+2. FUNCIÓN Y OBJETIVO
+3. FLUJO TÉCNICO COMPLETO
+4. PROMPT ACTUAL (System Prompt)
+5. ESTRUCTURA DE DATOS
+6. LIMITACIONES ACTUALES
+7. MEJORAS SUGERIDAS
+8. EJEMPLOS DE USO REAL
+9. ARCHIVOS CLAVE DEL SISTEMA
+
+================================================================================
+1. ¿QUÉ ES EL TÍO VIAJERO?
+================================================================================
+
+El Tío Viajero es un agente conversacional de IA diseñado para ayudar a los 
+usuarios a descubrir los mejores lugares de España (restaurantes, hoteles, 
+spas, bares) mediante conversación natural.
+
+CARACTERÍSTICAS PRINCIPALES:
+- ✅ Recomienda lugares basándose en datos reales de Google Places
+- ✅ Filtra por categoría, ubicación, tipo de cocina y precio
+- ✅ Detecta ubicación GPS del usuario (geolocalización)
+- ✅ Solo recomienda lugares indexados en la plataforma (no inventa)
+- ✅ Mantiene historial de conversación
+- ✅ Respuestas en español, tono cercano pero experto
+
+TECNOLOGÍA:
+- Modelo: GPT-4o-mini (configurable)
+- Temperatura: 0.7 (balance creatividad/precisión)
+- Max tokens: 400 (respuestas concisas)
+- Historial: 12 mensajes (6 pares usuario/asistente)
+
+================================================================================
+2. FUNCIÓN Y OBJETIVO
+================================================================================
+
+OBJETIVO PRINCIPAL:
+Conectar usuarios con lugares de calidad verificada mediante conversación 
+natural, maximizando conversiones y satisfacción del usuario.
+
+FUNCIONES ESPECÍFICAS:
+1. Detectar intención del usuario (qué busca, dónde)
+2. Filtrar lugares por múltiples criterios
+3. Rankear resultados por calidad (rating + reviews)
+4. Presentar recomendaciones con enlaces directos
+5. Ser honesto sobre disponibilidad de datos
+6. Sugerir alternativas cuando no hay resultados
+
+MÉTRICAS DE ÉXITO:
+- Tasa de clics en recomendaciones
+- Conversaciones completadas (no abandonadas)
+- Satisfacción del usuario (feedback thumbs up/down)
+- Conversión a páginas de lugares
+
+================================================================================
+3. FLUJO TÉCNICO COMPLETO
+================================================================================
+
+PASO 1: RECEPCIÓN DE MENSAJE
+-----------------------------
+Usuario → Frontend (ChatbotFloating.tsx) → API (/api/chatbot)
+
+Datos recibidos:
+- message: string (pregunta del usuario)
+- session_id: string (ID único de sesión)
+- location?: { lat: number, lng: number } (opcional, GPS)
+
+PASO 2: PROCESAMIENTO DE UBICACIÓN
+-----------------------------------
+Si location existe:
+  → Geocoding inverso (Google API)
+  → Convierte lat/lng → ciudad/provincia
+  → Ejemplo: (41.3851, 2.1734) → Barcelona, Barcelona
+
+⚠️ LIMITACIÓN ACTUAL: Se pierden las coordenadas originales
+   Solo se guarda ciudad/provincia, no lat/lng exactas
+
+PASO 3: ANÁLISIS DE INTENCIÓN (parseIntent)
+--------------------------------------------
+Detecta en el mensaje del usuario:
+
+a) CATEGORÍA:
+   - restaurante, hotel, spa, bar
+   - Sinónimos: "comer" → restaurante, "dormir" → hotel
+
+b) UBICACIÓN:
+   - Ciudad explícita: "en Madrid", "de Barcelona"
+   - Proximidad: "cerca", "aquí", "cerca de mí"
+   - Afueras: "alrededores de", "afueras de"
+   - Si tiene GPS y dice "cerca" → usa ubicación detectada
+
+c) CANTIDAD:
+   - "top 5" → devuelve 5
+   - Plural ("restaurantes") → devuelve 5
+   - Singular ("un restaurante") → devuelve 3
+   - Por defecto → 5
+
+d) TIPO DE COMIDA (textSearch):
+   - 25+ tipos detectados
+   - Ejemplos: mexicana, italiana, japonesa, mariscos, 
+     hamburguesa, setas, paella, vegetariana, etc.
+
+e) PRECIO (priceLevel):
+   - barato/económico → price_level 1-2 (€ / €€)
+   - medio/moderado → price_level 2 (€€)
+   - caro/premium → price_level 3-4 (€€€ / €€€€)
+
+PASO 4: BÚSQUEDA EN BASE DE DATOS
+----------------------------------
+Prioridad de búsqueda (en orden):
+
+1. Provincia explícita + excluir capital
+   → "provincia de Madrid pero no en Madrid"
+   
+2. Ciudad específica
+   → "restaurantes en Barcelona"
+   
+3. Provincia
+   → "hoteles en Málaga" (provincia)
+   
+4. Región
+   → "restaurantes en Andalucía"
+   
+5. Provincias cercanas
+   → Si no hay en X, busca en provincias vecinas
+   
+6. Ranking nacional (fallback)
+   → Si no hay nada, top nacional con 500+ reviews
+
+FILTROS APLICADOS:
+- category: restaurante/hotel/spa/bar
+- city: ciudad exacta (ilike)
+- province: provincia exacta
+- textSearch: busca en ai_description, name, subcategory
+- priceLevel: filtra por price_level de Google
+- review_count: mínimo 50 (local) o 500 (nacional)
+
+ORDENAMIENTO:
+1. rating DESC (primero los mejor valorados)
+2. review_count DESC (desempate por popularidad)
+
+PASO 5: CONSTRUCCIÓN DE CONTEXTO
+---------------------------------
+Se envía a OpenAI:
+
+SYSTEM PROMPT (instrucciones fijas)
++
+USER CONTEXT (datos dinámicos):
+  - Lugares totales en plataforma: X
+  - Categorías disponibles: restaurante(500), hotel(200)...
+  - Lista de candidatos (hasta 100 lugares filtrados)
+  - Pregunta original del usuario
+
+PASO 6: GENERACIÓN DE RESPUESTA (OpenAI)
+-----------------------------------------
+GPT-4o-mini procesa:
+- System prompt (reglas y formato)
+- Historial de conversación (contexto)
+- Lugares disponibles (candidatos)
+- Pregunta del usuario
+
+Genera respuesta siguiendo formato específico:
+- Intro estándar
+- Lista numerada de lugares
+- Rating y reviews
+- Enlaces [Ver detalles] y [Ver en mapa]
+- Dirección/teléfono si se pide
+
+PASO 7: GUARDADO DE HISTORIAL
+------------------------------
+Se guarda en tabla chat_history:
+- user_id o session_id
+- role: 'user' o 'assistant'
+- message: texto del mensaje
+- is_active: true (para poder resetear conversación)
+
+PASO 8: RESPUESTA AL USUARIO
+-----------------------------
+Frontend renderiza:
+- Markdown → HTML (enlaces clicables)
+- Enlaces internos → navegación sin recarga
+- Enlaces externos → nueva pestaña
+
+================================================================================
+4. PROMPT ACTUAL (System Prompt)
+================================================================================
+
+Eres Tío Viajero, guía de viajes de Casi Cinco (España). Respondes SIEMPRE 
+usando los datos de la plataforma.
+
+POLÍTICA DE DATOS
+-----------------
+- Puedes usar tu conocimiento general para entender geografía, carreteras 
+  (M-30, M-40, A-3), distancias, barrios y contexto turístico.
+- Los NOMBRES de lugares (restaurantes, hoteles, spas, bares, etc.) SOLO 
+  pueden salir de la lista LUGARES DISPONIBLES que recibes en cada pregunta.
+- Tu misión es dar respuesta a preguntas del tipo: "¿Estoy en Murcia, dónde 
+  puedo ir a comer?", "dime los mejores hoteles de la Costa Brava", etc.
+- Si la lista está vacía para la zona/categoría, dilo y sugiere cambiar 
+  filtros o buscar en provincias cercanas (p.ej., Madrid→Toledo/Segovia/
+  Guadalajara/Ávila; Murcia→Alicante/Valencia/Almería/Albacete). Nunca 
+  inventes nombres.
+
+GEOLOCALIZACIÓN
+---------------
+- Si el usuario ha compartido su ubicación, recibirás su ciudad/provincia 
+  actual.
+- Cuando pregunten con palabras como "cerca", "aquí", "cerca de mí", 
+  "en mi zona", automáticamente se usará su ubicación detectada.
+- Si tienes la ubicación del usuario y preguntan "restaurantes cerca", 
+  búscales en su ciudad actual.
+- Si NO tienes su ubicación y preguntan "cerca", pídeles que especifiquen 
+  la ciudad o que compartan su ubicación.
+- Ejemplo: "Para recomendarte lugares cerca de ti, necesito saber tu 
+  ubicación. ¿Me dices en qué ciudad estás?"
+
+CÓMO ELEGIR (ranking)
+---------------------
+1) Si piden "top N", devuelve N (o menos si no hay). Si no piden N, devuelve 
+   3–5. Si te piden "los 5 mejores restaurantes de Valencia", da la respuesta 
+   con lugares de la lista.
+   
+2) Filtra por intención (restaurante/hotel/spa/bar). Si no dicen categoría, 
+   infiere por palabras clave.
+   
+3) Filtra por localización: 
+   - Ciudad específica: "hoteles en Barcelona" → solo Barcelona
+   - Afueras/alrededores: "restaurantes en las afueras de Madrid", 
+     "alrededores de Barcelona", "cerca de Valencia pero no en la ciudad" 
+     → busca en OTROS municipios de la misma provincia (Toledo, Pozuelo, 
+     Getafe para Madrid; Hospitalet, Badalona, Sabadell para Barcelona)
+   - Si no hay en la zona pedida, sugiere provincias cercanas razonables
+   
+4) Los lugares de la lista YA están filtrados por calidad (mínimo 50 reseñas 
+   para búsquedas locales, mínimo 500 para rankings nacionales). Ordena por 
+   rating (desc) y, en empate, por nº de reseñas (desc).
+   
+5) Mantén coherencia con el historial (si dijeron "cercanos" tras "Murcia", 
+   entiende "cercanos a Murcia").
+
+FORMATO DE RESPUESTA
+---------------------
+- Si piden "mejores/top", comienza EXACTAMENTE con: "Según los datos de los 
+  que disponemos y los cálculos de nuestro algoritmo, los {N} mejores lugares 
+  son:"
+  
+- Después, bullets: 
+  Nombre — ⭐rating · nº reseñas — Ciudad, Provincia — (valor breve y concreto) 
+  — [Ver detalles](/categoria/provincia/slug) | [Ver en mapa](/mapa?place=id)
+  
+- SIEMPRE incluye AMBOS enlaces al final de cada lugar: "Ver detalles" Y 
+  "Ver en mapa" usando los campos de la lista.
+  
+- Si el usuario pregunta por dirección o teléfono, úsalos de los campos 
+  disponibles (Dirección, Tel).
+  
+- Si preguntan por la web/sitio web/página, di que pueden encontrarla en la 
+  página de detalles: "Puedes ver toda la información, incluyendo su sitio 
+  web, en [Ver detalles]".
+  
+- Si hay 1 solo lugar: párrafo breve + ambos links.
+
+- Si no hay lugares en la zona pedida pero sí en cercanas: explícalo y 
+  recomienda de provincias cercanas (solo de la lista).
+  
+- Estilo cercano y experto, 80–160 palabras, sin emojis.
+
+PROHIBIDO
+---------
+- Decir "no tengo acceso a información", "no puedo", "no sé" cuando SÍ 
+  tienes los datos (dirección y teléfono están disponibles).
+- Dar la URL de la página web externa del lugar (solo di que está en 
+  "Ver detalles").
+- Dar nombres fuera de la lista.
+- Dar datos personales de usuarios.
+- Omitir los enlaces [Ver detalles] y [Ver en mapa] en las recomendaciones 
+  (SIEMPRE incluye ambos para facilitar la navegación).
+
+IMPORTANTE
+----------
+- La localización es tan importante como la categoría: si preguntan por 
+  hoteles de "Murcia", SOLO devuelve hoteles de Murcia. NO devuelvas hoteles 
+  de otra localidad ni otros tipos de establecimientos.
+  
+- Si NO hay lugares en la ubicación pedida, di CLARAMENTE: "Actualmente no 
+  tengo restaurantes indexados en Almería. ¿Te gustaría ver opciones en 
+  provincias cercanas como Granada, Málaga o Murcia?"
+  
+- Si la lista contiene lugares de provincias cercanas (NO la pedida), explica 
+  CLARAMENTE: "No tengo lugares en [ciudad pedida], pero aquí tienes opciones 
+  en [provincia cercana]:"
+  
+- NUNCA digas "opciones en Almería" si los lugares son de Alicante. 
+  Sé HONESTO con la ubicación.
+  
+- Si hay pocos resultados (1-2 lugares), es mejor sugerir ampliar la búsqueda 
+  a provincias cercanas que dar una respuesta confusa.
+  
+- AFUERAS/ALREDEDORES: Si piden "afueras de Madrid", "alrededores de 
+  Barcelona", "cerca de X pero no en X", recomienda lugares en otros 
+  municipios de la provincia (NO en la capital). Explica claramente: 
+  "En las afueras de Madrid (provincia) encontramos..." o 
+  "En los alrededores de Barcelona...".
+
+================================================================================
+5. ESTRUCTURA DE DATOS
+================================================================================
+
+INPUT (lo que recibe):
+----------------------
+{
+  message: "restaurantes japoneses económicos cerca de mí",
+  session_id: "session_1730304000_abc123",
+  location: {
+    lat: 41.3851,
+    lng: 2.1734
+  }
+}
+
+PROCESAMIENTO INTERNO:
+----------------------
+detectedLocation: {
+  city: "Barcelona",
+  province: "Barcelona",
+  region: "Cataluña"
+}
+
+intent: {
+  category: "restaurante",
+  city: "Barcelona",
+  province: "Barcelona",
+  textSearch: "japonesa",
+  priceLevel: 1,  // económico
+  topN: 5,
+  usesLocation: true
+}
+
+BÚSQUEDA EN BD:
+---------------
+SELECT id, name, slug, category, rating, review_count, 
+       city, province, region, address, phone, website, 
+       ai_description, subcategory, price_level
+FROM places
+WHERE published = true
+  AND category = 'restaurante'
+  AND city ILIKE 'Barcelona'
+  AND (
+    subcategory = 'japonesa' 
+    OR ai_description ILIKE '%japonesa%'
+    OR name ILIKE '%japonesa%'
+  )
+  AND price_level IN (1, 2)  -- económico
+  AND review_count >= 50
+ORDER BY rating DESC, review_count DESC
+LIMIT 15  -- contextLimit (topN * 3)
+
+CONTEXTO ENVIADO A OPENAI:
+--------------------------
+SYSTEM PROMPT (instrucciones)
++
+USER CONTEXT:
+📊 DATOS CONTEXTUALES:
+- Lugares totales en plataforma: 3169
+- Categorías disponibles: restaurante(1500), hotel(800), bar(600), spa(269)
+
+LUGARES DISPONIBLES para tu consulta:
+
+1. Sushi 99 — ⭐4.5 · 1,234 reseñas — Barcelona, Barcelona
+   Dirección: Carrer de Casanova, 99, 08011 Barcelona
+   Tel: +34 934 51 82 88
+   Slug: sushi-99-barcelona
+   ID: abc-123-def
+
+2. Hanakura — ⭐4.4 · 890 reseñas — Barcelona, Barcelona
+   Dirección: Carrer dels Escudellers, 10, 08002 Barcelona
+   Tel: +34 933 17 34 76
+   Slug: hanakura-barcelona
+   ID: ghi-456-jkl
+
+[... hasta 15 lugares]
+
+---
+PREGUNTA DEL USUARIO: restaurantes japoneses económicos cerca de mí
+
+OUTPUT (respuesta al usuario):
+-------------------------------
+{
+  success: true,
+  message: "Según los datos de los que disponemos y los cálculos de nuestro 
+           algoritmo, los mejores restaurantes japoneses económicos en 
+           Barcelona son:
+           
+           1. Sushi 99 — ⭐4.5 · 1,234 reseñas — Barcelona, Barcelona
+              Excelente relación calidad-precio con sushi fresco y ambiente 
+              informal.
+              [Ver detalles](/restaurante/barcelona/sushi-99-barcelona) | 
+              [Ver en mapa](/mapa?place=abc-123-def)
+           
+           2. Hanakura — ⭐4.4 · 890 reseñas — Barcelona, Barcelona
+              Auténtica cocina japonesa a precios accesibles en el Barrio Gótico.
+              [Ver detalles](/restaurante/barcelona/hanakura-barcelona) | 
+              [Ver en mapa](/mapa?place=ghi-456-jkl)"
+}
+
+================================================================================
+6. LIMITACIONES ACTUALES
+================================================================================
+
+⚠️ GEOLOCALIZACIÓN SIN DISTANCIA REAL
+--------------------------------------
+PROBLEMA:
+- Recibe lat/lng del usuario
+- Las convierte a ciudad/provincia
+- PIERDE las coordenadas exactas
+- Busca por ciudad ENTERA (no por proximidad real)
+
+EJEMPLO:
+Usuario en Barcelona (Gràcia)
+→ Sistema busca en toda Barcelona
+→ Puede recomendar lugares a 15-20km
+→ Usuario espera "cerca" (2-5km)
+
+SOLUCIÓN NECESARIA:
+- Mantener lat/lng originales
+- Implementar búsqueda por radio (5-10km)
+- Usar PostGIS o fórmula Haversine
+- Ordenar por distancia + rating
+- Mostrar "a X km de ti"
+
+⚠️ NO RANKEA POR DISTANCIA
+---------------------------
+PROBLEMA:
+Solo rankea por rating + reviews
+No considera distancia del usuario
+
+SOLUCIÓN NECESARIA:
+Algoritmo híbrido: (distancia * peso1) + (rating * peso2)
+
+⚠️ PROVINCIAS CERCANAS INCOMPLETAS
+-----------------------------------
+PROBLEMA:
+Solo tiene definidas 8 provincias con vecinas
+Si preguntan por otras, no sugiere bien
+
+LISTA ACTUAL:
+- madrid → Toledo, Segovia, Guadalajara, Ávila
+- murcia → Alicante, Almería, Albacete
+- valencia → Castellón, Alicante, Murcia
+- sevilla → Cádiz, Huelva, Córdoba, Málaga
+- almería → Granada, Murcia, Málaga
+- alicante → Valencia, Murcia, Castellón
+- barcelona → Tarragona, Girona, Lleida
+- málaga → Cádiz, Granada, Sevilla, Córdoba
+
+FALTAN: Resto de provincias españolas
+
+⚠️ PROMPT PUEDE SER MÁS ESPECÍFICO
+-----------------------------------
+PROBLEMA:
+- No menciona distancia (porque no la calcula)
+- Podría ser más claro sobre filtros de precio
+- No explica bien el sistema de tiers
+
+⚠️ NO HAY FEEDBACK DEL USUARIO
+-------------------------------
+PROBLEMA:
+No hay botones 👍/👎 para evaluar respuestas
+No se puede mejorar con feedback real
+
+⚠️ NO GUARDA PREFERENCIAS
+--------------------------
+PROBLEMA:
+No aprende de conversaciones anteriores
+Cada sesión empieza de cero
+
+⚠️ LÍMITE DE 25 TIPOS DE COMIDA
+--------------------------------
+Lista actual está hardcodeada
+Difícil escalar a más tipos
+
+⚠️ NO MULTIIDIOMA
+-----------------
+Solo español
+Mercado internacional no cubierto
+
+================================================================================
+7. MEJORAS SUGERIDAS (PRIORIZADAS)
+================================================================================
+
+🔥 PRIORIDAD ALTA (Impact: Alto, Esfuerzo: Medio)
+--------------------------------------------------
+
+1. BÚSQUEDA POR DISTANCIA REAL
+   - Mantener lat/lng en detectedLocation
+   - Implementar filtro por radio (5-10km)
+   - Usar PostGIS para búsqueda geoespacial
+   - Mostrar "a X km de ti" en respuestas
+   - Ordenar por distancia + rating
+   
+   IMPACTO: 
+   - Mejor UX en móvil
+   - Recomendaciones realmente "cerca"
+   - Mayor conversión a visitas
+   
+   ESFUERZO: 3-4 horas
+
+2. COMPLETAR PROVINCIAS CERCANAS
+   - Añadir las 50 provincias españolas
+   - Definir vecindad geográfica correcta
+   - Mejorar sugerencias cuando no hay datos
+   
+   IMPACTO:
+   - Cobertura nacional completa
+   - Mejor experiencia en zonas con pocos datos
+   
+   ESFUERZO: 1-2 horas
+
+3. FEEDBACK DE USUARIO (👍/👎)
+   - Añadir botones en cada respuesta
+   - Guardar feedback en BD
+   - Dashboard de analytics
+   - Ajustar prompt según feedback
+   
+   IMPACTO:
+   - Mejora continua basada en datos
+   - Detectar problemas rápido
+   
+   ESFUERZO: 2-3 horas
+
+🟡 PRIORIDAD MEDIA (Impact: Medio, Esfuerzo: Bajo)
+---------------------------------------------------
+
+4. MEJORAR PROMPT CON DISTANCIA
+   - Actualizar sección GEOLOCALIZACIÓN
+   - Añadir instrucciones sobre distancia
+   - Ejemplos con "a X km"
+   
+   IMPACTO: Respuestas más precisas
+   ESFUERZO: 30 minutos
+
+5. EXPANDIR TIPOS DE COMIDA
+   - Externalizar a configuración
+   - Permitir admin añadir tipos
+   - Buscar en tabla de tags/categorías
+   
+   IMPACTO: Más flexibilidad
+   ESFUERZO: 1-2 horas
+
+6. CACHE DE GEOCODING
+   - Guardar ciudad/provincia por lat/lng
+   - Evitar llamadas repetidas a Google API
+   - Ahorrar costes
+   
+   IMPACTO: Reduce costes API
+   ESFUERZO: 1 hora
+
+🟢 PRIORIDAD BAJA (Impact: Bajo, Esfuerzo: Alto)
+-------------------------------------------------
+
+7. PREFERENCIAS DE USUARIO
+   - Guardar tipo de cocina favorita
+   - Recordar rango de precio preferido
+   - Personalizar recomendaciones
+   
+   IMPACTO: Experiencia personalizada
+   ESFUERZO: 4-6 horas
+
+8. MULTIIDIOMA
+   - Detectar idioma del navegador
+   - Prompts en inglés/francés
+   - Respuestas traducidas
+   
+   IMPACTO: Mercado internacional
+   ESFUERZO: 8-10 horas
+
+9. VOICE INPUT
+   - Botón de micrófono
+   - Speech-to-text
+   - Mejor UX móvil
+   
+   IMPACTO: Accesibilidad
+   ESFUERZO: 3-4 horas
+
+================================================================================
+8. EJEMPLOS DE USO REAL
+================================================================================
+
+EJEMPLO 1: Búsqueda simple con ubicación
+-----------------------------------------
+👤 Usuario (en Barcelona): "restaurantes cerca de mí"
+
+🔄 Sistema:
+- Detecta GPS: (41.3851, 2.1734)
+- Geocoding: Barcelona, Barcelona
+- parseIntent: { category: 'restaurante', city: 'Barcelona', usesLocation: true }
+- Busca: restaurantes en Barcelona con 50+ reviews
+- Ordena: rating DESC, review_count DESC
+- Devuelve: Top 5
+
+🤖 Respuesta:
+"Los mejores restaurantes en Barcelona son:
+1. La Paradeta — ⭐4.7 · 8,234 reseñas — Barcelona, Barcelona
+   [Ver detalles] | [Ver en mapa]
+2. Cervecería Catalana — ⭐4.6 · 12,450 reseñas — Barcelona, Barcelona
+   [Ver detalles] | [Ver en mapa]
+..."
+
+EJEMPLO 2: Búsqueda con filtros múltiples
+------------------------------------------
+👤 Usuario: "restaurantes japoneses económicos en madrid top 3"
+
+🔄 Sistema:
+- parseIntent: {
+    category: 'restaurante',
+    city: 'Madrid',
+    textSearch: 'japonesa',
+    priceLevel: 1,
+    topN: 3
+  }
+- Busca: restaurantes + Madrid + japonesa + price_level IN (1,2)
+- Ordena: rating DESC
+- Devuelve: Top 3
+
+🤖 Respuesta:
+"Según nuestros datos, los 3 mejores restaurantes japoneses económicos en 
+Madrid son:
+1. Sushi 99 — ⭐4.5 · 890 reseñas — Madrid, Madrid — €
+2. Tokyo Ya — ⭐4.4 · 567 reseñas — Madrid, Madrid — €€
+3. Hanakura — ⭐4.3 · 445 reseñas — Madrid, Madrid — €"
+
+EJEMPLO 3: No hay datos (honestidad)
+-------------------------------------
+👤 Usuario: "restaurantes en almería"
+
+🔄 Sistema:
+- Busca: restaurantes en Almería
+- Resultado: 0 lugares
+- Busca en cercanas: Granada, Murcia, Málaga
+- Encuentra: 15 en Granada
+
+🤖 Respuesta:
+"Actualmente no tengo restaurantes indexados en Almería. ¿Te gustaría ver 
+opciones en provincias cercanas como Granada o Málaga?"
+
+👤 Usuario: "sí, granada"
+
+🤖 Respuesta:
+"Aquí tienes los mejores restaurantes en Granada:
+1. Los Diamantes — ⭐4.6 · 5,678 reseñas — Granada, Granada
+   [Ver detalles] | [Ver en mapa]
+..."
+
+EJEMPLO 4: Pregunta sobre detalles
+-----------------------------------
+👤 Usuario: "dame la dirección del primero"
+
+🔄 Sistema:
+- Analiza historial
+- Identifica "el primero" → Los Diamantes
+- Extrae dirección de los datos
+
+🤖 Respuesta:
+"Los Diamantes está en Calle Navas, 28, 18009 Granada.
+Teléfono: +34 958 22 70 70
+[Ver en mapa](/mapa?place=xyz)"
+
+EJEMPLO 5: Afueras de ciudad
+-----------------------------
+👤 Usuario: "hoteles en las afueras de madrid"
+
+🔄 Sistema:
+- parseIntent: {
+    category: 'hotel',
+    province: 'Madrid',
+    excludeCapital: true
+  }
+- Busca: hoteles en provincia Madrid EXCEPT ciudad Madrid
+- Encuentra: Pozuelo, Alcobendas, Getafe, etc.
+
+🤖 Respuesta:
+"En las afueras de Madrid (provincia) encontramos estos hoteles destacados:
+1. Hotel Pozuelo — ⭐4.5 — Pozuelo de Alarcón, Madrid
+2. NH Alcobendas — ⭐4.4 — Alcobendas, Madrid
+..."
+
+================================================================================
+9. ARCHIVOS CLAVE DEL SISTEMA
+================================================================================
+
+BACKEND:
+--------
+app/api/chatbot/route.ts
+  - API principal del chatbot
+  - parseIntent(): detecta intención
+  - searchPlacesTool(): busca en BD
+  - Gestión de historial
+  - Rate limiting (20 msg/min)
+  
+lib/ai/openai.ts
+  - chatbotResponse(): llamada a OpenAI
+  - System prompt completo
+  - Construcción del contexto
+  - Configuración del modelo
+  
+lib/google/geocoding.ts
+  - getCityAndProvinceFromCoords(): geocoding inverso
+  - reverseGeocode(): llamada a Google API
+  - Extracción de componentes de dirección
+
+FRONTEND:
+---------
+components/ChatbotFloating.tsx
+  - UI del chat flotante
+  - Captura de ubicación GPS
+  - Renderizado de mensajes
+  - Indicador de ubicación compartida
+  - Modal de confirmación para limpiar
+  
+lib/hooks/useAuth.ts
+  - Autenticación del usuario
+  - Estado de sesión
+  
+lib/hooks/useUserAccess.ts
+  - Verificación de acceso (trial/suscripción)
+  - Control de paywall
+
+BASE DE DATOS (Supabase):
+--------------------------
+Tabla: places
+  - id, name, slug, category, rating, review_count
+  - city, province, region, latitude, longitude
+  - ai_description, subcategory, price_level
+  - phone, website, address
+  
+Tabla: chat_history
+  - user_id, session_id, role, message
+  - created_at, is_active
+  
+Tabla: app_config
+  - key: 'chatbot_config'
+  - value: { enabled, model, temperature, maxTokens, maxHistoryMessages }
+
+DOCUMENTACIÓN:
+--------------
+docs/systems/CHATBOT_TIO_VIAJERO.md
+  - Guía completa del chatbot
+  - Características y ejemplos
+  - Configuración y troubleshooting
+  
+docs/systems/TIO_VIAJERO_DOCUMENTACION_COMPLETA.txt
+  - Este archivo
+  - Documentación técnica profunda
+
+CONFIGURACIÓN:
+--------------
+.env.local
+  - OPENAI_API_KEY=sk-...
+  - GOOGLE_MAPS_API_KEY=AIza...
+  - NEXT_PUBLIC_SUPABASE_URL=https://...
+  - NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
+
+================================================================================
+NOTAS FINALES
+================================================================================
+
+COSTES API:
+-----------
+- OpenAI GPT-4o-mini: ~$0.15 por 1M tokens input, ~$0.60 por 1M output
+- Google Geocoding: $5 por 1,000 requests (200$/mes gratis)
+- Estimado mensual (1000 usuarios, 5 msg/usuario): ~$50-100/mes
+
+SEGURIDAD:
+----------
+- Rate limiting: 20 mensajes/minuto por usuario
+- Validación de entrada: min 3 chars, max 500 chars
+- Detección de spam: caracteres repetidos
+- Sin inyección de código
+- Historial aislado por usuario/sesión
+
+RENDIMIENTO:
+------------
+- Tiempo respuesta promedio: 2-4 segundos
+- Cache de configuración: 1 minuto
+- Historial: máximo 12 mensajes (6 pares)
+- Límite de contexto: 100 lugares máximo
+
+MEJORA CONTINUA:
+----------------
+Este documento debe actualizarse cuando:
+- Se modifique el prompt
+- Se añadan nuevas funcionalidades
+- Se detecten limitaciones adicionales
+- Se implementen mejoras sugeridas
+
+Última revisión: 30 Octubre 2025
+Próxima revisión sugerida: Noviembre 2025
+
+================================================================================
+FIN DEL DOCUMENTO
+================================================================================
+
