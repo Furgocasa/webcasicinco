@@ -44,7 +44,7 @@ export function WelcomeModal() {
         return;
       }
 
-      // 2c. MOSTRAR si tiene trial activo y recién registrado
+      // 2c. Verificar y calcular días restantes del trial
       if (trialEndsAt) {
         const trialEnd = new Date(trialEndsAt);
         const now = new Date();
@@ -54,12 +54,21 @@ export function WelcomeModal() {
         
         console.log('🔍 WelcomeModal: Días restantes de trial:', days);
         
-        // Si tiene menos de 20 días, probablemente ya vio el modal
-        if (days < 20) {
-          console.log('❌ WelcomeModal: Usuario antiguo (< 20 días), no mostrar');
+        // Si el trial expiró (0 días), no mostrar este modal
+        // El PaywallModal se encargará de mostrar el mensaje apropiado
+        if (days === 0) {
+          console.log('❌ WelcomeModal: Trial expirado, PaywallModal se encargará');
           localStorage.setItem('hasSeenWelcome', 'true');
           return;
         }
+        
+        // Si tiene días válidos (1-30), continuar para mostrar modal
+        // La verificación de si ya lo vio está en localStorage al inicio
+      } else {
+        // Si NO tiene trial_ends_at, el trigger de base de datos falló
+        // No mostrar modal pero tampoco marcar como visto (puede que se corrija)
+        console.log('⚠️ WelcomeModal: Usuario sin trial_ends_at - posible error en trigger de BD');
+        return;
       }
 
       // 2d. NO mostrar si ya tiene suscripción activa

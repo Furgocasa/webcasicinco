@@ -66,24 +66,33 @@ git push origin main
 
 ## 📚 Documentación
 
-### 📖 Guías Esenciales:
-- **[BETA_100_RELEASE_NOTES.md](BETA_100_RELEASE_NOTES.md)** - Release notes completas
-- **[LEEME_PRIMERO.md](LEEME_PRIMERO.md)** - Introducción al proyecto
-- **[INDICE_MAESTRO_DOCUMENTACION.md](INDICE_MAESTRO_DOCUMENTACION.md)** - Índice completo
+> **Nueva estructura organizada** (v3.0 - 26 Oct 2025): Documentación reorganizada en `docs/strategy/`, `docs/systems/` y `docs/guides/`
 
-### 🔧 Configuración:
-- [CONFIGURACION_COMPLETA.md](CONFIGURACION_COMPLETA.md) - Setup completo
-- [DEPLOY_AWS.md](DEPLOY_AWS.md) - Despliegue en AWS
-- [GOOGLE_OAUTH_SETUP.md](GOOGLE_OAUTH_SETUP.md) - OAuth con Google
+### 📖 Guías Esenciales:
+- **[LEEME_PRIMERO.md](LEEME_PRIMERO.md)** - Introducción al proyecto
+- **[INDICE_MAESTRO_DOCUMENTACION.md](INDICE_MAESTRO_DOCUMENTACION.md)** - 📚 Índice completo de toda la documentación
+- **[COMANDOS_UTILES.md](COMANDOS_UTILES.md)** - Comandos SQL, JS, debugging
+
+### 🎯 Estrategia y Acción:
+- [docs/strategy/ACCIONES_INMEDIATAS_CRITICAS.md](docs/strategy/ACCIONES_INMEDIATAS_CRITICAS.md) - ⚠️ **BLOQUEADORES CRÍTICOS**
+- [docs/strategy/PLAN_ESTRATEGICO_2025_SEO_VIABILIDAD.md](docs/strategy/PLAN_ESTRATEGICO_2025_SEO_VIABILIDAD.md) - Plan completo SEO
+- [docs/strategy/PROXIMAS_MEJORAS_PRIORIZADAS.md](docs/strategy/PROXIMAS_MEJORAS_PRIORIZADAS.md) - Roadmap P0-P3
+
+### 🔧 Guías de Configuración:
+- [docs/guides/CONFIGURACION_COMPLETA.md](docs/guides/CONFIGURACION_COMPLETA.md) - Setup completo
+- [docs/guides/DEPLOY_AWS.md](docs/guides/DEPLOY_AWS.md) - Despliegue en AWS
+- [docs/guides/GOOGLE_OAUTH_SETUP.md](docs/guides/GOOGLE_OAUTH_SETUP.md) - OAuth con Google
+- [docs/guides/CONFIGURAR_STRIPE.md](docs/guides/CONFIGURAR_STRIPE.md) - Pagos Stripe
 
 ### 💡 Sistemas Principales:
-- [CHATBOT_TIO_VIAJERO.md](CHATBOT_TIO_VIAJERO.md) - Chatbot IA
-- [SISTEMA_FILTRADO.md](SISTEMA_FILTRADO.md) - Filtros avanzados
-- **[SISTEMA_MONETIZACION.md](SISTEMA_MONETIZACION.md)** - ✨ Trial 30 días + Stripe (v5.0)
-- **[SISTEMA_REDES_SOCIALES.md](SISTEMA_REDES_SOCIALES.md)** - 📱 Instagram, Facebook, Twitter (v2.0)
-- **[SISTEMA_FOTOS_SUPABASE.md](SISTEMA_FOTOS_SUPABASE.md)** - 📸 Almacenamiento de fotos optimizado
-- **[SISTEMA_LLAMADAS_GOOGLE_API.md](SISTEMA_LLAMADAS_GOOGLE_API.md)** - 🔍 Cuándo y cómo se usa Google API
-- [scripts/README_SOCIAL_MEDIA.md](scripts/README_SOCIAL_MEDIA.md) - Scripts de scraping
+- [docs/systems/FLUJO_COMPLETO_INDEXACION_ENRIQUECIMIENTO.md](docs/systems/FLUJO_COMPLETO_INDEXACION_ENRIQUECIMIENTO.md) - **Sistema 2 fases**
+- [docs/systems/CHATBOT_TIO_VIAJERO.md](docs/systems/CHATBOT_TIO_VIAJERO.md) - Chatbot IA
+- [docs/systems/SISTEMA_FILTRADO.md](docs/systems/SISTEMA_FILTRADO.md) - Filtros avanzados
+- [docs/systems/SISTEMA_MONETIZACION.md](docs/systems/SISTEMA_MONETIZACION.md) - ✨ Trial 30 días + Stripe
+- [docs/systems/SISTEMA_REDES_SOCIALES.md](docs/systems/SISTEMA_REDES_SOCIALES.md) - 📱 Redes sociales
+- [docs/systems/SISTEMA_FOTOS_SUPABASE.md](docs/systems/SISTEMA_FOTOS_SUPABASE.md) - 📸 Fotos optimizadas
+- [docs/systems/SISTEMA_LLAMADAS_GOOGLE_API.md](docs/systems/SISTEMA_LLAMADAS_GOOGLE_API.md) - 🔍 Google API
+- [docs/systems/OPTIMIZACION_GOOGLE_API_COMPLETA.md](docs/systems/OPTIMIZACION_GOOGLE_API_COMPLETA.md) - Optimizaciones (~€108k/año ahorrados)
 
 ### 📊 Analytics:
 - Dashboard de estadísticas: `/admin/estadisticas`
@@ -306,21 +315,22 @@ con testing exhaustivo entre cada cambio.
 
 ## 💰 Sistema de Costos Optimizado
 
-### Ahorro Total: ~€6,900/año (Actualizado 24 Oct 2025)
+### Ahorro Total: ~€108,300/año (Actualizado 26 Oct 2025)
 
 #### Optimizaciones Implementadas:
-- ✅ **Fotos en Supabase Storage** → Ahorro: $2,400/año
-- ✅ **Limpieza fotos expiradas (24 Oct)** → Ahorro: €900/año ← **NUEVO**
-- ✅ **Optimización indexación** → Ahorro: $3,200/año
-- ✅ **Caché de búsquedas** → Ahorro: $200/año
-- ✅ **Context Provider mapa** → Ahorro: €216/año
-- ✅ **Frontend optimizado** → Ahorro: €240/año
+- ✅ **Supabase Storage vs Google Photos API** → Ahorro: €45,000/año
+- ✅ **Eliminación fallback blog (26 Oct)** → Ahorro: €44,400/año ← **NUEVO**
+- ✅ **Limpieza fotos expiradas (24 Oct)** → Ahorro: €900/año
+- ✅ **MapContext Provider (66% reducción)** → Ahorro: €15,000/año (estimado)
+- ✅ **Caché de búsquedas** → Ahorro: €3,000/año (estimado)
 
 #### Estado Actual del Sistema:
-- 📊 **3,133 lugares publicados**
-- 📸 **96.8% con fotos en Supabase** (3,034 lugares)
-- 💰 **Costo fotos: €0/mes** (antes €75/mes)
-- ✅ **0 lugares usando Google Photos API**
+- 📊 **2,612+ lugares indexados**
+- 📸 **96.8% con fotos en Supabase**
+- 💰 **Costo Google Photos API: €0/mes** (antes €3,700/mes)
+- ✅ **0 lugares usando Google Photos API fallback**
+
+Ver detalles en: [docs/systems/OPTIMIZACION_GOOGLE_API_COMPLETA.md](docs/systems/OPTIMIZACION_GOOGLE_API_COMPLETA.md)
 
 ---
 
@@ -349,10 +359,15 @@ Este es un proyecto privado. No se aceptan contribuciones externas.
 
 ## 📊 Estado Actual
 
-**Última actualización:** 25 de Octubre 2025  
-**Estado:** 🟢 OPERATIVO AL 100%  
-**Ver:** [ESTADO_ACTUAL_25OCT2025.md](ESTADO_ACTUAL_25OCT2025.md) - Estado completo del sistema
+**Última actualización:** 26 de Octubre 2025  
+**Estado:** 🟢 LISTO PARA PRODUCCIÓN  
+**Documentación:** v3.0.0 (Reorganizada y optimizada)
+
+### Ver Estado del Sistema:
+- [docs/archive/snapshots/](docs/archive/snapshots/) - Estados históricos por fecha
+- [CHANGELOG.md](CHANGELOG.md) - Historial completo de cambios
 
 ---
 
-**Release:** BETA 100 🎉
+**Release:** BETA 100 🎉  
+**Documentación:** v3.0.0 ✨ (Estructura profesional implementada)
