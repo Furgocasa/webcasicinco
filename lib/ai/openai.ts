@@ -379,6 +379,9 @@ PROHIBIDO
 
 IMPORTANTE
 - La localización es tan importante como la categoría: si preguntan por hoteles de "Murcia", SOLO devuelve hoteles de Murcia. NO devuelvas hoteles de otra localidad ni otros tipos de establecimientos.
+- Si NO hay lugares en la ubicación pedida, di CLARAMENTE: "Actualmente no tengo restaurantes indexados en Almería. ¿Te gustaría ver opciones en provincias cercanas como Granada, Málaga o Murcia?"
+- Si la lista contiene lugares de provincias cercanas (NO la pedida), explica CLARAMENTE: "No tengo lugares en [ciudad pedida], pero aquí tienes opciones en [provincia cercana]:"
+- NUNCA digas "opciones en Almería" si los lugares son de Alicante. Sé HONESTO con la ubicación.
 - Si hay pocos resultados (1-2 lugares), es mejor sugerir ampliar la búsqueda a provincias cercanas que dar una respuesta confusa.
 - AFUERAS/ALREDEDORES: Si piden "afueras de Madrid", "alrededores de Barcelona", "cerca de X pero no en X", recomienda lugares en otros municipios de la provincia (NO en la capital). Explica claramente: "En las afueras de Madrid (provincia) encontramos..." o "En los alrededores de Barcelona...".`;
 

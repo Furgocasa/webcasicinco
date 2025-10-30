@@ -38,9 +38,13 @@ const REGION_TO_PROVINCES: Record<string, string[]> = {
 
 const NEARBY_BY_PROVINCE: Record<string, string[]> = {
   madrid: ['Toledo','Segovia','Guadalajara','Ávila'],
-  murcia: ['Alicante','Valencia','Almería','Albacete'],
+  murcia: ['Alicante','Almería','Albacete'],
   valencia: ['Castellón','Alicante','Murcia'],
   sevilla: ['Cádiz','Huelva','Córdoba','Málaga'],
+  almería: ['Granada','Murcia','Málaga'],
+  alicante: ['Valencia','Murcia','Castellón'],
+  barcelona: ['Tarragona','Girona','Lleida'],
+  málaga: ['Cádiz','Granada','Sevilla','Córdoba'],
 };
 
 // Capital por provincia para poder excluir la capital cuando el usuario pida "fuera de la capital"
