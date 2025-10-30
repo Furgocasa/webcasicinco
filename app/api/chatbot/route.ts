@@ -536,6 +536,16 @@ export async function POST(request: NextRequest) {
       console.log(`📊 Por categoría:`, categoryCounts);
     }
 
+    // 🆕 Extraer provincias y ciudades de los candidatos para el contexto de OpenAI
+    const provincesFromCandidates = [...new Set(candidates.map(p => p.province).filter(Boolean))];
+    const citiesFromCandidates = [...new Set(candidates.map(p => p.city).filter(Boolean))];
+    
+    // 🆕 Construir categoryStats de los candidatos
+    const categoryStatsFromCandidates = candidates.reduce((acc, p) => {
+      acc[p.category] = (acc[p.category] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
     // Usar candidates como contexto específico para esta pregunta
     const startTime = Date.now();
     const response = await chatbotResponse(
@@ -544,6 +554,9 @@ export async function POST(request: NextRequest) {
       {
         ...context,
         places: candidates.length ? candidates : context.places,
+        provinces: provincesFromCandidates,  // 🆕 Provincias de los candidatos
+        cities: citiesFromCandidates,        // 🆕 Ciudades de los candidatos
+        categoryStats: categoryStatsFromCandidates, // 🆕 Stats de los candidatos
       }
     );
     const queryTimeMs = Date.now() - startTime;
