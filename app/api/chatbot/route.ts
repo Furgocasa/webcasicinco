@@ -449,6 +449,7 @@ export async function POST(request: NextRequest) {
     // Agente: detectar intención y ejecutar tool
     // ---------------------------------------------
     const intent = parseIntent(message, detectedLocation);
+    console.log('🎯 Intent parseado:', JSON.stringify(intent, null, 2));
     const requestedCategory = intent.category;
     const targetN = intent.topN || 5;
     const contextLimit = Math.min(targetN * 3, 100);
@@ -473,6 +474,7 @@ export async function POST(request: NextRequest) {
       });
     }
     if (candidates.length === 0 && intent.city && !intent.explicitProvince) {
+      console.log(`🔍 Buscando por ciudad: ${intent.city}`);
       candidates = await searchPlacesTool(supabase, {
         category: requestedCategory,
         city: intent.city,
@@ -480,8 +482,10 @@ export async function POST(request: NextRequest) {
         priceLevel: intent.priceLevel,
         limit: contextLimit,
       });
+      console.log(`📊 Encontrados por ciudad: ${candidates.length}`);
     }
     if (candidates.length === 0 && intent.province) {
+      console.log(`🔍 Buscando por provincia: ${intent.province}`);
       candidates = await searchPlacesTool(supabase, {
         category: requestedCategory,
         province: intent.province,
@@ -489,6 +493,7 @@ export async function POST(request: NextRequest) {
         priceLevel: intent.priceLevel,
         limit: contextLimit,
       });
+      console.log(`📊 Encontrados por provincia: ${candidates.length}`);
     }
     if (candidates.length === 0 && provincesFromRegion) {
       candidates = await searchPlacesTool(supabase, {
