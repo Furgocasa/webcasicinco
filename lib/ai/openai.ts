@@ -210,6 +210,7 @@ export async function chatbotResponse(
     provinces?: string[];
     isAdmin?: boolean;
     chatbotConfig?: any;
+    userLocation?: { city: string; province: string; region: string };
   }
 ): Promise<string> {
   // Preparar contexto de lugares relevantes (filtrado por intención + ubicación)
