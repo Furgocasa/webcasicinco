@@ -273,9 +273,10 @@ async function searchPlacesTool(supabase: any, params: SearchParams) {
   }
   
   // Búsqueda normal por ciudad/provincia (texto)
+  // 🆕 SIEMPRE incluir coordenadas para poder calcular distancias si hay GPS del usuario
   let query = supabase
     .from('places')
-    .select('id, name, slug, category, rating, review_count, city, province, region, address, phone, website, ai_description, subcategory, price_level')
+    .select('id, name, slug, category, rating, review_count, city, province, region, address, phone, website, ai_description, subcategory, price_level, latitude, longitude')
     .eq('published', true);
 
   if (params.category) query = query.eq('category', params.category);
@@ -316,6 +317,31 @@ async function searchPlacesTool(supabase: any, params: SearchParams) {
     .order('rating', { ascending: false })
     .order('review_count', { ascending: false })
     .limit(params.limit);
+
+  // 🆕 CALCULAR distance_km para TODOS los lugares si tenemos GPS del usuario
+  // Esto permite a la IA interpretar cualquier mención de distancia libremente
+  if (data && params.userCoords) {
+    return data.map(place => {
+      if (place.latitude && place.longitude) {
+        // Fórmula de Haversine para calcular distancia entre dos puntos GPS
+        const R = 6371; // Radio de la Tierra en km
+        const dLat = (place.latitude - params.userCoords.lat) * Math.PI / 180;
+        const dLon = (place.longitude - params.userCoords.lng) * Math.PI / 180;
+        const a = 
+          Math.sin(dLat/2) * Math.sin(dLat/2) +
+          Math.cos(params.userCoords.lat * Math.PI / 180) * Math.cos(place.latitude * Math.PI / 180) *
+          Math.sin(dLon/2) * Math.sin(dLon/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        const distance_km = R * c;
+        
+        return {
+          ...place,
+          distance_km: Math.round(distance_km * 100) / 100 // Redondear a 2 decimales
+        };
+      }
+      return place;
+    });
+  }
 
   return data || [];
 }
@@ -577,7 +603,13 @@ export async function POST(request: NextRequest) {
       console.log(`📍 Encontrados ${candidates.length} lugares por proximidad GPS`);
     }
 
+    // 🆕 Coordenadas GPS del usuario para calcular distancias en TODAS las búsquedas
+    const userCoordsForSearch = location && location.lat && location.lng 
+      ? { lat: location.lat, lng: location.lng } 
+      : undefined;
+
     // Si no hay búsqueda por GPS o no encontró nada, usar búsquedas textuales
+    // PERO siempre pasar userCoords para que calcule distancias
     if (candidates.length === 0 && (intent.explicitProvince || (intent.province && intent.excludeCapital))) {
       candidates = await searchPlacesTool(supabase, {
         category: requestedCategory,
@@ -585,6 +617,7 @@ export async function POST(request: NextRequest) {
         excludeCity: capitalToExclude,
         textSearch: intent.textSearch,
         priceLevel: intent.priceLevel,
+        userCoords: userCoordsForSearch, // 🆕 Siempre pasar coords para calcular distancia
         limit: contextLimit,
       });
     }
@@ -595,6 +628,7 @@ export async function POST(request: NextRequest) {
         city: intent.city,
         textSearch: intent.textSearch,
         priceLevel: intent.priceLevel,
+        userCoords: userCoordsForSearch, // 🆕 Siempre pasar coords
         limit: contextLimit,
       });
       console.log(`📊 Encontrados por ciudad: ${candidates.length}`);
@@ -606,6 +640,7 @@ export async function POST(request: NextRequest) {
         province: intent.province,
         textSearch: intent.textSearch,
         priceLevel: intent.priceLevel,
+        userCoords: userCoordsForSearch, // 🆕 Siempre pasar coords
         limit: contextLimit,
       });
       console.log(`📊 Encontrados por provincia: ${candidates.length}`);
@@ -616,6 +651,7 @@ export async function POST(request: NextRequest) {
         provinces: provincesFromRegion,
         textSearch: intent.textSearch,
         priceLevel: intent.priceLevel,
+        userCoords: userCoordsForSearch, // 🆕 Siempre pasar coords
         limit: contextLimit,
       });
     }
@@ -627,6 +663,7 @@ export async function POST(request: NextRequest) {
           provinces: near,
           textSearch: intent.textSearch,
           priceLevel: intent.priceLevel,
+          userCoords: userCoordsForSearch, // 🆕 Siempre pasar coords
           limit: contextLimit,
         });
       }
@@ -636,6 +673,7 @@ export async function POST(request: NextRequest) {
         category: requestedCategory,
         textSearch: intent.textSearch,
         priceLevel: intent.priceLevel,
+        userCoords: userCoordsForSearch, // 🆕 Siempre pasar coords
         limit: contextLimit,
         isNationalRanking: true,  // Fallback nacional: mínimo 500 reseñas
       });
