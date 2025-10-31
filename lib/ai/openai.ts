@@ -216,6 +216,7 @@ export async function chatbotResponse(
   // Preparar contexto de lugares relevantes (filtrado por intención + ubicación)
   let placesContext = '';
   let bestIntroInstruction = '';
+  let targetN = 5; // Default, puede ser sobrescrito
 
   if (context?.places && context.places.length > 0) {
     const msg = userMessage.toLowerCase();
