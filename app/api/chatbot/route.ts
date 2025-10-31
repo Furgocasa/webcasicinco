@@ -321,15 +321,15 @@ async function searchPlacesTool(supabase: any, params: SearchParams) {
   // 🆕 CALCULAR distance_km para TODOS los lugares si tenemos GPS del usuario
   // Esto permite a la IA interpretar cualquier mención de distancia libremente
   if (data && params.userCoords) {
-    return data.map(place => {
+    return data.map((place: any) => {
       if (place.latitude && place.longitude) {
         // Fórmula de Haversine para calcular distancia entre dos puntos GPS
         const R = 6371; // Radio de la Tierra en km
-        const dLat = (place.latitude - params.userCoords.lat) * Math.PI / 180;
-        const dLon = (place.longitude - params.userCoords.lng) * Math.PI / 180;
+        const dLat = (place.latitude - params.userCoords!.lat) * Math.PI / 180;
+        const dLon = (place.longitude - params.userCoords!.lng) * Math.PI / 180;
         const a = 
           Math.sin(dLat/2) * Math.sin(dLat/2) +
-          Math.cos(params.userCoords.lat * Math.PI / 180) * Math.cos(place.latitude * Math.PI / 180) *
+          Math.cos(params.userCoords!.lat * Math.PI / 180) * Math.cos(place.latitude * Math.PI / 180) *
           Math.sin(dLon/2) * Math.sin(dLon/2);
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
         const distance_km = R * c;
