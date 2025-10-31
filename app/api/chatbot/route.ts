@@ -203,7 +203,9 @@ function parseIntent(
   const proximityKeywords = [
     'cerca', 'aquí', 'aqui', 'por aquí', 'por aqui', 'en mi zona', 
     'cerca de mí', 'cerca de mi', 'alrededor', 'cercano', 'cercanos',
-    'por donde estoy', 'en esta zona', 'en la zona', 'por la zona'
+    'por donde estoy', 'en esta zona', 'en la zona', 'por la zona',
+    'donde estoy', 'dónde estoy', 'mi ubicación', 'mi ubicacion',
+    'ubicación actual', 'ubicacion actual'
   ];
   
   const hasProximityKeyword = proximityKeywords.some(keyword => msg.includes(keyword));
@@ -481,13 +483,14 @@ export async function POST(request: NextRequest) {
     
     if (location && location.lat && location.lng) {
       console.log(`📍 Ubicación recibida: ${location.lat}, ${location.lng}`);
+      
+      // Intentar geocoding para obtener ciudad/provincia real
       try {
         const geoResult = await getCityAndProvinceFromCoords(location.lat, location.lng);
         if (geoResult) {
           detectedLocation = geoResult;
-          console.log(`📍 Ubicación detectada: ${geoResult.city}, ${geoResult.province}`);
+          console.log(`✅ Ubicación geocodificada: ${geoResult.city}, ${geoResult.province}`);
           
-          // 🆕 AÑADIR ubicación al contexto para que la IA la vea
           context.userLocation = {
             city: geoResult.city,
             province: geoResult.province,
@@ -495,9 +498,27 @@ export async function POST(request: NextRequest) {
           };
         }
       } catch (error) {
-        console.error('Error geocodificando ubicación:', error);
-        // Continuar sin ubicación si falla
+        console.warn('⚠️ Geocoding falló, usando coordenadas GPS directamente:', error);
       }
+      
+      // 🆕 FALLBACK CRÍTICO: Si geocoding falló, usar coordenadas GPS igualmente
+      // Esto permite búsqueda por proximidad real incluso sin nombre de ciudad
+      if (!detectedLocation) {
+        console.log('🌍 Usando coordenadas GPS sin geocoding (fallback activado)');
+        detectedLocation = {
+          city: 'Tu ubicación GPS',
+          province: 'GPS',
+          region: 'España'
+        };
+        
+        context.userLocation = {
+          city: 'Tu ubicación GPS',
+          province: 'Coordenadas GPS',
+          region: 'España'
+        };
+      }
+      
+      console.log(`📍 Ubicación final enviada a IA: ${context.userLocation?.city}, ${context.userLocation?.province}`);
     }
 
     // ---------------------------------------------
