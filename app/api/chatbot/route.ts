@@ -210,16 +210,30 @@ function parseIntent(
   
   const hasProximityKeyword = proximityKeywords.some(keyword => msg.includes(keyword));
   let usesLocation = false;
+  const isFallbackGPS = Boolean(
+    detectedLocation &&
+    !detectedLocation.city &&
+    !detectedLocation.province &&
+    !detectedLocation.region
+  );
   
   // Si tiene palabra de proximidad y NO tiene ciudad/provincia especificada manualmente,
   // usar la ubicación detectada con coordenadas GPS para búsqueda por proximidad real
-  if (hasProximityKeyword && !city && !province && detectedLocation && userCoords) {
+  if (
+    hasProximityKeyword &&
+    detectedLocation &&
+    userCoords &&
+    (
+      (!city && !province) ||
+      isFallbackGPS
+    )
+  ) {
     usesLocation = true;
     return {
       category,
-      city: detectedLocation.city,
-      province: detectedLocation.province,
-      region: detectedLocation.region,
+      city: detectedLocation.city || undefined,
+      province: detectedLocation.province || undefined,
+      region: detectedLocation.region || undefined,
       topN,
       excludeCapital,
       explicitProvince,
@@ -504,16 +518,19 @@ export async function POST(request: NextRequest) {
       // 🆕 FALLBACK CRÍTICO: Si geocoding falló, usar coordenadas GPS igualmente
       // Esto permite búsqueda por proximidad real incluso sin nombre de ciudad
       if (!detectedLocation) {
-        console.log('🌍 Usando coordenadas GPS sin geocoding (fallback activado)');
+        const latFixed = Number(location.lat).toFixed(4);
+        const lngFixed = Number(location.lng).toFixed(4);
+        console.log('🌍 Usando coordenadas GPS sin geocoding (fallback activado)', { latFixed, lngFixed });
+
         detectedLocation = {
-          city: 'Tu ubicación GPS',
-          province: 'GPS',
-          region: 'España'
+          city: '',
+          province: '',
+          region: ''
         };
         
         context.userLocation = {
-          city: 'Tu ubicación GPS',
-          province: 'Coordenadas GPS',
+          city: `Coordenadas GPS (${latFixed}, ${lngFixed})`,
+          province: 'GPS',
           region: 'España'
         };
       }
