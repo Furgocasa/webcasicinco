@@ -216,19 +216,22 @@ function parseIntent(
     !detectedLocation.province &&
     !detectedLocation.region
   );
+
+  // 🆕 REGLA CRÍTICA: PRIORIDADES DE UBICACIÓN
+  // PRIORIDAD 1: Si menciona explícitamente una ciudad/provincia → Usa ESA ubicación (ignora GPS)
+  const hasExplicitLocation = Boolean(city || province || region);
   
-  // Si tiene palabra de proximidad y NO tiene ciudad/provincia especificada manualmente,
-  // usar la ubicación detectada con coordenadas GPS para búsqueda por proximidad real
-  if (
-    hasProximityKeyword &&
-    detectedLocation &&
-    userCoords &&
-    (
-      (!city && !province) ||
-      isFallbackGPS
-    )
-  ) {
+  // PRIORIDAD 2: Si NO menciona ciudad/provincia PERO tiene GPS → Usa su ubicación GPS
+  // (pregunta genérica tipo "hoteles", "restaurantes" sin especificar dónde)
+  const shouldUseGPS = !hasExplicitLocation && detectedLocation && userCoords;
+  
+  // Si debe usar GPS (por proximidad explícita O por pregunta genérica con GPS disponible)
+  if (shouldUseGPS || (hasProximityKeyword && detectedLocation && userCoords)) {
     usesLocation = true;
+    
+    // Radio dinámico: si dice "cerca" → 10km, si es genérico → 50km
+    const radiusKm = hasProximityKeyword ? 10 : 50;
+    
     return {
       category,
       city: detectedLocation.city || undefined,
@@ -240,11 +243,12 @@ function parseIntent(
       textSearch,
       usesLocation,
       priceLevel,
-      userCoords,      // 🆕 Pasar coordenadas GPS para búsqueda por distancia real
-      radiusKm: 50     // 🆕 Buscar en radio de 50km
+      userCoords,      // Pasar coordenadas GPS para búsqueda por distancia real
+      radiusKm         // Radio dinámico según tipo de pregunta
     };
   }
 
+  // Si llegamos aquí: tiene ciudad/provincia explícita O no tiene GPS
   return { category, city: finalCity, province, region, topN, excludeCapital, explicitProvince, textSearch, usesLocation, priceLevel };
 }
 
