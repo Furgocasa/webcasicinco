@@ -538,7 +538,7 @@ ${userMessage}
 3. Filtra y ordena los lugares según la intención detectada
 4. Responde en el formato especificado con ambos enlaces siempre incluidos
 5. Menciona distancias si usas geolocalización
-6. Recomienda máximo ${targetN} lugares (ajusta según contexto)`;
+6. Recomienda los mejores lugares según la consulta (ajusta cantidad según contexto)`;
 
   console.log(`🎯 System prompt: ${systemPrompt.length} chars`);
   console.log(`📍 User context incluye lugares: ${placesContext.length > 0}`);
