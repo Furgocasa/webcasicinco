@@ -82,3 +82,5 @@ ORDER BY created_at DESC;
 SELECT 
   '✅ Corrección aplicada. Usuarios afectados actualizados con 30 días de trial.' as mensaje;
 
+
+

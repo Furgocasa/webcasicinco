@@ -208,3 +208,5 @@ Si un usuario reporta este problema:
 **Reportado por**: Usuario nuevo (registro con Google)  
 **Resuelto por**: Sistema automatizado + corrección manual
 
+
+
