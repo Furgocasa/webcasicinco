@@ -62,7 +62,7 @@ export const PROVINCES_BY_REGION: Record<string, string[]> = {
 };
 
 // Array de todas las provincias (para el mapa)
-export const PROVINCES: string[] = Object.values(PROVINCES_BY_REGION).flat().sort();
+export const PROVINCES: string[] = Object.values(PROVINCES_BY_REGION).flat().sort((a, b) => a.localeCompare(b, 'es'));
 
 // Niveles de rating para filtros
 export const RATING_LEVELS = [

@@ -21,9 +21,9 @@ SET region = CASE province
   -- Asturias
   WHEN 'Asturias' THEN 'Asturias'
   
-  -- Islas Baleares
-  WHEN 'Islas Baleares' THEN 'Islas Baleares'
-  WHEN 'Baleares' THEN 'Islas Baleares'
+  -- Baleares
+  WHEN 'Islas Baleares' THEN 'Baleares'
+  WHEN 'Baleares' THEN 'Baleares'
   
   -- Canarias
   WHEN 'Las Palmas' THEN 'Canarias'
@@ -72,10 +72,10 @@ SET region = CASE province
   WHEN 'Pontevedra' THEN 'Galicia'
   
   -- Madrid
-  WHEN 'Madrid' THEN 'Comunidad de Madrid'
+  WHEN 'Madrid' THEN 'Madrid'
   
   -- Murcia
-  WHEN 'Murcia' THEN 'Región de Murcia'
+  WHEN 'Murcia' THEN 'Murcia'
   
   -- Navarra
   WHEN 'Navarra' THEN 'Navarra'
