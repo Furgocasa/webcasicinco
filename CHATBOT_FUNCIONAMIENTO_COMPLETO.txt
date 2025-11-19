@@ -1,0 +1,1555 @@
+═══════════════════════════════════════════════════════════════════════════════
+                    CHATBOT TÍO VIAJERO - DOCUMENTACIÓN COMPLETA
+                          Configuración APIs y Funcionamiento
+═══════════════════════════════════════════════════════════════════════════════
+
+📅 Fecha: Noviembre 2024
+🎯 Proyecto: Casi Cinco App
+🤖 Chatbot: Tío Viajero (Asistente IA con Geolocalización GPS)
+
+═══════════════════════════════════════════════════════════════════════════════
+                              ÍNDICE DE CONTENIDOS
+═══════════════════════════════════════════════════════════════════════════════
+
+1. ARQUITECTURA GENERAL
+2. VARIABLES DE ENTORNO REQUERIDAS
+3. APIS EXTERNAS INTEGRADAS
+4. BASE DE DATOS SUPABASE
+5. FUNCIÓN POSTGIS DE PROXIMIDAD
+6. LÓGICA DE PRIORIZACIÓN DE UBICACIÓN
+7. FLUJO COMPLETO DE UNA CONSULTA
+8. ARCHIVOS CLAVE DEL SISTEMA
+9. CONFIGURACIÓN Y TROUBLESHOOTING
+10. EJEMPLOS DE USO REAL
+
+═══════════════════════════════════════════════════════════════════════════════
+1. ARQUITECTURA GENERAL
+═══════════════════════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                            FLUJO DE DATOS COMPLETO                          │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+    Usuario (Navegador)
+         │
+         │ 1. Abre chat → Solicita GPS
+         ↓
+    ChatbotFloating.tsx (Frontend)
+         │
+         │ 2. POST /api/chatbot
+         │    - message: "hoteles cerca"
+         │    - location: { lat: 37.1773, lng: -3.5985 }
+         │    - session_id: "session_1234..."
+         ↓
+    app/api/chatbot/route.ts (Backend)
+         │
+         ├─→ 3a. Geocoding API (Google)
+         │       GPS → Ciudad/Provincia
+         │       37.1773, -3.5985 → "Granada, Andalucía"
+         │
+         ├─→ 3b. parseIntent()
+         │       Analiza mensaje del usuario
+         │       Detecta: categoría, ubicación, proximidad
+         │
+         ├─→ 3c. searchPlacesTool()
+         │       Busca lugares en Supabase
+         │       ↓
+         │       Supabase PostGIS
+         │       search_places_by_proximity()
+         │       - Filtra por radio (10-50km)
+         │       - Calcula distance_km desde usuario
+         │       - Ordena por distancia + rating
+         │       ↓
+         │       Devuelve: [lugares con distance_km]
+         │
+         ├─→ 3d. chatbotResponse() (lib/ai/openai.ts)
+         │       Construye contexto para IA:
+         │       - System Prompt (reglas del Tío Viajero)
+         │       - User Context (ubicación, lugares, mensaje)
+         │       - Conversation History (historial previo)
+         │       ↓
+         │       OpenAI API (GPT-4)
+         │       - Modelo: gpt-4-turbo-preview
+         │       - Genera respuesta inteligente
+         │       ↓
+         │       Respuesta: "Aquí tienes 5 hoteles en Granada..."
+         │
+         └─→ 3e. Guardar en chat_history
+                 - user: mensaje original
+                 - assistant: respuesta generada
+         ↓
+    Respuesta JSON al Frontend
+         │
+         │ 4. { success: true, message: "..." }
+         ↓
+    ChatbotFloating.tsx
+         │
+         │ 5. Renderiza mensaje con enlaces
+         │    [Ver detalles] [Ver en mapa]
+         ↓
+    Usuario ve respuesta
+
+
+═══════════════════════════════════════════════════════════════════════════════
+2. VARIABLES DE ENTORNO REQUERIDAS
+═══════════════════════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Archivo: .env.local (en la raíz del proyecto)                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SUPABASE (Base de Datos PostgreSQL + PostGIS)
+# ═══════════════════════════════════════════════════════════════════════════
+NEXT_PUBLIC_SUPABASE_URL=https://tu-proyecto.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+🔍 Dónde obtenerlas:
+   1. Ve a tu proyecto en Supabase: https://supabase.com/dashboard
+   2. Settings → API
+   3. Copia:
+      - Project URL → NEXT_PUBLIC_SUPABASE_URL
+      - anon public → NEXT_PUBLIC_SUPABASE_ANON_KEY
+      - service_role (secret) → SUPABASE_SERVICE_ROLE_KEY
+
+📌 Uso en el código:
+   - lib/supabase/server.ts línea 14: NEXT_PUBLIC_SUPABASE_URL
+   - lib/supabase/server.ts línea 15: NEXT_PUBLIC_SUPABASE_ANON_KEY
+   - lib/supabase/server.ts línea 55: SUPABASE_SERVICE_ROLE_KEY
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# OPENAI (Motor de IA del Chatbot)
+# ═══════════════════════════════════════════════════════════════════════════
+OPENAI_API_KEY=sk-proj-abcdefghijklmnopqrstuvwxyz1234567890...
+
+🔍 Dónde obtenerla:
+   1. Ve a: https://platform.openai.com/api-keys
+   2. Crea una nueva API key
+   3. Copia la key (empieza con "sk-proj-" o "sk-")
+
+📌 Uso en el código:
+   - lib/ai/openai.ts línea 14:
+     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+🎯 Modelo usado:
+   - gpt-4-turbo-preview (para respuestas del chatbot)
+   
+💰 Costos aproximados (Nov 2024):
+   - $0.01 por cada 1K tokens de entrada
+   - $0.03 por cada 1K tokens de salida
+   - Conversación típica: ~2K tokens = $0.05
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# GOOGLE MAPS (Geocoding: GPS → Ciudad/Provincia)
+# ═══════════════════════════════════════════════════════════════════════════
+GOOGLE_MAPS_API_KEY=AIzaSyAbCdEfGhIjKlMnOpQrStUvWxYz1234567
+NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=AIzaSyAbCdEfGhIjKlMnOpQrStUvWxYz1234567
+
+🔍 Dónde obtenerla:
+   1. Ve a: https://console.cloud.google.com/apis/credentials
+   2. Crea un proyecto (si no tienes uno)
+   3. Habilita estas APIs:
+      - Geocoding API
+      - Maps JavaScript API
+   4. Crea una API key en "Credentials"
+
+📌 Uso en el código:
+   - lib/google/geocoding.ts línea 7:
+     const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY!;
+
+🎯 APIs usadas:
+   - Geocoding API: https://maps.googleapis.com/maps/api/geocode/json
+     * reverseGeocode(lat, lng) → Convierte GPS a ciudad/provincia
+     * geocodeAddress(address) → Convierte dirección a GPS
+
+💰 Costos aproximados (Nov 2024):
+   - Geocoding: $5.00 por cada 1,000 requests
+   - Incluye $200 de crédito gratis mensual
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# OPCIONAL: Stripe, Analytics, etc.
+# ═══════════════════════════════════════════════════════════════════════════
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_...
+STRIPE_SECRET_KEY=sk_live_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+
+(No son necesarias para el chatbot básico)
+
+
+═══════════════════════════════════════════════════════════════════════════════
+3. APIS EXTERNAS INTEGRADAS
+═══════════════════════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ API 1: OpenAI GPT-4 (Motor de IA)                                          │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+📍 Endpoint: https://api.openai.com/v1/chat/completions
+🔑 Autenticación: Bearer token (OPENAI_API_KEY)
+
+REQUEST TÍPICO:
+POST https://api.openai.com/v1/chat/completions
+Headers:
+  Authorization: Bearer sk-proj-...
+  Content-Type: application/json
+
+Body:
+{
+  "model": "gpt-4-turbo-preview",
+  "messages": [
+    {
+      "role": "system",
+      "content": "Eres el Tío Viajero, experto en turismo de España..."
+    },
+    {
+      "role": "user",
+      "content": "📍 UBICACIÓN: Granada\n📊 LUGARES DISPONIBLES:\n1. Hotel X..."
+    }
+  ],
+  "temperature": 0.7,
+  "max_tokens": 1000
+}
+
+RESPONSE:
+{
+  "id": "chatcmpl-123",
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "¡Claro! Aquí tienes 5 hoteles excelentes en Granada..."
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 1500,
+    "completion_tokens": 500,
+    "total_tokens": 2000
+  }
+}
+
+📌 Implementación: lib/ai/openai.ts → chatbotResponse()
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ API 2: Google Geocoding (GPS → Ciudad/Provincia)                           │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+📍 Endpoint: https://maps.googleapis.com/maps/api/geocode/json
+🔑 Autenticación: Query parameter (?key=...)
+
+REQUEST TÍPICO:
+GET https://maps.googleapis.com/maps/api/geocode/json?latlng=37.1773,-3.5985&language=es&key=AIzaSy...
+
+RESPONSE:
+{
+  "status": "OK",
+  "results": [
+    {
+      "formatted_address": "Granada, España",
+      "address_components": [
+        {
+          "long_name": "Granada",
+          "short_name": "Granada",
+          "types": ["locality", "political"]
+        },
+        {
+          "long_name": "Granada",
+          "short_name": "GR",
+          "types": ["administrative_area_level_2", "political"]
+        },
+        {
+          "long_name": "Andalucía",
+          "short_name": "AN",
+          "types": ["administrative_area_level_1", "political"]
+        }
+      ],
+      "geometry": {
+        "location": {
+          "lat": 37.1773363,
+          "lng": -3.5985571
+        }
+      }
+    }
+  ]
+}
+
+📌 Implementación: lib/google/geocoding.ts
+   - reverseGeocode(lat, lng) → Devuelve GeocodeResult
+   - getCityAndProvinceFromCoords(lat, lng) → Extrae ciudad/provincia/región
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ API 3: Supabase REST API (Acceso a Base de Datos)                          │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+📍 Endpoint: https://tu-proyecto.supabase.co/rest/v1/
+🔑 Autenticación: apikey header + Authorization Bearer
+
+REQUEST TÍPICO (Llamada a función RPC):
+POST https://tu-proyecto.supabase.co/rest/v1/rpc/search_places_by_proximity
+Headers:
+  apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+  Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+  Content-Type: application/json
+
+Body:
+{
+  "user_lat": 37.1773,
+  "user_lng": -3.5985,
+  "radius_meters": 50000,
+  "place_category": "hotel",
+  "price_level_filter": null,
+  "text_search_term": null,
+  "result_limit": 15
+}
+
+RESPONSE:
+[
+  {
+    "id": "uuid-123",
+    "name": "Hotel Alhambra Palace",
+    "slug": "alhambra-palace-granada",
+    "category": "hotel",
+    "rating": 4.9,
+    "review_count": 850,
+    "city": "Granada",
+    "province": "Granada",
+    "region": "Andalucía",
+    "latitude": 37.1756,
+    "longitude": -3.5881,
+    "distance_km": 3.12
+  },
+  ...
+]
+
+📌 Implementación: 
+   - lib/supabase/server.ts → createClient()
+   - app/api/chatbot/route.ts → searchPlacesTool()
+
+
+═══════════════════════════════════════════════════════════════════════════════
+4. BASE DE DATOS SUPABASE
+═══════════════════════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ TABLA 1: places (Lugares/Establecimientos)                                 │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+CREATE TABLE places (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  
+  -- Identificación
+  name VARCHAR(255) NOT NULL,
+  slug VARCHAR(255) UNIQUE NOT NULL,
+  google_place_id VARCHAR(255) UNIQUE,
+  
+  -- Clasificación
+  category VARCHAR(50) NOT NULL,  -- 'restaurante', 'hotel', 'bar', 'spa'
+  subcategory VARCHAR(100),       -- 'italiana', 'mexicana', 'boutique', etc.
+  
+  -- Ubicación
+  city VARCHAR(100),
+  province VARCHAR(100),
+  region VARCHAR(100),
+  address TEXT,
+  latitude DOUBLE PRECISION,
+  longitude DOUBLE PRECISION,
+  
+  -- Calidad
+  rating NUMERIC(2,1),            -- 4.7, 4.8, 4.9, etc.
+  review_count INTEGER,           -- Número de reseñas en Google
+  price_level INTEGER,            -- 1-4 (€ a €€€€)
+  
+  -- Información
+  phone VARCHAR(50),
+  website TEXT,
+  ai_description TEXT,            -- Descripción generada por IA
+  ai_review_summary TEXT,         -- Resumen de reseñas por IA
+  
+  -- Estado
+  published BOOLEAN DEFAULT false,
+  indexed_at TIMESTAMP,
+  enriched_at TIMESTAMP,
+  
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Índice espacial PostGIS (CRÍTICO para búsquedas por proximidad)
+CREATE INDEX idx_places_location ON places USING GIST (
+  geography(ST_Point(longitude, latitude))
+);
+
+-- Índices adicionales
+CREATE INDEX idx_places_category ON places(category);
+CREATE INDEX idx_places_city ON places(city);
+CREATE INDEX idx_places_province ON places(province);
+CREATE INDEX idx_places_rating ON places(rating DESC);
+CREATE INDEX idx_places_published ON places(published) WHERE published = true;
+
+
+EJEMPLO DE REGISTRO:
+{
+  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "name": "Hotel Alhambra Palace",
+  "slug": "alhambra-palace-granada",
+  "google_place_id": "ChIJ1234567890",
+  "category": "hotel",
+  "subcategory": "hotel boutique",
+  "city": "Granada",
+  "province": "Granada",
+  "region": "Andalucía",
+  "address": "Plaza Arquitecto García de Paredes, 1, 18009 Granada",
+  "latitude": 37.1756,
+  "longitude": -3.5881,
+  "rating": 4.9,
+  "review_count": 850,
+  "price_level": 3,
+  "phone": "+34 958 22 14 68",
+  "website": "https://www.alhambrapalace.es",
+  "ai_description": "Un hotel histórico con vistas espectaculares...",
+  "published": true
+}
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ TABLA 2: chat_history (Historial de Conversaciones)                        │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+CREATE TABLE chat_history (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  
+  -- Identificación del usuario
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  session_id TEXT,  -- Para usuarios NO autenticados
+  
+  -- Mensaje
+  role TEXT NOT NULL CHECK (role IN ('user', 'assistant')),
+  message TEXT NOT NULL,
+  
+  -- Control
+  is_active BOOLEAN DEFAULT true,  -- Para "reset" sin borrar datos
+  
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Índices
+CREATE INDEX idx_chat_history_user ON chat_history(user_id) WHERE user_id IS NOT NULL;
+CREATE INDEX idx_chat_history_session ON chat_history(session_id) WHERE session_id IS NOT NULL;
+CREATE INDEX idx_chat_history_active ON chat_history(is_active) WHERE is_active = true;
+
+
+EJEMPLO DE CONVERSACIÓN:
+[
+  {
+    "id": "uuid-1",
+    "user_id": "uuid-user",
+    "session_id": null,
+    "role": "user",
+    "message": "hoteles en Granada",
+    "is_active": true,
+    "created_at": "2024-11-04T10:30:00Z"
+  },
+  {
+    "id": "uuid-2",
+    "user_id": "uuid-user",
+    "session_id": null,
+    "role": "assistant",
+    "message": "¡Claro! Aquí tienes 5 hoteles excelentes en Granada...",
+    "is_active": true,
+    "created_at": "2024-11-04T10:30:03Z"
+  }
+]
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ TABLA 3: chatbot_config (Configuración del Chatbot)                        │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+CREATE TABLE chatbot_config (
+  key TEXT PRIMARY KEY,
+  config JSONB NOT NULL,
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Registro principal
+INSERT INTO chatbot_config (key, config) VALUES (
+  'chatbot_config',
+  '{
+    "enabled": true,
+    "systemPrompt": null,
+    "maxHistoryMessages": 12,
+    "introMessages": [
+      "¡Hola! Soy el Tío Viajero, tu guía personal para descubrir los mejores lugares de España.",
+      "¡Buenas! ¿Listo para descubrir lugares increíbles? Pregúntame lo que quieras.",
+      "¡Hola viajero! ¿Buscas restaurantes, hoteles o bares? Cuéntame qué necesitas."
+    ]
+  }'::jsonb
+);
+
+
+CONFIGURACIÓN JSON:
+{
+  "enabled": true,              // Activar/desactivar chatbot globalmente
+  "systemPrompt": null,         // Prompt personalizado (null = usar por defecto)
+  "maxHistoryMessages": 12,     // Cantidad de mensajes de historial a cargar
+  "introMessages": [            // Mensajes de bienvenida rotativos
+    "¡Hola! Soy el Tío Viajero...",
+    "¡Buenas! ¿Listo para descubrir...?"
+  ]
+}
+
+
+═══════════════════════════════════════════════════════════════════════════════
+5. FUNCIÓN POSTGIS DE PROXIMIDAD
+═══════════════════════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Archivo: supabase/migrations/20251030_search_places_by_proximity_FIXED.sql │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+-- Función que busca lugares cercanos al usuario usando PostGIS
+CREATE OR REPLACE FUNCTION search_places_by_proximity(
+  user_lat DOUBLE PRECISION,
+  user_lng DOUBLE PRECISION,
+  radius_meters INTEGER DEFAULT 50000,      -- 50km por defecto
+  place_category TEXT DEFAULT NULL,
+  price_level_filter INTEGER DEFAULT NULL,
+  text_search_term TEXT DEFAULT NULL,
+  result_limit INTEGER DEFAULT 15
+)
+RETURNS TABLE (
+  id UUID,
+  name TEXT,
+  slug TEXT,
+  category TEXT,
+  rating NUMERIC,
+  review_count INTEGER,
+  city TEXT,
+  province TEXT,
+  region TEXT,
+  address TEXT,
+  phone TEXT,
+  website TEXT,
+  ai_description TEXT,
+  subcategory TEXT,
+  price_level INTEGER,
+  latitude DOUBLE PRECISION,
+  longitude DOUBLE PRECISION,
+  distance_km NUMERIC  -- ⭐ CAMPO CALCULADO: distancia en kilómetros
+) AS $$
+BEGIN
+  RETURN QUERY
+  SELECT
+    p.id,
+    p.name::TEXT,
+    p.slug::TEXT,
+    p.category::TEXT,
+    p.rating,
+    p.review_count,
+    p.city::TEXT,
+    p.province::TEXT,
+    p.region::TEXT,
+    p.address::TEXT,
+    p.phone::TEXT,
+    p.website::TEXT,
+    p.ai_description::TEXT,
+    p.subcategory::TEXT,
+    p.price_level,
+    p.latitude,
+    p.longitude,
+    -- Calcular distancia real usando PostGIS
+    (
+      ST_Distance(
+        geography(ST_Point(user_lng, user_lat)),
+        geography(ST_Point(p.longitude, p.latitude))
+      ) / 1000  -- Convertir metros a kilómetros
+    )::NUMERIC AS distance_km
+  FROM places p
+  WHERE p.published = true
+    AND p.latitude IS NOT NULL
+    AND p.longitude IS NOT NULL
+    -- Filtrar por radio usando ST_DWithin (usa índice espacial GIST)
+    AND ST_DWithin(
+      geography(ST_Point(p.longitude, p.latitude)),
+      geography(ST_Point(user_lng, user_lat)),
+      radius_meters
+    )
+    -- Filtros opcionales
+    AND (place_category IS NULL OR p.category = place_category)
+    AND (price_level_filter IS NULL OR
+      (price_level_filter = 1 AND p.price_level IN (1, 2)) OR
+      (price_level_filter = 2 AND p.price_level = 2) OR
+      (price_level_filter = 3 AND p.price_level IN (3, 4))
+    )
+    AND (text_search_term IS NULL OR
+      p.subcategory ILIKE '%' || text_search_term || '%' OR
+      p.ai_description ILIKE '%' || text_search_term || '%' OR
+      p.name ILIKE '%' || text_search_term || '%' OR
+      p.ai_review_summary ILIKE '%' || text_search_term || '%'
+    )
+    AND p.review_count >= 50  -- Mínimo 50 reseñas (Tier Bronce)
+  ORDER BY distance_km ASC, p.rating DESC
+  LIMIT result_limit;
+END;
+$$ LANGUAGE plpgsql;
+
+
+EJEMPLO DE USO:
+SELECT * FROM search_places_by_proximity(
+  37.1773,      -- Latitud de Granada
+  -3.5985,      -- Longitud de Granada
+  10000,        -- Radio de 10km
+  'hotel',      -- Solo hoteles
+  NULL,         -- Cualquier precio
+  NULL,         -- Sin búsqueda textual
+  5             -- Máximo 5 resultados
+);
+
+RESULTADO:
+┌──────────────────────┬─────────┬────────┬────────────┐
+│ name                 │ rating  │ city   │ distance_km│
+├──────────────────────┼─────────┼────────┼────────────┤
+│ Hotel Granada Center │ 4.8     │ Granada│ 2.3        │
+│ Hotel Alhambra Palace│ 4.9     │ Granada│ 3.1        │
+│ Hotel Casa Morisca   │ 4.8     │ Granada│ 4.5        │
+│ Hotel Palacio Santa  │ 4.7     │ Granada│ 5.8        │
+│ Hotel Reina Cristina │ 4.8     │ Granada│ 7.2        │
+└──────────────────────┴─────────┴────────┴────────────┘
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ ÍNDICE ESPACIAL (CRÍTICO PARA PERFORMANCE)                                 │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+-- Este índice permite búsquedas geográficas ultrarrápidas
+CREATE INDEX idx_places_location ON places USING GIST (
+  geography(ST_Point(longitude, latitude))
+);
+
+🎯 Sin este índice:
+   - Búsqueda de 50km en 10,000 lugares: ~500ms
+   
+✅ Con este índice:
+   - Búsqueda de 50km en 10,000 lugares: ~15ms (33x más rápido!)
+
+
+═══════════════════════════════════════════════════════════════════════════════
+6. LÓGICA DE PRIORIZACIÓN DE UBICACIÓN
+═══════════════════════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Archivo: app/api/chatbot/route.ts (líneas 220-252)                         │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+REGLA CRÍTICA: El sistema decide QUÉ ubicación usar según la intención del usuario
+
+┌────────────────────────────────────────────────────────────────────────────┐
+│ PRIORIDAD 1: UBICACIÓN EXPLÍCITA (ignora GPS)                             │
+└────────────────────────────────────────────────────────────────────────────┘
+
+Usuario en Granada dice: "hoteles en Murcia"
+                          ^^^^^^^^^^^^^^^
+                          Ciudad explícita detectada
+
+Código:
+const hasExplicitLocation = Boolean(city || province || region);
+if (hasExplicitLocation) {
+  // Busca en Murcia (ignora que está en Granada)
+  return { category: 'hotel', city: 'Murcia', ... };
+}
+
+Resultado:
+✅ Busca hoteles en MURCIA
+❌ NO usa GPS de Granada
+
+
+┌────────────────────────────────────────────────────────────────────────────┐
+│ PRIORIDAD 2: PREGUNTA GENÉRICA + GPS DISPONIBLE                           │
+└────────────────────────────────────────────────────────────────────────────┘
+
+Usuario en Granada dice: "hoteles"
+                          ^^^^^^^^
+                          Genérico, sin ciudad mencionada
+
+Código:
+const shouldUseGPS = !hasExplicitLocation && detectedLocation && userCoords;
+if (shouldUseGPS) {
+  // Usa su ubicación GPS actual
+  return {
+    category: 'hotel',
+    city: 'Granada',
+    province: 'Granada',
+    userCoords: { lat: 37.1773, lng: -3.5985 },
+    radiusKm: 50  // Radio amplio para genéricas
+  };
+}
+
+Resultado:
+✅ Busca hoteles en GRANADA (50km de radio)
+✅ Usa función PostGIS search_places_by_proximity()
+
+
+┌────────────────────────────────────────────────────────────────────────────┐
+│ PRIORIDAD 3: PROXIMIDAD EXPLÍCITA (radio pequeño)                         │
+└────────────────────────────────────────────────────────────────────────────┘
+
+Usuario en Granada dice: "hoteles cerca de mí"
+                                 ^^^^^^^^^^^^^
+                                 Palabra de proximidad detectada
+
+Palabras clave:
+['cerca', 'aquí', 'aqui', 'por aquí', 'en mi zona', 'cerca de mí',
+ 'alrededor', 'cercano', 'por donde estoy', 'en esta zona']
+
+Código:
+const hasProximityKeyword = proximityKeywords.some(k => msg.includes(k));
+const radiusKm = hasProximityKeyword ? 10 : 50;
+
+if (hasProximityKeyword && userCoords) {
+  return {
+    category: 'hotel',
+    userCoords: { lat: 37.1773, lng: -3.5985 },
+    radiusKm: 10  // Radio reducido para "cerca"
+  };
+}
+
+Resultado:
+✅ Busca hoteles a máximo 10km de Granada
+✅ Ordena por distancia ascendente
+✅ Muestra distancias: "Hotel X a 2.3km de ti"
+
+
+┌────────────────────────────────────────────────────────────────────────────┐
+│ TABLA RESUMEN DE PRIORIDADES                                              │
+└────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────┬─────────────┬──────────────┬────────────┐
+│ Usuario dice             │ Está en     │ Sistema busca│ Radio      │
+├──────────────────────────┼─────────────┼──────────────┼────────────┤
+│ "hoteles en Murcia"      │ Granada     │ Murcia       │ Provincia  │
+│ "restaurantes Barcelona" │ Granada     │ Barcelona    │ Provincia  │
+│ "hoteles"                │ Granada     │ Granada      │ 50km       │
+│ "restaurantes"           │ Granada     │ Granada      │ 50km       │
+│ "hoteles cerca"          │ Granada     │ Granada      │ 10km       │
+│ "restaurantes aquí"      │ Granada     │ Granada      │ 10km       │
+│ "bares por mi zona"      │ Granada     │ Granada      │ 10km       │
+│ "mejores de España"      │ Granada     │ España       │ Nacional   │
+└──────────────────────────┴─────────────┴──────────────┴────────────┘
+
+
+═══════════════════════════════════════════════════════════════════════════════
+7. FLUJO COMPLETO DE UNA CONSULTA (EJEMPLO REAL)
+═══════════════════════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ ESCENARIO: Usuario en Granada pregunta "3 hamburgueserías"                 │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════════════════════
+PASO 1: FRONTEND - Obtener GPS y enviar mensaje
+═══════════════════════════════════════════════════════════════════════════════
+
+Archivo: components/ChatbotFloating.tsx
+
+// 1.1. Usuario abre el chat
+useEffect(() => {
+  if (isOpen && !userLocation && 'geolocation' in navigator) {
+    // Solicitar permiso de ubicación
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const location = {
+          lat: 37.1773,  // Granada
+          lng: -3.5985
+        };
+        setUserLocation(location);
+        toast.success('📍 Ubicación compartida');
+      }
+    );
+  }
+}, [isOpen]);
+
+// 1.2. Usuario escribe "3 hamburgueserías" y presiona Enter
+const handleSend = async () => {
+  const response = await fetch('/api/chatbot', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      message: "3 hamburgueserías",
+      session_id: "session_1234567890_abcdef",
+      location: { lat: 37.1773, lng: -3.5985 }
+    })
+  });
+};
+
+
+═══════════════════════════════════════════════════════════════════════════════
+PASO 2: BACKEND - Recibir request y procesar ubicación
+═══════════════════════════════════════════════════════════════════════════════
+
+Archivo: app/api/chatbot/route.ts
+
+export async function POST(request: NextRequest) {
+  const body = await request.json();
+  const { message, session_id, location } = body;
+  
+  console.log('Mensaje recibido:', message);
+  console.log('Ubicación GPS:', location);
+  // → "3 hamburgueserías"
+  // → { lat: 37.1773, lng: -3.5985 }
+  
+  
+  // 2.1. Geocoding reverso (GPS → Ciudad/Provincia)
+  let detectedLocation;
+  if (location?.lat && location?.lng) {
+    try {
+      detectedLocation = await getCityAndProvinceFromCoords(
+        location.lat,
+        location.lng
+      );
+      console.log('Ubicación geocodificada:', detectedLocation);
+      // → { city: 'Granada', province: 'Granada', region: 'Andalucía' }
+    } catch (error) {
+      // Fallback: usar coordenadas GPS directamente
+      detectedLocation = {
+        city: `Coordenadas GPS (${location.lat.toFixed(4)}, ${location.lng.toFixed(4)})`,
+        province: 'GPS',
+        region: 'España'
+      };
+    }
+  }
+}
+
+
+═══════════════════════════════════════════════════════════════════════════════
+PASO 3: BACKEND - Parsear intención del usuario
+═══════════════════════════════════════════════════════════════════════════════
+
+Archivo: app/api/chatbot/route.ts → parseIntent()
+
+const intent = parseIntent(
+  "3 hamburgueserías",
+  { city: 'Granada', province: 'Granada', region: 'Andalucía' },
+  { lat: 37.1773, lng: -3.5985 }
+);
+
+console.log('Intención detectada:', intent);
+
+// RESULTADO:
+{
+  category: 'restaurante',           // Detectado por palabra "hamburgueserías"
+  textSearch: 'hamburguesa',         // Subcategoría detectada
+  topN: 3,                           // Número explícito en mensaje
+  city: 'Granada',                   // De geocoding
+  province: 'Granada',
+  region: 'Andalucía',
+  userCoords: { lat: 37.1773, lng: -3.5985 },
+  radiusKm: 50,                      // Genérico (no dice "cerca")
+  usesLocation: true                 // Sí usa GPS
+}
+
+ANÁLISIS DE LA INTENCIÓN:
+✅ Categoría: "restaurante" (hamburguesería es tipo de restaurante)
+✅ Subcategoría: "hamburguesa" (para filtrar en subcategory/ai_description)
+✅ Cantidad: 3 (detectado por regex /(\d+)\s*hamburgueser/)
+✅ Ubicación: Granada (pregunta genérica + GPS disponible)
+✅ Radio: 50km (genérico, no dijo "cerca")
+
+
+═══════════════════════════════════════════════════════════════════════════════
+PASO 4: BACKEND - Buscar lugares en Supabase con PostGIS
+═══════════════════════════════════════════════════════════════════════════════
+
+Archivo: app/api/chatbot/route.ts → searchPlacesTool()
+
+const places = await searchPlacesTool(supabase, {
+  category: 'restaurante',
+  textSearch: 'hamburguesa',
+  userCoords: { lat: 37.1773, lng: -3.5985 },
+  radiusKm: 50,
+  limit: 15  // Buscar 15, la IA luego seleccionará los mejores 3
+});
+
+// Internamente llama a la función PostGIS:
+const { data, error } = await supabase.rpc('search_places_by_proximity', {
+  user_lat: 37.1773,
+  user_lng: -3.5985,
+  radius_meters: 50000,  // 50km → 50,000 metros
+  place_category: 'restaurante',
+  text_search_term: 'hamburguesa',
+  price_level_filter: null,
+  result_limit: 15
+});
+
+console.log('Lugares encontrados:', data.length);
+
+// RESULTADO (2 hamburgueserías en Granada):
+[
+  {
+    id: "uuid-1",
+    name: "Burger Paco",
+    slug: "burger-paco-granada",
+    category: "restaurante",
+    subcategory: "hamburguesa",
+    rating: 4.8,
+    review_count: 320,
+    city: "Granada",
+    province: "Granada",
+    address: "Calle Reyes Católicos, 55",
+    latitude: 37.1766,
+    longitude: -3.5978,
+    distance_km: 0.8,  // ⭐ Calculado por PostGIS
+    phone: "+34 958 123 456",
+    website: "https://burgerpaco.es",
+    ai_description: "Hamburgueserías gourmet con carne de calidad..."
+  },
+  {
+    id: "uuid-2",
+    name: "La Mafia se Sienta a la Mesa",
+    slug: "la-mafia-granada",
+    category: "restaurante",
+    subcategory: "italiana",  // No es hamburguesa específicamente
+    rating: 4.7,
+    review_count: 450,
+    city: "Granada",
+    distance_km: 1.2
+  }
+]
+
+
+═══════════════════════════════════════════════════════════════════════════════
+PASO 5: BACKEND - Construir contexto para OpenAI
+═══════════════════════════════════════════════════════════════════════════════
+
+Archivo: lib/ai/openai.ts → chatbotResponse()
+
+const context = {
+  userLocation: {
+    city: 'Granada',
+    province: 'Granada',
+    region: 'Andalucía'
+  },
+  stats: {
+    totalPlaces: 1250,
+    totalRestaurants: 850,
+    totalHotels: 300,
+    totalBars: 100
+  },
+  availablePlaces: [
+    {
+      name: "Burger Paco",
+      rating: 4.8,
+      review_count: 320,
+      city: "Granada",
+      distance_km: 0.8,
+      slug: "burger-paco-granada",
+      category: "restaurante",
+      subcategory: "hamburguesa"
+    },
+    {
+      name: "La Mafia se Sienta a la Mesa",
+      rating: 4.7,
+      review_count: 450,
+      city: "Granada",
+      distance_km: 1.2,
+      slug: "la-mafia-granada",
+      category: "restaurante"
+    }
+  ]
+};
+
+const conversationHistory = [
+  // Mensajes previos de la conversación (si existen)
+];
+
+const userContext = `
+═══════════════════════════════════════
+📍 UBICACIÓN DEL USUARIO
+═══════════════════════════════════════
+✅ GPS COMPARTIDO
+- Ciudad detectada: Granada
+- Provincia: Granada
+- Región: Andalucía
+- Coordenadas precisas: Disponibles
+- Todos los lugares incluyen campo "distance_km"
+
+═══════════════════════════════════════
+📊 ESTADÍSTICAS DE LA PLATAFORMA
+═══════════════════════════════════════
+Total lugares: 1,250 lugares
+Restaurantes: 850
+Hoteles: 300
+Bares: 100
+
+═══════════════════════════════════════
+📌 LUGARES DISPONIBLES (2)
+═══════════════════════════════════════
+
+1. **Burger Paco** (4.8★, 320 reseñas) - Granada - 0.8km de ti
+   Categoría: restaurante
+   Subcategoría: hamburguesa
+   [Ver detalles](/burger-paco-granada)
+   [Ver en mapa](/mapa/burger-paco-granada)
+
+2. **La Mafia se Sienta a la Mesa** (4.7★, 450 reseñas) - Granada - 1.2km de ti
+   Categoría: restaurante
+   Subcategoría: italiana
+   [Ver detalles](/la-mafia-granada)
+   [Ver en mapa](/mapa/la-mafia-granada)
+
+═══════════════════════════════════════
+💬 MENSAJE DEL USUARIO
+═══════════════════════════════════════
+3 hamburgueserías
+`;
+
+
+═══════════════════════════════════════════════════════════════════════════════
+PASO 6: OPENAI - Generar respuesta inteligente
+═══════════════════════════════════════════════════════════════════════════════
+
+const response = await openai.chat.completions.create({
+  model: 'gpt-4-turbo-preview',
+  messages: [
+    {
+      role: 'system',
+      content: `Eres el Tío Viajero, experto en turismo de España...
+      
+      REGLA CRÍTICA:
+      - Si usuario pide 3 y solo hay 2 en su ciudad, di la verdad
+      - NO mezcles ciudades sin avisar
+      - Ofrece ampliar búsqueda si hay pocas opciones
+      ...`
+    },
+    ...conversationHistory,
+    {
+      role: 'user',
+      content: userContext
+    }
+  ],
+  temperature: 0.7,
+  max_tokens: 1000
+});
+
+const aiMessage = response.choices[0].message.content;
+
+console.log('Respuesta de IA:', aiMessage);
+
+// RESPUESTA GENERADA:
+`
+En Granada tengo **2 hamburgueserías excelentes**:
+
+1. **Burger Paco** (4.8★, 320 reseñas) - A 0.8km de ti
+   Hamburgueserías gourmet con carne de calidad y opciones creativas. 
+   Ambiente moderno y servicio rápido.
+   [Ver detalles](/burger-paco-granada) [Ver en mapa](/mapa/burger-paco-granada)
+
+2. **La Mafia se Sienta a la Mesa** (4.7★, 450 reseñas) - A 1.2km de ti
+   Restaurante italiano con hamburguesas de calidad en su menú.
+   [Ver detalles](/la-mafia-granada) [Ver en mapa](/mapa/la-mafia-granada)
+
+Como solo tengo 2 hamburgueserías en Granada que cumplan nuestros 
+estándares de calidad (+4.7★), ¿te gustaría que te muestre opciones en 
+provincias cercanas como Málaga o Almería? 🍔
+`
+
+ANÁLISIS DE LA RESPUESTA:
+✅ Dice la verdad: "tengo 2 hamburgueserías" (no 3)
+✅ NO mezcla ciudades silenciosamente
+✅ Ofrece ampliar búsqueda claramente
+✅ Incluye distancias: "a 0.8km de ti"
+✅ Incluye ambos enlaces: [Ver detalles] [Ver en mapa]
+
+
+═══════════════════════════════════════════════════════════════════════════════
+PASO 7: BACKEND - Guardar en historial y devolver respuesta
+═══════════════════════════════════════════════════════════════════════════════
+
+// Guardar mensaje del usuario
+await supabase.from('chat_history').insert({
+  user_id: user?.id || null,
+  session_id: user ? null : session_id,
+  role: 'user',
+  message: '3 hamburgueserías',
+  is_active: true
+});
+
+// Guardar respuesta del asistente
+await supabase.from('chat_history').insert({
+  user_id: user?.id || null,
+  session_id: user ? null : session_id,
+  role: 'assistant',
+  message: aiMessage,
+  is_active: true
+});
+
+// Devolver respuesta al frontend
+return NextResponse.json({
+  success: true,
+  message: aiMessage
+});
+
+
+═══════════════════════════════════════════════════════════════════════════════
+PASO 8: FRONTEND - Mostrar respuesta al usuario
+═══════════════════════════════════════════════════════════════════════════════
+
+Archivo: components/ChatbotFloating.tsx
+
+// Recibir respuesta
+const data = await response.json();
+
+if (data.success) {
+  setMessages([
+    ...messages,
+    { role: 'user', content: '3 hamburgueserías' },
+    { role: 'assistant', content: data.message }
+  ]);
+}
+
+// Renderizar con enlaces clicables
+const renderMessageWithLinks = (content) => {
+  return content
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, text, url) => {
+      return `<a href="${url}" class="text-blue-600 hover:underline">${text}</a>`;
+    })
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+};
+
+
+PANTALLA DEL USUARIO:
+┌────────────────────────────────────────────────────────────────┐
+│ 👤 Usuario (10:30)                                             │
+│ 3 hamburgueserías                                              │
+├────────────────────────────────────────────────────────────────┤
+│ 🤖 Tío Viajero (10:30)                                         │
+│                                                                │
+│ En Granada tengo 2 hamburgueserías excelentes:                │
+│                                                                │
+│ 1. Burger Paco (4.8★, 320 reseñas) - A 0.8km de ti           │
+│    Hamburgueserías gourmet con carne de calidad...           │
+│    [Ver detalles] [Ver en mapa]                              │
+│                                                                │
+│ 2. La Mafia se Sienta a la Mesa (4.7★, 450 reseñas)          │
+│    - A 1.2km de ti                                            │
+│    Restaurante italiano con hamburguesas...                   │
+│    [Ver detalles] [Ver en mapa]                              │
+│                                                                │
+│ Como solo tengo 2 hamburgueserías en Granada que cumplan      │
+│ nuestros estándares (+4.7★), ¿te gustaría que te muestre     │
+│ opciones en provincias cercanas como Málaga o Almería? 🍔     │
+└────────────────────────────────────────────────────────────────┘
+
+
+═══════════════════════════════════════════════════════════════════════════════
+8. ARCHIVOS CLAVE DEL SISTEMA
+═══════════════════════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ FRONTEND                                                                    │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+components/ChatbotFloating.tsx
+├─ Componente principal del chat flotante
+├─ Solicita permiso de geolocalización al usuario
+├─ Envía mensaje + GPS al backend
+├─ Renderiza respuestas con markdown (enlaces, negrita)
+└─ Trackea eventos de analytics
+
+Líneas clave:
+- 116-143: Obtener GPS del usuario
+- 163-189: Enviar mensaje al backend con ubicación
+- 50-85: Renderizar respuesta con enlaces clicables
+- 206-230: Limpiar historial (reset chat)
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ BACKEND - API ROUTE                                                         │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+app/api/chatbot/route.ts
+├─ Endpoint principal: POST /api/chatbot
+├─ Validación de entrada (anti-spam, rate limiting)
+├─ Geocoding reverso (GPS → ciudad/provincia)
+├─ parseIntent(): Analiza mensaje del usuario
+├─ searchPlacesTool(): Busca lugares en Supabase
+├─ chatbotResponse(): Genera respuesta con OpenAI
+└─ Guarda conversación en chat_history
+
+Líneas clave:
+- 418-497: POST handler principal
+- 500-533: Geocoding reverso con Google API
+- 68-253: parseIntent() - Detección de intención
+- 255-347: searchPlacesTool() - Búsqueda con PostGIS
+- 220-252: Lógica de priorización de ubicación
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ BACKEND - IA OPENAI                                                         │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+lib/ai/openai.ts
+├─ Configuración del cliente OpenAI
+├─ chatbotResponse(): Función principal del chatbot
+├─ System Prompt completo (reglas del Tío Viajero)
+├─ Construcción de contexto del usuario
+└─ Otras funciones de IA (descripciones, resúmenes)
+
+Líneas clave:
+- 13-15: Inicialización de cliente OpenAI
+- 200-707: chatbotResponse() - Función principal
+- 350-490: System Prompt (identidad, reglas, prioridades)
+- 600-670: User Context (ubicación, lugares, estadísticas)
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ BACKEND - GOOGLE GEOCODING                                                  │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+lib/google/geocoding.ts
+├─ Funciones para Google Geocoding API
+├─ geocodeAddress(): Dirección → GPS
+├─ reverseGeocode(): GPS → Dirección
+├─ getCityAndProvinceFromCoords(): GPS → Ciudad/Provincia
+└─ Funciones auxiliares de extracción
+
+Líneas clave:
+- 7: API key de Google Maps
+- 30-49: geocodeAddress()
+- 54-76: reverseGeocode()
+- 133-159: getCityAndProvinceFromCoords() (usado por chatbot)
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ BACKEND - SUPABASE CLIENT                                                   │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+lib/supabase/server.ts
+├─ Cliente de Supabase para servidor
+├─ createClient(): Cliente con anon key (usuarios normales)
+└─ createAdminClient(): Cliente con service role (admin)
+
+Líneas clave:
+- 10-46: createClient() - Cliente normal
+- 52-60: createAdminClient() - Cliente privilegiado
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ BASE DE DATOS - MIGRACIÓN POSTGIS                                           │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+supabase/migrations/20251030_search_places_by_proximity_FIXED.sql
+├─ Función PostgreSQL para búsqueda por proximidad
+├─ Usa PostGIS para cálculos geográficos
+├─ Filtra por radio, categoría, precio, texto
+└─ Retorna lugares ordenados por distancia + rating
+
+Líneas clave:
+- 1-22: Definición de función y parámetros
+- 24-50: RETURNS TABLE (campos devueltos)
+- 52-120: Query principal con filtros y cálculos
+
+
+═══════════════════════════════════════════════════════════════════════════════
+9. CONFIGURACIÓN Y TROUBLESHOOTING
+═══════════════════════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ SETUP INICIAL                                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+1. CLONAR REPOSITORIO
+   git clone https://github.com/ActtaxIA/Casi_cinco_app.git
+   cd Casi_cinco_app
+
+2. INSTALAR DEPENDENCIAS
+   npm install --legacy-peer-deps
+
+3. CONFIGURAR .env.local
+   cp .env.example .env.local
+   
+   Editar .env.local con:
+   - NEXT_PUBLIC_SUPABASE_URL
+   - NEXT_PUBLIC_SUPABASE_ANON_KEY
+   - SUPABASE_SERVICE_ROLE_KEY
+   - OPENAI_API_KEY
+   - GOOGLE_MAPS_API_KEY
+
+4. EJECUTAR MIGRACIONES EN SUPABASE
+   a. Ve a Supabase Dashboard → SQL Editor
+   b. Ejecuta estos archivos en orden:
+      - supabase/migrations/20251020_initial_schema.sql
+      - supabase/migrations/20251030_search_places_by_proximity_FIXED.sql
+      - supabase/migrations/20251101_chat_history.sql
+
+5. INICIAR SERVIDOR
+   npm run dev
+   
+   Abrir: http://localhost:3000
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ PROBLEMAS COMUNES Y SOLUCIONES                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+❌ PROBLEMA 1: "El chatbot no responde"
+
+Síntomas:
+- Mensaje se envía pero no hay respuesta
+- Error 500 en consola del navegador
+
+Diagnóstico:
+1. Abrir DevTools → Network → Buscar request a /api/chatbot
+2. Ver respuesta del servidor en "Response"
+
+Causas posibles:
+a) OPENAI_API_KEY inválida o sin crédito
+   Solución: Verificar en https://platform.openai.com/account/api-keys
+   
+b) Error en Supabase (search_places_by_proximity no existe)
+   Solución: Ejecutar migración 20251030_search_places_by_proximity_FIXED.sql
+   
+c) Google Geocoding falla
+   Solución: El sistema tiene fallback a GPS directo (no crítico)
+
+
+❌ PROBLEMA 2: "La IA no respeta mi ubicación GPS"
+
+Síntomas:
+- Estás en Granada, preguntas "hoteles"
+- Te da hoteles de Madrid, Barcelona, etc.
+
+Causa:
+- Bug en priorización de ubicación (ya corregido en commit 4df590c)
+
+Verificar:
+1. F12 → Console → Buscar "📍 Ubicación recibida"
+2. Debe mostrar: "📍 Ubicación recibida: 37.1773, -3.5985"
+
+Si no aparece:
+- El navegador no compartió la ubicación
+- Revisar permisos en navegador (icono candado en URL)
+
+
+❌ PROBLEMA 3: "Error 42804: structure of query does not match"
+
+Síntomas:
+- Error al buscar lugares por proximidad
+- Mensaje: "Returned type character varying does not match expected type text"
+
+Causa:
+- Versión antigua de la función PostGIS (tipos VARCHAR vs TEXT)
+
+Solución:
+1. Ejecutar: supabase/migrations/20251030_search_places_by_proximity_FIXED.sql
+2. Esta versión castea explícitamente todos los campos a TEXT
+
+
+❌ PROBLEMA 4: "Rate limit exceeded" (429)
+
+Síntomas:
+- Después de varios mensajes seguidos, recibe error
+
+Causa:
+- Protección anti-spam activada (límite: 30 mensajes cada 15 minutos)
+
+Solución:
+- Esperar 15 minutos
+- O ajustar límite en app/api/chatbot/route.ts línea 393-396
+
+
+❌ PROBLEMA 5: "No tengo lugares en [ciudad]" (pero sí hay)
+
+Síntomas:
+- Usuario en Granada pregunta "restaurantes en Murcia"
+- IA responde: "No tengo restaurantes en Granada"
+
+Causa:
+- IA confunde ciudad solicitada con ubicación GPS del usuario
+
+Solución:
+- Ya corregido en prompt (commit f8b7ff4)
+- Verificar que estás en versión más reciente
+- git pull origin main
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ DEBUGGING - LOGS ÚTILES                                                     │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+FRONTEND (components/ChatbotFloating.tsx):
+console.log('📍 Ubicación obtenida:', location);
+console.log('Enviando mensaje:', { message, location, session_id });
+
+BACKEND (app/api/chatbot/route.ts):
+console.log(`📍 Ubicación recibida: ${location.lat}, ${location.lng}`);
+console.log(`✅ Ubicación geocodificada: ${geoResult.city}, ${geoResult.province}`);
+console.log(`📜 Historial cargado: ${conversation_history.length} mensajes`);
+console.log(`📍 Búsqueda por proximidad: lat=${lat}, lng=${lng}, radio=${radiusKm}km`);
+console.log(`✅ Encontrados ${data?.length || 0} lugares por proximidad`);
+
+Para ver logs en producción (AWS Amplify):
+1. AWS Amplify Console
+2. Monitoring → CloudWatch Logs
+3. Buscar logs de /api/chatbot
+
+
+═══════════════════════════════════════════════════════════════════════════════
+10. EJEMPLOS DE USO REAL
+═══════════════════════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ EJEMPLO 1: Búsqueda genérica con GPS                                       │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+Usuario en Granada: "hoteles"
+
+Flow:
+1. Frontend envía: { message: "hoteles", location: {lat: 37.1773, lng: -3.5985} }
+2. Backend geocodifica: Granada, Granada, Andalucía
+3. parseIntent detecta: category='hotel', genérico sin ciudad explícita
+4. shouldUseGPS = true → Usa GPS
+5. Busca con PostGIS: radio 50km desde Granada
+6. IA responde: "Aquí tienes 5 hoteles excelentes en Granada..."
+
+Resultado:
+✅ Solo hoteles de Granada (50km)
+✅ Ordenados por distancia + rating
+✅ Con distancias: "Hotel X a 2.3km de ti"
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ EJEMPLO 2: Ciudad explícita diferente a GPS                                │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+Usuario en Granada: "restaurantes en Murcia"
+
+Flow:
+1. Frontend envía: { message: "restaurantes en Murcia", location: {lat: 37.1773} }
+2. Backend geocodifica: Granada (pero no lo usará)
+3. parseIntent detecta: category='restaurante', city='Murcia' (EXPLÍCITO)
+4. hasExplicitLocation = true → Ignora GPS
+5. Busca en Supabase: WHERE city = 'Murcia' OR province = 'Murcia'
+6. IA responde: "Restaurantes en Murcia: [lista de Murcia]"
+
+Resultado:
+✅ Solo restaurantes de MURCIA (ignora que está en Granada)
+✅ Puede mencionar distancia si útil: "Restaurante X en Murcia (a 150km de ti)"
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ EJEMPLO 3: Proximidad explícita                                            │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+Usuario en Granada: "bares cerca de mí"
+
+Flow:
+1. Frontend envía: { message: "bares cerca de mí", location: {lat: 37.1773} }
+2. Backend geocodifica: Granada
+3. parseIntent detecta: category='bar', proximityKeyword='cerca de mí'
+4. Busca con PostGIS: radio 10km (reducido para "cerca")
+5. IA responde: "Bares cerca de ti: [lista con distancias]"
+
+Resultado:
+✅ Solo bares a máximo 10km de Granada
+✅ Ordenados por distancia ascendente
+✅ Distancias precisas: "Bar X a 0.5km, Bar Y a 1.2km"
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ EJEMPLO 4: Cantidad específica insuficiente                                │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+Usuario en Granada: "5 hamburgueserías"
+
+Flow:
+1. parseIntent detecta: topN=5, textSearch='hamburguesa'
+2. Busca con PostGIS en Granada (50km)
+3. Encuentra solo 2 hamburgueserías
+4. IA (con prompt correcto) responde:
+   "En Granada tengo 2 hamburgueserías excelentes: [lista].
+    Como solo tengo 2 que cumplan nuestros estándares (+4.7★),
+    ¿te gustaría ver opciones en Málaga o Almería?"
+
+Resultado:
+✅ Honesto: dice que solo hay 2
+❌ NO rellena con lugares de otras ciudades sin avisar
+✅ Ofrece ampliar búsqueda claramente
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ EJEMPLO 5: Subcategoría específica                                         │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+Usuario en Granada: "sushi cerca"
+
+Flow:
+1. parseIntent detecta: textSearch='sushi', proximityKeyword='cerca'
+2. Busca con PostGIS: 
+   - radius_meters = 10000 (10km para "cerca")
+   - text_search_term = 'sushi'
+3. PostGIS filtra:
+   WHERE subcategory ILIKE '%sushi%'
+   OR ai_description ILIKE '%sushi%'
+   OR name ILIKE '%sushi%'
+4. IA responde: "Restaurantes de sushi cerca de ti: [lista]"
+
+Resultado:
+✅ Solo restaurantes que sirven sushi
+✅ Máximo 10km de distancia
+✅ Con distancias precisas
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ EJEMPLO 6: Conversación con contexto                                       │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+Usuario en Granada:
+Mensaje 1: "hoteles"
+→ IA: "5 hoteles en Granada: [lista]"
+
+Mensaje 2: "y que tengan piscina?"
+→ IA busca en historial: sabe que hablamos de hoteles en Granada
+→ Busca: hoteles + textSearch='piscina' + Granada
+→ IA: "De esos 5, estos 3 tienen piscina: [lista filtrada]"
+
+Resultado:
+✅ Mantiene contexto de conversación
+✅ No necesita repetir "hoteles en Granada"
+✅ Refina búsqueda anterior
+
+
+═══════════════════════════════════════════════════════════════════════════════
+                                  FIN DEL DOCUMENTO
+═══════════════════════════════════════════════════════════════════════════════
+
+📌 RESUMEN EJECUTIVO:
+
+1. ARQUITECTURA: Frontend (React) → Backend (Next.js API) → OpenAI + Supabase
+2. APIs: OpenAI GPT-4 + Google Geocoding + Supabase PostgreSQL/PostGIS
+3. VARIABLES: OPENAI_API_KEY, GOOGLE_MAPS_API_KEY, SUPABASE_URL/KEYS
+4. LÓGICA: Prioriza ciudad explícita > GPS genérico > proximidad explícita
+5. POSTGIS: Función search_places_by_proximity() con índice espacial GIST
+6. PROMPT: Sistema completo con reglas de ubicación, honestidad y calidad
+7. HISTORIAL: Guarda conversaciones en chat_history (con reset no destructivo)
+
+🎯 CARACTERÍSTICAS CLAVE:
+✅ Geolocalización GPS en tiempo real
+✅ Cálculo de distancias reales (Haversine + PostGIS)
+✅ Priorización inteligente de ubicaciones
+✅ Honestidad en cantidad de resultados
+✅ No mezcla ciudades sin avisar
+✅ Contexto conversacional (historial)
+✅ Fallbacks robustos (geocoding, coordenadas GPS)
+
+📝 ÚLTIMA ACTUALIZACIÓN: Noviembre 2024
+🔗 Repositorio: https://github.com/ActtaxIA/Casi_cinco_app
+👨‍💻 Desarrollador: Narciso Pardo Buendía
+
+
+

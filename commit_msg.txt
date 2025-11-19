@@ -1,0 +1,29 @@
+Fix CRITICO: Respetar ubicacion GPS en busquedas genericas
+
+PROBLEMA:
+Usuario en Granada: "hoteles"
+Sistema: Daba Madrid, Teruel, Alicante (TODA la BD)
+Esperado: Solo hoteles de Granada
+
+CAUSA:
+Solo usaba GPS si detectaba palabras "cerca", "aqui"
+Preguntas genericas ("hoteles", "restaurantes") buscaban en toda España
+
+SOLUCION - PRIORIDADES:
+1. Ubicacion EXPLICITA gana (ignora GPS)
+   - "hoteles en Murcia" -> Busca Murcia
+2. Sin ubicacion explicita PERO con GPS -> Usa GPS
+   - "hoteles" -> Busca donde esta el usuario
+3. Proximidad explicita -> GPS con radio pequeno
+   - "cerca" -> 10km, generica -> 50km
+
+CAMBIOS:
+- Nueva variable hasExplicitLocation (city/province/region)
+- Nueva variable shouldUseGPS (sin ubicacion explicita + GPS disponible)
+- Radio dinamico: 10km si "cerca", 50km si generico
+- Ahora SIEMPRE respeta ubicacion del usuario en genericas
+
+Ejemplo resuelto:
+- Usuario en Granada: "hoteles" -> Granada (50km)
+- Usuario en Granada: "hoteles cerca" -> Granada (10km)
+- Usuario en Granada: "hoteles en Murcia" -> Murcia (ignora GPS)
