@@ -2,7 +2,7 @@
 
 ## 📂 Contenido
 
-Este folder contiene 3 versiones de emails HTML profesionales para notificar a los lugares incluidos en Casi Cinco.
+Este folder contiene 4 versiones de emails HTML profesionales para notificar a los lugares incluidos en Casi Cinco.
 
 ### ✉️ Versiones Disponibles:
 
@@ -26,6 +26,17 @@ Este folder contiene 3 versiones de emails HTML profesionales para notificar a l
 - **Header:** Estrella grande, mensaje personal
 - **Elementos:** Quote destacado, checklist visual de criterios
 - **Ideal para:** Conectar emocionalmente, reconocer el esfuerzo
+
+#### **V4 - Completo con Tiers e IA** ⭐ **RECOMENDADO**
+`email-bienvenida-v4-completo-tiers-ia.html`
+- **Estilo:** Educativo, informativo, profesional
+- **Contenido exclusivo:**
+  - 💎 **Explicación completa del Sistema de Tiers** (Diamante a Bronce)
+  - 🤖 **Papel de la IA** en recomendaciones
+  - 📊 **Binomio rating + reseñas** explicado
+  - 🎯 **Ventaja competitiva** para el negocio
+- **Elementos:** Tabla visual de tiers, bullets de IA, destacados
+- **Ideal para:** Educar sobre el valor de Casi Cinco, diferenciación
 
 ---
 
