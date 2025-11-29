@@ -12,6 +12,18 @@
 
 **Casi Cinco** es una plataforma que te ayuda a descubrir los mejores restaurantes, bares y hoteles de España. Solo incluimos lugares con valoración mínima de **4.7 estrellas** en Google Maps.
 
+### 💎 Sistema de Tiers - Nuestro Diferenciador Clave
+
+**Lo que nos hace únicos:** No ordenamos solo por rating. Usamos un **sistema de tiers** que combina rating + número de reseñas para identificar los lugares verdaderamente excepcionales:
+
+- **💎 DIAMANTE** (4.8+ con 1000+ reseñas) - Top 0.1% de España
+- **🏆 PLATINO** (4.8+ con 500+ reseñas) - Top 1%
+- **🥇 ORO** (4.8+ con 200+ reseñas) - Top 5%
+- **🥈 PLATA** (4.7+ con 100+ reseñas) - Top 15%
+- **🥉 BRONCE** (4.7+ estrellas) - Calidad garantizada
+
+Este sistema es el **pilar de toda la aplicación**: mapa, chatbot IA, blog y recomendaciones siempre priorizan los tiers superiores.
+
 ### 🎯 Características Principales:
 
 - 🗺️ **Mapa Interactivo** - Visualiza lugares por categoría y ubicación
@@ -184,6 +196,11 @@ Luego ejecutar (opcional):
 ---
 
 ## 🎨 Características del Blog
+
+### Sistema de Tiers en el Blog:
+- ✅ **Artículos ordenados por tier** - Diamante primero, luego platino, luego oro
+- ✅ **Top 10 basado en calidad real** - No solo rating, sino el binomio rating + reseñas
+- ✅ **Misma filosofía que la app** - Coherencia total en toda la plataforma
 
 ### Sistema de Auto-Publicación (tipo Joomla):
 - ✅ Posts con fecha futura NO se muestran

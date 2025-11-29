@@ -98,18 +98,25 @@ Esta carpeta contiene la **documentación técnica completa** de todos los siste
 
 ---
 
-### 🎯 **Filtrado y Tiers**
+### 🎯 **Filtrado y Tiers** ⭐ **PILAR DE LA APP**
 
 #### `SISTEMA_FILTRADO.md`
 **Propósito:** Sistema de filtros avanzados basado en Tiers  
 **Incluye:**
-- Tiers: Diamond (4.9+), Platinum (4.8+), Gold (4.7+), Silver (4.6+), Bronze (4.5+)
+- **Sistema de Tiers - Nuestro diferenciador clave:**
+  - **💎 DIAMANTE** (4.8+ con 1000+ reseñas) - Top 0.1%
+  - **🏆 PLATINO** (4.8+ con 500+ reseñas) - Top 1%
+  - **🥇 ORO** (4.8+ con 200+ reseñas) - Top 5%
+  - **🥈 PLATA** (4.7+ con 100+ reseñas) - Top 15%
+  - **🥉 BRONCE** (4.7+ estrellas) - Calidad garantizada
+- Binomio rating + número de reseñas (no solo rating)
+- Aplicado en: Mapa, Chatbot, Blog, todas las búsquedas
 - Números reales por categoría
 - Lógica de filtrado
 - UI/UX de filtros
 
 **Audiencia:** Desarrolladores Frontend/Backend  
-**Frecuencia de uso:** ⭐⭐⭐ Según necesidad
+**Frecuencia de uso:** ⭐⭐⭐⭐⭐ **SISTEMA CORE**
 
 ---
 

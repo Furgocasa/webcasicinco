@@ -22,15 +22,34 @@ Este es tu mapa completo de toda la documentación reorganizada. **Nueva estruct
 └── archive/    → Histórico (snapshots, fixes, migraciones)
 ```
 
-### **2️⃣ Entiende el Sistema**
-📄 `docs/systems/FLUJO_COMPLETO_INDEXACION_ENRIQUECIMIENTO.md` ⭐ **DOCUMENTO CLAVE**
+### **2️⃣ Entiende el Sistema de Tiers** ⭐ **NUESTRO DIFERENCIADOR**
+📄 `lib/utils/tier-calculator.ts`
+
+**El pilar de Casi Cinco:** No ordenamos solo por rating. Usamos tiers que combinan rating + reseñas:
+- **💎 DIAMANTE** (4.8+ con 1000+ reseñas) - Top 0.1%
+- **🏆 PLATINO** (4.8+ con 500+ reseñas) - Top 1%
+- **🥇 ORO** (4.8+ con 200+ reseñas) - Top 5%
+- **🥈 PLATA** (4.7+ con 100+ reseñas) - Top 15%
+- **🥉 BRONCE** (4.7+ estrellas) - Calidad garantizada
+
+Este sistema se aplica en:
+- ✅ Mapa interactivo (marcadores con colores de tier)
+- ✅ Chatbot IA (recomendaciones priorizadas)
+- ✅ Blog (Top 10 ordenados por tier)
+- ✅ Todas las búsquedas y filtros
+
+### **3️⃣ Entiende el Flujo de Indexación**
+📄 `docs/systems/FLUJO_COMPLETO_INDEXACION_ENRIQUECIMIENTO.md` ⭐
+
+### **3️⃣ Entiende el Flujo de Indexación**
+📄 `docs/systems/FLUJO_COMPLETO_INDEXACION_ENRIQUECIMIENTO.md` ⭐
 
 Explica TODO el flujo de 2 fases:
 - **FASE 1:** Búsqueda e Indexación Rápida (sin IA)
 - **FASE 2:** Enriquecimiento con IA (OpenAI GPT-4)
 - **FASE 3:** Publicación Manual
 
-### **3️⃣ Conoce las Conexiones**
+### **4️⃣ Conoce las Conexiones**
 📄 `CONEXION_FRONTEND_BACKEND.md`
 
 Mapa completo de:
@@ -39,7 +58,7 @@ Mapa completo de:
 - Autenticación
 - Base de datos
 
-### **4️⃣ Comandos Útiles**
+### **5️⃣ Comandos Útiles**
 📄 `COMANDOS_UTILES.md`
 
 Tu guía rápida para:

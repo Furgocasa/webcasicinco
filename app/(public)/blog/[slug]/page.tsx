@@ -29,42 +29,90 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   }
 
-  // Construir URL de imagen destacada desde el primer lugar
-  let ogImage = post.first_place_photo || post.featured_image_url;
+  // 🎯 Obtener el PRIMER LUGAR (mejor tier) para la imagen OpenGraph
+  const { data: allPlaces } = await supabase
+    .from('places')
+    .select('photo_urls, rating, review_count, name')
+    .eq('category', post.category)
+    .eq('published', true)
+    .or(`city.eq.${post.location},province.eq.${post.location}`)
+    .gte('rating', 4.7);
   
-  // Si no tiene, intentar obtener del primer lugar de la ubicación
+  // Ordenar por tier (diamante primero) y obtener el primero
+  const sortedPlaces = (allPlaces || []).sort(comparePlacesByTier);
+  const firstPlace = sortedPlaces.length > 0 ? sortedPlaces[0] : null;
+  
+  // Imagen OpenGraph: siempre del primer lugar (mejor tier)
+  let ogImage = firstPlace?.photo_urls?.[0] || post.first_place_photo || post.featured_image_url;
+  
+  // Fallback a imagen por defecto de Casi Cinco si no hay foto
   if (!ogImage) {
-    const { data: places } = await supabase
-      .from('places')
-      .select('photo_urls')
-      .eq('category', post.category)
-      .eq('published', true)
-      .or(`city.eq.${post.location},province.eq.${post.location}`)
-      .order('rating', { ascending: false })
-      .limit(1);
+    ogImage = `${process.env.NEXT_PUBLIC_APP_URL}/images/opengraph_casicinco_wide.png`;
+  }
+  
+  // 📝 Meta description optimizada para redes sociales (max 155 caracteres)
+  const categoryEmoji = post.category === 'restaurante' ? '🍽️' : 
+                        post.category === 'bar' ? '🍺' : 
+                        post.category === 'hotel' ? '🏨' : '⭐';
+  
+  let metaDescription = post.meta_description;
+  
+  // Si no hay meta_description o es muy corta, generar una perfecta
+  if (!metaDescription || metaDescription.length < 100) {
+    const placeName = firstPlace ? firstPlace.name : '';
+    const placeRating = firstPlace ? `${firstPlace.rating}★` : '';
     
-    if (places && places.length > 0 && places[0].photo_urls && places[0].photo_urls.length > 0) {
-      ogImage = places[0].photo_urls[0];
+    if (placeName && post.location) {
+      // Ejemplo: "🍽️ Top 10 restaurantes en Murcia (2025). Encabeza La Pequeña Taberna con 4.9★. Solo lugares +4.7★ verificados en Google Maps."
+      metaDescription = `${categoryEmoji} ${post.title}. Encabeza ${placeName} con ${placeRating}. Solo lugares +4.7★ verificados en Google Maps.`;
+    } else {
+      // Fallback genérico
+      metaDescription = `${categoryEmoji} Descubre los mejores ${post.category}s en ${post.location}. Solo lugares excepcionales con +4.7★ en Google Maps. Verificado y actualizado.`;
+    }
+    
+    // Asegurar que no exceda 155 caracteres
+    if (metaDescription.length > 155) {
+      metaDescription = metaDescription.substring(0, 152) + '...';
     }
   }
   
+  // URL completa del artículo
+  const articleUrl = `${process.env.NEXT_PUBLIC_APP_URL}/blog/${params.slug}`;
+  const siteName = 'Casi Cinco';
+  
   return {
-    title: post.title,
-    description: post.meta_description || post.intro_text?.substring(0, 155),
+    title: `${post.title} | Casi Cinco`,
+    description: metaDescription,
     keywords: post.keywords || [],
+    authors: [{ name: 'Casi Cinco' }],
     openGraph: {
       title: post.title,
-      description: post.meta_description || post.intro_text?.substring(0, 155),
-      images: ogImage ? [ogImage] : [],
+      description: metaDescription,
+      url: articleUrl,
+      siteName: siteName,
+      locale: 'es_ES',
       type: 'article',
       publishedTime: post.created_at,
       modifiedTime: post.updated_at,
+      images: [
+        {
+          url: ogImage,
+          width: 1200,
+          height: 630,
+          alt: `${post.title} - ${firstPlace?.name || 'Casi Cinco'}`,
+        }
+      ],
     },
     twitter: {
       card: 'summary_large_image',
+      site: '@CasiCinco',
+      creator: '@CasiCinco',
       title: post.title,
-      description: post.meta_description || post.intro_text?.substring(0, 155),
-      images: ogImage ? [ogImage] : [],
+      description: metaDescription,
+      images: [ogImage],
+    },
+    alternates: {
+      canonical: articleUrl,
     },
   };
 }
@@ -130,6 +178,11 @@ export default async function BlogPostPage({ params }: Props) {
     }
   }
 
+  // Fallback a imagen por defecto
+  if (!firstPlacePhotoUrl) {
+    firstPlacePhotoUrl = `${process.env.NEXT_PUBLIC_APP_URL}/images/opengraph_casicinco_wide.png`;
+  }
+
   const postWithPlaces: BlogPostWithPlaces = {
     ...post,
     first_place_photo: firstPlacePhotoUrl,
@@ -143,55 +196,108 @@ export default async function BlogPostPage({ params }: Props) {
     .eq('id', post.id)
     .then();
 
-  // ✅ 4. Schema.org para SEO (Article + ItemList)
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.casicinco.com';
+
+  // ✅ 4. Schema.org mejorado para SEO (Article + ItemList + BreadcrumbList)
   const articleSchema = {
     "@context": "https://schema.org",
     "@type": "Article",
     "headline": post.title,
     "description": post.meta_description || post.intro_text?.substring(0, 200),
-    "image": post.featured_image_url || post.first_place_photo,
+    "image": {
+      "@type": "ImageObject",
+      "url": firstPlacePhotoUrl,
+      "width": 1200,
+      "height": 630
+    },
     "datePublished": post.created_at,
     "dateModified": post.updated_at,
     "author": {
       "@type": "Organization",
-      "name": "Casi Cinco"
+      "name": "Casi Cinco",
+      "url": baseUrl
     },
     "publisher": {
       "@type": "Organization",
       "name": "Casi Cinco",
+      "url": baseUrl,
       "logo": {
         "@type": "ImageObject",
-        "url": "https://casicinco.com/images/logo.png"
+        "url": `${baseUrl}/images/casi_cinco_blue.png`,
+        "width": 600,
+        "height": 60
       }
+    },
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": `${baseUrl}/blog/${params.slug}`
     }
   };
 
-  // ItemList Schema para el Top 10
+  // ItemList Schema para el Top 10 (mejorado con tier info)
   const itemListSchema = {
     "@context": "https://schema.org",
     "@type": "ItemList",
     "name": post.title,
-    "numberOfItems": places?.length || 0,
-    "itemListElement": places?.map((place, index) => ({
+    "description": `Top 10 ${post.category} en ${post.location} ordenados por calidad (rating + reseñas)`,
+    "numberOfItems": sortedPlaces?.length || 0,
+    "itemListElement": sortedPlaces?.map((place, index) => ({
       "@type": "ListItem",
       "position": index + 1,
       "item": {
         "@type": place.category === 'restaurante' ? 'Restaurant' : 
                 place.category === 'hotel' ? 'Hotel' :
-                place.category === 'bar' ? 'BarOrPub' :
-                place.category === 'cafe' ? 'CafeOrCoffeeShop' : 'LocalBusiness',
+                place.category === 'bar' ? 'BarOrPub' : 'LocalBusiness',
         "name": place.name,
-        "url": `https://casicinco.com/${place.category}/${place.province}/${place.slug}`,
+        "url": `${baseUrl}/${place.category}/${place.province}/${place.slug}`,
+        "image": place.photo_urls?.[0],
         "aggregateRating": {
           "@type": "AggregateRating",
           "ratingValue": place.rating,
-          "reviewCount": place.review_count
+          "reviewCount": place.review_count,
+          "bestRating": 5,
+          "worstRating": 1
         },
         "address": {
           "@type": "PostalAddress",
           "addressLocality": place.city,
           "addressRegion": place.province,
           "addressCountry": "ES"
+        },
+        "geo": place.latitude && place.longitude ? {
+          "@type": "GeoCoordinates",
+          "latitude": place.latitude,
+          "longitude": place.longitude
+        } : undefined
+      }
+    })) || []
+  };
+
+  // BreadcrumbList Schema
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Inicio",
+        "item": baseUrl
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Blog",
+        "item": `${baseUrl}/blog`
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": post.title,
+        "item": `${baseUrl}/blog/${params.slug}`
+      }
+    ]
+  };
         }
       }
     })) || []
