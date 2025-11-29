@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { comparePlacesByTier } from '@/lib/utils/tier-calculator';
 
 export const dynamic = 'force-dynamic';
 
@@ -44,16 +45,13 @@ export async function GET(request: NextRequest) {
     // Enriquecer cada post con la foto del primer lugar de su Top 10
     const enrichedPosts = await Promise.all(
       (posts || []).map(async (post) => {
-        // Obtener el primer lugar (mejor valorado) para este post
+        // Obtener lugares para este post
         let placesQuery = supabase
           .from('places')
-          .select('photos, photo_urls')
+          .select('photos, photo_urls, rating, review_count')
           .eq('category', post.category)
           .eq('published', true)
-          .gte('rating', 4.7)
-          .order('rating', { ascending: false })
-          .order('review_count', { ascending: false })
-          .limit(1);
+          .gte('rating', 4.7);
 
         // Filtrar por ubicación
         if (post.location_type === 'city') {
@@ -65,7 +63,10 @@ export async function GET(request: NextRequest) {
         }
 
         const { data: places } = await placesQuery;
-        const firstPlace = places && places.length > 0 ? places[0] : null;
+        
+        // 🎯 Ordenar por tier (diamante primero) y obtener el primero
+        const sortedPlaces = (places || []).sort(comparePlacesByTier);
+        const firstPlace = sortedPlaces.length > 0 ? sortedPlaces[0] : null;
 
         // Obtener foto del primer lugar (SOLO Supabase Storage)
         let photoReference = null;

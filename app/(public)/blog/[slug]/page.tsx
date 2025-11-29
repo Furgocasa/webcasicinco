@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createClient as createClientBrowser } from '@supabase/supabase-js';
 import { BlogPostContent } from '@/components/blog/BlogPostContent';
 import type { BlogPostWithPlaces } from '@/types/blog';
+import { comparePlacesByTier } from '@/lib/utils/tier-calculator';
 
 type Props = {
   params: { slug: string }
@@ -113,14 +114,17 @@ export default async function BlogPostPage({ params }: Props) {
     .eq('category', post.category)
     .eq('published', true)
     .or(`city.eq.${post.location},province.eq.${post.location}`)
-    .order('rating', { ascending: false })
-    .order('review_count', { ascending: false })
-    .limit(10);
+    .gte('rating', 4.7); // Traer todos los lugares +4.7★
+
+  // 🎯 Ordenar por tier (diamante primero) en memoria
+  const sortedPlaces = (places || [])
+    .sort(comparePlacesByTier)
+    .slice(0, 10); // Top 10
 
   // Obtener URL de foto del primer lugar (priorizar Supabase)
   let firstPlacePhotoUrl = post.first_place_photo;
-  if (!firstPlacePhotoUrl && places && places.length > 0) {
-    const firstPlace = places[0];
+  if (!firstPlacePhotoUrl && sortedPlaces && sortedPlaces.length > 0) {
+    const firstPlace = sortedPlaces[0];
     if (firstPlace.photo_urls && firstPlace.photo_urls.length > 0) {
       firstPlacePhotoUrl = firstPlace.photo_urls[0]; // URL completa de Supabase
     }
@@ -129,7 +133,7 @@ export default async function BlogPostPage({ params }: Props) {
   const postWithPlaces: BlogPostWithPlaces = {
     ...post,
     first_place_photo: firstPlacePhotoUrl,
-    places: places || [],
+    places: sortedPlaces,
   };
 
   // Incrementar contador de vistas (fire and forget)

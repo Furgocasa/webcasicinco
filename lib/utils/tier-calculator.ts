@@ -114,3 +114,47 @@ export function getTierMarkerColor(tier: QualityTier): string {
   return colors[tier];
 }
 
+/**
+ * Obtiene el peso numérico de un tier para ordenación
+ * Valores más altos = mejor tier
+ */
+export function getTierWeight(tier: QualityTier): number {
+  const weights: Record<QualityTier, number> = {
+    diamond: 5,
+    platinum: 4,
+    gold: 3,
+    silver: 2,
+    bronze: 1,
+    none: 0,
+  };
+  return weights[tier];
+}
+
+/**
+ * Función de comparación para ordenar lugares por tier (diamante primero)
+ * Dentro del mismo tier, ordena por rating y luego por número de reseñas
+ */
+export function comparePlacesByTier(
+  a: { rating: number; review_count: number },
+  b: { rating: number; review_count: number }
+): number {
+  const tierA = calculateQualityTier(a.rating, a.review_count);
+  const tierB = calculateQualityTier(b.rating, b.review_count);
+  
+  const weightA = getTierWeight(tierA);
+  const weightB = getTierWeight(tierB);
+  
+  // 1. Ordenar por tier (mayor peso primero)
+  if (weightA !== weightB) {
+    return weightB - weightA;
+  }
+  
+  // 2. Dentro del mismo tier, ordenar por rating
+  if (a.rating !== b.rating) {
+    return b.rating - a.rating;
+  }
+  
+  // 3. Si mismo tier y rating, ordenar por número de reseñas
+  return b.review_count - a.review_count;
+}
+

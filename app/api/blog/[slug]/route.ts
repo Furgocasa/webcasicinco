@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { comparePlacesByTier } from '@/lib/utils/tier-calculator';
 
 export const dynamic = 'force-dynamic';
 
@@ -42,10 +43,7 @@ export async function GET(
       .select('*')
       .eq('category', post.category)
       .eq('published', true)
-      .gte('rating', 4.7)
-      .order('rating', { ascending: false })
-      .order('review_count', { ascending: false })
-      .limit(10);
+      .gte('rating', 4.7); // Traer todos los lugares +4.7★
 
     // Filtrar por ubicación
     if (post.location_type === 'city') {
@@ -62,12 +60,17 @@ export async function GET(
       console.error('Error fetching places:', placesError);
     }
 
+    // 🎯 Ordenar por tier (diamante primero) en memoria
+    const sortedPlaces = (places || [])
+      .sort(comparePlacesByTier)
+      .slice(0, 10); // Top 10
+
     // Obtener foto del primer lugar para la imagen destacada
     let photoReference = null;
     let photoIsUrl = false;
     
-    if (places && places.length > 0) {
-      const firstPlace = places[0];
+    if (sortedPlaces && sortedPlaces.length > 0) {
+      const firstPlace = sortedPlaces[0];
       // SOLO usar photo_urls de Supabase Storage (GRATIS)
       if (firstPlace.photo_urls && firstPlace.photo_urls.length > 0) {
         photoReference = firstPlace.photo_urls[0]; // URL completa de Supabase
@@ -81,7 +84,7 @@ export async function GET(
       success: true,
       post: {
         ...post,
-        places: places || [],
+        places: sortedPlaces,
         first_place_photo: photoReference,
         first_place_photo_is_url: photoIsUrl
       }

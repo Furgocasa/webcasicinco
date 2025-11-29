@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { createClient } from '@/lib/supabase/server';
 import { BlogListContent } from '@/components/blog/BlogListContent';
+import { comparePlacesByTier } from '@/lib/utils/tier-calculator';
 
 // ✅ 1. Metadata estática para el listado del blog
 export const metadata: Metadata = {
@@ -37,16 +38,13 @@ export default async function BlogPage() {
   // Enriquecer cada post con la foto del primer lugar de su Top 10
   const enrichedPosts = await Promise.all(
     (posts || []).map(async (post) => {
-      // Obtener el primer lugar (mejor valorado) para este post
+      // Obtener lugares para este post
       let placesQuery = supabase
         .from('places')
-        .select('photo_urls, photos')
+        .select('photo_urls, photos, rating, review_count')
         .eq('category', post.category)
         .eq('published', true)
-        .gte('rating', 4.7)
-        .order('rating', { ascending: false})
-        .order('review_count', { ascending: false })
-        .limit(1);
+        .gte('rating', 4.7);
 
       // Filtrar por ubicación
       if (post.location_type === 'city') {
@@ -58,7 +56,10 @@ export default async function BlogPage() {
       }
 
       const { data: places } = await placesQuery;
-      const firstPlace = places && places.length > 0 ? places[0] : null;
+      
+      // 🎯 Ordenar por tier (diamante primero) y obtener el primero
+      const sortedPlaces = (places || []).sort(comparePlacesByTier);
+      const firstPlace = sortedPlaces.length > 0 ? sortedPlaces[0] : null;
 
       // Obtener URL de foto del primer lugar (SOLO Supabase Storage)
       let photoUrl = null;
