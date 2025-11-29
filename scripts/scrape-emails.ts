@@ -3,9 +3,22 @@
  * Sin coste de APIs - scraping directo de websites públicos
  */
 
+import { config } from 'dotenv';
 import { createClient } from '@supabase/supabase-js';
 import axios from 'axios';
 import * as cheerio from 'cheerio';
+
+// Cargar variables de entorno desde .env.local
+config({ path: '.env.local' });
+
+// Debug: verificar que las variables estén cargadas
+if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+  console.error('❌ Error: Variables de entorno no cargadas');
+  console.error('   NEXT_PUBLIC_SUPABASE_URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? 'OK' : 'MISSING');
+  console.error('   SUPABASE_SERVICE_ROLE_KEY:', process.env.SUPABASE_SERVICE_ROLE_KEY ? 'OK' : 'MISSING');
+  console.error('\n💡 Asegúrate de que .env.local existe y contiene las variables necesarias\n');
+  process.exit(1);
+}
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -279,7 +292,7 @@ async function main() {
     const withEmail = stats?.filter(p => p.email).length || 0;
     
     console.log(`📊 Estadísticas:`);
-    console.log(`   Total lugares publicados: ${total}`);
+    console.log(`   Total lugares: ${total}`);
     console.log(`   Con website: ${withWebsite} (${((withWebsite/total)*100).toFixed(1)}%)`);
     console.log(`   Con email: ${withEmail} (${((withEmail/total)*100).toFixed(1)}%)`);
     console.log(`   Sin email: ${withWebsite - withEmail}`);
@@ -291,11 +304,10 @@ async function main() {
   if (command === 'process') {
     console.log(`🚀 Procesando hasta ${limitArg} lugares con website pero sin email...\n`);
     
-    // Obtener lugares sin email pero con website
+    // Obtener lugares sin email pero con website (TODOS, no solo publicados)
     const { data: places, error } = await supabase
       .from('places')
       .select('id, name, website')
-      .eq('published', true)
       .not('website', 'is', null)
       .is('email', null)
       .limit(limitArg);
