@@ -38,6 +38,32 @@ Este folder contiene 4 versiones de emails HTML profesionales para notificar a l
 - **Elementos:** Tabla visual de tiers, bullets de IA, destacados
 - **Ideal para:** Educar sobre el valor de Casi Cinco, diferenciación
 
+#### **V5 - Datos y Transparencia** 📊
+`email-bienvenida-v5-datos-transparencia.html`
+- **Estilo:** Técnico, analítico, basado en datos
+- **Contenido exclusivo:**
+  - 📈 **Stats en header** (4.7+, 1000+ lugares, 100% verificado)
+  - 🔍 **Proceso de análisis paso a paso** (4 etapas)
+  - 📊 **Comparativa visual** (5.0 con 10 vs 4.8 con 1000)
+  - 💻 **Tiers compactos** con gradientes únicos
+  - 🤖 **Funciones de IA** en formato cards
+- **Header:** Negro elegante con stats
+- **Ideal para:** Negocios que valoran datos, transparencia y procesos
+
+#### **V6 - Beneficios y ROI** 💰 **ORIENTADO A NEGOCIO**
+`email-bienvenida-v6-beneficios-roi.html`
+- **Estilo:** Comercial, orientado a resultados, persuasivo
+- **Contenido exclusivo:**
+  - 🎯 **3 beneficios principales** con iconos grandes
+    1. Público Cualificado
+    2. Recomendaciones Inteligentes IA
+    3. Diferenciación por Mérito
+  - 💎 **Tiers con beneficios específicos** (visibilidad, prioridad)
+  - 💬 **Ejemplos reales de conversaciones IA** (casos de uso)
+  - 📈 **Enfoque en ROI** sin publicidad pagada
+- **Hero:** Visual impactante con emoji grande
+- **Ideal para:** Convencer sobre el valor comercial, enfoque business
+
 ---
 
 ## 🎨 Características Comunes
