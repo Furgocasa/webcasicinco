@@ -24,13 +24,11 @@ import {
   ExternalLink,
   MoreVertical,
   ChevronDown,
-  ChevronUp,
-  Mail
+  ChevronUp
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { calculateQualityTier, getTierMarkerColor, getTierInfo } from '@/lib/utils/tier-calculator';
 import { getPlacePhotoUrl } from '@/lib/utils/photo-helper';
-import { EmailScrapingModal } from '@/components/admin/EmailScrapingModal';
 
 const libraries: ("places" | "drawing" | "geometry" | "visualization")[] = ["places"];
 
@@ -61,7 +59,6 @@ export default function LugaresPage() {
   const [showMap, setShowMap] = useState(true);
   const [enriching, setEnriching] = useState(false);
   const [enrichProgress, setEnrichProgress] = useState({ current: 0, total: 0 });
-  const [showEmailModal, setShowEmailModal] = useState(false);
   
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
@@ -453,7 +450,7 @@ export default function LugaresPage() {
             )}
           </div>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+        <div className="grid grid-cols-3 md:flex gap-2">
           <Button onClick={loadPlaces} variant="outline" size="sm" disabled={enriching}>
             <RefreshCw className="h-4 w-4 md:mr-2" />
             <span className="hidden md:inline">Recargar</span>
@@ -461,10 +458,6 @@ export default function LugaresPage() {
           <Button onClick={handleEnrichPlaces} variant="primary" size="sm" disabled={enriching}>
             <span className="md:hidden">🎨</span>
             <span className="hidden md:inline">{enriching ? '⏳ Procesando...' : '🎨 Enriquecer IA'}</span>
-          </Button>
-          <Button onClick={() => setShowEmailModal(true)} variant="outline" size="sm" disabled={enriching}>
-            <Mail className="h-4 w-4 md:mr-2" />
-            <span className="hidden md:inline">Buscar Emails</span>
           </Button>
           <Button onClick={handlePublishAll} variant="outline" size="sm" disabled={enriching}>
             <Eye className="h-4 w-4 md:mr-2" />
@@ -1032,16 +1025,6 @@ export default function LugaresPage() {
           </div>
         </CardContent>
       </Card>
-
-      {/* Modal de Email Scraping */}
-      <EmailScrapingModal
-        isOpen={showEmailModal}
-        onClose={() => {
-          setShowEmailModal(false);
-          loadPlaces(); // Recargar para mostrar los nuevos emails
-        }}
-        limit={100}
-      />
     </div>
   );
 }
