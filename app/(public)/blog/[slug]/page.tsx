@@ -298,35 +298,6 @@ export default async function BlogPostPage({ params }: Props) {
       }
     ]
   };
-        }
-      }
-    })) || []
-  };
-
-  // Breadcrumb Schema
-  const breadcrumbSchema = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    "itemListElement": [
-      {
-        "@type": "ListItem",
-        "position": 1,
-        "name": "Inicio",
-        "item": "https://casicinco.com"
-      },
-      {
-        "@type": "ListItem",
-        "position": 2,
-        "name": "Blog",
-        "item": "https://casicinco.com/blog"
-      },
-      {
-        "@type": "ListItem",
-        "position": 3,
-        "name": post.title
-      }
-    ]
-  };
 
   return (
     <>
