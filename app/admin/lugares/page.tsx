@@ -24,8 +24,7 @@ import {
   ExternalLink,
   MoreVertical,
   ChevronDown,
-  ChevronUp,
-  Mail
+  ChevronUp
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { calculateQualityTier, getTierMarkerColor, getTierInfo } from '@/lib/utils/tier-calculator';
@@ -451,7 +450,7 @@ export default function LugaresPage() {
             )}
           </div>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+        <div className="grid grid-cols-3 md:flex gap-2">
           <Button onClick={loadPlaces} variant="outline" size="sm" disabled={enriching}>
             <RefreshCw className="h-4 w-4 md:mr-2" />
             <span className="hidden md:inline">Recargar</span>
@@ -459,14 +458,6 @@ export default function LugaresPage() {
           <Button onClick={handleEnrichPlaces} variant="primary" size="sm" disabled={enriching}>
             <span className="md:hidden">🎨</span>
             <span className="hidden md:inline">{enriching ? '⏳ Procesando...' : '🎨 Enriquecer IA'}</span>
-          </Button>
-          <Button 
-            onClick={() => window.open('/admin/scrape-emails', '_blank')} 
-            variant="outline" 
-            size="sm"
-          >
-            <Mail className="h-4 w-4 md:mr-2" />
-            <span className="hidden md:inline">Buscar Emails</span>
           </Button>
           <Button onClick={handlePublishAll} variant="outline" size="sm" disabled={enriching}>
             <Eye className="h-4 w-4 md:mr-2" />

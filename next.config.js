@@ -34,30 +34,6 @@ const nextConfig = {
     STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
     STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
   },
-  // Excluir cheerio y axios del bundle del cliente (solo servidor)
-  webpack: (config, { isServer }) => {
-    if (!isServer) {
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        fs: false,
-        net: false,
-        tls: false,
-        dns: false,
-        child_process: false,
-        'undici': false,
-        'cheerio': false,
-        'axios': false,
-      };
-    }
-    
-    // Marcar como externos para el cliente
-    config.externals = config.externals || [];
-    if (!isServer) {
-      config.externals.push('cheerio', 'axios', 'undici');
-    }
-    
-    return config;
-  },
 };
 
 module.exports = nextConfig;
