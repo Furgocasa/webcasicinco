@@ -3,9 +3,6 @@
  * Usado durante la indexación de lugares
  */
 
-import axios from 'axios';
-import * as cheerio from 'cheerio';
-
 // Regex para extraer emails
 const EMAIL_REGEX = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/gi;
 
@@ -76,6 +73,10 @@ export async function scrapeEmailFromWebsite(
   if (!website) {
     return { email: null, source: 'no_website' };
   }
+  
+  // Importaciones dinámicas para evitar problemas de build
+  const axios = (await import('axios')).default;
+  const cheerio = await import('cheerio');
   
   const baseUrl = normalizeUrl(website);
   

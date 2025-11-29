@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import axios from 'axios';
-import * as cheerio from 'cheerio';
 
 // Regex para extraer emails
 const EMAIL_REGEX = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/gi;
@@ -67,6 +65,10 @@ function normalizeUrl(url: string): string {
  * Busca email en una URL
  */
 async function scrapeEmailFromUrl(url: string): Promise<{ email: string | null; source: string }> {
+  // Importaciones dinámicas para evitar problemas de build
+  const axios = (await import('axios')).default;
+  const cheerio = await import('cheerio');
+  
   const baseUrl = normalizeUrl(url);
   
   try {
