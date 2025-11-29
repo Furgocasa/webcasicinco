@@ -15,7 +15,8 @@
     "test:ui": "playwright test --ui",
     "test:debug": "playwright test --debug",
     "test:report": "playwright show-report TESTERS/reports",
-    "social-media": "tsx scripts/find-social-media.ts"
+    "social-media": "tsx scripts/find-social-media.ts",
+    "scrape-emails": "tsx scripts/scrape-emails.ts"
   },
   "dependencies": {
     "@googlemaps/markerclusterer": "^2.6.2",

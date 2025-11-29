@@ -64,6 +64,9 @@ export interface Place {
   longitude: number;
   phone?: string;
   website?: string;
+  email?: string; // 🆕 Email del lugar
+  email_verified?: boolean; // 🆕 Si el email ha sido verificado
+  email_source?: string; // 🆕 Fuente: 'website', 'manual', 'google'
   price_level?: number;
   ai_description?: string;
   ai_review_summary?: string;
