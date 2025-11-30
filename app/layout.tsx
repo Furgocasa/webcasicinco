@@ -10,6 +10,7 @@ import GoogleAnalytics from '@/components/GoogleAnalytics';
 import PageTracker from '@/components/PageTracker';
 import PageViewTracker from '@/components/PageViewTracker';
 import { WelcomeModal } from '@/components/auth/WelcomeModal';
+import ConditionalBackToTop from '@/components/ui/ConditionalBackToTop';
 import { MapProvider } from '@/lib/contexts/MapContext';
 import './globals.css';
 
@@ -111,6 +112,7 @@ export default function RootLayout({
           <main>
             {children}
           </main>
+          <ConditionalBackToTop />
           <ChatbotFloating />
           <WelcomeModal />
           {/* PaywallModal desactivado - Solo bloqueo visual en páginas protegidas */}
