@@ -14,9 +14,11 @@ export default function ContactoPage() {
     email: '',
     subject: '',
     message: '',
+    acceptPrivacy: false,
   });
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
+  const [error, setError] = useState('');
 
   // Establecer título de la página
   useEffect(() => {
@@ -26,13 +28,30 @@ export default function ContactoPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError('');
 
-    // Simular envío (aquí deberías conectar con tu backend)
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    setSent(true);
-    setLoading(false);
-    setFormData({ name: '', email: '', subject: '', message: '' });
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setSent(true);
+        setFormData({ name: '', email: '', subject: '', message: '', acceptPrivacy: false });
+      } else {
+        setError(data.error || 'Error al enviar el mensaje');
+      }
+    } catch (err) {
+      setError('Error al enviar el mensaje. Por favor, intenta de nuevo o escribe directamente a info@casicinco.com');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -86,6 +105,12 @@ export default function ContactoPage() {
                     </div>
                   ) : (
                     <form onSubmit={handleSubmit} className="space-y-4">
+                      {error && (
+                        <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">
+                          <p className="text-sm">{error}</p>
+                        </div>
+                      )}
+
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                           Nombre
@@ -139,9 +164,33 @@ export default function ContactoPage() {
                         />
                       </div>
 
+                      {/* Checkbox de privacidad */}
+                      <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                        <input
+                          type="checkbox"
+                          id="acceptPrivacy"
+                          checked={formData.acceptPrivacy}
+                          onChange={(e) => setFormData({ ...formData, acceptPrivacy: e.target.checked })}
+                          required
+                          className="mt-1 h-4 w-4 text-[#063971] focus:ring-[#063971] border-gray-300 rounded"
+                        />
+                        <label htmlFor="acceptPrivacy" className="text-sm text-gray-700">
+                          Acepto la{' '}
+                          <Link 
+                            href="/privacidad" 
+                            target="_blank"
+                            className="text-[#063971] hover:underline font-medium"
+                          >
+                            política de privacidad
+                          </Link>
+                          {' '}y el tratamiento de mis datos personales para responder a mi consulta
+                        </label>
+                      </div>
+
                       <Button
                         type="submit"
                         loading={loading}
+                        disabled={!formData.acceptPrivacy}
                         className="w-full bg-[#063971] text-white hover:bg-[#052d5a]"
                       >
                         <Send className="h-4 w-4 mr-2" />
