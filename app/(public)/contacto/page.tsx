@@ -158,6 +158,16 @@ export default function ContactoPage() {
                   <h3 className="text-xl font-bold text-gray-900 mb-4">Contacto Directo</h3>
                   <div className="space-y-4 text-gray-700">
                     <div>
+                      <p className="font-semibold mb-1">Email Principal</p>
+                      <a 
+                        href="mailto:info@casicinco.com"
+                        className="text-[#063971] hover:underline text-lg font-medium"
+                      >
+                        info@casicinco.com
+                      </a>
+                    </div>
+                    <hr className="border-gray-200" />
+                    <div>
                       <p className="font-semibold mb-1">Email General</p>
                       <a 
                         href="mailto:hola@casicinco.com"
