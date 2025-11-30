@@ -76,10 +76,6 @@ export default function HomePage() {
       <main className="min-h-screen">
         {/* 1. HERO SECTION - EL GANCHO */}
         <section className="relative bg-[#063971] text-white overflow-hidden">
-          {/* Decorative background */}
-          <div className="absolute inset-0 bg-black opacity-10"></div>
-          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
-          
           <div className="relative container mx-auto px-4 py-20 md:py-40 pb-24 md:pb-44">
             <div className="max-w-4xl mx-auto text-center">
               {/* Badge */}
