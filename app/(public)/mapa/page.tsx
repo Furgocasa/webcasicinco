@@ -24,6 +24,7 @@ import { Card } from '@/components/ui/Card';
 import BottomNavigation from '@/components/mobile/BottomNavigation';
 import BottomSheet from '@/components/mobile/BottomSheet';
 import LoginOverlay from '@/components/auth/LoginOverlay';
+import RoutePromoModal from '@/components/modals/RoutePromoModal';
 import type { PlaceWithTier, PlaceFilters, QualityTier, ReviewsRange } from '@/types/filters';
 import { calculateQualityTier, getTierMarkerColor, getTierInfo } from '@/lib/utils/tier-calculator';
 import { trackEvent, EVENTS, CATEGORIES as ANALYTICS_CATEGORIES } from '@/lib/analytics/tracker';
@@ -1182,6 +1183,9 @@ export default function MapPage() {
 
   return (
     <div className="flex flex-col h-[calc(100vh-64px)]">
+      {/* Modal Promocional de Rutas */}
+      <RoutePromoModal />
+      
       <div className="flex-1 flex overflow-hidden relative pb-16 md:pb-0">
         {/* Overlay de Login para usuarios no autenticados */}
         {!authLoading && !user && <LoginOverlay feature="mapa" />}

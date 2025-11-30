@@ -1,5 +1,127 @@
 # 📝 Changelog - Casi Cinco
 
+## [30 Noviembre 2025] - 🚀 v1.0.0 STABLE - Primera Versión Oficial de Producción
+
+### 🎉 LANZAMIENTO OFICIAL v1.0.0
+**¡Casi Cinco sale oficialmente de BETA y se convierte en la v1.0 STABLE!**
+
+Después de meses de desarrollo, optimización y mejoras continuas, Casi Cinco alcanza su primera versión estable de producción con todas las características principales completamente funcionales y optimizadas.
+
+### ✨ NUEVA FEATURE: Modal Promocional de Rutas
+- **OBJETIVO:** Fomentar el uso del planificador de rutas (característica diferenciadora)
+- **UBICACIÓN:** Aparece en `/mapa` solo para usuarios registrados
+- **FRECUENCIA:** Cada 7 días (configurable)
+- **VARIANTES:** 3 mensajes diferentes que rotan aleatoriamente:
+  1. "¿Sabías que...?" - Énfasis en optimización automática
+  2. "¡Planifica tu viaje!" - Énfasis en encontrar lugares en trayecto
+  3. "Nueva función: Rutas" - Énfasis en calidad (4.7+ estrellas, tiers)
+- **UX:** 
+  - Aparece después de 3 segundos (no invasivo)
+  - Fácil de cerrar (X o click fuera)
+  - Checkbox "No volver a mostrar"
+  - CTA claro: "Crear mi ruta" → `/ruta`
+  - Diseño moderno con gradientes y animaciones
+- **LOCAL STORAGE:** Control de frecuencia y preferencias del usuario
+- **ANALYTICS READY:** Preparado para trackear conversión
+
+### 🧭 NUEVA FEATURE: Sección "Información" en Menú Móvil
+- **AGREGADO:** Nueva sección después de "Top 10" en menú hamburguesa
+- **LINKS IMPORTANTES:**
+  - 📧 Contacto (verde) → `/contacto` - 56 FAQs
+  - 💰 Precios (morado) → `/pricing` - Planes y suscripción
+  - 📄 Metodología (índigo) → `/metodologia` - Sistema de tiers
+  - ℹ️ Sobre Nosotros (azul) → `/sobre-nosotros` - Historia
+- **UX:** Cada opción con icono, color y hover específico
+- **ACCESIBILIDAD:** Páginas clave ahora accesibles en móvil
+
+### 📚 Características Principales de v1.0.0
+
+#### 🗺️ Mapa Interactivo
+- 3,500+ lugares verificados en toda España
+- Filtros avanzados (categoría, provincia, ciudad, rating, precio, tiers)
+- Clustering inteligente para performance
+- Marcadores de colores según tier (Diamante, Platino, Oro, Plata, Bronce)
+- Optimización MapContext (66% menos llamadas a Google Maps API)
+
+#### 🤖 Chatbot IA "Tío Viajero"
+- GPT-4o-mini con geolocalización GPS real
+- Búsquedas por proximidad (PostGIS con ST_DWithin)
+- Desambiguación inteligente (provincia vs ciudad)
+- 25+ tipos de cocina soportados
+- Historial de conversación
+- Rate limiting (20 msg/min)
+
+#### 📍 Planificador de Rutas
+- Optimización automática de distancias
+- Múltiples paradas
+- Guardar rutas favoritas
+- Compartir rutas
+- **AHORA CON MODAL PROMOCIONAL para aumentar uso**
+
+#### 📝 Blog SEO
+- 29 artículos "Top 10" optimizados
+- SSR/SSG para rendimiento
+- Auto-publicación programada (estilo Joomla)
+- Ordenado por tiers (Diamante primero)
+- Sitemap unificado + sitemap de imágenes
+
+#### 💎 Sistema de Tiers
+- Diamante (4.8+ con 1000+ reseñas) - Top 0.1%
+- Platino (4.8+ con 500+) - Top 1%
+- Oro (4.8+ con 200+) - Top 5%
+- Plata (4.7+ con 100+) - Top 15%
+- Bronce (4.7+) - Calidad garantizada
+
+#### 📧 Contacto y Soporte
+- Página de contacto rediseñada
+- 56 FAQs organizadas en 5 categorías
+- Filtros interactivos
+- Email: info@casicinco.com
+- Tiempo de respuesta: < 24h laborables
+
+#### 🔒 Seguridad y Privacidad
+- Información técnica sensible eliminada de FAQs públicas
+- Autenticación con Google OAuth
+- GDPR compliant
+- HTTPS obligatorio
+
+#### 💰 Monetización
+- Trial gratuito 30 días sin tarjeta
+- Plan Mensual: 2,99€/mes
+- Plan Anual: 24,99€/año (ahorro 40%)
+- Pagos seguros con sistema certificado
+
+#### 📊 Optimizaciones de Costos
+- Ahorro total: ~€108,300/año
+- Fotos en Supabase Storage (€45k/año ahorrado)
+- Sin fallback blog (€44k/año ahorrado)
+- MapContext optimizado (€15k/año ahorrado)
+- Cache de búsquedas (€3k/año ahorrado)
+- Costo actual Google Photos API: €0/mes
+
+### 📈 Estadísticas v1.0.0
+- **Lugares**: 3,500+ verificados en 50 provincias
+- **Fotos**: 96.8% de lugares con imágenes
+- **Categorías**: Restaurantes, Hoteles, Bares
+- **Blog posts**: 29 artículos SEO
+- **FAQs**: 56 preguntas
+- **Usuarios**: Sistema de suscripción activo
+- **Performance**: Optimizado para desktop, tablet y móvil
+
+### 🎯 Próximas Mejoras (v1.1.0)
+- Analytics de conversión del modal de rutas
+- Búsqueda en tiempo real dentro de FAQs
+- Notificaciones push para usuarios premium
+- Expansión a Portugal
+- Apps nativas iOS/Android
+
+### 🙏 Agradecimientos
+Esta versión 1.0 marca un hito importante en el desarrollo de Casi Cinco. Gracias a todos los usuarios beta que han ayudado a testear y mejorar la plataforma.
+
+**De BETA a PRODUCCIÓN: El viaje continúa. 🚀**
+
+---
+
 ## [30 Noviembre 2025] - BETA 101: Página de Contacto Mejorada + FAQs Expandidas 📞
 
 ### ✨ NUEVA FEATURE: Página de Contacto Rediseñada
