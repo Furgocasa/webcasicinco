@@ -76,7 +76,8 @@ export default function HomePage() {
       <main className="min-h-screen">
         {/* 1. HERO SECTION - EL GANCHO */}
         <section className="relative bg-[#063971] text-white overflow-hidden">
-          <div className="relative container mx-auto px-4 py-20 md:py-40 pb-24 md:pb-44">
+          <div className="absolute inset-0 bg-[#063971]"></div>
+          <div className="relative container mx-auto px-4 py-20 md:py-40 pb-24 md:pb-44 z-10">
             <div className="max-w-4xl mx-auto text-center">
               {/* Badge */}
               <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-3 md:px-4 py-1.5 md:py-2 rounded-full mb-6 md:mb-8 animate-fade-in">
@@ -802,8 +803,9 @@ export default function HomePage() {
         </section>
 
         {/* CTA FINAL SIMPLIFICADO */}
-        <section className="py-20 bg-[#063971] text-white">
-          <div className="container mx-auto px-4 text-center">
+        <section className="py-20 bg-[#063971] text-white relative overflow-hidden">
+          <div className="absolute inset-0 bg-[#063971]"></div>
+          <div className="container mx-auto px-4 text-center relative z-10">
             <div className="max-w-3xl mx-auto">
               <h2 className="text-4xl md:text-5xl font-bold mb-6">
                 Empieza a Descubrir Lugares Excepcionales
