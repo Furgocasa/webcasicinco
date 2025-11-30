@@ -26,10 +26,10 @@ export default function SobreNosotrosPage() {
       <main className="min-h-screen">
         {/* Hero Section */}
         <section className="relative bg-[#063971] text-white overflow-hidden">
-          <div className="absolute inset-0 bg-black opacity-10"></div>
-          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+          {/* Capa sólida de fondo */}
+          <div className="absolute inset-0 bg-[#063971]"></div>
           
-          <div className="relative container mx-auto px-4 py-20 md:py-32">
+          <div className="relative container mx-auto px-4 py-20 md:py-32 z-10">
             <div className="max-w-4xl mx-auto text-center">
               <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full mb-6">
                 <Star className="h-4 w-4 fill-[#ffd935] text-[#ffd935]" />
@@ -250,8 +250,11 @@ export default function SobreNosotrosPage() {
         </section>
 
         {/* CTA Final */}
-        <section className="py-20 bg-[#063971] text-white">
-          <div className="container mx-auto px-4 text-center">
+        <section className="relative py-20 bg-[#063971] text-white overflow-hidden">
+          {/* Capa sólida de fondo */}
+          <div className="absolute inset-0 bg-[#063971]"></div>
+          
+          <div className="container mx-auto px-4 text-center relative z-10">
             <div className="max-w-3xl mx-auto">
               <h2 className="text-4xl md:text-5xl font-bold mb-6">
                 ¿Listo para Descubrir Lugares Excepcionales?
