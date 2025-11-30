@@ -19,60 +19,72 @@ function toSlug(text: string): string {
     .replace(/[^a-z0-9-]/g, ''); // Solo letras, números y guiones
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.casicinco.com';
+  const { searchParams } = new URL(request.url);
+  const page = parseInt(searchParams.get('page') || '1');
+  
+  // ✅ PAGINACIÓN: Máximo 500 lugares por sitemap para evitar HTTP 413
+  const PLACES_PER_PAGE = 500;
+  const IMAGES_PER_PLACE = 3; // Reducido a 3 imágenes por lugar para mantener tamaño razonable
+  const offset = (page - 1) * PLACES_PER_PAGE;
 
-  // ✅ Obtener TODOS los lugares PUBLICADOS con imágenes en lotes
-  let allPlaces: any[] = [];
-  let currentOffset = 0;
-  const batchSize = 1000;
-  let hasMore = true;
+  // Obtener lugares con imágenes para esta página
+  const { data: places, error } = await supabase
+    .from('places')
+    .select('slug, category, province, city, name, photo_urls, ai_description')
+    .eq('published', true)
+    .not('photo_urls', 'is', null) // Solo lugares con imágenes
+    .order('rating', { ascending: false })
+    .order('review_count', { ascending: false })
+    .range(offset, offset + PLACES_PER_PAGE - 1);
 
-  while (hasMore) {
-    const { data, error } = await supabase
-      .from('places')
-      .select('slug, category, province, city, name, photo_urls, ai_description')
-      .eq('published', true)
-      .not('photo_urls', 'is', null) // Solo lugares con imágenes
-      .order('rating', { ascending: false })
-      .order('review_count', { ascending: false })
-      .range(currentOffset, currentOffset + batchSize - 1);
-
-    if (error) {
-      console.error('Error cargando lugares para images sitemap:', error);
-      break;
-    }
-
-    if (data && data.length > 0) {
-      // Filtrar lugares que realmente tienen photo_urls (array no vacío)
-      const placesWithImages = data.filter(
-        (place) => place.photo_urls && Array.isArray(place.photo_urls) && place.photo_urls.length > 0
-      );
-      allPlaces = [...allPlaces, ...placesWithImages];
-      currentOffset += batchSize;
-      
-      if (data.length < batchSize) {
-        hasMore = false;
-      }
-    } else {
-      hasMore = false;
-    }
+  if (error) {
+    console.error('Error cargando lugares para images sitemap:', error);
+    const emptyXml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+</urlset>`;
+    return new NextResponse(emptyXml, {
+      headers: {
+        'Content-Type': 'application/xml',
+      },
+    });
   }
 
-  console.log(`✅ Images Sitemap - Total lugares con imágenes: ${allPlaces.length}`);
+  // Filtrar lugares que realmente tienen photo_urls (array no vacío)
+  const placesWithImages = (places || []).filter(
+    (place) => place.photo_urls && Array.isArray(place.photo_urls) && place.photo_urls.length > 0
+  );
+
+  console.log(`✅ Images Sitemap (page ${page}) - Lugares con imágenes: ${placesWithImages.length}`);
+
+  // Si no hay lugares, retornar sitemap vacío
+  if (placesWithImages.length === 0) {
+    const emptyXml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+</urlset>`;
+    return new NextResponse(emptyXml, {
+      headers: {
+        'Content-Type': 'application/xml',
+        'Cache-Control': 'public, max-age=3600, s-maxage=3600',
+      },
+    });
+  }
 
   // Generar XML del sitemap de imágenes
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
-${allPlaces
+${placesWithImages
   .map((place) => {
     const placeUrl = `${baseUrl}/${place.category}/${toSlug(place.province)}/${place.slug}`;
     const geoLocation = `${place.city}, ${place.province}, España`;
     
-    // Generar entradas para cada imagen (máximo 10 imágenes por lugar según recomendación de Google)
+    // Generar entradas para cada imagen (máximo 3 imágenes por lugar para mantener tamaño razonable)
     const images = (place.photo_urls || [])
-      .slice(0, 10) // Máximo 10 imágenes por lugar
+      .slice(0, IMAGES_PER_PLACE)
       .map((imageUrl: string) => {
         // Limpiar parámetros de transformación de Supabase para la URL canónica
         const cleanImageUrl = imageUrl.split('?')[0];
