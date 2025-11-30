@@ -335,40 +335,6 @@ export default function MapPage() {
       });
       console.log(`   - Filtro ciudad específico "${cityTerm}": ${filtered.length}`);
     }
-    if (debouncedSearchTerm && debouncedSearchTerm.trim()) {
-      const searchLower = debouncedSearchTerm.toLowerCase().trim();
-      const searchWords = searchLower.split(' ').filter(word => word.length > 2);
-      
-      filtered = filtered.filter(p => {
-        // Campos de ubicación
-        const city = p.city?.toLowerCase() || '';
-        const province = p.province?.toLowerCase() || '';
-        const region = p.region?.toLowerCase() || '';
-        
-        // Campos del negocio
-        const name = p.name?.toLowerCase() || '';
-        const category = p.category?.toLowerCase() || '';
-        const subcategory = p.subcategory?.toLowerCase() || '';
-        
-        // Campos de calidad
-        const tier = calculateQualityTier(p.rating, p.review_count || 0).toLowerCase();
-        
-        // Concatenar todos los campos buscables
-        const searchableText = [
-          city, province, region, name, category, subcategory, tier
-        ].join(' ');
-        
-        // Si hay múltiples palabras (ej: "hotel murcia"), todas deben estar presentes
-        if (searchWords.length > 1) {
-          return searchWords.every(word => searchableText.includes(word));
-        }
-        
-        // Si es una sola palabra, buscar en cualquier campo
-        return searchableText.includes(searchLower);
-      });
-      
-      console.log(`   - Búsqueda universal "${searchLower}": ${filtered.length}`);
-    }
 
     // Filtro de categoría
     if (filters.category) {
