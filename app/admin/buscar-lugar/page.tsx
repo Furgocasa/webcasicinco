@@ -18,7 +18,7 @@ export default function BuscarLugarPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [searching, setSearching] = useState(false);
   const [results, setResults] = useState<any[]>([]);
-  const [selectedPlace, setSelectedPlace] = useState<any>(null);
+  const [selectedPlaces, setSelectedPlaces] = useState<any[]>([]);
   const [adding, setAdding] = useState(false);
   const [totalCost, setTotalCost] = useState(0);
 
@@ -37,7 +37,7 @@ export default function BuscarLugarPage() {
 
     setSearching(true);
     setResults([]);
-    setSelectedPlace(null);
+    setSelectedPlaces([]);
 
     try {
       const res = await fetch('/api/admin/search-manual', {
@@ -85,34 +85,74 @@ export default function BuscarLugarPage() {
     }
   };
 
-  const handleAddPlace = async () => {
-    if (!selectedPlace) return;
+  const handleAddPlaces = async () => {
+    if (selectedPlaces.length === 0) return;
 
     setAdding(true);
+    let addedCount = 0;
+    let errorCount = 0;
+    let totalAddedCost = 0;
+
     try {
-      const res = await fetch('/api/admin/add-manual-place', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ place_id: selectedPlace.place_id }),
-      });
+      // Procesar lugares de forma secuencial para evitar saturar la API
+      for (const place of selectedPlaces) {
+        try {
+          const res = await fetch('/api/admin/add-manual-place', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ place_id: place.place_id }),
+          });
 
-      const data = await res.json();
+          const data = await res.json();
 
-      if (data.success) {
-        setTotalCost(prev => prev + data.cost);
-        toast.success('✅ Lugar añadido! Pendiente de enriquecimiento IA');
-        
-        // Quitar de resultados
-        setResults(results.filter(p => p.place_id !== selectedPlace.place_id));
-        setSelectedPlace(null);
-      } else {
-        toast.error(data.error);
+          if (data.success) {
+            addedCount++;
+            totalAddedCost += data.cost;
+          } else {
+            errorCount++;
+            console.error(`Error añadiendo ${place.name}:`, data.error);
+          }
+        } catch (error) {
+          errorCount++;
+          console.error(`Error añadiendo ${place.name}:`, error);
+        }
       }
+
+      // Actualizar coste total
+      setTotalCost(prev => prev + totalAddedCost);
+
+      // Mostrar resultado
+      if (addedCount > 0) {
+        toast.success(`✅ ${addedCount} lugar${addedCount > 1 ? 'es' : ''} añadido${addedCount > 1 ? 's' : ''}!`);
+      }
+      if (errorCount > 0) {
+        toast.error(`❌ ${errorCount} lugar${errorCount > 1 ? 'es' : ''} no se ${errorCount > 1 ? 'pudieron' : 'pudo'} añadir`);
+      }
+
+      // Quitar lugares añadidos de resultados
+      const addedPlaceIds = selectedPlaces.map(p => p.place_id);
+      setResults(results.filter(p => !addedPlaceIds.includes(p.place_id)));
+      setSelectedPlaces([]);
     } catch (error) {
-      toast.error('Error añadiendo lugar');
+      toast.error('Error añadiendo lugares');
     } finally {
       setAdding(false);
     }
+  };
+
+  const togglePlaceSelection = (place: any) => {
+    setSelectedPlaces(prev => {
+      const isSelected = prev.some(p => p.place_id === place.place_id);
+      if (isSelected) {
+        return prev.filter(p => p.place_id !== place.place_id);
+      } else {
+        return [...prev, place];
+      }
+    });
+  };
+
+  const isPlaceSelected = (placeId: string) => {
+    return selectedPlaces.some(p => p.place_id === placeId);
   };
 
   if (loadError) {
@@ -178,10 +218,36 @@ export default function BuscarLugarPage() {
       <div className="grid md:grid-cols-2 gap-6">
         {/* Lista de resultados */}
         <div>
-          <h2 className="text-xl font-bold mb-4">
-            📋 Resultados 
-            {results.length > 0 && ` (${results.length})`}
-          </h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold">
+              📋 Resultados 
+              {results.length > 0 && ` (${results.length})`}
+            </h2>
+            {selectedPlaces.length > 0 && (
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-gray-600">
+                  {selectedPlaces.length} seleccionado{selectedPlaces.length > 1 ? 's' : ''}
+                </span>
+                <Button
+                  onClick={handleAddPlaces}
+                  disabled={adding}
+                  size="sm"
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  {adding ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Añadiendo...
+                    </>
+                  ) : (
+                    <>
+                      ✅ Añadir {selectedPlaces.length} Lugar{selectedPlaces.length > 1 ? 'es' : ''}
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
+          </div>
           
           {results.length === 0 ? (
             <Card>
@@ -201,14 +267,26 @@ export default function BuscarLugarPage() {
                 <Card
                   key={place.place_id}
                   className={`cursor-pointer transition ${
-                    selectedPlace?.place_id === place.place_id
-                      ? 'border-primary border-2 shadow-md'
+                    isPlaceSelected(place.place_id)
+                      ? 'border-primary border-2 shadow-md bg-blue-50'
                       : 'hover:border-gray-300 hover:shadow'
                   }`}
-                  onClick={() => setSelectedPlace(place)}
+                  onClick={() => togglePlaceSelection(place)}
                 >
                   <CardContent className="pt-4">
-                    <div className="flex items-start justify-between">
+                    <div className="flex items-start gap-3">
+                      {/* Checkbox */}
+                      <div className="pt-1">
+                        <input
+                          type="checkbox"
+                          checked={isPlaceSelected(place.place_id)}
+                          onChange={() => togglePlaceSelection(place)}
+                          className="h-5 w-5 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                      </div>
+                      
+                      {/* Información del lugar */}
                       <div className="flex-1">
                         <h3 className="font-bold text-gray-900">{place.name}</h3>
                         <div className="flex items-center gap-2 text-sm mt-1">
@@ -220,11 +298,6 @@ export default function BuscarLugarPage() {
                           {place.address}
                         </p>
                       </div>
-                      {selectedPlace?.place_id === place.place_id && (
-                        <div className="ml-3">
-                          <div className="w-3 h-3 bg-primary rounded-full animate-pulse"></div>
-                        </div>
-                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -253,11 +326,13 @@ export default function BuscarLugarPage() {
                   <GoogleMap
                     mapContainerStyle={{ width: '100%', height: '100%' }}
                     center={
-                      selectedPlace
-                        ? selectedPlace.location
+                      selectedPlaces.length > 0
+                        ? selectedPlaces[0].location
+                        : results.length > 0
+                        ? results[0].location
                         : { lat: 40.4168, lng: -3.7038 }
                     }
-                    zoom={selectedPlace ? 15 : 6}
+                    zoom={selectedPlaces.length > 0 || results.length > 0 ? 12 : 6}
                     options={{
                       mapTypeControl: false,
                       streetViewControl: false,
@@ -268,10 +343,10 @@ export default function BuscarLugarPage() {
                       <Marker
                         key={place.place_id}
                         position={place.location}
-                        onClick={() => setSelectedPlace(place)}
+                        onClick={() => togglePlaceSelection(place)}
                         icon={{
-                          url: place.place_id === selectedPlace?.place_id
-                            ? 'http://maps.google.com/mapfiles/ms/icons/red-dot.png'
+                          url: isPlaceSelected(place.place_id)
+                            ? 'http://maps.google.com/mapfiles/ms/icons/green-dot.png'
                             : 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
                         }}
                       />
@@ -280,73 +355,67 @@ export default function BuscarLugarPage() {
                 </div>
               </Card>
 
-              {/* Detalles del lugar seleccionado */}
-              {selectedPlace && (
+              {/* Detalles de los lugares seleccionados */}
+              {selectedPlaces.length > 0 && (
                 <Card className="border-primary">
                   <CardHeader>
-                    <CardTitle className="flex items-start justify-between">
-                      <span className="flex-1">{selectedPlace.name}</span>
+                    <CardTitle>
+                      📍 Lugares Seleccionados ({selectedPlaces.length})
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-2">
-                        <Star className="h-5 w-5 text-yellow-500 fill-yellow-500" />
-                        <span className="font-bold text-lg">{selectedPlace.rating}★</span>
-                        <span className="text-gray-600">
-                          ({selectedPlace.user_ratings_total} reseñas)
-                        </span>
-                      </div>
-
-                      <div className="flex items-start gap-2 text-sm">
-                        <MapPin className="h-4 w-4 text-gray-400 mt-0.5 flex-shrink-0" />
-                        <span className="text-gray-700">{selectedPlace.address}</span>
-                      </div>
-
-                      {selectedPlace.rating >= 4.7 ? (
-                        <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                          <p className="text-sm text-green-800 font-medium">
-                            ✅ Cumple requisitos (≥4.7★)
-                          </p>
+                    <div className="space-y-4 max-h-[300px] overflow-y-auto">
+                      {selectedPlaces.map((place) => (
+                        <div key={place.place_id} className="border-b pb-3 last:border-b-0">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <h4 className="font-semibold text-gray-900">{place.name}</h4>
+                              <div className="flex items-center gap-2 mt-1">
+                                <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
+                                <span className="font-semibold text-sm">{place.rating}★</span>
+                                <span className="text-gray-500 text-sm">({place.user_ratings_total})</span>
+                              </div>
+                            </div>
+                            <button
+                              onClick={() => togglePlaceSelection(place)}
+                              className="text-red-500 hover:text-red-700 text-sm"
+                            >
+                              ✕
+                            </button>
+                          </div>
                         </div>
-                      ) : (
-                        <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                          <p className="text-sm text-red-800 font-medium">
-                            ❌ No cumple requisitos (&lt;4.7★)
-                          </p>
-                        </div>
-                      )}
-
-                      <div className="pt-3 flex gap-2">
-                        <Button
-                          onClick={handleAddPlace}
-                          disabled={adding || selectedPlace.rating < 4.7}
-                          className="flex-1"
-                          size="lg"
-                        >
-                          {adding ? (
-                            <>
-                              <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                              Añadiendo...
-                            </>
-                          ) : (
-                            <>
-                              ✅ Añadir Lugar
-                            </>
-                          )}
-                        </Button>
-                        <Button
-                          onClick={() => setSelectedPlace(null)}
-                          variant="outline"
-                        >
-                          Cancelar
-                        </Button>
-                      </div>
-
-                      <p className="text-xs text-gray-500 text-center">
-                        Se añadirá como borrador pendiente de enriquecimiento IA
-                      </p>
+                      ))}
                     </div>
+
+                    <div className="pt-4 flex gap-2">
+                      <Button
+                        onClick={handleAddPlaces}
+                        disabled={adding}
+                        className="flex-1 bg-green-600 hover:bg-green-700"
+                        size="lg"
+                      >
+                        {adding ? (
+                          <>
+                            <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                            Añadiendo {selectedPlaces.length} lugar{selectedPlaces.length > 1 ? 'es' : ''}...
+                          </>
+                        ) : (
+                          <>
+                            ✅ Añadir {selectedPlaces.length} Lugar{selectedPlaces.length > 1 ? 'es' : ''}
+                          </>
+                        )}
+                      </Button>
+                      <Button
+                        onClick={() => setSelectedPlaces([])}
+                        variant="outline"
+                      >
+                        Limpiar
+                      </Button>
+                    </div>
+
+                    <p className="text-xs text-gray-500 text-center mt-3">
+                      Se añadirán como borradores pendientes de enriquecimiento IA
+                    </p>
                   </CardContent>
                 </Card>
               )}
