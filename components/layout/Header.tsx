@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '../ui/Button';
 import { useAuth } from '@/lib/hooks/useAuth';
-import { User, LogOut, Settings, ChevronDown, Map, Navigation, BookOpen, Mail, DollarSign, FileText, Info } from 'lucide-react';
+import { User, LogOut, Settings, ChevronDown, Map, Navigation, BookOpen, Mail, DollarSign, FileText, Info, Menu } from 'lucide-react';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -43,7 +43,7 @@ export default function Header() {
             />
           </Link>
 
-          {/* Desktop Navigation */}
+          {/* Desktop Navigation - Enlaces principales */}
           <div className="hidden md:flex items-center space-x-8">
             <Link 
               href="/mapa" 
@@ -68,7 +68,7 @@ export default function Header() {
             </Link>
           </div>
 
-          {/* Mobile Quick Nav + Menu - Iconos permanentes en navbar */}
+          {/* Mobile Quick Nav - Iconos permanentes en navbar móvil */}
           <div className="flex md:hidden items-center gap-0.5">
             <Link 
               href="/mapa"
@@ -101,8 +101,19 @@ export default function Header() {
             <div className="w-px h-8 bg-gray-300 mx-1" />
           </div>
 
-          {/* Auth Buttons - Desktop */}
-          <div className="hidden md:flex items-center space-x-4">
+          {/* Right Side: Hamburger + Auth Buttons */}
+          <div className="flex items-center gap-2">
+            {/* Hamburger Menu Button - Universal (Desktop + Mobile) - Antes del auth */}
+            <button
+              className="hidden md:block p-2 hover:bg-gray-100 rounded-lg transition"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              aria-label="Menú"
+            >
+              <Menu className="w-6 h-6 text-gray-700" />
+            </button>
+
+            {/* Auth Buttons - Desktop */}
+            <div className="hidden md:flex items-center space-x-4">
             {loading ? (
               <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-brand-blue"></div>
             ) : user ? (
@@ -191,9 +202,10 @@ export default function Header() {
                 </Link>
               </>
             )}
+            </div>
           </div>
 
-          {/* Mobile Menu Button - Touch optimized */}
+          {/* Mobile Menu Button - Solo móvil */}
           <button
             className="md:hidden p-3 -mr-3 active:bg-gray-100 rounded-lg transition"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -217,17 +229,17 @@ export default function Header() {
           </button>
         </div>
 
-        {/* Mobile Menu Overlay */}
+        {/* Menu Overlay - Universal (Desktop + Mobile) */}
         {isMenuOpen && (
           <>
             {/* Fondo oscuro */}
             <div 
-              className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+              className="fixed inset-0 bg-black bg-opacity-50 z-40"
               onClick={() => setIsMenuOpen(false)}
             />
             
-            {/* Menú deslizable - Limpio y Sin Duplicados */}
-            <div className="fixed top-16 left-0 right-0 bottom-0 bg-white z-50 md:hidden overflow-y-auto animate-slide-down shadow-2xl">
+            {/* Menú deslizable - Ancho adaptativo */}
+            <div className="fixed top-16 right-0 bottom-0 bg-white z-50 overflow-y-auto animate-slide-in-right shadow-2xl w-full md:w-96">
               <div className="p-6">
               <div className="space-y-6">
                 {loading ? (
