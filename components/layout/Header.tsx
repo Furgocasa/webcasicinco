@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '../ui/Button';
 import { useAuth } from '@/lib/hooks/useAuth';
-import { User, LogOut, Settings, ChevronDown, Map, Navigation, BookOpen } from 'lucide-react';
+import { User, LogOut, Settings, ChevronDown, Map, Navigation, BookOpen, Mail, DollarSign, FileText, Info } from 'lucide-react';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -356,6 +356,45 @@ export default function Header() {
                     >
                       <span className="text-2xl">🏨</span>
                       <span className="font-medium text-gray-900">Hoteles</span>
+                    </Link>
+                  </div>
+                </div>
+
+                {/* Información y Ayuda */}
+                <div>
+                  <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-4">Información</h3>
+                  <div className="space-y-2">
+                    <Link
+                      href="/contacto"
+                      className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-green-50 transition"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <Mail className="h-5 w-5 text-green-600" />
+                      <span className="font-medium text-gray-900">Contacto</span>
+                    </Link>
+                    <Link
+                      href="/pricing"
+                      className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-purple-50 transition"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <DollarSign className="h-5 w-5 text-purple-600" />
+                      <span className="font-medium text-gray-900">Precios</span>
+                    </Link>
+                    <Link
+                      href="/metodologia"
+                      className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-indigo-50 transition"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <FileText className="h-5 w-5 text-indigo-600" />
+                      <span className="font-medium text-gray-900">Metodología</span>
+                    </Link>
+                    <Link
+                      href="/sobre-nosotros"
+                      className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-blue-50 transition"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <Info className="h-5 w-5 text-blue-600" />
+                      <span className="font-medium text-gray-900">Sobre Nosotros</span>
                     </Link>
                   </div>
                 </div>
