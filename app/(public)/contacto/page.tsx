@@ -9,7 +9,7 @@ import { Card } from '@/components/ui/Card';
 interface FAQItem {
   question: string;
   answer: string;
-  category: 'suscripcion' | 'lugares' | 'funcionalidades' | 'general';
+  category: 'suscripcion' | 'lugares' | 'funcionalidades' | 'app' | 'general';
 }
 
 const faqs: FAQItem[] = [
@@ -81,6 +81,52 @@ const faqs: FAQItem[] = [
     question: '¿Hay límite de favoritos?',
     answer: 'No. Puedes guardar tantos lugares como favoritos como quieras. También puedes organizarlos por categorías y acceder a ellos fácilmente desde tu perfil.',
   },
+  // App y Tecnología
+  {
+    category: 'app',
+    question: '¿Cómo funciona el sistema de tiers (Diamante, Platino, Oro)?',
+    answer: 'No ordenamos solo por rating. Usamos un sistema único que combina rating + número de reseñas: 💎 Diamante (4.8+ con 1000+ reseñas), 🏆 Platino (4.8+ con 500+), 🥇 Oro (4.8+ con 200+), 🥈 Plata (4.7+ con 100+), 🥉 Bronce (4.7+). Esto identifica los lugares verdaderamente excepcionales.',
+  },
+  {
+    category: 'app',
+    question: '¿Qué es el Tío Viajero y cómo funciona?',
+    answer: 'El Tío Viajero es nuestro asistente de IA (GPT-4o-mini) que te ayuda a encontrar lugares mediante conversación natural. Puede detectar tu ubicación GPS, entender búsquedas como "restaurantes cerca de mí" o "hoteles románticos en Madrid", y recomendarte los mejores lugares basándose en datos verificados de Google Maps.',
+  },
+  {
+    category: 'app',
+    question: '¿El Tío Viajero puede usar mi ubicación GPS?',
+    answer: 'Sí. Si compartes tu ubicación, el Tío Viajero puede encontrar lugares cercanos usando términos como "cerca", "aquí", "a 500 metros" o "caminando". Siempre te mostrará la distancia real en kilómetros. Tu ubicación solo se usa para recomendaciones y nunca se almacena.',
+  },
+  {
+    category: 'app',
+    question: '¿Cómo se indexan los lugares?',
+    answer: 'Nuestro sistema indexa automáticamente lugares de Google Maps con mínimo 4.7★ verificados. El proceso tiene 2 fases: primero indexación rápida (datos básicos), luego enriquecimiento con IA (descripciones, fotos). Añadimos nuevos lugares cada semana.',
+  },
+  {
+    category: 'app',
+    question: '¿Qué datos usan para los lugares?',
+    answer: 'Todos los datos provienen de Google Places API verificados y actualizados. Incluyen: nombre, dirección, teléfono, website, rating, número de reseñas, coordenadas GPS, fotos, y descripciones generadas con IA. Nunca inventamos información.',
+  },
+  {
+    category: 'app',
+    question: '¿Cómo funciona el mapa interactivo?',
+    answer: 'El mapa muestra más de 3,500 lugares verificados en toda España. Puedes filtrar por categoría (restaurante, hotel, bar), provincia, ciudad, rating y precio. Los lugares se muestran con marcadores de colores según su tier (Diamante, Platino, Oro, etc.).',
+  },
+  {
+    category: 'app',
+    question: '¿Cómo funciona el planificador de rutas?',
+    answer: 'Puedes añadir múltiples lugares a tu ruta y el sistema optimiza automáticamente el orden para minimizar distancias. Puedes guardar rutas, compartirlas y acceder a ellas desde cualquier dispositivo. Ideal para planificar viajes o días de turismo.',
+  },
+  {
+    category: 'app',
+    question: '¿Qué tecnologías usa la app?',
+    answer: 'Casi Cinco está construida con Next.js 14, Supabase (base de datos), OpenAI GPT-4o-mini (chatbot), Google Maps API (lugares), y Stripe (pagos). Todo está optimizado para rendimiento y seguridad.',
+  },
+  {
+    category: 'app',
+    question: '¿Los lugares pueden pagar para aparecer mejor?',
+    answer: 'No. Nuestro sistema es completamente objetivo. Los lugares se ordenan exclusivamente por nuestro algoritmo de calidad (tiers) que combina rating y número de reseñas. No hay pago por posición ni publicidad.',
+  },
   // General
   {
     category: 'general',
@@ -108,6 +154,7 @@ const categories = [
   { id: 'suscripcion', name: 'Suscripción', icon: '💳' },
   { id: 'lugares', name: 'Lugares', icon: '📍' },
   { id: 'funcionalidades', name: 'Funcionalidades', icon: '⚙️' },
+  { id: 'app', name: 'Cómo Funciona', icon: '🤖' },
   { id: 'general', name: 'General', icon: '❓' },
 ];
 
