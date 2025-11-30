@@ -62,7 +62,7 @@ const faqs: FAQItem[] = [
   {
     category: 'suscripcion',
     question: '¿Cómo se procesa el pago?',
-    answer: 'Usamos Stripe para pagos seguros. Aceptamos todas las tarjetas principales (Visa, Mastercard, American Express). Todos los datos están cifrados y protegidos. Nunca almacenamos información de tarjetas.',
+    answer: 'Usamos un sistema de pagos seguro y certificado. Aceptamos todas las tarjetas principales (Visa, Mastercard, American Express). Todos los datos están cifrados y protegidos. Nunca almacenamos información de tarjetas.',
   },
   // Lugares (12 preguntas)
   {
@@ -103,12 +103,12 @@ const faqs: FAQItem[] = [
   {
     category: 'lugares',
     question: '¿De dónde provienen los datos de los lugares?',
-    answer: 'Todos los datos provienen de Google Places API verificados y actualizados. Incluyen: nombre, dirección, teléfono, website, rating, número de reseñas, coordenadas GPS, fotos en alta calidad almacenadas en Supabase, y descripciones generadas con IA.',
+    answer: 'Todos los datos provienen de Google Maps verificados y actualizados. Incluyen: nombre, dirección, teléfono, website, rating, número de reseñas, coordenadas GPS, fotos en alta calidad, y descripciones generadas con IA.',
   },
   {
     category: 'lugares',
     question: '¿Cómo funciona la indexación en 2 fases?',
-    answer: 'Fase 1 (Indexación): Obtenemos datos básicos de Google Maps (nombre, dirección, rating, fotos). Fase 2 (Enriquecimiento): IA genera descripciones únicas, analiza reseñas, descarga fotos a Supabase, y busca redes sociales. Este proceso optimiza costos y calidad.',
+    answer: 'Fase 1 (Indexación): Obtenemos datos básicos de Google Maps (nombre, dirección, rating, fotos). Fase 2 (Enriquecimiento): IA genera descripciones únicas, analiza reseñas, optimiza fotos, y busca redes sociales. Este proceso garantiza calidad y eficiencia.',
   },
   {
     category: 'lugares',
@@ -123,7 +123,7 @@ const faqs: FAQItem[] = [
   {
     category: 'lugares',
     question: '¿Los lugares tienen fotos reales?',
-    answer: 'Sí. Almacenamos hasta 5 fotos en alta calidad de cada lugar en Supabase Storage. Las fotos provienen de Google Places y están optimizadas para carga rápida. El 96.8% de nuestros lugares tienen fotos.',
+    answer: 'Sí. Almacenamos hasta 5 fotos en alta calidad de cada lugar. Las fotos provienen de Google Maps y están optimizadas para carga rápida. El 96.8% de nuestros lugares tienen fotos.',
   },
   // Funcionalidades (15 preguntas)
   {
@@ -201,7 +201,7 @@ const faqs: FAQItem[] = [
     question: '¿Puedo ver el historial de lugares visitados?',
     answer: 'Sí. Desde tu perfil puedes ver todos los lugares que has marcado como visitados, junto con la fecha. Útil para recordar y recomendar.',
   },
-  // App y Tecnología (11 preguntas)
+  // App y Tecnología (8 preguntas)
   {
     category: 'app',
     question: '¿Cómo se garantiza la calidad de los datos?',
@@ -210,7 +210,7 @@ const faqs: FAQItem[] = [
   {
     category: 'app',
     question: '¿Cómo funciona el sistema de indexación automática?',
-    answer: 'Nuestro sistema busca automáticamente lugares en Google Maps con 4.7+ estrellas, los indexa en 2 fases (datos básicos + enriquecimiento IA), descarga fotos a Supabase, genera descripciones únicas, y busca redes sociales. Todo automatizado.',
+    answer: 'Nuestro sistema busca automáticamente lugares en Google Maps con 4.7+ estrellas, los indexa en 2 fases (datos básicos + enriquecimiento IA), optimiza fotos, genera descripciones únicas, y busca redes sociales. Todo automatizado.',
   },
   {
     category: 'app',
@@ -219,38 +219,28 @@ const faqs: FAQItem[] = [
   },
   {
     category: 'app',
-    question: '¿Cómo se procesan las fotos de los lugares?',
-    answer: 'Descargamos hasta 5 fotos de Google Places API y las almacenamos en Supabase Storage. Esto reduce costos (€45,000/año de ahorro vs Google Photos API) y mejora velocidad de carga. Fotos optimizadas en calidad 80%.',
-  },
-  {
-    category: 'app',
     question: '¿Qué diferencia a Casi Cinco de otras apps?',
-    answer: 'Sistema de tiers único (rating + reseñas, no solo rating), chatbot IA con geolocalización GPS, datos verificados de Google Maps, proceso totalmente objetivo (sin pagos de lugares), y optimización extrema de costos.',
+    answer: 'Sistema de tiers único (rating + reseñas, no solo rating), chatbot IA con geolocalización GPS, datos verificados de Google Maps, proceso totalmente objetivo (sin pagos de lugares), y optimización extrema de calidad.',
   },
   {
     category: 'app',
     question: '¿Cómo funciona la geolocalización GPS?',
-    answer: 'Si compartes tu ubicación, el sistema calcula distancias reales en kilómetros a cada lugar usando PostGIS. El Tío Viajero entiende términos como "cerca", "caminando", "en coche" y ajusta búsquedas. Tu ubicación nunca se almacena.',
+    answer: 'Si compartes tu ubicación, el sistema calcula distancias reales en kilómetros a cada lugar. El Tío Viajero entiende términos como "cerca", "caminando", "en coche" y ajusta búsquedas. Tu ubicación nunca se almacena.',
   },
   {
     category: 'app',
     question: '¿Qué es el enriquecimiento con IA?',
-    answer: 'Fase 2 de indexación donde OpenAI GPT-4o-mini genera descripciones únicas analizando nombre, categoría, ubicación y reseñas. También resumimos reseñas, extraemos highlights, y buscamos redes sociales automáticamente.',
-  },
-  {
-    category: 'app',
-    question: '¿Cómo se optimizan los costos de Google API?',
-    answer: 'Ahorramos ~€108,300/año: Fotos en Supabase (€45k), sin fallback blog (€44k), cache de búsquedas (€3k), MapContext optimizado (€15k), limpieza fotos expiradas (€900). Costo actual: €0/mes en Google Photos API.',
+    answer: 'Fase 2 de indexación donde nuestra IA genera descripciones únicas analizando nombre, categoría, ubicación y reseñas. También resumimos reseñas, extraemos highlights, y buscamos redes sociales automáticamente.',
   },
   {
     category: 'app',
     question: '¿La app es responsive?',
-    answer: 'Sí. Totalmente optimizada para desktop, tablet y móvil. Funciona en todos los navegadores: Chrome, Firefox, Safari, Edge. Diseño adaptativo con Tailwind CSS.',
+    answer: 'Sí. Totalmente optimizada para desktop, tablet y móvil. Funciona en todos los navegadores: Chrome, Firefox, Safari, Edge. Diseño adaptativo y moderno.',
   },
   {
     category: 'app',
     question: '¿Qué medidas de seguridad tienen?',
-    answer: 'Row Level Security (RLS) en Supabase, autenticación con Google OAuth + PKCE, API keys restringidas por dominio, validaciones server-side, HTTPS obligatorio, política de cookies y privacidad GDPR.',
+    answer: 'Seguridad a nivel de base de datos con permisos granulares, autenticación con Google OAuth, cifrado de datos, HTTPS obligatorio, y cumplimiento completo de GDPR y políticas de privacidad europeas.',
   },
   {
     category: 'app',
