@@ -60,6 +60,11 @@ export default function Footer() {
             <h4 className="text-white font-semibold mb-4">Nosotros</h4>
             <ul className="space-y-2 text-sm">
               <li>
+                <Link href="/sobre-nosotros" className="hover:text-white transition">
+                  Sobre Nosotros
+                </Link>
+              </li>
+              <li>
                 <Link href="/metodologia" className="hover:text-white transition">
                   Metodología
                 </Link>
