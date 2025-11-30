@@ -308,6 +308,37 @@ export default function MapPage() {
       console.log(`   - Filtro ciudad (búsqueda parcial) "${cityTerm}": ${filtered.length}`);
     }
 
+    // 🔍 BÚSQUEDA UNIVERSAL - Busca en múltiples campos
+    if (debouncedSearchTerm && debouncedSearchTerm.trim()) {
+      const searchLower = debouncedSearchTerm.toLowerCase().trim();
+      
+      filtered = filtered.filter(p => {
+        // Campos de ubicación
+        const city = p.city?.toLowerCase() || '';
+        const province = p.province?.toLowerCase() || '';
+        const region = p.region?.toLowerCase() || '';
+        
+        // Campos del negocio
+        const name = p.name?.toLowerCase() || '';
+        const category = p.category?.toLowerCase() || '';
+        const subcategory = p.subcategory?.toLowerCase() || '';
+        
+        // Campos de calidad
+        const tier = calculateQualityTier(p.rating, p.review_count || 0).toLowerCase();
+        
+        // Buscar en TODOS los campos relevantes
+        return city.includes(searchLower) ||
+               province.includes(searchLower) ||
+               region.includes(searchLower) ||
+               name.includes(searchLower) ||
+               category.includes(searchLower) ||
+               subcategory.includes(searchLower) ||
+               tier.includes(searchLower);
+      });
+      
+      console.log(`   - Búsqueda universal "${searchLower}": ${filtered.length}`);
+    }
+
     // Filtro de categoría
     if (filters.category) {
       filtered = filtered.filter(p => p.category === filters.category);
