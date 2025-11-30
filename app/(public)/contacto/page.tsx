@@ -201,12 +201,7 @@ const faqs: FAQItem[] = [
     question: '¿Puedo ver el historial de lugares visitados?',
     answer: 'Sí. Desde tu perfil puedes ver todos los lugares que has marcado como visitados, junto con la fecha. Útil para recordar y recomendar.',
   },
-  // App y Tecnología (12 preguntas)
-  {
-    category: 'app',
-    question: '¿Qué tecnologías usa la app?',
-    answer: 'Next.js 14 (React framework), Supabase (base de datos PostgreSQL), OpenAI GPT-4o-mini (chatbot IA), Google Maps API (lugares y mapas), Stripe (pagos), Tailwind CSS (diseño), y AWS Amplify (hosting).',
-  },
+  // App y Tecnología (11 preguntas)
   {
     category: 'app',
     question: '¿Cómo se garantiza la calidad de los datos?',
