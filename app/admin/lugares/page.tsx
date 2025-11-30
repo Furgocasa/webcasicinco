@@ -24,8 +24,10 @@ import {
   ExternalLink,
   MoreVertical,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Download
 } from 'lucide-react';
+import * as XLSX from 'xlsx';
 import { toast } from 'sonner';
 import { calculateQualityTier, getTierMarkerColor, getTierInfo } from '@/lib/utils/tier-calculator';
 import { getPlacePhotoUrl } from '@/lib/utils/photo-helper';
@@ -419,6 +421,157 @@ export default function LugaresPage() {
     }
   };
 
+  // Función para exportar a CSV
+  const exportToCSV = () => {
+    try {
+      // Preparar datos para exportación
+      const exportData = filteredPlaces.map(place => {
+        const tier = calculateQualityTier(place.rating, place.review_count);
+        const tierInfo = getTierInfo(tier);
+        
+        return {
+          'ID': place.id,
+          'Nombre': place.name,
+          'Categoría': place.category || '',
+          'Rating': place.rating,
+          'Reseñas': place.review_count,
+          'Tier': tierInfo.name,
+          'Provincia': place.province || '',
+          'Ciudad': place.city || '',
+          'Dirección': place.address || '',
+          'Teléfono': place.phone || '',
+          'Email': place.email || '',
+          'Email Verificado': place.email_verified ? 'Sí' : 'No',
+          'Email Fuente': place.email_source || '',
+          'Website': place.website || '',
+          'Google Maps ID': place.google_maps_id || '',
+          'Google Place ID': place.google_place_id || '',
+          'Latitud': place.latitude,
+          'Longitud': place.longitude,
+          'Publicado': place.published ? 'Sí' : 'No',
+          'Verificado': place.verified ? 'Sí' : 'No',
+          'Fecha Creación': place.created_at ? new Date(place.created_at).toLocaleString('es-ES') : '',
+          'Descripción SEO': place.seo_description || '',
+          'AI Summary': place.ai_summary || '',
+          'Highlights': place.highlights || ''
+        };
+      });
+
+      // Convertir a CSV
+      const headers = Object.keys(exportData[0] || {});
+      const csvContent = [
+        headers.join(','),
+        ...exportData.map(row => 
+          headers.map(header => {
+            const value = row[header as keyof typeof row];
+            // Escapar comillas y envolver en comillas si contiene comas o saltos de línea
+            const stringValue = String(value || '');
+            if (stringValue.includes(',') || stringValue.includes('\n') || stringValue.includes('"')) {
+              return `"${stringValue.replace(/"/g, '""')}"`;
+            }
+            return stringValue;
+          }).join(',')
+        )
+      ].join('\n');
+
+      // Descargar archivo
+      const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `lugares_casicinco_${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      toast.success(`✅ CSV exportado: ${exportData.length} lugares`);
+    } catch (error) {
+      console.error('Error exportando CSV:', error);
+      toast.error('Error al exportar CSV');
+    }
+  };
+
+  // Función para exportar a Excel (XLSX)
+  const exportToExcel = () => {
+    try {
+      // Preparar datos para exportación
+      const exportData = filteredPlaces.map(place => {
+        const tier = calculateQualityTier(place.rating, place.review_count);
+        const tierInfo = getTierInfo(tier);
+        
+        return {
+          'ID': place.id,
+          'Nombre': place.name,
+          'Categoría': place.category || '',
+          'Rating': place.rating,
+          'Reseñas': place.review_count,
+          'Tier': tierInfo.name,
+          'Provincia': place.provincia || place.province || '',
+          'Ciudad': place.city || '',
+          'Dirección': place.address || '',
+          'Teléfono': place.phone || '',
+          'Email': place.email || '',
+          'Email Verificado': place.email_verified ? 'Sí' : 'No',
+          'Email Fuente': place.email_source || '',
+          'Website': place.website || '',
+          'Google Maps ID': place.google_maps_id || '',
+          'Google Place ID': place.google_place_id || '',
+          'Latitud': place.latitude,
+          'Longitud': place.longitude,
+          'Publicado': place.published ? 'Sí' : 'No',
+          'Verificado': place.verified ? 'Sí' : 'No',
+          'Fecha Creación': place.created_at ? new Date(place.created_at).toLocaleString('es-ES') : '',
+          'Descripción SEO': place.seo_description || '',
+          'AI Summary': place.ai_summary || '',
+          'Highlights': place.highlights || ''
+        };
+      });
+
+      // Crear libro de Excel
+      const worksheet = XLSX.utils.json_to_sheet(exportData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Lugares');
+
+      // Ajustar ancho de columnas
+      const columnWidths = [
+        { wch: 30 }, // ID
+        { wch: 40 }, // Nombre
+        { wch: 15 }, // Categoría
+        { wch: 10 }, // Rating
+        { wch: 10 }, // Reseñas
+        { wch: 15 }, // Tier
+        { wch: 20 }, // Provincia
+        { wch: 20 }, // Ciudad
+        { wch: 40 }, // Dirección
+        { wch: 15 }, // Teléfono
+        { wch: 30 }, // Email
+        { wch: 15 }, // Email Verificado
+        { wch: 15 }, // Email Fuente
+        { wch: 40 }, // Website
+        { wch: 30 }, // Google Maps ID
+        { wch: 30 }, // Google Place ID
+        { wch: 12 }, // Latitud
+        { wch: 12 }, // Longitud
+        { wch: 10 }, // Publicado
+        { wch: 10 }, // Verificado
+        { wch: 20 }, // Fecha Creación
+        { wch: 50 }, // Descripción SEO
+        { wch: 50 }, // AI Summary
+        { wch: 50 }, // Highlights
+      ];
+      worksheet['!cols'] = columnWidths;
+
+      // Descargar archivo
+      XLSX.writeFile(workbook, `lugares_casicinco_${new Date().toISOString().split('T')[0]}.xlsx`);
+
+      toast.success(`✅ Excel exportado: ${exportData.length} lugares`);
+    } catch (error) {
+      console.error('Error exportando Excel:', error);
+      toast.error('Error al exportar Excel');
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -454,6 +607,14 @@ export default function LugaresPage() {
           <Button onClick={loadPlaces} variant="outline" size="sm" disabled={enriching}>
             <RefreshCw className="h-4 w-4 md:mr-2" />
             <span className="hidden md:inline">Recargar</span>
+          </Button>
+          <Button onClick={exportToCSV} variant="outline" size="sm" disabled={enriching || filteredPlaces.length === 0}>
+            <Download className="h-4 w-4 md:mr-2" />
+            <span className="hidden md:inline">CSV</span>
+          </Button>
+          <Button onClick={exportToExcel} variant="outline" size="sm" disabled={enriching || filteredPlaces.length === 0}>
+            <Download className="h-4 w-4 md:mr-2" />
+            <span className="hidden md:inline">Excel</span>
           </Button>
           <Button onClick={handleEnrichPlaces} variant="primary" size="sm" disabled={enriching}>
             <span className="md:hidden">🎨</span>
