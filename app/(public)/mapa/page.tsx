@@ -289,26 +289,52 @@ export default function MapPage() {
       filtered = filtered.filter(p => p.province === filters.province);
     }
 
-    // Filtro de ciudad (búsqueda PARCIAL, case-insensitive) 🔍
+    // 🔍 BÚSQUEDA UNIVERSAL - Busca en múltiples campos (nombre, ciudad, provincia, región, categoría, tier, etc.)
+    if (debouncedSearchTerm && debouncedSearchTerm.trim()) {
+      const searchLower = debouncedSearchTerm.toLowerCase().trim();
+      const searchWords = searchLower.split(' ').filter(word => word.length > 2);
+      
+      filtered = filtered.filter(p => {
+        // Campos de ubicación
+        const city = p.city?.toLowerCase() || '';
+        const province = p.province?.toLowerCase() || '';
+        const region = p.region?.toLowerCase() || '';
+        
+        // Campos del negocio
+        const name = p.name?.toLowerCase() || '';
+        const category = p.category?.toLowerCase() || '';
+        const subcategory = p.subcategory?.toLowerCase() || '';
+        
+        // Campos de calidad
+        const tier = calculateQualityTier(p.rating, p.review_count || 0).toLowerCase();
+        
+        // Concatenar todos los campos buscables
+        const searchableText = [
+          city, province, region, name, category, subcategory, tier
+        ].join(' ');
+        
+        // Si hay múltiples palabras (ej: "hotel murcia"), todas deben estar presentes
+        if (searchWords.length > 1) {
+          return searchWords.every(word => searchableText.includes(word));
+        }
+        
+        // Si es una sola palabra, buscar en cualquier campo
+        return searchableText.includes(searchLower);
+      });
+      
+      console.log(`   - Búsqueda universal "${searchLower}": ${filtered.length}`);
+    }
+
+    // Filtro de ciudad (específico, para combinar con otros filtros) 🏙️
     if (filters.city && filters.city.trim()) {
       const cityTerm = filters.city.toLowerCase().trim();
       
       filtered = filtered.filter(p => {
         const cityName = p.city?.toLowerCase() || '';
-        // Búsqueda parcial: "murci" encuentra "Murcia"
-        const cityMatch = cityName.includes(cityTerm);
-        
-        // Si hay filtro de provincia seleccionado, verificar que coincida
-        if (filters.province && cityMatch) {
-          return p.province === filters.province;
-        }
-        
-        return cityMatch;
+        return cityName.includes(cityTerm);
       });
-      console.log(`   - Filtro ciudad (búsqueda parcial) "${cityTerm}": ${filtered.length}`);
+      console.log(`   - Filtro ciudad específico "${cityTerm}": ${filtered.length}`);
     }
-
-    // 🔍 BÚSQUEDA UNIVERSAL - Busca en múltiples campos
     if (debouncedSearchTerm && debouncedSearchTerm.trim()) {
       const searchLower = debouncedSearchTerm.toLowerCase().trim();
       const searchWords = searchLower.split(' ').filter(word => word.length > 2);
@@ -1257,7 +1283,7 @@ export default function MapPage() {
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                   <input
                     type="text"
-                    placeholder="Nombre, ciudad..."
+                    placeholder="Ej: restaurante murcia, hotel madrid..."
                     value={filters.searchTerm || ''}
                     onChange={(e) => setFilters({ ...filters, searchTerm: e.target.value })}
                     onKeyPress={(e) => e.key === 'Enter' && applyFilters()}
@@ -2310,7 +2336,7 @@ export default function MapPage() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
               <input
                 type="text"
-                placeholder="Nombre, ciudad..."
+                placeholder="Ej: restaurante murcia, hotel madrid..."
                 value={filters.searchTerm || ''}
                 onChange={(e) => setFilters({ ...filters, searchTerm: e.target.value })}
                 className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg text-base"
