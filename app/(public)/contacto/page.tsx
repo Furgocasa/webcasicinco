@@ -546,7 +546,6 @@ export default function ContactoPage() {
         </section>
       </main>
 
-      <BackToTop />
       <Footer />
     </>
   );
