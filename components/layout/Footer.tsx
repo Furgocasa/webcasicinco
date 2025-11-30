@@ -75,11 +75,6 @@ export default function Footer() {
                   Precios
                 </Link>
               </li>
-              <li>
-                <Link href="/perfil" className="hover:text-white transition">
-                  Mi Perfil
-                </Link>
-              </li>
             </ul>
           </div>
 
