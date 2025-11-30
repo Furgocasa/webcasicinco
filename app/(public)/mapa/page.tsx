@@ -311,6 +311,7 @@ export default function MapPage() {
     // 🔍 BÚSQUEDA UNIVERSAL - Busca en múltiples campos
     if (debouncedSearchTerm && debouncedSearchTerm.trim()) {
       const searchLower = debouncedSearchTerm.toLowerCase().trim();
+      const searchWords = searchLower.split(' ').filter(word => word.length > 2);
       
       filtered = filtered.filter(p => {
         // Campos de ubicación
@@ -326,14 +327,18 @@ export default function MapPage() {
         // Campos de calidad
         const tier = calculateQualityTier(p.rating, p.review_count || 0).toLowerCase();
         
-        // Buscar en TODOS los campos relevantes
-        return city.includes(searchLower) ||
-               province.includes(searchLower) ||
-               region.includes(searchLower) ||
-               name.includes(searchLower) ||
-               category.includes(searchLower) ||
-               subcategory.includes(searchLower) ||
-               tier.includes(searchLower);
+        // Concatenar todos los campos buscables
+        const searchableText = [
+          city, province, region, name, category, subcategory, tier
+        ].join(' ');
+        
+        // Si hay múltiples palabras (ej: "hotel murcia"), todas deben estar presentes
+        if (searchWords.length > 1) {
+          return searchWords.every(word => searchableText.includes(word));
+        }
+        
+        // Si es una sola palabra, buscar en cualquier campo
+        return searchableText.includes(searchLower);
       });
       
       console.log(`   - Búsqueda universal "${searchLower}": ${filtered.length}`);
