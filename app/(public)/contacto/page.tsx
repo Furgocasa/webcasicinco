@@ -200,6 +200,40 @@ export default function ContactoPage() {
         {/* CONTENT */}
         <section className="py-12">
           <div className="container mx-auto px-4 max-w-4xl">
+            {/* Sección: ¿Por qué contactarnos? */}
+            <Card className="p-8 mb-8 bg-gradient-to-br from-blue-50 to-gray-50">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">¿Por qué contactarnos?</h2>
+              <div className="grid md:grid-cols-3 gap-6">
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-2xl">🐛</span>
+                    <h3 className="font-semibold text-gray-900">Reportar Errores</h3>
+                  </div>
+                  <p className="text-sm text-gray-600">
+                    Si encuentras información incorrecta, enlaces rotos o cualquier problema en la plataforma, escríbenos para que podamos corregirlo.
+                  </p>
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-2xl">✏️</span>
+                    <h3 className="font-semibold text-gray-900">Corregir Información</h3>
+                  </div>
+                  <p className="text-sm text-gray-600">
+                    ¿Eres propietario de un lugar y hay datos desactualizados? Ayúdanos a mantener la información precisa.
+                  </p>
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-2xl">⭐</span>
+                    <h3 className="font-semibold text-gray-900">Sugerir Lugares</h3>
+                  </div>
+                  <p className="text-sm text-gray-600">
+                    ¿Conoces un lugar excepcional con +4.7★ que no está en Casi Cinco? Cuéntanos y lo revisaremos para incluirlo.
+                  </p>
+                </div>
+              </div>
+            </Card>
+
             <div className="grid md:grid-cols-2 gap-8">
               {/* Contacto Directo */}
               <Card className="p-8">
