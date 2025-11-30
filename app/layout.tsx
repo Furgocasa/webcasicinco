@@ -59,7 +59,7 @@ export const metadata: Metadata = {
     title: 'Casi Cinco - Los mejores lugares con 4.7+ estrellas',
     description:
       'Descubre restaurantes, hoteles, spas y experiencias con valoraciones excepcionales.',
-    creator: '@casi5app',
+    creator: '@casi_cinco',
     images: ['/images/opengraph_casicinco.png'],
   },
   robots: {
