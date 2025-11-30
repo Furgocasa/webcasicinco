@@ -19,12 +19,14 @@ import {
   Crown,
   Loader2,
   RefreshCw,
-  X
+  X,
+  Download
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { toast } from 'sonner';
+import * as XLSX from 'xlsx';
 
 interface UserData {
   id: string;
@@ -279,6 +281,114 @@ export default function UsuariosPage() {
     inTrial: users.filter(u => u.is_in_trial).length,
   };
 
+  // Función para exportar a CSV
+  const exportToCSV = () => {
+    try {
+      // Preparar datos para exportación
+      const exportData = filteredUsers.map(user => ({
+        'ID': user.id,
+        'Email': user.email,
+        'Nombre': user.full_name || '',
+        'Rol': user.role === 'admin' ? 'Administrador' : 'Usuario',
+        'Plan Suscripción': user.subscription_plan || 'Ninguno',
+        'Estado Suscripción': user.subscription_status || 'Ninguno',
+        'Usuario Gratis': user.is_free_user ? 'Sí' : 'No',
+        'En Trial': user.is_in_trial ? 'Sí' : 'No',
+        'Días Trial Restantes': user.trial_days_remaining || 0,
+        'Trial Termina': user.trial_ends_at ? new Date(user.trial_ends_at).toLocaleString('es-ES') : '',
+        'Fecha Registro': user.created_at ? new Date(user.created_at).toLocaleString('es-ES') : '',
+        'Última Conexión': user.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleString('es-ES') : '',
+        'Actualizado': user.updated_at ? new Date(user.updated_at).toLocaleString('es-ES') : ''
+      }));
+
+      // Convertir a CSV
+      const headers = Object.keys(exportData[0] || {});
+      const csvContent = [
+        headers.join(','),
+        ...exportData.map(row => 
+          headers.map(header => {
+            const value = row[header as keyof typeof row];
+            // Escapar comillas y envolver en comillas si contiene comas o saltos de línea
+            const stringValue = String(value || '');
+            if (stringValue.includes(',') || stringValue.includes('\n') || stringValue.includes('"')) {
+              return `"${stringValue.replace(/"/g, '""')}"`;
+            }
+            return stringValue;
+          }).join(',')
+        )
+      ].join('\n');
+
+      // Descargar archivo
+      const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `usuarios_casicinco_${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      toast.success(`✅ CSV exportado: ${exportData.length} usuarios`);
+    } catch (error) {
+      console.error('Error exportando CSV:', error);
+      toast.error('Error al exportar CSV');
+    }
+  };
+
+  // Función para exportar a Excel (XLSX)
+  const exportToExcel = () => {
+    try {
+      // Preparar datos para exportación
+      const exportData = filteredUsers.map(user => ({
+        'ID': user.id,
+        'Email': user.email,
+        'Nombre': user.full_name || '',
+        'Rol': user.role === 'admin' ? 'Administrador' : 'Usuario',
+        'Plan Suscripción': user.subscription_plan || 'Ninguno',
+        'Estado Suscripción': user.subscription_status || 'Ninguno',
+        'Usuario Gratis': user.is_free_user ? 'Sí' : 'No',
+        'En Trial': user.is_in_trial ? 'Sí' : 'No',
+        'Días Trial Restantes': user.trial_days_remaining || 0,
+        'Trial Termina': user.trial_ends_at ? new Date(user.trial_ends_at).toLocaleString('es-ES') : '',
+        'Fecha Registro': user.created_at ? new Date(user.created_at).toLocaleString('es-ES') : '',
+        'Última Conexión': user.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleString('es-ES') : '',
+        'Actualizado': user.updated_at ? new Date(user.updated_at).toLocaleString('es-ES') : ''
+      }));
+
+      // Crear libro de Excel
+      const worksheet = XLSX.utils.json_to_sheet(exportData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Usuarios');
+
+      // Ajustar ancho de columnas
+      const columnWidths = [
+        { wch: 30 }, // ID
+        { wch: 35 }, // Email
+        { wch: 30 }, // Nombre
+        { wch: 15 }, // Rol
+        { wch: 20 }, // Plan Suscripción
+        { wch: 20 }, // Estado Suscripción
+        { wch: 15 }, // Usuario Gratis
+        { wch: 12 }, // En Trial
+        { wch: 20 }, // Días Trial Restantes
+        { wch: 20 }, // Trial Termina
+        { wch: 20 }, // Fecha Registro
+        { wch: 20 }, // Última Conexión
+        { wch: 20 }, // Actualizado
+      ];
+      worksheet['!cols'] = columnWidths;
+
+      // Descargar archivo
+      XLSX.writeFile(workbook, `usuarios_casicinco_${new Date().toISOString().split('T')[0]}.xlsx`);
+
+      toast.success(`✅ Excel exportado: ${exportData.length} usuarios`);
+    } catch (error) {
+      console.error('Error exportando Excel:', error);
+      toast.error('Error al exportar Excel');
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -290,14 +400,32 @@ export default function UsuariosPage() {
           </p>
         </div>
 
-        <Button
-          onClick={loadUsers}
-          variant="outline"
-          disabled={loading}
-        >
-          <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-          Recargar
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            onClick={exportToCSV}
+            variant="outline"
+            disabled={loading || filteredUsers.length === 0}
+          >
+            <Download className="h-4 w-4 mr-2" />
+            CSV
+          </Button>
+          <Button
+            onClick={exportToExcel}
+            variant="outline"
+            disabled={loading || filteredUsers.length === 0}
+          >
+            <Download className="h-4 w-4 mr-2" />
+            Excel
+          </Button>
+          <Button
+            onClick={loadUsers}
+            variant="outline"
+            disabled={loading}
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            Recargar
+          </Button>
+        </div>
       </div>
 
       {/* Estadísticas */}
