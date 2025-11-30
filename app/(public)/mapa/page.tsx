@@ -370,16 +370,6 @@ export default function MapPage() {
     });
     console.log(`   - Filtro reseñas (${minReviews}-${maxReviews}): ${beforeReviewsFilter} → ${filtered.length}`);
 
-    // Filtro de búsqueda - 🚀 USA debouncedSearchTerm en vez del filtro directo
-    if (debouncedSearchTerm) {
-      const term = debouncedSearchTerm.toLowerCase();
-      filtered = filtered.filter(p => 
-        p.name.toLowerCase().includes(term) ||
-        p.city?.toLowerCase().includes(term) ||
-        p.address?.toLowerCase().includes(term)
-      );
-    }
-
     console.log(`✅ Total filtrados final: ${filtered.length}`);
     setFilteredPlaces(filtered);
   }, [filters, minReviews, maxReviews, debouncedSearchTerm]);
