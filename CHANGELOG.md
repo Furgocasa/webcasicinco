@@ -1,5 +1,48 @@
 # 📝 Changelog - Casi Cinco
 
+## [30 Noviembre 2025] - BETA 101: Página de Contacto Mejorada + FAQs Expandidas 📞
+
+### ✨ NUEVA FEATURE: Página de Contacto Rediseñada
+- **DISEÑO:** Nueva estructura en 2 secciones principales (Contacto + FAQs)
+- **SECCIÓN 1:** Email destacado con botón grande + links a redes sociales (Instagram, Facebook)
+- **SECCIÓN 2:** Preguntas Frecuentes expandidas y agrupadas por categorías
+- **UX:** Motivos para contactar en cards visuales (Reportar errores, Corregir info, Sugerir lugares)
+- **RESPONSIVE:** Totalmente optimizado para móvil y desktop
+
+### 📚 FEATURE: FAQs Expandidas (56 preguntas)
+- **EXPANSIÓN:** De 17 a 56 preguntas frecuentes organizadas
+- **CATEGORÍAS:** 5 categorías principales con filtros interactivos:
+  - 💳 Suscripción (10 preguntas)
+  - 📍 Lugares (12 preguntas)
+  - ⚙️ Funcionalidades (15 preguntas)
+  - 🤖 Cómo Funciona (8 preguntas)
+  - ❓ General (11 preguntas)
+- **UX:** Acordeones interactivos con animaciones suaves
+- **UX:** Filtros visuales para navegación rápida por categoría
+- **UX:** Badges con número de preguntas por categoría
+- **AGRUPACIÓN:** FAQs agrupadas visualmente con títulos destacados
+
+### 🔒 SEGURIDAD: Limpieza de Información Técnica Sensible
+- **ELIMINADO:** Referencias a stack tecnológico (Next.js, Supabase, OpenAI, Tailwind, etc.)
+- **ELIMINADO:** Detalles de APIs específicas (Google Places API, PostGIS, etc.)
+- **ELIMINADO:** Información de costos internos y optimizaciones (€108k/año)
+- **ELIMINADO:** Detalles de implementación técnica (RLS, PKCE, Stripe)
+- **MANTENIDO:** Funcionalidades para usuarios sin revelar implementación
+- **PRINCIPIO:** Explicar QUÉ HACE la app, no CÓMO ESTÁ CONSTRUIDA
+
+### 📧 MEJORA: Información de Contacto
+- **ACTUALIZADO:** Email info@casicinco.com visible en footer y contacto
+- **AGREGADO:** Links directos a redes sociales con botones visuales
+- **MEJORADO:** Tiempo de respuesta claramente indicado (< 24h laborables)
+
+### 📄 DOCUMENTACIÓN
+- **ACTUALIZADO:** README.md a versión 3.1.0
+- **ACTUALIZADO:** Badge de estado a BETA 101
+- **AGREGADO:** Nueva característica de FAQs en lista principal
+- **CHANGELOG:** Esta entrada documenta todos los cambios
+
+---
+
 ## [30 Octubre 2025] - Chatbot con GPS REAL + Desambiguación Inteligente 🗺️
 
 ### 🚀 MEJORA CRÍTICA: Búsqueda por Proximidad GPS REAL

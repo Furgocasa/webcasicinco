@@ -2,7 +2,7 @@
 
 > **Descubre establecimientos excepcionales con +4.7★ en Google Maps**
 
-[![Estado](https://img.shields.io/badge/Estado-BETA%20100-success)](https://www.casicinco.com)
+[![Estado](https://img.shields.io/badge/Estado-BETA%20101-success)](https://www.casicinco.com)
 [![Deploy](https://img.shields.io/badge/Deploy-AWS%20Amplify-orange)](https://aws.amazon.com/amplify/)
 [![Framework](https://img.shields.io/badge/Framework-Next.js%2014-black)](https://nextjs.org/)
 
@@ -32,6 +32,7 @@ Este sistema es el **pilar de toda la aplicación**: mapa, chatbot IA, blog y re
 - 📍 **Planificador de Rutas** - Crea itinerarios personalizados
 - 📊 **Analytics** - Descubre tendencias y lugares populares
 - 📷 **Redes Sociales** - Instagram, Facebook, Twitter y TikTok integrados
+- ❓ **FAQs Completas** - 56 preguntas agrupadas por categorías con búsqueda inteligente
 
 ---
 
@@ -367,7 +368,7 @@ Este es un proyecto privado. No se aceptan contribuciones externas.
 ## 📞 Contacto
 
 **Web:** https://www.casicinco.com  
-**Email:** [contacto en la web]  
+**Email:** info@casicinco.com  
 **Admin:** https://www.casicinco.com/admin
 
 ---
@@ -376,9 +377,10 @@ Este es un proyecto privado. No se aceptan contribuciones externas.
 
 ## 📊 Estado Actual
 
-**Última actualización:** 26 de Octubre 2025  
+**Última actualización:** 30 de Noviembre 2025  
 **Estado:** 🟢 LISTO PARA PRODUCCIÓN  
-**Documentación:** v3.0.0 (Reorganizada y optimizada)
+**Versión:** BETA 101 ✨  
+**Documentación:** v3.1.0 (Página de contacto mejorada + FAQs expandidas)
 
 ### Ver Estado del Sistema:
 - [docs/archive/snapshots/](docs/archive/snapshots/) - Estados históricos por fecha
@@ -386,5 +388,5 @@ Este es un proyecto privado. No se aceptan contribuciones externas.
 
 ---
 
-**Release:** BETA 100 🎉  
-**Documentación:** v3.0.0 ✨ (Estructura profesional implementada)
+**Release:** BETA 101 🎉  
+**Documentación:** v3.1.0 ✨ (Contacto mejorado + 56 FAQs)
