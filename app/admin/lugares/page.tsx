@@ -444,6 +444,10 @@ export default function LugaresPage() {
           'Email Verificado': place.email_verified ? 'Sí' : 'No',
           'Email Fuente': place.email_source || '',
           'Website': place.website || '',
+          'Instagram': place.instagram_url || '',
+          'Facebook': place.facebook_url || '',
+          'Twitter': place.twitter_url || '',
+          'TikTok': place.tiktok_url || '',
           'Google Maps ID': place.google_maps_id || '',
           'Google Place ID': place.google_place_id || '',
           'Latitud': place.latitude,
@@ -515,6 +519,10 @@ export default function LugaresPage() {
           'Email Verificado': place.email_verified ? 'Sí' : 'No',
           'Email Fuente': place.email_source || '',
           'Website': place.website || '',
+          'Instagram': place.instagram_url || '',
+          'Facebook': place.facebook_url || '',
+          'Twitter': place.twitter_url || '',
+          'TikTok': place.tiktok_url || '',
           'Google Maps ID': place.google_maps_id || '',
           'Google Place ID': place.google_place_id || '',
           'Latitud': place.latitude,
@@ -549,6 +557,10 @@ export default function LugaresPage() {
         { wch: 15 }, // Email Verificado
         { wch: 15 }, // Email Fuente
         { wch: 40 }, // Website
+        { wch: 40 }, // Instagram
+        { wch: 40 }, // Facebook
+        { wch: 40 }, // Twitter
+        { wch: 40 }, // TikTok
         { wch: 30 }, // Google Maps ID
         { wch: 30 }, // Google Place ID
         { wch: 12 }, // Latitud
