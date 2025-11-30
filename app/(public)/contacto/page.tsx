@@ -158,50 +158,16 @@ export default function ContactoPage() {
                   <h3 className="text-xl font-bold text-gray-900 mb-4">Contacto Directo</h3>
                   <div className="space-y-4 text-gray-700">
                     <div>
-                      <p className="font-semibold mb-1">Email Principal</p>
+                      <p className="font-semibold mb-1">Email</p>
                       <a 
                         href="mailto:info@casicinco.com"
                         className="text-[#063971] hover:underline text-lg font-medium"
                       >
                         info@casicinco.com
                       </a>
-                    </div>
-                    <hr className="border-gray-200" />
-                    <div>
-                      <p className="font-semibold mb-1">Email General</p>
-                      <a 
-                        href="mailto:hola@casicinco.com"
-                        className="text-[#063971] hover:underline"
-                      >
-                        hola@casicinco.com
-                      </a>
-                    </div>
-                    <div>
-                      <p className="font-semibold mb-1">Soporte Técnico</p>
-                      <a 
-                        href="mailto:soporte@casicinco.com"
-                        className="text-[#063971] hover:underline"
-                      >
-                        soporte@casicinco.com
-                      </a>
-                    </div>
-                    <div>
-                      <p className="font-semibold mb-1">Privacidad y Datos</p>
-                      <a 
-                        href="mailto:privacidad@casicinco.com"
-                        className="text-[#063971] hover:underline"
-                      >
-                        privacidad@casicinco.com
-                      </a>
-                    </div>
-                    <div>
-                      <p className="font-semibold mb-1">Legal y Empresas</p>
-                      <a 
-                        href="mailto:legal@casicinco.com"
-                        className="text-[#063971] hover:underline"
-                      >
-                        legal@casicinco.com
-                      </a>
+                      <p className="text-sm text-gray-500 mt-2">
+                        Para consultas generales, soporte técnico, privacidad o temas legales
+                      </p>
                     </div>
                   </div>
                 </Card>
