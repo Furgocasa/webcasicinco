@@ -6,22 +6,59 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
+// Función para convertir provincias a slug URL-friendly
+function toSlug(text: string): string {
+  return text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // Quitar tildes
+    .replace(/\s+/g, '-') // Espacios a guiones
+    .replace(/[^a-z0-9-]/g, ''); // Solo letras, números y guiones
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.casicinco.com';
 
-  // Obtener todos los lugares PUBLICADOS de la base de datos
-  const { data: places } = await supabase
-    .from('places')
-    .select('slug, category, province, updated_at')
-    .eq('published', true)  // ✅ Solo lugares publicados
-    .order('rating', { ascending: false });
+  // ✅ Obtener TODOS los lugares PUBLICADOS en lotes (sin límite)
+  let allPlaces: any[] = [];
+  let currentOffset = 0;
+  const batchSize = 1000;
+  let hasMore = true;
 
-  // Generar URLs para cada lugar
-  const placeUrls: MetadataRoute.Sitemap = (places || []).map((place) => ({
-    url: `${baseUrl}/${place.category}/${place.province}/${place.slug}`,
+  while (hasMore) {
+    const { data, error } = await supabase
+      .from('places')
+      .select('slug, category, province, updated_at, rating')
+      .eq('published', true)
+      .order('rating', { ascending: false })
+      .order('review_count', { ascending: false })
+      .range(currentOffset, currentOffset + batchSize - 1);
+
+    if (error) {
+      console.error('Error cargando lugares para sitemap:', error);
+      break;
+    }
+
+    if (data && data.length > 0) {
+      allPlaces = [...allPlaces, ...data];
+      currentOffset += batchSize;
+      
+      if (data.length < batchSize) {
+        hasMore = false;
+      }
+    } else {
+      hasMore = false;
+    }
+  }
+
+  console.log(`✅ Sitemap - Total lugares encontrados: ${allPlaces.length}`);
+
+  // Generar URLs para cada lugar (con slug correcto de provincia)
+  const placeUrls: MetadataRoute.Sitemap = allPlaces.map((place) => ({
+    url: `${baseUrl}/${place.category}/${toSlug(place.province)}/${place.slug}`,
     lastModified: place.updated_at ? new Date(place.updated_at) : new Date(),
     changeFrequency: 'weekly' as const,
-    priority: 0.7,
+    priority: place.rating >= 4.8 ? 0.9 : place.rating >= 4.7 ? 0.8 : 0.7,
   }));
 
   // Obtener artículos del blog PUBLICADOS (solo published = true)
@@ -72,6 +109,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'monthly',
       priority: 0.7,
     },
+    {
+      url: `${baseUrl}/sobre-nosotros`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.7,
+    },
     // Páginas de categorías
     {
       url: `${baseUrl}/restaurante`,
@@ -87,12 +130,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     {
       url: `${baseUrl}/bar`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/cafeteria`,
       lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 0.8,
@@ -131,6 +168,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
-  // Combinar páginas estáticas + lugares dinámicos + artículos del blog
+  // Combinar todo en un único sitemap
   return [...staticPages, ...placeUrls, ...blogUrls];
 }
