@@ -155,12 +155,10 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    // Rutas admin y perfil protegidas
     '/admin/:path*',
     '/perfil/:path*',
-    // Rutas de lugares para redirección de URLs con tildes
-    '/restaurante/:province/:slug',
-    '/bar/:province/:slug',
-    '/hotel/:province/:slug',
-    '/cafe/:province/:slug'
+    // Rutas de lugares - necesitamos capturar province/slug
+    '/(restaurante|bar|hotel|cafe)/:path*'
   ],
 };
