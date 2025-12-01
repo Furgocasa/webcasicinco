@@ -199,6 +199,13 @@ export default function LugaresPage() {
 
           try {
             const response = await fetch(`/api/admin/places?${params.toString()}`);
+            
+            if (!response.ok) {
+              console.error(`❌ Error HTTP ${response.status} en batch ${page}`);
+              hasMore = false;
+              break;
+            }
+            
             const data = await response.json();
             
             if (data.success && data.places && data.places.length > 0) {
@@ -221,11 +228,16 @@ export default function LugaresPage() {
               }
               
               page++;
+              
+              // Pequeño delay entre batches para no saturar el servidor
+              await new Promise(resolve => setTimeout(resolve, 100));
             } else {
+              console.log(`⚠️ Batch ${page} sin datos o error en respuesta`);
               hasMore = false;
             }
-          } catch (batchError) {
+          } catch (batchError: any) {
             console.error(`❌ Error en batch ${page}:`, batchError);
+            toast.error(`Error cargando batch ${page}: ${batchError.message}`);
             hasMore = false;
           }
         }
@@ -233,15 +245,22 @@ export default function LugaresPage() {
         setLoadingProgress({ current: 0, total: 0 }); // Reset
         
         setPlaces(allLoadedPlaces);
-        setTotalPlaces(allLoadedPlaces.length);
+        setTotalPlaces(totalExpected || allLoadedPlaces.length);
         setTotalPages(1);
-        console.log(`✅ TODOS cargados: ${allLoadedPlaces.length} lugares en ${page - 1} batches`);
         
         if (allLoadedPlaces.length > 0) {
+          console.log(`✅ Cargados ${allLoadedPlaces.length} lugares en ${page - 1} batches`);
           setMapCenter({
             lat: allLoadedPlaces[0].latitude,
             lng: allLoadedPlaces[0].longitude,
           });
+          
+          if (allLoadedPlaces.length < totalExpected) {
+            toast.warning(`Cargados ${allLoadedPlaces.length} de ${totalExpected} lugares. Algunos batches fallaron.`);
+          }
+        } else {
+          console.error('❌ No se pudo cargar ningún lugar');
+          toast.error('No se pudieron cargar los lugares. Intenta con paginación normal.');
         }
         
       } else {
