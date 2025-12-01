@@ -173,8 +173,8 @@ export default function LugaresPage() {
   const loadPlaces = async () => {
     setLoading(true);
     try {
-      // Si itemsPerPage es 0 (Todos), cargar con límite alto
-      const effectiveLimit = itemsPerPage === 0 ? 10000 : itemsPerPage;
+      // Si itemsPerPage es 0 (Todos), cargar con límite de 1000 para evitar 413 Payload Too Large
+      const effectiveLimit = itemsPerPage === 0 ? 1000 : itemsPerPage;
       
       // Construir query con filtros
       const params = new URLSearchParams({
@@ -682,13 +682,21 @@ export default function LugaresPage() {
       {/* Mapa colapsable */}
       {isLoaded && (
         <Card>
-          <CardHeader className="cursor-pointer" onClick={() => setShowMap(!showMap)}>
+          <CardHeader className="cursor-pointer hover:bg-gray-50 transition" onClick={() => setShowMap(!showMap)}>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle>Mapa de Lugares</CardTitle>
-                <CardDescription>Vista geográfica de todos los lugares</CardDescription>
+                <CardTitle className="flex items-center gap-2">
+                  <MapPin className="h-5 w-5 text-indigo-600" />
+                  Mapa de Lugares
+                  {mapPlaces.length > 0 && (
+                    <span className="text-sm font-normal text-gray-500">({mapPlaces.length} lugares)</span>
+                  )}
+                </CardTitle>
+                <CardDescription>
+                  {showMap ? 'Click para ocultar el mapa' : 'Click para mostrar el mapa con clustering'}
+                </CardDescription>
               </div>
-              {showMap ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+              {showMap ? <ChevronUp className="h-5 w-5 text-gray-400" /> : <ChevronDown className="h-5 w-5 text-gray-400" />}
             </div>
           </CardHeader>
           {showMap && (
@@ -985,7 +993,8 @@ export default function LugaresPage() {
                   <option value="100">100</option>
                   <option value="200">200</option>
                   <option value="500">500</option>
-                  <option value="0">Todos</option>
+                  <option value="1000">1000</option>
+                  <option value="0">Todos (max 1000)</option>
                 </select>
                 <span className="text-sm text-gray-600">
                   por página
