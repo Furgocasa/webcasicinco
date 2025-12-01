@@ -242,7 +242,7 @@ export default function ChatbotFloating() {
       {isOpen && (
         <div className="fixed top-20 bottom-24 md:top-auto md:bottom-6 right-2 md:right-6 left-2 md:left-auto z-40 md:w-96 md:h-[600px] bg-white rounded-2xl shadow-2xl border-2 border-gray-200 flex flex-col overflow-hidden">
           {/* Header - STICKY para siempre visible */}
-          <div className="sticky top-0 z-10 bg-gradient-to-r from-amber-600 to-orange-600 text-white p-3 md:p-4 flex items-center justify-between flex-shrink-0">
+          <div className="sticky top-0 z-10 bg-gradient-to-r from-[#002297] to-blue-700 text-white p-3 md:p-4 flex items-center justify-between flex-shrink-0">
             <div className="flex items-center gap-3">
               {/* Avatar estilo Tío Viajero */}
               <div className="relative w-12 h-12 flex-shrink-0 rounded-full overflow-hidden bg-sky-100 border-2 border-white shadow-lg">
@@ -257,7 +257,7 @@ export default function ChatbotFloating() {
                   Tío Viajero IA
                   <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full">BETA</span>
                 </h3>
-                <p className="text-xs text-amber-100">Tu guía de viajes inteligente</p>
+                <p className="text-xs text-blue-100">Tu guía de viajes inteligente</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -325,7 +325,7 @@ export default function ChatbotFloating() {
             {/* Loading historial */}
             {loadingHistory && (
               <div className="flex justify-center py-8">
-                <div className="flex items-center gap-2 text-amber-600">
+                <div className="flex items-center gap-2 text-[#002297]">
                   <Loader2 className="h-5 w-5 animate-spin" />
                   <span className="text-sm">Cargando conversación...</span>
                 </div>
@@ -344,10 +344,10 @@ export default function ChatbotFloating() {
 
             {/* Mensaje de bienvenida */}
             {!loadingHistory && messages.length === 0 && (
-              <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg p-4 border-2 border-amber-200">
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 border-2 border-blue-200">
                 <div className="flex items-start gap-3">
                   {/* Avatar del Tío Viajero */}
-                  <div className="relative w-10 h-10 flex-shrink-0 rounded-full overflow-hidden bg-sky-100 border-2 border-amber-500">
+                  <div className="relative w-10 h-10 flex-shrink-0 rounded-full overflow-hidden bg-sky-100 border-2 border-[#002297]">
                     <img 
                       src="/images/tio-viajero.png" 
                       alt="Tío Viajero" 
@@ -355,8 +355,8 @@ export default function ChatbotFloating() {
                     />
                   </div>
                   <div>
-                    <p className="font-bold text-amber-900 mb-1">¡Saludos, viajero! 🎩</p>
-                    <p className="text-sm text-amber-800">
+                    <p className="font-bold text-[#002297] mb-1">¡Saludos, viajero! 🎩</p>
+                    <p className="text-sm text-blue-800">
                       Soy el Tío Viajero, tu guía experto por España. He recorrido cada rincón y conozco los mejores secretos.
                     </p>
                     {userLocation && (
@@ -364,10 +364,10 @@ export default function ChatbotFloating() {
                         📍 Tengo tu ubicación. Puedes preguntarme por lugares "cerca" o "aquí"
                       </p>
                     )}
-                    <p className="text-sm text-amber-800 mt-2">
+                    <p className="text-sm text-blue-800 mt-2">
                       Pregúntame lo que quieras:
                     </p>
-                    <ul className="text-xs text-amber-700 mt-2 space-y-1 ml-2">
+                    <ul className="text-xs text-blue-700 mt-2 space-y-1 ml-2">
                       <li>🍽️ "¿Dónde comer en Madrid?"</li>
                       <li>🏨 "Hotel en Barcelona cerca del mar"</li>
                       {userLocation && <li>📍 "Restaurante de pescado cerca de mí"</li>}
@@ -395,14 +395,14 @@ export default function ChatbotFloating() {
                 >
                   {msg.role === 'assistant' && (
                     <div className="flex items-center gap-2 mb-2">
-                      <div className="w-6 h-6 rounded-full overflow-hidden bg-sky-100 border border-amber-400">
+                      <div className="w-6 h-6 rounded-full overflow-hidden bg-sky-100 border border-[#002297]">
                         <img 
                           src="/images/tio-viajero.png" 
                           alt="Tío Viajero" 
                           className="w-full h-full object-cover"
                         />
                       </div>
-                      <span className="text-xs font-semibold text-amber-700">Tío Viajero</span>
+                      <span className="text-xs font-semibold text-[#002297]">Tío Viajero</span>
                     </div>
                   )}
                   {msg.role === 'assistant' ? (
@@ -433,10 +433,10 @@ export default function ChatbotFloating() {
             {/* Modal de confirmación para limpiar conversación */}
             {showClearConfirm && (
               <div className="absolute inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-10">
-                <div className="bg-white rounded-xl shadow-2xl p-6 max-w-sm w-full border-2 border-amber-200">
+                <div className="bg-white rounded-xl shadow-2xl p-6 max-w-sm w-full border-2 border-blue-200">
                   <div className="flex items-start gap-3 mb-4">
-                    <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
-                      <RotateCcw className="h-5 w-5 text-amber-600" />
+                    <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                      <RotateCcw className="h-5 w-5 text-[#002297]" />
                     </div>
                     <div>
                       <h3 className="font-bold text-gray-900 mb-1">Limpiar conversación</h3>
@@ -469,7 +469,7 @@ export default function ChatbotFloating() {
                           toast.error('Error al limpiar conversación');
                         }
                       }}
-                      className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 rounded-lg transition shadow-lg"
+                      className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-[#002297] to-blue-700 hover:from-blue-900 hover:to-blue-800 rounded-lg transition shadow-lg"
                     >
                       Sí, limpiar
                     </button>
