@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { PlaceMarker } from './PlaceMarker';
+import { getPlaceUrl } from '@/lib/utils/url-helper';
 
 interface Place {
   id: string;
@@ -72,6 +73,7 @@ export function MapView({ places, center, zoom = 10, onPlaceClick }: MapViewProp
       });
 
       // InfoWindow para mostrar información al hacer clic
+      const placeUrl = getPlaceUrl(place.category, place.province, place.slug);
       const infoWindow = new google.maps.InfoWindow({
         content: `
           <div style="padding: 8px; max-width: 200px;">
@@ -83,7 +85,7 @@ export function MapView({ places, center, zoom = 10, onPlaceClick }: MapViewProp
               <span style="font-weight: 500;">${place.rating}</span>
             </div>
             <button 
-              onclick="window.location.href='/${place.category}/${place.province}/${place.slug}'"
+              onclick="window.location.href='${placeUrl}'"
               style="
                 background: #2563eb;
                 color: white;

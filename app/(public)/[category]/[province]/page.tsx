@@ -9,30 +9,13 @@ import { Badge } from '@/components/ui/Badge';
 import Footer from '@/components/layout/Footer';
 import { getPlacePhotoUrl } from '@/lib/utils/photo-helper';
 import { calculateQualityTier, getTierInfo } from '@/lib/utils/tier-calculator';
+import { toSlug, fromSlug, getPlaceUrl } from '@/lib/utils/url-helper';
 
 type Props = {
   params: { category: string; province: string }
 }
 
 const VALID_CATEGORIES = ['restaurante', 'bar', 'cafe', 'hotel'];
-
-// Utility para convertir provincia a slug URL-friendly
-function toSlug(text: string): string {
-  return text
-    .toLowerCase()
-    .normalize('NFD') // Descomponer caracteres con tildes
-    .replace(/[\u0300-\u036f]/g, '') // Quitar tildes
-    .replace(/\s+/g, '-') // Espacios a guiones
-    .replace(/[^a-z0-9-]/g, ''); // Solo letras, números y guiones
-}
-
-// Utility para convertir slug de URL a nombre de provincia para BD
-function fromSlug(slug: string): string {
-  return slug
-    .split('-')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
-}
 
 const CATEGORY_CONFIG: Record<string, {
   title: string;
@@ -339,7 +322,7 @@ export default async function CategoryProvincePage({ params }: Props) {
               return (
                 <Link 
                   key={place.id}
-                  href={`/${place.category}/${place.province}/${place.slug}`}
+                  href={getPlaceUrl(place.category, place.province, place.slug)}
                   className="group"
                 >
                   <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 h-full">

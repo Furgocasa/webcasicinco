@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createClient as createClientBrowser } from '@supabase/supabase-js';
 import { PlaceContent } from '@/components/places/PlaceContent';
 import { calculateQualityTier, getTierInfo } from '@/lib/utils/tier-calculator';
+import { toSlug } from '@/lib/utils/url-helper';
 
 type Props = {
   params: { category: string; province: string; slug: string }
@@ -66,7 +67,7 @@ export async function generateStaticParams() {
   
   return (places || []).map((place) => ({
     category: place.category,
-    province: place.province,
+    province: toSlug(place.province), // ✅ Convertir a slug sin tildes
     slug: place.slug,
   }));
 }
@@ -152,7 +153,7 @@ export default async function PlaceDetailPage({ params }: Props) {
         "@type": "ListItem",
         "position": 3,
         "name": place.province,
-        "item": `https://casicinco.com/${place.category}/${place.province}`
+        "item": `https://casicinco.com/${place.category}/${toSlug(place.province)}`
       },
       {
         "@type": "ListItem",

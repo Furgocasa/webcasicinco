@@ -8,6 +8,7 @@ import Footer from '@/components/layout/Footer';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { getPlacePhotoUrl } from '@/lib/utils/photo-helper';
+import { getPlaceUrl } from '@/lib/utils/url-helper';
 
 type Props = {
   params: { category: string }
@@ -298,7 +299,7 @@ export default async function CategoryPage({ params }: Props) {
                             </p>
                           )}
 
-                          <Link href={`/${category}/${place.province}/${place.slug}`}>
+                          <Link href={getPlaceUrl(category, place.province, place.slug)}>
                             <Button style={{ backgroundColor: config.color }} className="text-white">
                               Ver Detalles
                               <ArrowRight className="ml-2 h-4 w-4" />

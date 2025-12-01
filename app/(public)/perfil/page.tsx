@@ -25,6 +25,7 @@ import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { calculateQualityTier, getTierInfo } from '@/lib/utils/tier-calculator';
 import { getPlacePhotoUrl } from '@/lib/utils/photo-helper';
+import { getPlaceUrl } from '@/lib/utils/url-helper';
 import { toast } from 'sonner';
 
 export default function PerfilPage() {
@@ -345,7 +346,7 @@ export default function PerfilPage() {
                               {place.city}, {place.province}
                             </p>
                             
-                            <Link href={`/${place.category}/${place.province}/${place.slug}`}>
+                            <Link href={getPlaceUrl(place.category, place.province, place.slug)}>
                               <Button size="sm" className="w-full">
                                 <Eye className="h-4 w-4 mr-2" />
                                 Ver Detalles
@@ -451,7 +452,7 @@ export default function PerfilPage() {
                             
                             {/* Acciones */}
                             <div className="flex flex-col gap-2">
-                              <Link href={`/${place.category}/${place.province}/${place.slug}`}>
+                              <Link href={getPlaceUrl(place.category, place.province, place.slug)}>
                                 <Button size="sm" variant="outline">
                                   <Eye className="h-4 w-4" />
                                 </Button>
@@ -607,7 +608,7 @@ export default function PerfilPage() {
                                 </Badge>
                               </div>
                             </div>
-                            <Link href={`/${place.category}/${place.province}/${place.slug}`}>
+                            <Link href={getPlaceUrl(place.category, place.province, place.slug)}>
                               <Button size="sm" variant="outline">
                                 <Eye className="h-4 w-4" />
                               </Button>

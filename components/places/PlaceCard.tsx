@@ -5,13 +5,14 @@ import { Place } from '@/types/place';
 import { Card, CardContent } from '../ui/Card';
 import { Badge } from '../ui/Badge';
 import { getPlacePhotoUrl, hasPlacePhotos } from '@/lib/utils/photo-helper';
+import { getPlaceUrl } from '@/lib/utils/url-helper';
 
 interface PlaceCardProps {
   place: Place;
 }
 
 export default function PlaceCard({ place }: PlaceCardProps) {
-  const placeUrl = `/${place.category}/${place.province}/${place.slug}`;
+  const placeUrl = getPlaceUrl(place.category, place.province, place.slug);
   const photoUrl = getPlacePhotoUrl(place, 0);
 
   return (

@@ -37,6 +37,7 @@ import { getPlacePhotoUrl } from '@/lib/utils/photo-helper';
 import { toast } from 'sonner';
 import { trackEvent, EVENTS, CATEGORIES as ANALYTICS_CATEGORIES } from '@/lib/analytics/tracker';
 import { FurgocasaBanner } from '@/components/ad/FurgocasaBanner';
+import { toSlug } from '@/lib/utils/url-helper';
 
 type PlaceContentProps = {
   place: any;
@@ -53,12 +54,7 @@ export function PlaceContent({ place, tier, tierInfo }: PlaceContentProps) {
   const [isMobile, setIsMobile] = useState(false);
 
   // Convertir provincia a slug para URLs (Málaga → malaga)
-  const provinceSlug = place.province
-    ?.toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/[^a-z0-9-]/g, '') || place.province;
+  const provinceSlug = toSlug(place.province);
 
   // Obtener la API key de Google Maps desde variable de entorno
   const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;

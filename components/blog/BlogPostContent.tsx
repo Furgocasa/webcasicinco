@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import Footer from '@/components/layout/Footer';
 import { getPlacePhotoUrl } from '@/lib/utils/photo-helper';
+import { getPlaceUrl } from '@/lib/utils/url-helper';
 import { FurgocasaBanner } from '@/components/ad/FurgocasaBanner';
 import type { BlogPostWithPlaces } from '@/types/blog';
 
@@ -190,7 +191,7 @@ export function BlogPostContent({ post }: BlogPostContentProps) {
 
                             {/* Botones */}
                             <div className="flex flex-wrap gap-2">
-                              <Link href={`/${place.category}/${place.province}/${place.slug}`}>
+                              <Link href={getPlaceUrl(place.category, place.province, place.slug)}>
                                 <Button variant="outline" size="sm">
                                   Ver Detalles
                                 </Button>

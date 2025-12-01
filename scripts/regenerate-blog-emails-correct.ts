@@ -27,6 +27,15 @@ interface BlogPost {
   places: Place[];
 }
 
+function toSlug(text: string): string {
+  return text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // Quitar tildes
+    .replace(/\s+/g, '-') // Espacios a guiones
+    .replace(/[^a-z0-9-]/g, ''); // Solo letras, números y guiones
+}
+
 function getPlacePhotoUrl(place: Place): string {
   if (place.photo_urls && place.photo_urls.length > 0) {
     return place.photo_urls[0];
@@ -68,7 +77,7 @@ function generateEnhancedEmailHTML(post: BlogPost): string {
                 ${place.ai_description.substring(0, 150)}...
               </p>
               ` : ''}
-              <a href="https://www.casicinco.com/${place.category}/${place.province}/${place.slug}" style="display: inline-block; padding: 10px 20px; background-color: #063971; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 600; border-radius: 6px; margin-top: 5px;">
+              <a href="https://www.casicinco.com/${place.category}/${toSlug(place.province)}/${place.slug}" style="display: inline-block; padding: 10px 20px; background-color: #063971; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 600; border-radius: 6px; margin-top: 5px;">
                 Ver detalles →
               </a>
             </td>
