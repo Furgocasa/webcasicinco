@@ -2,10 +2,43 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
 /**
- * Middleware para proteger rutas /admin/*
- * Verifica que el usuario esté autenticado y sea admin
+ * Convierte texto a slug URL-friendly (sin tildes ni caracteres especiales)
+ */
+function toSlug(text: string): string {
+  return text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // Quitar tildes
+    .replace(/\s+/g, '-') // Espacios a guiones
+    .replace(/[^a-z0-9-]/g, ''); // Solo letras, números y guiones
+}
+
+/**
+ * Middleware para:
+ * 1. Redirigir URLs con tildes/caracteres especiales (SEO - evitar contenido duplicado)
+ * 2. Proteger rutas /admin/* y /perfil
  */
 export async function middleware(request: NextRequest) {
+  const pathname = request.nextUrl.pathname;
+
+  // 🔥 REDIRECCIÓN 301: URLs con caracteres especiales → URLs limpias
+  // Ejemplo: /bar/M%C3%A1laga/... → /bar/malaga/...
+  const categoryMatch = pathname.match(/^\/(restaurante|bar|hotel|cafe)\/([^/]+)\/(.+)$/);
+  
+  if (categoryMatch) {
+    const [, category, province, slug] = categoryMatch;
+    const cleanProvince = toSlug(decodeURIComponent(province));
+    
+    // Si la provincia tiene caracteres especiales, redirigir a URL limpia
+    if (province !== cleanProvince) {
+      const cleanUrl = `/${category}/${cleanProvince}/${slug}`;
+      console.log('🔄 Redirecting:', pathname, '→', cleanUrl);
+      
+      // Redirección 301 permanente (SEO-friendly)
+      return NextResponse.redirect(new URL(cleanUrl, request.url), 301);
+    }
+  }
+
   let response = NextResponse.next({
     request: {
       headers: request.headers,
@@ -57,8 +90,6 @@ export async function middleware(request: NextRequest) {
       },
     }
   );
-
-  const pathname = request.nextUrl.pathname;
   
   try {
     // 🔥 FIX: Obtener PRIMERO la sesión (más confiable que getUser en middleware)
@@ -125,6 +156,11 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     '/admin/:path*',
-    '/perfil/:path*'
+    '/perfil/:path*',
+    // Rutas de lugares para redirección de URLs con tildes
+    '/restaurante/:province/:slug',
+    '/bar/:province/:slug',
+    '/hotel/:province/:slug',
+    '/cafe/:province/:slug'
   ],
 };

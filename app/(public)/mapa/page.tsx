@@ -28,6 +28,7 @@ import RoutePromoModal from '@/components/modals/RoutePromoModal';
 import type { PlaceWithTier, PlaceFilters, QualityTier, ReviewsRange } from '@/types/filters';
 import { calculateQualityTier, getTierMarkerColor, getTierInfo } from '@/lib/utils/tier-calculator';
 import { trackEvent, EVENTS, CATEGORIES as ANALYTICS_CATEGORIES } from '@/lib/analytics/tracker';
+import { getPlaceUrl } from '@/lib/utils/url-helper';
 import { 
   QUALITY_TIERS, 
   REVIEWS_RANGES, 
@@ -1921,7 +1922,7 @@ export default function MapPage() {
                     <div className="grid grid-cols-2 gap-2 mb-2">
                       <Button
                         size="sm"
-                        onClick={() => router.push(`/${selectedPlace.category}/${selectedPlace.province}/${selectedPlace.slug}`)}
+                        onClick={() => router.push(getPlaceUrl(selectedPlace.category, selectedPlace.province, selectedPlace.slug))}
                         className="w-full"
                       >
                         Ver Detalles

@@ -18,8 +18,9 @@ export function toSlug(text: string): string {
  * Ejemplo: "a-coruna" → "A Coruña"
  */
 export function fromSlug(slug: string): string {
-  // Mapeo manual para provincias con nombres especiales
+  // Mapeo manual para provincias con tildes y caracteres especiales
   const provinceMap: Record<string, string> = {
+    // Provincias con tildes
     'malaga': 'Málaga',
     'cadiz': 'Cádiz',
     'cordoba': 'Córdoba',
@@ -28,8 +29,17 @@ export function fromSlug(slug: string): string {
     'leon': 'León',
     'jaen': 'Jaén',
     'caceres': 'Cáceres',
-    'a-coruna': 'A Coruña',
     'alava': 'Álava',
+    // Provincias con múltiples palabras o caracteres especiales
+    'a-coruna': 'A Coruña',
+    'la-coruna': 'A Coruña', // Alias común
+    'islas-baleares': 'Islas Baleares',
+    'baleares': 'Islas Baleares',
+    'illes-balears': 'Islas Baleares',
+    'las-palmas': 'Las Palmas',
+    'santa-cruz-de-tenerife': 'Santa Cruz de Tenerife',
+    'castellon': 'Castellón',
+    'castello': 'Castellón',
   };
 
   // Si existe en el mapeo, retornar el valor correcto

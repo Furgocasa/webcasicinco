@@ -22,6 +22,7 @@ import BottomSheet from '@/components/mobile/BottomSheet';
 import LoginOverlay from '@/components/auth/LoginOverlay';
 import { calculateQualityTier, getTierInfo } from '@/lib/utils/tier-calculator';
 import { getPlacePhotoUrl } from '@/lib/utils/photo-helper';
+import { getPlaceUrl } from '@/lib/utils/url-helper';
 import { toast } from 'sonner';
 
 const mapContainerStyle = {
@@ -1432,7 +1433,7 @@ export default function RutaPage() {
                       <Button
                         onClick={(e) => {
                           e.stopPropagation();
-                          window.location.href = `/${place.category}/${place.province}/${place.slug}`;
+                          window.location.href = getPlaceUrl(place.category, place.province, place.slug);
                         }}
                         size="sm"
                         className="flex-1"
