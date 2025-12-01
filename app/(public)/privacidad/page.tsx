@@ -13,7 +13,7 @@ export default function PrivacidadPage() {
     <>
       <main className="min-h-screen bg-white">
         {/* HERO */}
-        <section className="relative bg-[#063971] text-white overflow-hidden py-12">
+        <section className="relative bg-[#002297] text-white overflow-hidden py-12">
           <div className="container mx-auto px-4">
             <Link 
               href="/"
@@ -105,7 +105,7 @@ export default function PrivacidadPage() {
                 Usamos cookies esenciales para el funcionamiento de la aplicación y cookies
                 analíticas para mejorar el servicio. Puedes gestionar las cookies en la
                 configuración de tu navegador. Ver nuestra{' '}
-                <Link href="/cookies" className="text-[#063971] hover:underline">
+                <Link href="/cookies" className="text-[#002297] hover:underline">
                   Política de Cookies
                 </Link>.
               </p>
@@ -115,8 +115,8 @@ export default function PrivacidadPage() {
                 Para ejercer tus derechos o resolver dudas sobre privacidad:
               </p>
               <ul className="list-disc pl-6 text-gray-700 mb-6 space-y-2">
-                <li>Email: <a href="mailto:privacidad@casicinco.com" className="text-[#063971] hover:underline">privacidad@casicinco.com</a></li>
-                <li>Formulario de contacto: <Link href="/contacto" className="text-[#063971] hover:underline">/contacto</Link></li>
+                <li>Email: <a href="mailto:privacidad@casicinco.com" className="text-[#002297] hover:underline">privacidad@casicinco.com</a></li>
+                <li>Formulario de contacto: <Link href="/contacto" className="text-[#002297] hover:underline">/contacto</Link></li>
               </ul>
 
               <div className="bg-gray-50 p-6 rounded-lg border border-gray-200 mt-8">

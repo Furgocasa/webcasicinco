@@ -25,9 +25,9 @@ export default function SobreNosotrosPage() {
     <>
       <main className="min-h-screen">
         {/* Hero Section */}
-        <section className="relative bg-[#063971] text-white overflow-hidden">
+        <section className="relative bg-[#002297] text-white overflow-hidden">
           {/* Capa sólida de fondo */}
-          <div className="absolute inset-0 bg-[#063971]"></div>
+          <div className="absolute inset-0 bg-[#002297]"></div>
           
           <div className="relative container mx-auto px-4 py-20 md:py-32 z-10">
             <div className="max-w-4xl mx-auto text-center">
@@ -135,20 +135,20 @@ export default function SobreNosotrosPage() {
 
                   <div className="flex items-center justify-center">
                     <div className="bg-gray-200 rounded-full p-3">
-                      <ArrowRight className="h-8 w-8 transform rotate-90 text-[#063971]" />
+                      <ArrowRight className="h-8 w-8 transform rotate-90 text-[#002297]" />
                     </div>
                   </div>
 
                   {/* Logo Casi Cinco */}
                   <div className="bg-gradient-to-br from-[#ffd935] to-yellow-600 rounded-2xl p-8 text-center shadow-xl">
                     <div className="bg-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                      <Star className="h-8 w-8 text-[#063971] fill-[#063971]" />
+                      <Star className="h-8 w-8 text-[#002297] fill-[#002297]" />
                     </div>
-                    <h4 className="text-xl font-bold text-[#063971] mb-2">Casi Cinco</h4>
-                    <p className="text-[#063971]/80 text-sm mb-4">
+                    <h4 className="text-xl font-bold text-[#002297] mb-2">Casi Cinco</h4>
+                    <p className="text-[#002297]/80 text-sm mb-4">
                       La solución para encontrar lugares excepcionales
                     </p>
-                    <div className="flex items-center justify-center gap-6 text-sm text-[#063971]/80">
+                    <div className="flex items-center justify-center gap-6 text-sm text-[#002297]/80">
                       <div className="flex items-center gap-1">
                         <Award className="h-4 w-4" />
                         <span>Solo 4.7★+</span>
@@ -174,7 +174,7 @@ export default function SobreNosotrosPage() {
                   Hoy, <strong>tanto si viajas en camper como si no</strong>, Casi Cinco te garantiza 
                   que cada lugar que elijas será excepcional. 
                   <br /><br />
-                  <span className="text-[#063971] font-bold text-2xl">Porque nacimos de viajeros, para viajeros.</span>
+                  <span className="text-[#002297] font-bold text-2xl">Porque nacimos de viajeros, para viajeros.</span>
                 </p>
                 
                 <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
@@ -186,7 +186,7 @@ export default function SobreNosotrosPage() {
                   >
                     <Button 
                       variant="outline"
-                      className="border-2 border-[#063971] text-[#063971] hover:bg-[#063971] hover:text-white transition-colors"
+                      className="border-2 border-[#002297] text-[#002297] hover:bg-[#002297] hover:text-white transition-colors"
                       size="lg"
                     >
                       🚐 Conoce Furgocasa Campervans
@@ -194,7 +194,7 @@ export default function SobreNosotrosPage() {
                   </a>
                   <Button 
                     onClick={() => router.push('/mapa')}
-                    className="bg-[#063971] text-white hover:bg-[#052d5a] font-bold"
+                    className="bg-[#002297] text-white hover:bg-[#052d5a] font-bold"
                     size="lg"
                   >
                     ⭐ Explora Casi Cinco
@@ -216,7 +216,7 @@ export default function SobreNosotrosPage() {
               
               <div className="grid md:grid-cols-3 gap-8">
                 <Card className="p-6 text-center hover:shadow-lg transition">
-                  <div className="bg-[#063971] w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <div className="bg-[#002297] w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Star className="h-8 w-8 text-[#ffd935] fill-[#ffd935]" />
                   </div>
                   <h3 className="text-xl font-bold text-gray-900 mb-3">Excelencia</h3>
@@ -226,7 +226,7 @@ export default function SobreNosotrosPage() {
                 </Card>
 
                 <Card className="p-6 text-center hover:shadow-lg transition">
-                  <div className="bg-[#063971] w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <div className="bg-[#002297] w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                     <TrendingUp className="h-8 w-8 text-white" />
                   </div>
                   <h3 className="text-xl font-bold text-gray-900 mb-3">Objetividad</h3>
@@ -236,7 +236,7 @@ export default function SobreNosotrosPage() {
                 </Card>
 
                 <Card className="p-6 text-center hover:shadow-lg transition">
-                  <div className="bg-[#063971] w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <div className="bg-[#002297] w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Users className="h-8 w-8 text-white" />
                   </div>
                   <h3 className="text-xl font-bold text-gray-900 mb-3">Experiencia</h3>
@@ -250,9 +250,9 @@ export default function SobreNosotrosPage() {
         </section>
 
         {/* CTA Final */}
-        <section className="relative py-20 bg-[#063971] text-white overflow-hidden">
+        <section className="relative py-20 bg-[#002297] text-white overflow-hidden">
           {/* Capa sólida de fondo */}
-          <div className="absolute inset-0 bg-[#063971]"></div>
+          <div className="absolute inset-0 bg-[#002297]"></div>
           
           <div className="container mx-auto px-4 text-center relative z-10">
             <div className="max-w-3xl mx-auto">
@@ -267,7 +267,7 @@ export default function SobreNosotrosPage() {
                 <Button 
                   size="lg" 
                   onClick={() => router.push('/registro')}
-                  className="bg-[#ffd935] text-[#063971] hover:bg-[#e6c430] font-bold text-lg px-10 py-6 shadow-2xl"
+                  className="bg-[#ffd935] text-[#002297] hover:bg-[#e6c430] font-bold text-lg px-10 py-6 shadow-2xl"
                 >
                   Probar Gratis 30 Días
                   <ArrowRight className="ml-2 h-5 w-5" />

@@ -28,7 +28,7 @@ export default function MetodologiaPage() {
     <>
       <main className="min-h-screen bg-white">
         {/* HERO */}
-        <section className="relative bg-[#063971] text-white overflow-hidden py-24 md:py-32">
+        <section className="relative bg-[#002297] text-white overflow-hidden py-24 md:py-32">
           <div className="absolute inset-0 bg-black opacity-10"></div>
           
           <div className="relative container mx-auto px-4">
@@ -68,9 +68,9 @@ export default function MetodologiaPage() {
           <div className="container mx-auto px-4">
             <div className="max-w-5xl mx-auto">
               <div className="text-center mb-12">
-                <div className="inline-flex items-center gap-2 bg-[#063971]/10 px-4 py-2 rounded-full mb-4">
+                <div className="inline-flex items-center gap-2 bg-[#002297]/10 px-4 py-2 rounded-full mb-4">
                   <span className="text-2xl">🚐</span>
-                  <span className="text-sm font-medium text-[#063971]">El origen de nuestra obsesión por la calidad</span>
+                  <span className="text-sm font-medium text-[#002297]">El origen de nuestra obsesión por la calidad</span>
                 </div>
                 <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
                   Por Qué Nació Casi Cinco
@@ -81,7 +81,7 @@ export default function MetodologiaPage() {
               </div>
 
               <div className="grid md:grid-cols-3 gap-6 mb-12">
-                <Card className="p-6 border-2 border-[#063971]/20 hover:border-[#063971] transition-all">
+                <Card className="p-6 border-2 border-[#002297]/20 hover:border-[#002297] transition-all">
                   <div className="text-4xl mb-4">📅</div>
                   <h3 className="text-xl font-bold text-gray-900 mb-2">2018: El Inicio</h3>
                   <p className="text-gray-600 text-sm">
@@ -109,7 +109,7 @@ export default function MetodologiaPage() {
                 </Card>
               </div>
 
-              <Card className="p-8 bg-gradient-to-r from-[#063971] to-blue-800 text-white text-center">
+              <Card className="p-8 bg-gradient-to-r from-[#002297] to-blue-800 text-white text-center">
                 <p className="text-lg md:text-xl leading-relaxed">
                   <strong>Esta metodología no es teórica.</strong>
                   <br />
@@ -203,7 +203,7 @@ export default function MetodologiaPage() {
                 <Card className="p-8">
                   <div className="flex items-start gap-6">
                     <div className="bg-[#ffd935] w-16 h-16 rounded-xl flex items-center justify-center flex-shrink-0">
-                      <Award className="h-8 w-8 text-[#063971]" />
+                      <Award className="h-8 w-8 text-[#002297]" />
                     </div>
                     <div className="flex-1">
                       <h3 className="text-2xl font-bold text-gray-900 mb-3">1. Rating Mínimo: 4.7★</h3>
@@ -211,7 +211,7 @@ export default function MetodologiaPage() {
                         Solo el <strong>top 5% de todos los lugares de España</strong> tiene 4.7 estrellas o más.
                         Este es nuestro filtro base. <strong>Cero lugares mediocres</strong>.
                       </p>
-                      <div className="bg-blue-50 p-4 rounded-lg border-l-4 border-[#063971]">
+                      <div className="bg-blue-50 p-4 rounded-lg border-l-4 border-[#002297]">
                         <p className="text-sm text-gray-700">
                           <strong>📊 Dato:</strong> De ~70,000 restaurantes en España, solo ~3,500 tienen 4.7★+.
                           Eso es un 95% de descarte automático.
@@ -224,7 +224,7 @@ export default function MetodologiaPage() {
                 {/* Variable 2: Número de Reseñas */}
                 <Card className="p-8">
                   <div className="flex items-start gap-6">
-                    <div className="bg-[#063971] w-16 h-16 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <div className="bg-[#002297] w-16 h-16 rounded-xl flex items-center justify-center flex-shrink-0">
                       <Users className="h-8 w-8 text-white" />
                     </div>
                     <div className="flex-1">
@@ -263,7 +263,7 @@ export default function MetodologiaPage() {
                 {/* Variable 3: IA */}
                 <Card className="p-8">
                   <div className="flex items-start gap-6">
-                    <div className="bg-gradient-to-br from-[#063971] to-blue-800 w-16 h-16 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <div className="bg-gradient-to-br from-[#002297] to-blue-800 w-16 h-16 rounded-xl flex items-center justify-center flex-shrink-0">
                       <Brain className="h-8 w-8 text-white" />
                     </div>
                     <div className="flex-1">
@@ -273,15 +273,15 @@ export default function MetodologiaPage() {
                       </p>
                       <ul className="space-y-2 text-gray-700">
                         <li className="flex items-start gap-2">
-                          <CheckCircle2 className="h-5 w-5 text-[#063971] mt-0.5" />
+                          <CheckCircle2 className="h-5 w-5 text-[#002297] mt-0.5" />
                           <span><strong>Highlights:</strong> Qué hace único a cada lugar</span>
                         </li>
                         <li className="flex items-start gap-2">
-                          <CheckCircle2 className="h-5 w-5 text-[#063971] mt-0.5" />
+                          <CheckCircle2 className="h-5 w-5 text-[#002297] mt-0.5" />
                           <span><strong>Resumen de reseñas:</strong> Consenso de opiniones reales</span>
                         </li>
                         <li className="flex items-start gap-2">
-                          <CheckCircle2 className="h-5 w-5 text-[#063971] mt-0.5" />
+                          <CheckCircle2 className="h-5 w-5 text-[#002297] mt-0.5" />
                           <span><strong>Descripción:</strong> Información relevante sin marketing</span>
                         </li>
                       </ul>
@@ -308,7 +308,7 @@ export default function MetodologiaPage() {
 
               <div className="space-y-4">
                 {/* Diamante */}
-                <Card className="p-6 border-2 border-[#063971] bg-gradient-to-r from-blue-50 to-blue-100">
+                <Card className="p-6 border-2 border-[#002297] bg-gradient-to-r from-blue-50 to-blue-100">
                   <div className="flex items-center gap-4">
                     <span className="text-4xl">💎</span>
                     <div className="flex-1">
@@ -317,7 +317,7 @@ export default function MetodologiaPage() {
                       <p className="text-sm text-gray-500">Solo ~150 lugares en toda España. El 0.2% absoluto.</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-3xl font-bold text-[#063971]">0.2%</p>
+                      <p className="text-3xl font-bold text-[#002297]">0.2%</p>
                       <p className="text-xs text-gray-500">de España</p>
                     </div>
                   </div>
@@ -349,7 +349,7 @@ export default function MetodologiaPage() {
                       <p className="text-sm text-gray-500">~400 lugares. Validación sólida y consistente.</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-3xl font-bold text-[#063971]">1%</p>
+                      <p className="text-3xl font-bold text-[#002297]">1%</p>
                       <p className="text-xs text-gray-500">de España</p>
                     </div>
                   </div>
@@ -365,7 +365,7 @@ export default function MetodologiaPage() {
                       <p className="text-sm text-gray-500">~1,600 lugares. Excelente calidad verificada.</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-3xl font-bold text-[#063971]">2%</p>
+                      <p className="text-3xl font-bold text-[#002297]">2%</p>
                       <p className="text-xs text-gray-500">de España</p>
                     </div>
                   </div>
@@ -381,7 +381,7 @@ export default function MetodologiaPage() {
                       <p className="text-sm text-gray-500">~1,100 lugares. Buena calidad, menos validación.</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-3xl font-bold text-[#063971]">1.5%</p>
+                      <p className="text-3xl font-bold text-[#002297]">1.5%</p>
                       <p className="text-xs text-gray-500">de España</p>
                     </div>
                   </div>
@@ -398,7 +398,7 @@ export default function MetodologiaPage() {
                     {' + '}
                     <span className="font-mono bg-white px-3 py-1 rounded">Muchas Reseñas</span>
                     {' = '}
-                    <span className="font-mono bg-[#063971] text-white px-3 py-1 rounded">Objetividad Garantizada</span>
+                    <span className="font-mono bg-[#002297] text-white px-3 py-1 rounded">Objetividad Garantizada</span>
                   </p>
                 </div>
               </div>
@@ -413,7 +413,7 @@ export default function MetodologiaPage() {
               <div className="text-center mb-12">
                 <div className="inline-flex items-center gap-2 bg-[#ffd935]/20 px-4 py-2 rounded-full mb-4">
                   <span className="text-2xl">👤</span>
-                  <span className="text-sm font-medium text-[#063971]">Ejemplo real</span>
+                  <span className="text-sm font-medium text-[#002297]">Ejemplo real</span>
                 </div>
                 <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
                   Cómo Funciona en la Práctica
@@ -445,15 +445,15 @@ export default function MetodologiaPage() {
                 </Card>
 
                 {/* Paso 2: Con Casi Cinco */}
-                <Card className="p-6 md:p-8 bg-gradient-to-br from-green-50 to-blue-50 border-2 border-[#063971]">
+                <Card className="p-6 md:p-8 bg-gradient-to-br from-green-50 to-blue-50 border-2 border-[#002297]">
                   <div className="flex items-start gap-6">
-                    <div className="bg-[#063971] text-white rounded-full w-12 h-12 flex items-center justify-center flex-shrink-0 font-bold text-xl">
+                    <div className="bg-[#002297] text-white rounded-full w-12 h-12 flex items-center justify-center flex-shrink-0 font-bold text-xl">
                       ✨
                     </div>
                     <div className="flex-1">
-                      <h3 className="text-xl font-bold text-[#063971] mb-3">Método Casi Cinco</h3>
+                      <h3 className="text-xl font-bold text-[#002297] mb-3">Método Casi Cinco</h3>
                       <div className="space-y-3">
-                        <div className="bg-white p-4 rounded-lg border-l-4 border-[#063971]">
+                        <div className="bg-white p-4 rounded-lg border-l-4 border-[#002297]">
                           <p className="text-gray-700 text-sm mb-2">
                             <strong>1. Filtro automático 4.7★+</strong>
                           </p>
@@ -567,7 +567,7 @@ export default function MetodologiaPage() {
         </section>
 
         {/* TRANSPARENCIA TOTAL */}
-        <section className="py-20 bg-[#063971] text-white">
+        <section className="py-20 bg-[#002297] text-white">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto text-center">
               <h2 className="text-3xl md:text-4xl font-bold mb-6">
@@ -611,7 +611,7 @@ export default function MetodologiaPage() {
         </section>
 
         {/* CTA FINAL */}
-        <section className="py-24 bg-gradient-to-r from-[#063971] to-blue-800 text-white">
+        <section className="py-24 bg-gradient-to-r from-[#002297] to-blue-800 text-white">
           <div className="container mx-auto px-4 text-center">
             <div className="max-w-3xl mx-auto">
               <h2 className="text-4xl font-bold mb-6">
@@ -624,7 +624,7 @@ export default function MetodologiaPage() {
                 <Link href="/mapa">
                   <Button 
                     size="lg"
-                    className="bg-[#ffd935] text-[#063971] hover:bg-[#e6c430] font-bold px-8 py-6"
+                    className="bg-[#ffd935] text-[#002297] hover:bg-[#e6c430] font-bold px-8 py-6"
                   >
                     Explorar el Mapa
                   </Button>

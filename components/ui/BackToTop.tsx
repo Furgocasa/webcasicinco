@@ -38,7 +38,7 @@ export default function BackToTop() {
           className="fixed bottom-6 left-6 z-[998] bg-white hover:bg-gray-50 text-gray-700 p-4 rounded-full shadow-lg border-2 border-gray-200 transition-all duration-300 hover:scale-110 hover:shadow-xl group"
           aria-label="Volver arriba"
         >
-          <ArrowUp className="h-6 w-6 text-[#063971] group-hover:animate-bounce" />
+          <ArrowUp className="h-6 w-6 text-[#002297] group-hover:animate-bounce" />
         </button>
       )}
     </>

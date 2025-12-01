@@ -11,7 +11,7 @@ Cada email replica fielmente el contenido del artículo del blog, incluyendo:
 ✅ **Ratings y reseñas reales** - Datos actualizados de Google  
 ✅ **Descripciones IA** - Texto generado por IA para cada lugar  
 ✅ **Links directos** - A cada lugar específico en la web  
-✅ **Diseño elegante** - Colores corporativos (#063971, #ffd935)  
+✅ **Diseño elegante** - Colores corporativos (#002297, #ffd935)  
 ✅ **Responsive** - Compatible con móvil y escritorio  
 ✅ **Compatible con Outlook** - Usando tablas e inline CSS  
 ✅ **Redes sociales** - Links a Instagram y Facebook  

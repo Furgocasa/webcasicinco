@@ -58,11 +58,11 @@ export async function POST(request: NextRequest) {
         </head>
         <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
           <div style="max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
-            <div style="background-color: #063971; color: white; padding: 20px; border-radius: 8px 8px 0 0;">
+            <div style="background-color: #002297; color: white; padding: 20px; border-radius: 8px 8px 0 0;">
               <h2 style="margin: 0;">📧 Nuevo Mensaje de Contacto</h2>
             </div>
             <div style="background-color: white; padding: 30px; border-radius: 0 0 8px 8px;">
-              <h3 style="color: #063971; margin-top: 0;">Información del Contacto</h3>
+              <h3 style="color: #002297; margin-top: 0;">Información del Contacto</h3>
               <table style="width: 100%; border-collapse: collapse;">
                 <tr>
                   <td style="padding: 10px 0; border-bottom: 1px solid #eee;"><strong>Nombre:</strong></td>
@@ -78,8 +78,8 @@ export async function POST(request: NextRequest) {
                 </tr>
               </table>
               
-              <h3 style="color: #063971; margin-top: 30px;">Mensaje</h3>
-              <div style="background-color: #f9fafb; padding: 20px; border-left: 4px solid #063971; border-radius: 4px;">
+              <h3 style="color: #002297; margin-top: 30px;">Mensaje</h3>
+              <div style="background-color: #f9fafb; padding: 20px; border-left: 4px solid #002297; border-radius: 4px;">
                 <p style="margin: 0; white-space: pre-wrap;">${message}</p>
               </div>
               

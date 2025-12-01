@@ -75,8 +75,8 @@ export default function HomePage() {
     <>
       <main className="min-h-screen">
         {/* 1. HERO SECTION - EL GANCHO */}
-        <section className="relative bg-[#063971] text-white overflow-hidden">
-          <div className="absolute inset-0 bg-[#063971]"></div>
+        <section className="relative bg-[#002297] text-white overflow-hidden">
+          <div className="absolute inset-0 bg-[#002297]"></div>
           <div className="relative container mx-auto px-4 py-20 md:py-40 pb-24 md:pb-44 z-10">
             <div className="max-w-4xl mx-auto text-center">
               {/* Badge */}
@@ -115,7 +115,7 @@ export default function HomePage() {
                   </div>
                   <Button 
                     onClick={handleSearch}
-                    className="h-12 md:h-auto text-base md:text-lg bg-[#ffd935] hover:bg-[#e6c430] text-[#063971] font-bold px-6 md:px-8 w-full sm:w-auto"
+                    className="h-12 md:h-auto text-base md:text-lg bg-[#ffd935] hover:bg-[#e6c430] text-[#002297] font-bold px-6 md:px-8 w-full sm:w-auto"
                   >
                     Buscar
                   </Button>
@@ -158,8 +158,8 @@ export default function HomePage() {
                   El Problema de Elegir
                 </h2>
                 <p className="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
-                  Abres Google Maps, ves <span className="text-[#063971] font-bold">2,547 resultados</span>, 
-                  pasas <span className="text-[#063971] font-bold">30 minutos leyendo reseñas</span>...
+                  Abres Google Maps, ves <span className="text-[#002297] font-bold">2,547 resultados</span>, 
+                  pasas <span className="text-[#002297] font-bold">30 minutos leyendo reseñas</span>...
                   <br />
                   <span className="text-gray-500 mt-2 block">Y al final eliges uno al azar 🤷</span>
                 </p>
@@ -204,33 +204,33 @@ export default function HomePage() {
 
                 {/* DESPUÉS - La Solución */}
                 <Card className="relative overflow-hidden border-2 border-[#ffd935] shadow-xl">
-                  <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-[#063971] to-[#ffd935]"></div>
+                  <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-[#002297] to-[#ffd935]"></div>
                   <div className="p-8 bg-gradient-to-br from-blue-50 to-yellow-50">
                     <div className="flex items-center gap-3 mb-6">
                       <div className="bg-[#ffd935] w-14 h-14 rounded-full flex items-center justify-center flex-shrink-0">
                         <span className="text-3xl">✨</span>
                       </div>
-                      <h3 className="text-2xl font-bold text-[#063971]">Método Casi Cinco</h3>
+                      <h3 className="text-2xl font-bold text-[#002297]">Método Casi Cinco</h3>
                     </div>
                     <ul className="space-y-4">
                       <li className="flex items-start gap-3">
-                        <CheckCircle2 className="h-6 w-6 text-[#063971] flex-shrink-0 mt-0.5" />
+                        <CheckCircle2 className="h-6 w-6 text-[#002297] flex-shrink-0 mt-0.5" />
                         <span className="text-gray-900 font-medium">Solo 50 opciones (ya filtradas)</span>
                       </li>
                       <li className="flex items-start gap-3">
-                        <CheckCircle2 className="h-6 w-6 text-[#063971] flex-shrink-0 mt-0.5" />
+                        <CheckCircle2 className="h-6 w-6 text-[#002297] flex-shrink-0 mt-0.5" />
                         <span className="text-gray-900 font-medium">Información clara y objetiva</span>
                       </li>
                       <li className="flex items-start gap-3">
-                        <CheckCircle2 className="h-6 w-6 text-[#063971] flex-shrink-0 mt-0.5" />
+                        <CheckCircle2 className="h-6 w-6 text-[#002297] flex-shrink-0 mt-0.5" />
                         <span className="text-gray-900 font-medium">Nuestro algoritmo ya decidió por ti</span>
                       </li>
                       <li className="flex items-start gap-3">
-                        <CheckCircle2 className="h-6 w-6 text-[#063971] flex-shrink-0 mt-0.5" />
+                        <CheckCircle2 className="h-6 w-6 text-[#002297] flex-shrink-0 mt-0.5" />
                         <span className="text-gray-900 font-medium">30 segundos de decisión</span>
                       </li>
                       <li className="flex items-start gap-3">
-                        <CheckCircle2 className="h-6 w-6 text-[#063971] flex-shrink-0 mt-0.5" />
+                        <CheckCircle2 className="h-6 w-6 text-[#002297] flex-shrink-0 mt-0.5" />
                         <span className="text-gray-900 font-bold">Resultado: Experiencia excepcional</span>
                       </li>
                     </ul>
@@ -240,7 +240,7 @@ export default function HomePage() {
 
               {/* Spoiler Box */}
               <div className="mt-12 max-w-3xl mx-auto">
-                <Card className="p-6 bg-[#063971] text-white border-none">
+                <Card className="p-6 bg-[#002297] text-white border-none">
                   <p className="text-center text-lg">
                     <span className="text-[#ffd935] font-bold">💡 Spoiler:</span> El de 4.7★ con 2,000 reseñas es objetivamente mejor.
                     <br />
@@ -266,8 +266,8 @@ export default function HomePage() {
 
             <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
               {/* Herramienta 1: Mapa Interactivo */}
-              <Card className="group hover:shadow-2xl transition-all duration-300 border-2 border-gray-100 hover:border-[#063971] overflow-hidden">
-                <div className="relative h-48 bg-gradient-to-br from-[#063971] to-blue-800 flex items-center justify-center overflow-hidden">
+              <Card className="group hover:shadow-2xl transition-all duration-300 border-2 border-gray-100 hover:border-[#002297] overflow-hidden">
+                <div className="relative h-48 bg-gradient-to-br from-[#002297] to-blue-800 flex items-center justify-center overflow-hidden">
                   <div className="absolute inset-0 bg-black/20"></div>
                   <MapPin className="h-20 w-20 text-white relative z-10 group-hover:scale-110 transition-transform" />
                 </div>
@@ -295,7 +295,7 @@ export default function HomePage() {
                   </ul>
                   <Button 
                     onClick={() => router.push('/mapa')}
-                    className="w-full bg-[#063971] hover:bg-[#052d5a] text-white"
+                    className="w-full bg-[#002297] hover:bg-[#052d5a] text-white"
                   >
                     Explorar Mapa
                     <ArrowRight className="ml-2 h-4 w-4" />
@@ -307,7 +307,7 @@ export default function HomePage() {
               <Card className="group hover:shadow-2xl transition-all duration-300 border-2 border-gray-100 hover:border-[#ffd935] overflow-hidden">
                 <div className="relative h-48 bg-gradient-to-br from-[#ffd935] to-yellow-600 flex items-center justify-center overflow-hidden">
                   <div className="absolute inset-0 bg-black/10"></div>
-                  <svg className="h-20 w-20 text-[#063971] relative z-10 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="h-20 w-20 text-[#002297] relative z-10 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
                   </svg>
                 </div>
@@ -335,7 +335,7 @@ export default function HomePage() {
                   </ul>
                   <Button 
                     onClick={() => router.push('/ruta')}
-                    className="w-full bg-[#ffd935] hover:bg-[#e6c430] text-[#063971] font-bold"
+                    className="w-full bg-[#ffd935] hover:bg-[#e6c430] text-[#002297] font-bold"
                   >
                     Planificar Ruta
                     <ArrowRight className="ml-2 h-4 w-4" />
@@ -423,7 +423,7 @@ export default function HomePage() {
                     <Clock className="h-8 w-8 text-gray-600" />
                   </div>
                   <h3 className="text-2xl font-bold text-gray-900 mb-2">Prueba Gratis</h3>
-                  <div className="text-4xl font-bold text-[#063971] mb-2">0€</div>
+                  <div className="text-4xl font-bold text-[#002297] mb-2">0€</div>
                   <p className="text-gray-600">30 días completos</p>
                 </div>
                 <ul className="space-y-3 mb-6">
@@ -454,13 +454,13 @@ export default function HomePage() {
               </Card>
 
               {/* Plan Mensual */}
-              <Card className="border-2 border-[#063971]/30 p-6 hover:shadow-xl transition hover:border-[#063971] bg-white">
+              <Card className="border-2 border-[#002297]/30 p-6 hover:shadow-xl transition hover:border-[#002297] bg-white">
                 <div className="text-center mb-6">
                   <div className="inline-block p-3 bg-blue-50 rounded-full mb-4">
-                    <Zap className="h-8 w-8 text-[#063971]" />
+                    <Zap className="h-8 w-8 text-[#002297]" />
                   </div>
                   <h3 className="text-2xl font-bold text-gray-900 mb-2">Premium Mensual</h3>
-                  <div className="text-4xl font-bold text-[#063971] mb-2">2,99€</div>
+                  <div className="text-4xl font-bold text-[#002297] mb-2">2,99€</div>
                   <p className="text-gray-600">por mes</p>
                 </div>
                 <ul className="space-y-3 mb-6">
@@ -483,7 +483,7 @@ export default function HomePage() {
                 </ul>
                 <Button 
                   onClick={() => router.push('/pricing?plan=monthly')}
-                  className="w-full bg-[#063971] hover:bg-[#052d5a] text-white"
+                  className="w-full bg-[#002297] hover:bg-[#052d5a] text-white"
                 >
                   Suscribirse
                 </Button>
@@ -493,17 +493,17 @@ export default function HomePage() {
               <Card className="border-2 border-[#ffd935] bg-gradient-to-br from-yellow-50 to-white p-6 hover:shadow-2xl transition relative">
                 {/* Badge de ahorro */}
                 <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <div className="bg-[#ffd935] text-[#063971] px-4 py-1 rounded-full text-sm font-bold shadow-lg">
+                  <div className="bg-[#ffd935] text-[#002297] px-4 py-1 rounded-full text-sm font-bold shadow-lg">
                     ¡Ahorra 30%!
                   </div>
                 </div>
                 
                 <div className="text-center mb-6 mt-2">
                   <div className="inline-block p-3 bg-[#ffd935]/20 rounded-full mb-4">
-                    <Crown className="h-8 w-8 text-[#063971]" />
+                    <Crown className="h-8 w-8 text-[#002297]" />
                   </div>
                   <h3 className="text-2xl font-bold text-gray-900 mb-2">Premium Anual</h3>
-                  <div className="text-4xl font-bold text-[#063971] mb-2">24,99€</div>
+                  <div className="text-4xl font-bold text-[#002297] mb-2">24,99€</div>
                   <p className="text-gray-600">por año · Solo 2,08€/mes</p>
                 </div>
                 <ul className="space-y-3 mb-6">
@@ -526,7 +526,7 @@ export default function HomePage() {
                 </ul>
                 <Button 
                   onClick={() => router.push('/pricing?plan=yearly')}
-                  className="w-full bg-[#063971] hover:bg-[#052d5a] text-white shadow-lg"
+                  className="w-full bg-[#002297] hover:bg-[#052d5a] text-white shadow-lg"
                 >
                   Mejor Valor
                 </Button>
@@ -572,7 +572,7 @@ export default function HomePage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 max-w-7xl mx-auto">
               {/* Feature 1 */}
               <Card className="p-6 hover:shadow-xl transition-shadow border-2 border-gray-100 hover:border-[#ffd935]">
-                <div className="bg-[#063971] w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+                <div className="bg-[#002297] w-12 h-12 rounded-lg flex items-center justify-center mb-4">
                   <Shield className="h-6 w-6 text-white" />
                 </div>
                 <h3 className="text-lg font-bold text-gray-900 mb-2">
@@ -585,7 +585,7 @@ export default function HomePage() {
 
               {/* Feature 2 */}
               <Card className="p-6 hover:shadow-xl transition-shadow border-2 border-gray-100 hover:border-[#ffd935]">
-                <div className="bg-[#063971] w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+                <div className="bg-[#002297] w-12 h-12 rounded-lg flex items-center justify-center mb-4">
                   <TrendingUp className="h-6 w-6 text-white" />
                 </div>
                 <h3 className="text-lg font-bold text-gray-900 mb-2">
@@ -598,7 +598,7 @@ export default function HomePage() {
 
               {/* Feature 3 */}
               <Card className="p-6 hover:shadow-xl transition-shadow border-2 border-gray-100 hover:border-[#ffd935]">
-                <div className="bg-[#063971] w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+                <div className="bg-[#002297] w-12 h-12 rounded-lg flex items-center justify-center mb-4">
                   <Sparkles className="h-6 w-6 text-white" />
                 </div>
                 <h3 className="text-lg font-bold text-gray-900 mb-2">
@@ -611,7 +611,7 @@ export default function HomePage() {
 
               {/* Feature 4 */}
               <Card className="p-6 hover:shadow-xl transition-shadow border-2 border-gray-100 hover:border-[#ffd935]">
-                <div className="bg-[#063971] w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+                <div className="bg-[#002297] w-12 h-12 rounded-lg flex items-center justify-center mb-4">
                   <Zap className="h-6 w-6 text-white" />
                 </div>
                 <h3 className="text-lg font-bold text-gray-900 mb-2">
@@ -668,7 +668,7 @@ export default function HomePage() {
                     "Ya no pierdo tiempo leyendo reseñas. <strong>Solo lugares increíbles</strong>. El filtro de 4.7★ es genial."
                   </p>
                   <div className="flex items-center gap-3">
-                    <div className="bg-[#063971] w-10 h-10 rounded-full flex items-center justify-center">
+                    <div className="bg-[#002297] w-10 h-10 rounded-full flex items-center justify-center">
                       <span className="text-sm font-bold text-white">CM</span>
                     </div>
                     <div>
@@ -721,7 +721,7 @@ export default function HomePage() {
               {/* Algoritmo en 3 pasos */}
               <div className="grid md:grid-cols-3 gap-8 mb-16">
                 <Card className="p-6 text-center hover:shadow-xl transition border-2 border-gray-100 hover:border-[#ffd935]">
-                  <div className="bg-[#063971] w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <div className="bg-[#002297] w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                     <span className="text-3xl font-bold text-white">1</span>
                   </div>
                   <h3 className="text-xl font-bold text-gray-900 mb-2">Rating 4.7★+</h3>
@@ -731,7 +731,7 @@ export default function HomePage() {
                 </Card>
 
                 <Card className="p-6 text-center hover:shadow-xl transition border-2 border-gray-100 hover:border-[#ffd935]">
-                  <div className="bg-[#063971] w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <div className="bg-[#002297] w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                     <span className="text-3xl font-bold text-white">2</span>
                   </div>
                   <h3 className="text-xl font-bold text-gray-900 mb-2">Validación Masiva</h3>
@@ -741,7 +741,7 @@ export default function HomePage() {
                 </Card>
 
                 <Card className="p-6 text-center hover:shadow-xl transition border-2 border-gray-100 hover:border-[#ffd935]">
-                  <div className="bg-[#063971] w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <div className="bg-[#002297] w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                     <span className="text-3xl font-bold text-white">3</span>
                   </div>
                   <h3 className="text-xl font-bold text-gray-900 mb-2">IA Analiza</h3>
@@ -758,28 +758,28 @@ export default function HomePage() {
                 </h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
                   <div>
-                    <div className="text-4xl md:text-5xl font-bold text-[#063971] mb-2">
+                    <div className="text-4xl md:text-5xl font-bold text-[#002297] mb-2">
                       {stats.totalPlaces.toLocaleString('es-ES')}
                     </div>
                     <p className="text-gray-600 text-sm">Lugares verificados</p>
                   </div>
 
                   <div>
-                    <div className="text-4xl md:text-5xl font-bold text-[#063971] mb-2">
+                    <div className="text-4xl md:text-5xl font-bold text-[#002297] mb-2">
                       {stats.avgRating}★
                     </div>
                     <p className="text-gray-600 text-sm">Rating promedio</p>
                   </div>
 
                   <div>
-                    <div className="text-4xl md:text-5xl font-bold text-[#063971] mb-2">
+                    <div className="text-4xl md:text-5xl font-bold text-[#002297] mb-2">
                       {stats.provincesCount}
                     </div>
                     <p className="text-gray-600 text-sm">Provincias</p>
                   </div>
 
                   <div>
-                    <div className="text-4xl md:text-5xl font-bold text-[#063971] mb-2">
+                    <div className="text-4xl md:text-5xl font-bold text-[#002297] mb-2">
                       {(stats.totalReviews / 1000).toFixed(0)}K+
                     </div>
                     <p className="text-gray-600 text-sm">Reseñas analizadas</p>
@@ -792,7 +792,7 @@ export default function HomePage() {
                 <Button 
                   variant="outline"
                   onClick={() => router.push('/metodologia')}
-                  className="text-[#063971] border-[#063971] hover:bg-blue-50"
+                  className="text-[#002297] border-[#002297] hover:bg-blue-50"
                 >
                   Conocer Nuestra Metodología Completa
                   <ArrowRight className="ml-2 h-5 w-5" />
@@ -803,8 +803,8 @@ export default function HomePage() {
         </section>
 
         {/* CTA FINAL SIMPLIFICADO */}
-        <section className="py-20 bg-[#063971] text-white relative overflow-hidden">
-          <div className="absolute inset-0 bg-[#063971]"></div>
+        <section className="py-20 bg-[#002297] text-white relative overflow-hidden">
+          <div className="absolute inset-0 bg-[#002297]"></div>
           <div className="container mx-auto px-4 text-center relative z-10">
             <div className="max-w-3xl mx-auto">
               <h2 className="text-4xl md:text-5xl font-bold mb-6">
@@ -819,7 +819,7 @@ export default function HomePage() {
                 <Button 
                   size="lg" 
                   onClick={() => router.push('/registro')}
-                  className="bg-[#ffd935] text-[#063971] hover:bg-[#e6c430] font-bold text-lg px-10 py-6 shadow-2xl"
+                  className="bg-[#ffd935] text-[#002297] hover:bg-[#e6c430] font-bold text-lg px-10 py-6 shadow-2xl"
                 >
                   Probar Gratis 30 Días
                   <ArrowRight className="ml-2 h-5 w-5" />

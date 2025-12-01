@@ -38,7 +38,7 @@ export default function CafeteriaPage() {
     <>
       <main className="min-h-screen bg-gray-50">
         {/* HERO */}
-        <section className="relative bg-[#063971] text-white overflow-hidden py-24 md:py-32">
+        <section className="relative bg-[#002297] text-white overflow-hidden py-24 md:py-32">
           <div className="absolute inset-0 bg-black opacity-10"></div>
           
           <div className="relative container mx-auto px-4 z-10">
@@ -63,7 +63,7 @@ export default function CafeteriaPage() {
 
               <div className="relative z-10">
                 <Link href="/mapa?category=cafe">
-                  <Button className="bg-[#ffd935] text-[#063971] hover:bg-[#ffd935]/90 font-bold px-8 py-6 text-lg">
+                  <Button className="bg-[#ffd935] text-[#002297] hover:bg-[#ffd935]/90 font-bold px-8 py-6 text-lg">
                     Ver Todas en el Mapa
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
@@ -115,7 +115,7 @@ export default function CafeteriaPage() {
                                 className="w-full h-full object-cover"
                               />
                             ) : (
-                              <div className="w-full h-full bg-gradient-to-br from-[#063971] to-[#0d5bb5] flex items-center justify-center">
+                              <div className="w-full h-full bg-gradient-to-br from-[#002297] to-[#0d5bb5] flex items-center justify-center">
                                 <span className="text-6xl">☕</span>
                               </div>
                             )}
@@ -124,7 +124,7 @@ export default function CafeteriaPage() {
                               index === 0 ? 'bg-yellow-400 text-yellow-900' :
                               index === 1 ? 'bg-gray-300 text-gray-800' :
                               index === 2 ? 'bg-orange-400 text-orange-900' :
-                              'bg-[#063971] text-white'
+                              'bg-[#002297] text-white'
                             }`}>
                               #{index + 1}
                             </div>
@@ -144,8 +144,8 @@ export default function CafeteriaPage() {
 
                             <div className="flex items-center gap-4 mb-4">
                               <div className="flex items-center gap-2 bg-[#ffd935] px-4 py-2 rounded-full">
-                                <Star className="h-5 w-5 fill-[#063971] text-[#063971]" />
-                                <span className="font-bold text-[#063971]">{place.rating}</span>
+                                <Star className="h-5 w-5 fill-[#002297] text-[#002297]" />
+                                <span className="font-bold text-[#002297]">{place.rating}</span>
                               </div>
                               <div className="flex items-center gap-2 text-gray-600">
                                 <Users className="h-5 w-5" />
@@ -165,7 +165,7 @@ export default function CafeteriaPage() {
                             )}
 
                             <Link href={`/cafe/${place.province}/${place.slug}`}>
-                              <Button className="bg-[#063971] text-white hover:bg-[#052d5a]">
+                              <Button className="bg-[#002297] text-white hover:bg-[#052d5a]">
                                 Ver Detalles
                                 <ArrowRight className="ml-2 h-4 w-4" />
                               </Button>
@@ -180,14 +180,14 @@ export default function CafeteriaPage() {
 
               {/* CTA para ver más */}
               <div className="mt-12 text-center">
-                <Card className="p-8 bg-[#063971] text-white">
+                <Card className="p-8 bg-[#002297] text-white">
                   <TrendingUp className="h-12 w-12 mx-auto mb-4 text-[#ffd935]" />
                   <h3 className="text-2xl font-bold mb-4">¿Quieres ver más cafeterías excepcionales?</h3>
                   <p className="text-white/90 mb-6">
                     Explora todas las cafeterías 4.7★+ de España en nuestro mapa interactivo
                   </p>
                   <Link href="/mapa?category=cafe">
-                    <Button className="bg-[#ffd935] text-[#063971] hover:bg-[#ffd935]/90 font-bold px-8">
+                    <Button className="bg-[#ffd935] text-[#002297] hover:bg-[#ffd935]/90 font-bold px-8">
                       Explorar Mapa Completo
                     </Button>
                   </Link>

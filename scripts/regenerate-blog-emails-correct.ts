@@ -64,7 +64,7 @@ function generateEnhancedEmailHTML(post: BlogPost): string {
           <tr>
             <td style="padding: 20px;">
               <div style="margin-bottom: 10px;">
-                <span style="display: inline-block; font-size: 20px; font-weight: 700; color: #063971; margin-right: 8px;">#${index + 1}</span>
+                <span style="display: inline-block; font-size: 20px; font-weight: 700; color: #002297; margin-right: 8px;">#${index + 1}</span>
                 <span style="display: inline-block; font-size: 18px; font-weight: 600; color: #1a1a1a;">${place.name}</span>
               </div>
               <div style="margin-bottom: 12px;">
@@ -77,7 +77,7 @@ function generateEnhancedEmailHTML(post: BlogPost): string {
                 ${place.ai_description.substring(0, 150)}...
               </p>
               ` : ''}
-              <a href="https://www.casicinco.com/${place.category}/${toSlug(place.province)}/${place.slug}" style="display: inline-block; padding: 10px 20px; background-color: #063971; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 600; border-radius: 6px; margin-top: 5px;">
+              <a href="https://www.casicinco.com/${place.category}/${toSlug(place.province)}/${place.slug}" style="display: inline-block; padding: 10px 20px; background-color: #002297; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 600; border-radius: 6px; margin-top: 5px;">
                 Ver detalles →
               </a>
             </td>
@@ -113,7 +113,7 @@ function generateEnhancedEmailHTML(post: BlogPost): string {
           <tr>
             <td style="padding: 10px 40px 20px; text-align: center;">
               <div style="font-size: 32px; margin-bottom: 10px;">${categoryEmoji}</div>
-              <h1 style="margin: 0; font-size: 26px; font-weight: 700; color: #063971; line-height: 1.3;">
+              <h1 style="margin: 0; font-size: 26px; font-weight: 700; color: #002297; line-height: 1.3;">
                 ${post.title}
               </h1>
             </td>
@@ -158,7 +158,7 @@ function generateEnhancedEmailHTML(post: BlogPost): string {
           <!-- CTA para leer completo -->
           <tr>
             <td align="center" style="padding: 0 40px 40px;">
-              <a href="https://www.casicinco.com/blog/${post.slug}" style="display: inline-block; padding: 16px 40px; background-color: #063971; color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 600; border-radius: 8px;">
+              <a href="https://www.casicinco.com/blog/${post.slug}" style="display: inline-block; padding: 16px 40px; background-color: #002297; color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 600; border-radius: 8px;">
                 Leer artículo completo →
               </a>
             </td>
@@ -174,7 +174,7 @@ function generateEnhancedEmailHTML(post: BlogPost): string {
           <!-- Top 3 lugares -->
           <tr>
             <td style="padding: 30px 40px 10px;">
-              <h2 style="margin: 0 0 25px; font-size: 22px; font-weight: 600; color: #063971; text-align: center;">
+              <h2 style="margin: 0 0 25px; font-size: 22px; font-weight: 600; color: #002297; text-align: center;">
                 🏆 Top ${topPlaces.length} Lugares Destacados
               </h2>
             </td>
@@ -195,7 +195,7 @@ function generateEnhancedEmailHTML(post: BlogPost): string {
               <p style="margin: 0 0 15px; font-size: 15px; color: #666;">
                 + ${post.places.length - 3} lugares más en el artículo completo
               </p>
-              <a href="https://www.casicinco.com/blog/${post.slug}" style="display: inline-block; padding: 14px 32px; background-color: #063971; color: #ffffff; text-decoration: none; font-size: 15px; font-weight: 600; border-radius: 6px;">
+              <a href="https://www.casicinco.com/blog/${post.slug}" style="display: inline-block; padding: 14px 32px; background-color: #002297; color: #ffffff; text-decoration: none; font-size: 15px; font-weight: 600; border-radius: 6px;">
                 Ver Top ${post.places.length} completo
               </a>
             </td>
@@ -211,7 +211,7 @@ function generateEnhancedEmailHTML(post: BlogPost): string {
           <!-- Beneficios de la app -->
           <tr>
             <td style="padding: 30px 40px;">
-              <h2 style="margin: 0 0 20px; font-size: 20px; font-weight: 600; color: #063971; text-align: center;">
+              <h2 style="margin: 0 0 20px; font-size: 20px; font-weight: 600; color: #002297; text-align: center;">
                 ¿Aún no conoces Casi Cinco?
               </h2>
               <p style="margin: 0 0 20px; font-size: 15px; color: #555; line-height: 1.6; text-align: center;">
@@ -244,7 +244,7 @@ function generateEnhancedEmailHTML(post: BlogPost): string {
               <table role="presentation" style="width: 100%; border-collapse: collapse; margin: 20px 0;">
                 <tr>
                   <td align="center">
-                    <a href="https://www.casicinco.com" style="display: inline-block; padding: 14px 32px; background-color: #063971; color: #ffffff; text-decoration: none; font-size: 15px; font-weight: 600; border-radius: 6px;">
+                    <a href="https://www.casicinco.com" style="display: inline-block; padding: 14px 32px; background-color: #002297; color: #ffffff; text-decoration: none; font-size: 15px; font-weight: 600; border-radius: 6px;">
                       Probar 30 días gratis
                     </a>
                   </td>
@@ -281,7 +281,7 @@ function generateEnhancedEmailHTML(post: BlogPost): string {
               <p style="margin: 0 0 10px; font-size: 12px; color: #777; line-height: 1.5;">
                 <strong>Casi Cinco</strong><br>
                 Los mejores lugares de España con mínimo 4.7★<br>
-                <a href="https://www.casicinco.com" style="color: #063971; text-decoration: none;">www.casicinco.com</a>
+                <a href="https://www.casicinco.com" style="color: #002297; text-decoration: none;">www.casicinco.com</a>
               </p>
 
               <p style="margin: 15px 0 0; font-size: 11px; color: #999;">

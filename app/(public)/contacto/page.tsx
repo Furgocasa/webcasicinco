@@ -331,7 +331,7 @@ export default function ContactoPage() {
     <>
       <main className="min-h-screen bg-gray-50">
         {/* HERO */}
-        <section className="relative bg-[#063971] text-white overflow-hidden py-12">
+        <section className="relative bg-[#002297] text-white overflow-hidden py-12">
           <div className="container mx-auto px-4">
             <Link 
               href="/"
@@ -365,7 +365,7 @@ export default function ContactoPage() {
             <div className="mb-10">
               <a 
                 href="mailto:info@casicinco.com"
-                className="inline-flex items-center gap-3 bg-[#063971] text-white px-8 py-4 rounded-xl hover:bg-[#0a4a8f] transition-all text-xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
+                className="inline-flex items-center gap-3 bg-[#002297] text-white px-8 py-4 rounded-xl hover:bg-[#0a4a8f] transition-all text-xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
               >
                 <Mail className="h-6 w-6" />
                 info@casicinco.com
@@ -439,7 +439,7 @@ export default function ContactoPage() {
           <div className="container mx-auto px-4 max-w-5xl">
             <div className="text-center mb-10">
               <div className="flex items-center justify-center gap-3 mb-4">
-                <HelpCircle className="h-8 w-8 text-[#063971]" />
+                <HelpCircle className="h-8 w-8 text-[#002297]" />
                 <h2 className="text-3xl font-bold text-gray-900">Preguntas Frecuentes</h2>
               </div>
               <p className="text-gray-600 text-lg">
@@ -453,7 +453,7 @@ export default function ContactoPage() {
                 onClick={() => setSelectedCategory(null)}
                 className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all shadow-sm ${
                   selectedCategory === null
-                    ? 'bg-[#063971] text-white shadow-md scale-105'
+                    ? 'bg-[#002297] text-white shadow-md scale-105'
                     : 'bg-white text-gray-700 hover:bg-gray-100'
                 }`}
               >
@@ -465,7 +465,7 @@ export default function ContactoPage() {
                   onClick={() => setSelectedCategory(cat.id)}
                   className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all shadow-sm ${
                     selectedCategory === cat.id
-                      ? 'bg-[#063971] text-white shadow-md scale-105'
+                      ? 'bg-[#002297] text-white shadow-md scale-105'
                       : 'bg-white text-gray-700 hover:bg-gray-100'
                   }`}
                 >
@@ -482,10 +482,10 @@ export default function ContactoPage() {
                 return (
                   <div key={category.id}>
                     {/* Título de categoría */}
-                    <div className="flex items-center gap-3 mb-5 pb-3 border-b-2 border-[#063971]">
+                    <div className="flex items-center gap-3 mb-5 pb-3 border-b-2 border-[#002297]">
                       <span className="text-3xl">{category.icon}</span>
-                      <h3 className="text-2xl font-bold text-[#063971]">{category.name}</h3>
-                      <span className="ml-auto bg-[#063971] text-white text-sm font-semibold px-3 py-1 rounded-full">
+                      <h3 className="text-2xl font-bold text-[#002297]">{category.name}</h3>
+                      <span className="ml-auto bg-[#002297] text-white text-sm font-semibold px-3 py-1 rounded-full">
                         {categoryFaqs.length} preguntas
                       </span>
                     </div>
@@ -499,7 +499,7 @@ export default function ContactoPage() {
                         return (
                           <div
                             key={globalIndex}
-                            className="bg-white border border-gray-200 rounded-lg overflow-hidden transition-all hover:border-[#063971] hover:shadow-md"
+                            className="bg-white border border-gray-200 rounded-lg overflow-hidden transition-all hover:border-[#002297] hover:shadow-md"
                           >
                             <button
                               onClick={() => setOpenFaq(isOpen ? null : globalIndex)}
@@ -507,7 +507,7 @@ export default function ContactoPage() {
                             >
                               <span className="font-semibold text-gray-900 pr-4 text-base">{faq.question}</span>
                               {isOpen ? (
-                                <ChevronUp className="h-5 w-5 text-[#063971] flex-shrink-0" />
+                                <ChevronUp className="h-5 w-5 text-[#002297] flex-shrink-0" />
                               ) : (
                                 <ChevronDown className="h-5 w-5 text-gray-400 flex-shrink-0" />
                               )}
@@ -528,7 +528,7 @@ export default function ContactoPage() {
 
             {/* Nota propietarios */}
             <div className="mt-10">
-              <Card className="p-6 bg-gradient-to-r from-[#ffd935]/20 to-[#063971]/10 border-[#ffd935]">
+              <Card className="p-6 bg-gradient-to-r from-[#ffd935]/20 to-[#002297]/10 border-[#ffd935]">
                 <h3 className="text-lg font-bold text-gray-900 mb-2 flex items-center gap-2">
                   🏪 ¿Eres propietario de un lugar?
                   </h3>
@@ -536,7 +536,7 @@ export default function ContactoPage() {
                   Si tienes un restaurante, hotel o bar y quieres aparecer en Casi Cinco,
                     asegúrate de tener <strong>mínimo 4.7★</strong> en Google Maps. Nuestro sistema
                   indexa automáticamente los mejores lugares. Para consultas, escribe a{' '}
-                  <a href="mailto:info@casicinco.com" className="text-[#063971] font-semibold hover:underline">
+                  <a href="mailto:info@casicinco.com" className="text-[#002297] font-semibold hover:underline">
                     info@casicinco.com
                   </a>
                   </p>

@@ -135,7 +135,7 @@ Este directorio contiene banners HTML optimizados para SP Page Builder en Joomla
 ### Cambiar Colores de Marca
 
 Buscar en el código y reemplazar:
-- **Azul oscuro**: `#063971` → Tu color
+- **Azul oscuro**: `#002297` → Tu color
 - **Amarillo**: `#ffd935` → Tu color
 - **Azul muy oscuro**: `#042143` → Tu color
 

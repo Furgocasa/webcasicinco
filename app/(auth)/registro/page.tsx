@@ -161,8 +161,8 @@ export default function RegisterPage() {
             <div className="text-center">
               {/* Icono animado */}
               <div className="mb-6 relative inline-block">
-                <div className="absolute inset-0 bg-gradient-to-br from-[#063971] to-[#ffd935] opacity-20 blur-xl rounded-full animate-pulse"></div>
-                <div className="relative bg-gradient-to-br from-[#063971] to-blue-600 rounded-full p-4">
+                <div className="absolute inset-0 bg-gradient-to-br from-[#002297] to-[#ffd935] opacity-20 blur-xl rounded-full animate-pulse"></div>
+                <div className="relative bg-gradient-to-br from-[#002297] to-blue-600 rounded-full p-4">
                   <Gift className="h-12 w-12 text-white" />
                 </div>
                 <div className="absolute -top-1 -right-1">
@@ -177,7 +177,7 @@ export default function RegisterPage() {
               
               {/* Descripción */}
               <p className="text-lg text-gray-700 mb-2">
-                Regístrate ahora y disfruta de <strong className="text-[#063971]">30 días completos</strong> de acceso premium
+                Regístrate ahora y disfruta de <strong className="text-[#002297]">30 días completos</strong> de acceso premium
               </p>
               
               {/* Beneficios */}
@@ -205,7 +205,7 @@ export default function RegisterPage() {
               {/* CTA */}
               <Button
                 onClick={() => setShowModal(false)}
-                className="w-full bg-gradient-to-r from-[#063971] to-blue-600 hover:from-[#063971]/90 hover:to-blue-700 text-white font-bold text-lg py-6"
+                className="w-full bg-gradient-to-r from-[#002297] to-blue-600 hover:from-[#002297]/90 hover:to-blue-700 text-white font-bold text-lg py-6"
               >
                 ¡Empezar Ahora! 🚀
               </Button>
@@ -231,11 +231,11 @@ export default function RegisterPage() {
           </Link>
 
           {/* Banner destacado - 30 días gratis */}
-          <div className="mb-6 overflow-hidden rounded-2xl bg-gradient-to-r from-[#063971] via-blue-600 to-[#063971] p-[2px] shadow-lg">
+          <div className="mb-6 overflow-hidden rounded-2xl bg-gradient-to-r from-[#002297] via-blue-600 to-[#002297] p-[2px] shadow-lg">
             <div className="bg-white rounded-[14px] p-6">
               <div className="flex items-center gap-4">
                 <div className="flex-shrink-0">
-                  <div className="bg-gradient-to-br from-[#063971] to-blue-600 rounded-full p-3">
+                  <div className="bg-gradient-to-br from-[#002297] to-blue-600 rounded-full p-3">
                     <Gift className="h-8 w-8 text-white" />
                   </div>
                 </div>
@@ -244,7 +244,7 @@ export default function RegisterPage() {
                     <h3 className="text-xl font-bold text-gray-900">
                       30 Días Gratis
                     </h3>
-                    <span className="bg-[#ffd935] text-[#063971] text-xs font-bold px-2 py-1 rounded-full">
+                    <span className="bg-[#ffd935] text-[#002297] text-xs font-bold px-2 py-1 rounded-full">
                       SIN TARJETA
                     </span>
                   </div>

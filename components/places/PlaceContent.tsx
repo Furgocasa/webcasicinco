@@ -808,7 +808,7 @@ export function PlaceContent({ place, tier, tierInfo }: PlaceContentProps) {
               Descubre <strong>3,133 lugares excepcionales</strong> como este en toda España.
             </p>
             <p className="text-base text-gray-600 mb-6 max-w-2xl mx-auto">
-              Todos con <strong className="text-[#063971]">+4.7★</strong> en Google Maps. 
+              Todos con <strong className="text-[#002297]">+4.7★</strong> en Google Maps. 
               Usa nuestro mapa interactivo, crea rutas y guarda favoritos.
             </p>
             
@@ -816,7 +816,7 @@ export function PlaceContent({ place, tier, tierInfo }: PlaceContentProps) {
             <div className="flex flex-col sm:flex-row gap-3 justify-center mb-4">
               <Link href="/mapa">
                 <Button 
-                  className="bg-[#063971] hover:bg-[#052d5a] text-white px-8 py-3 text-base font-semibold w-full sm:w-auto"
+                  className="bg-[#002297] hover:bg-[#052d5a] text-white px-8 py-3 text-base font-semibold w-full sm:w-auto"
                   onClick={() => {
                     trackEvent(EVENTS.PLACE_DETAIL_CLICK, ANALYTICS_CATEGORIES.ENGAGEMENT, {
                       place_id: place.id,
@@ -833,7 +833,7 @@ export function PlaceContent({ place, tier, tierInfo }: PlaceContentProps) {
               <Link href="/registro">
                 <Button 
                   variant="outline" 
-                  className="border-2 border-[#063971] text-[#063971] hover:bg-blue-50 px-8 py-3 text-base font-semibold w-full sm:w-auto"
+                  className="border-2 border-[#002297] text-[#002297] hover:bg-blue-50 px-8 py-3 text-base font-semibold w-full sm:w-auto"
                   onClick={() => {
                     trackEvent(EVENTS.PLACE_DETAIL_CLICK, ANALYTICS_CATEGORIES.ENGAGEMENT, {
                       place_id: place.id,

@@ -27,7 +27,7 @@ const CATEGORY_CONFIG: Record<string, {
     title: 'Restaurantes',
     emoji: '🍽️',
     description: 'Solo restaurantes con mínimo 4.7★ y validación de miles de comensales',
-    color: '#063971',
+    color: '#002297',
     colorLight: '#ffd935',
   },
   bar: {
