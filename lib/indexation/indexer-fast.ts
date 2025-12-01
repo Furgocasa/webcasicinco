@@ -18,6 +18,7 @@ import { IndexationLogger } from './logger';
 import { getCitiesForProvince as getCitiesFromFile, type CityData } from './cities-database';
 import { getAllCitiesFromSupabase, getCitiesFromSupabase } from './cities-supabase';
 import { generateSearchStrategy, getStrategyDescription } from './search-strategies';
+import { scrapeEmailFromWebsite } from './email-scraper';
 
 interface IndexationParams {
   provinces: string[];
@@ -281,6 +282,19 @@ async function processPlacesFromZone(
 
       const region = getRegionFromProvince(normalizedProvince);
 
+      // 🔥 NUEVO: Intentar extraer email del website (si existe)
+      let email: string | null = null;
+      if (details.website) {
+        try {
+          email = await scrapeEmailFromWebsite(details.website);
+          if (email) {
+            await logger.log(`   📧 Email encontrado: ${email}`);
+          }
+        } catch (error) {
+          // Ignorar errores de scraping para no bloquear indexación
+        }
+      }
+
       // Guardar lugar
       const placeData = {
         google_place_id: placeId,
@@ -299,6 +313,8 @@ async function processPlacesFromZone(
         photos: details.photos ? details.photos.map((p: any) => p.photo_reference) : [],
         phone: details.formatted_phone_number,
         website: details.website,
+        email: email, // 🔥 NUEVO: Email extraído del website
+        email_source: email ? 'indexation_scraping' : null, // 🔥 NUEVO: Fuente del email
         // opening_hours: (details as any).opening_hours?.weekday_text || [], // ❌ ELIMINADO - columna no existe en BD
         // geometry: details.geometry, // ❌ ELIMINADO - columna no existe en BD
         published: true,
