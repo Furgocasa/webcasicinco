@@ -4,7 +4,7 @@
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { GoogleMap, useLoadScript, Marker, InfoWindow } from '@react-google-maps/api';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -54,15 +54,22 @@ export default function LugaresPage() {
   });
 
   const [places, setPlaces] = useState<any[]>([]);
-  const [filteredPlaces, setFilteredPlaces] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedPlace, setSelectedPlace] = useState<any>(null);
   const [mapCenter, setMapCenter] = useState(defaultCenter);
-  const [showMap, setShowMap] = useState(true);
+  const [showMap, setShowMap] = useState(false); // 🚀 Desactivado por defecto
   const [enriching, setEnriching] = useState(false);
   const [enrichProgress, setEnrichProgress] = useState({ current: 0, total: 0 });
   
-  const [searchTerm, setSearchTerm] = useState('');
+  // Stats globales (sin cargar todos los lugares)
+  const [totalPlaces, setTotalPlaces] = useState(0);
+  const [publishedCount, setPublishedCount] = useState(0);
+  const [draftCount, setDraftCount] = useState(0);
+  const [uniqueProvinces, setUniqueProvinces] = useState<string[]>([]);
+  const [uniqueCategories, setUniqueCategories] = useState<string[]>([]);
+  
+  const [searchInput, setSearchInput] = useState(''); // Input real-time
+  const [searchTerm, setSearchTerm] = useState(''); // Término aplicado (con debounce)
   const [categoryFilter, setCategoryFilter] = useState('');
   const [provinceFilter, setProvinceFilter] = useState('');
   const [publishedFilter, setPublishedFilter] = useState<'all' | 'published' | 'draft'>('all');
@@ -70,80 +77,87 @@ export default function LugaresPage() {
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
   const [updatingCategoryId, setUpdatingCategoryId] = useState<string | null>(null);
 
-  // Paginación
+  // Paginación SERVER-SIDE
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState<number>(50);
+  const [totalPages, setTotalPages] = useState(1);
+
+  // Debounce search input (500ms)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearchTerm(searchInput);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchInput]);
 
   useEffect(() => {
+    loadStats();
     loadPlaces();
   }, []);
 
+  // 🚀 OPTIMIZACIÓN: Cargar datos del servidor cuando cambien filtros o paginación
   useEffect(() => {
-    applyFiltersAndSort();
-    setCurrentPage(1); // Resetear a página 1 cuando cambien los filtros
-  }, [places, searchTerm, categoryFilter, provinceFilter, publishedFilter, sortField, sortOrder]);
+    loadPlaces();
+  }, [searchTerm, categoryFilter, provinceFilter, publishedFilter, sortField, sortOrder, currentPage, itemsPerPage]);
+
+  // Resetear a página 1 cuando cambien los filtros
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, categoryFilter, provinceFilter, publishedFilter]);
 
   // Calcular estadísticas
-  const publishedCount = places.filter(p => p.published).length;
-  const draftCount = places.filter(p => !p.published).length;
-  const publishedPercentage = places.length > 0 ? Math.round((publishedCount / places.length) * 100) : 0;
+  const publishedPercentage = totalPlaces > 0 ? Math.round((publishedCount / totalPlaces) * 100) : 0;
 
-  // Calcular datos paginados
-  const totalPages = Math.ceil(filteredPlaces.length / (itemsPerPage === 0 ? filteredPlaces.length : itemsPerPage));
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = itemsPerPage === 0 ? filteredPlaces.length : startIndex + itemsPerPage;
-  const paginatedPlaces = itemsPerPage === 0 ? filteredPlaces : filteredPlaces.slice(startIndex, endIndex);
+  const loadStats = async () => {
+    try {
+      const response = await fetch('/api/admin/places/stats');
+      const data = await response.json();
+      
+      if (data.success) {
+        setTotalPlaces(data.total);
+        setPublishedCount(data.published);
+        setDraftCount(data.drafts);
+        setUniqueProvinces(data.provinces || []);
+        setUniqueCategories(data.categories || []);
+        console.log(`📊 Stats: ${data.total} lugares total`);
+      }
+    } catch (error) {
+      console.error('Error cargando estadísticas:', error);
+    }
+  };
 
   const loadPlaces = async () => {
     setLoading(true);
     try {
-      // Cargar TODOS los lugares en lotes progresivos
-      let allPlaces: any[] = [];
-      let page = 1;
-      const maxPages = 40; // Máximo 4000 lugares
-      
-      while (page <= maxPages) {
-        console.log(`🔄 Cargando página ${page}...`);
-        const response = await fetch(`/api/admin/places?page=${page}&limit=100`);
-        
-        if (!response.ok) {
-          console.error(`❌ Error HTTP ${response.status} en página ${page}`);
-          break;
-        }
-        
-        const data = await response.json();
-        console.log(`Página ${page} respuesta:`, { success: data.success, count: data.places?.length, total: data.total });
-        
-        if (data.success && data.places && data.places.length > 0) {
-          allPlaces = [...allPlaces, ...data.places];
-          console.log(`📍 Lugares: Página ${page}/${Math.ceil(data.total / 100)} - Acumulado: ${allPlaces.length} de ${data.total} total`);
-          page++;
-          
-          // Si recibimos menos de 100, no hay más páginas
-          if (data.places.length < 100) {
-            console.log(`✋ Última página alcanzada (${data.places.length} lugares)`);
-            break;
-          }
-          
-          // Si ya tenemos todos según el total, parar
-          if (allPlaces.length >= data.total) {
-            console.log(`✋ Total completo alcanzado (${allPlaces.length})`);
-            break;
-          }
-        } else {
-          console.warn(`⚠️ Página ${page} sin datos o error`);
-          break;
-        }
+      // Construir query con filtros
+      const params = new URLSearchParams({
+        page: currentPage.toString(),
+        limit: itemsPerPage.toString(),
+      });
+
+      if (searchTerm) params.append('search', searchTerm);
+      if (categoryFilter) params.append('category', categoryFilter);
+      if (provinceFilter) params.append('province', provinceFilter);
+      if (publishedFilter !== 'all') {
+        params.append('published', publishedFilter === 'published' ? 'true' : 'false');
       }
+
+      const response = await fetch(`/api/admin/places?${params.toString()}`);
+      const data = await response.json();
       
-      console.log(`✅ Cargados ${allPlaces.length} lugares total`);
-      setPlaces(allPlaces);
-      
-      if (allPlaces.length > 0) {
-        setMapCenter({
-          lat: allPlaces[0].latitude,
-          lng: allPlaces[0].longitude,
-        });
+      if (data.success && data.places) {
+        setPlaces(data.places);
+        setTotalPlaces(data.total);
+        setTotalPages(data.totalPages || 1);
+        console.log(`✅ Cargados ${data.places.length} de ${data.total} lugares (página ${currentPage})`);
+        
+        if (data.places.length > 0) {
+          setMapCenter({
+            lat: data.places[0].latitude,
+            lng: data.places[0].longitude,
+          });
+        }
       }
     } catch (error) {
       console.error('Error cargando lugares:', error);
@@ -153,48 +167,6 @@ export default function LugaresPage() {
     }
   };
 
-  const applyFiltersAndSort = useCallback(() => {
-    let filtered = [...places];
-
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      filtered = filtered.filter(p =>
-        p.name?.toLowerCase().includes(term) ||
-        p.city?.toLowerCase().includes(term) ||
-        p.province?.toLowerCase().includes(term)
-      );
-    }
-
-    if (categoryFilter) {
-      filtered = filtered.filter(p => p.category === categoryFilter);
-    }
-
-    if (provinceFilter) {
-      filtered = filtered.filter(p => p.province === provinceFilter);
-    }
-
-    if (publishedFilter === 'published') {
-      filtered = filtered.filter(p => p.published === true);
-    } else if (publishedFilter === 'draft') {
-      filtered = filtered.filter(p => p.published === false);
-    }
-
-    filtered.sort((a, b) => {
-      let aVal = a[sortField];
-      let bVal = b[sortField];
-
-      if (sortField === 'name') {
-        aVal = aVal?.toLowerCase() || '';
-        bVal = bVal?.toLowerCase() || '';
-      }
-
-      if (aVal < bVal) return sortOrder === 'asc' ? -1 : 1;
-      if (aVal > bVal) return sortOrder === 'asc' ? 1 : -1;
-      return 0;
-    });
-
-    setFilteredPlaces(filtered);
-  }, [places, searchTerm, categoryFilter, provinceFilter, publishedFilter, sortField, sortOrder]);
 
   const handleTogglePublish = async (id: string, currentStatus: boolean) => {
     try {
@@ -358,9 +330,6 @@ export default function LugaresPage() {
     };
   };
 
-  const uniqueCategories = Array.from(new Set(places.map(p => p.category))).filter(Boolean);
-  const uniqueProvinces = Array.from(new Set(places.map(p => p.province))).filter(Boolean).sort();
-
   // Categorías permitidas en todo el sistema (regla del proyecto)
   const ALLOWED_CATEGORIES: Array<'restaurante' | 'bar' | 'cafe' | 'hotel'> = [
     'restaurante', 'bar', 'cafe', 'hotel'
@@ -424,8 +393,8 @@ export default function LugaresPage() {
   // Función para exportar a CSV
   const exportToCSV = () => {
     try {
-      // Preparar datos para exportación
-      const exportData = filteredPlaces.map(place => {
+      // Preparar datos para exportación (solo página actual)
+      const exportData = places.map(place => {
         const tier = calculateQualityTier(place.rating, place.review_count);
         const tierInfo = getTierInfo(tier);
         
@@ -499,8 +468,8 @@ export default function LugaresPage() {
   // Función para exportar a Excel (XLSX)
   const exportToExcel = () => {
     try {
-      // Preparar datos para exportación
-      const exportData = filteredPlaces.map(place => {
+      // Preparar datos para exportación (solo página actual)
+      const exportData = places.map(place => {
         const tier = calculateQualityTier(place.rating, place.review_count);
         const tierInfo = getTierInfo(tier);
         
@@ -606,13 +575,8 @@ export default function LugaresPage() {
               📝 {draftCount} borradores
             </span>
             <span className="text-sm text-gray-500">
-              · {places.length} total ({publishedPercentage}% público)
+              · {totalPlaces} total ({publishedPercentage}% público)
             </span>
-            {filteredPlaces.length !== places.length && (
-              <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                🔍 {filteredPlaces.length} filtrados
-              </span>
-            )}
           </div>
         </div>
         <div className="grid grid-cols-3 md:flex gap-2">
@@ -620,11 +584,11 @@ export default function LugaresPage() {
             <RefreshCw className="h-4 w-4 md:mr-2" />
             <span className="hidden md:inline">Recargar</span>
           </Button>
-          <Button onClick={exportToCSV} variant="outline" size="sm" disabled={enriching || filteredPlaces.length === 0}>
+          <Button onClick={exportToCSV} variant="outline" size="sm" disabled={enriching || places.length === 0}>
             <Download className="h-4 w-4 md:mr-2" />
             <span className="hidden md:inline">CSV</span>
           </Button>
-          <Button onClick={exportToExcel} variant="outline" size="sm" disabled={enriching || filteredPlaces.length === 0}>
+          <Button onClick={exportToExcel} variant="outline" size="sm" disabled={enriching || places.length === 0}>
             <Download className="h-4 w-4 md:mr-2" />
             <span className="hidden md:inline">Excel</span>
           </Button>
@@ -697,7 +661,8 @@ export default function LugaresPage() {
                     fullscreenControl: true,
                   }}
                 >
-                  {filteredPlaces.map((place) => (
+                  {/* 🚀 OPTIMIZACIÓN: Solo mostrar primeros 100 markers para no saturar mapa */}
+                  {places.slice(0, 100).map((place) => (
                     <Marker
                       key={place.id}
                       position={{ lat: place.latitude, lng: place.longitude }}
@@ -871,16 +836,16 @@ export default function LugaresPage() {
                 </span>
               </div>
               <div className="text-sm text-gray-600">
-                Mostrando {startIndex + 1}-{Math.min(endIndex, filteredPlaces.length)} de {filteredPlaces.length}
+                Mostrando {((currentPage - 1) * itemsPerPage) + 1}-{Math.min(currentPage * itemsPerPage, totalPlaces)} de {totalPlaces}
               </div>
             </div>
             
             {/* Paginación */}
-            {itemsPerPage !== 0 && totalPages > 1 && (
+            {totalPages > 1 && (
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                  disabled={currentPage === 1}
+                  disabled={currentPage === 1 || loading}
                   className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Anterior
@@ -890,7 +855,7 @@ export default function LugaresPage() {
                 </span>
                 <button
                   onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                  disabled={currentPage === totalPages}
+                  disabled={currentPage === totalPages || loading}
                   className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Siguiente
@@ -905,10 +870,15 @@ export default function LugaresPage() {
               <input
                 type="text"
                 placeholder="Buscar por nombre, ciudad, provincia..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
               />
+              {searchInput !== searchTerm && (
+                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                  <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
+                </div>
+              )}
             </div>
 
             <select
@@ -1002,8 +972,8 @@ export default function LugaresPage() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {paginatedPlaces.length > 0 ? (
-                  paginatedPlaces.map((place) => {
+                {places.length > 0 ? (
+                  places.map((place) => {
                     const tier = calculateQualityTier(place.rating, place.review_count);
                     const tierInfo = getTierInfo(tier);
 

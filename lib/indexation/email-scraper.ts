@@ -1,10 +1,10 @@
 /**
  * Utilidades para extraer emails de websites
  * Se usa durante la indexación para capturar emails automáticamente
+ * ⚠️ SERVER ONLY - No se puede usar desde componentes cliente
  */
 
-import axios from 'axios';
-import * as cheerio from 'cheerio';
+import 'server-only';
 
 // Regex para extraer emails
 const EMAIL_REGEX = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/gi;
@@ -75,6 +75,10 @@ export async function scrapeEmailFromWebsite(url: string): Promise<string | null
   const baseUrl = normalizeUrl(url);
   
   try {
+    // Dynamic imports to avoid webpack issues
+    const axios = (await import('axios')).default;
+    const cheerio = await import('cheerio');
+    
     const response = await axios.get(baseUrl, {
       timeout: 5000, // 5 segundos timeout (rápido para no ralentizar indexación)
       headers: {
