@@ -57,6 +57,7 @@ export default function LugaresPage() {
   const [places, setPlaces] = useState<any[]>([]);
   const [mapPlaces, setMapPlaces] = useState<any[]>([]); // 🚀 NUEVO: Lugares para el mapa (todos)
   const [loading, setLoading] = useState(true);
+  const [loadingProgress, setLoadingProgress] = useState({ current: 0, total: 0 }); // 🚀 NUEVO: Progreso carga
   const [mapLoading, setMapLoading] = useState(false); // 🚀 NUEVO: Loading del mapa
   const [selectedPlace, setSelectedPlace] = useState<any>(null);
   const [mapCenter, setMapCenter] = useState(defaultCenter);
@@ -173,36 +174,105 @@ export default function LugaresPage() {
   const loadPlaces = async () => {
     setLoading(true);
     try {
-      // Si itemsPerPage es 0 (Todos), cargar con límite de 1000 para evitar 413 Payload Too Large
-      const effectiveLimit = itemsPerPage === 0 ? 1000 : itemsPerPage;
-      
-      // Construir query con filtros
-      const params = new URLSearchParams({
-        page: itemsPerPage === 0 ? '1' : currentPage.toString(),
-        limit: effectiveLimit.toString(),
-      });
-
-      if (searchTerm) params.append('search', searchTerm);
-      if (categoryFilter) params.append('category', categoryFilter);
-      if (provinceFilter) params.append('province', provinceFilter);
-      if (publishedFilter !== 'all') {
-        params.append('published', publishedFilter === 'published' ? 'true' : 'false');
-      }
-
-      const response = await fetch(`/api/admin/places?${params.toString()}`);
-      const data = await response.json();
-      
-      if (data.success && data.places) {
-        setPlaces(data.places);
-        setTotalPlaces(data.total);
-        setTotalPages(itemsPerPage === 0 ? 1 : (data.totalPages || 1));
-        console.log(`✅ Cargados ${data.places.length} de ${data.total} lugares (${itemsPerPage === 0 ? 'TODOS' : `página ${currentPage}`})`);
+      // 🚀 Si itemsPerPage es 0 (Todos), cargar en BATCHES progresivos como el mapa público
+      if (itemsPerPage === 0) {
+        console.log('📦 Cargando TODOS los lugares en batches...');
         
-        if (data.places.length > 0) {
-          setMapCenter({
-            lat: data.places[0].latitude,
-            lng: data.places[0].longitude,
+        let allLoadedPlaces: any[] = [];
+        const batchSize = 1000;
+        let page = 1;
+        let hasMore = true;
+        let totalExpected = 0;
+        
+        while (hasMore) {
+          const params = new URLSearchParams({
+            page: page.toString(),
+            limit: batchSize.toString(),
           });
+
+          if (searchTerm) params.append('search', searchTerm);
+          if (categoryFilter) params.append('category', categoryFilter);
+          if (provinceFilter) params.append('province', provinceFilter);
+          if (publishedFilter !== 'all') {
+            params.append('published', publishedFilter === 'published' ? 'true' : 'false');
+          }
+
+          try {
+            const response = await fetch(`/api/admin/places?${params.toString()}`);
+            const data = await response.json();
+            
+            if (data.success && data.places && data.places.length > 0) {
+              allLoadedPlaces = [...allLoadedPlaces, ...data.places];
+              totalExpected = data.total;
+              
+              // Actualizar progreso
+              setLoadingProgress({ current: allLoadedPlaces.length, total: data.total });
+              
+              console.log(`📍 Batch ${page}: +${data.places.length} lugares (Total acumulado: ${allLoadedPlaces.length}/${data.total})`);
+              
+              // Si recibimos menos del batch size, no hay más páginas
+              if (data.places.length < batchSize) {
+                hasMore = false;
+              }
+              
+              // Si ya tenemos todos según el total, parar
+              if (allLoadedPlaces.length >= data.total) {
+                hasMore = false;
+              }
+              
+              page++;
+            } else {
+              hasMore = false;
+            }
+          } catch (batchError) {
+            console.error(`❌ Error en batch ${page}:`, batchError);
+            hasMore = false;
+          }
+        }
+        
+        setLoadingProgress({ current: 0, total: 0 }); // Reset
+        
+        setPlaces(allLoadedPlaces);
+        setTotalPlaces(allLoadedPlaces.length);
+        setTotalPages(1);
+        console.log(`✅ TODOS cargados: ${allLoadedPlaces.length} lugares en ${page - 1} batches`);
+        
+        if (allLoadedPlaces.length > 0) {
+          setMapCenter({
+            lat: allLoadedPlaces[0].latitude,
+            lng: allLoadedPlaces[0].longitude,
+          });
+        }
+        
+      } else {
+        // Carga normal con paginación
+        const params = new URLSearchParams({
+          page: currentPage.toString(),
+          limit: itemsPerPage.toString(),
+        });
+
+        if (searchTerm) params.append('search', searchTerm);
+        if (categoryFilter) params.append('category', categoryFilter);
+        if (provinceFilter) params.append('province', provinceFilter);
+        if (publishedFilter !== 'all') {
+          params.append('published', publishedFilter === 'published' ? 'true' : 'false');
+        }
+
+        const response = await fetch(`/api/admin/places?${params.toString()}`);
+        const data = await response.json();
+        
+        if (data.success && data.places) {
+          setPlaces(data.places);
+          setTotalPlaces(data.total);
+          setTotalPages(data.totalPages || 1);
+          console.log(`✅ Cargados ${data.places.length} de ${data.total} lugares (página ${currentPage})`);
+          
+          if (data.places.length > 0) {
+            setMapCenter({
+              lat: data.places[0].latitude,
+              lng: data.places[0].longitude,
+            });
+          }
         }
       }
     } catch (error) {
@@ -602,7 +672,22 @@ export default function LugaresPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-indigo-600 mx-auto mb-4" />
+          {loadingProgress.total > 0 && (
+            <div className="space-y-2">
+              <p className="text-sm text-gray-600">
+                Cargando lugares: {loadingProgress.current} / {loadingProgress.total}
+              </p>
+              <div className="w-64 bg-gray-200 rounded-full h-2">
+                <div 
+                  className="bg-indigo-600 h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${(loadingProgress.current / loadingProgress.total) * 100}%` }}
+                ></div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     );
   }
@@ -994,7 +1079,7 @@ export default function LugaresPage() {
                   <option value="200">200</option>
                   <option value="500">500</option>
                   <option value="1000">1000</option>
-                  <option value="0">Todos (max 1000)</option>
+                  <option value="0">Todos (carga progresiva)</option>
                 </select>
                 <span className="text-sm text-gray-600">
                   por página
