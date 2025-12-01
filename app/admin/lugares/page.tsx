@@ -179,7 +179,7 @@ export default function LugaresPage() {
         console.log('📦 Cargando TODOS los lugares en batches...');
         
         let allLoadedPlaces: any[] = [];
-        const batchSize = 1000;
+        const batchSize = 500; // ⚠️ Reducido a 500 para evitar error 413 (Payload Too Large)
         let page = 1;
         let hasMore = true;
         let totalExpected = 0;
