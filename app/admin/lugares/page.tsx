@@ -746,10 +746,62 @@ export default function LugaresPage() {
                         
                         markersRef.current = markers;
                         
-                        // Inicializar clusterer
+                        // 🎨 Renderer personalizado para clusters (mismo estilo que mapa público)
+                        const clusterSize = 40;
+                        const clusterRadius = 18;
+                        const clusterFontSize = 12;
+                        
+                        const renderer = {
+                          render: ({ count, position, markers }: any) => {
+                            // Colores según cantidad (igual que mapa público)
+                            const color = count > 100 ? "#dc2626" : count > 50 ? "#f59e0b" : count > 20 ? "#3b82f6" : "#10b981";
+                            
+                            const clusterMarker = new google.maps.Marker({
+                              position,
+                              icon: {
+                                url: `data:image/svg+xml,${encodeURIComponent(`
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="${clusterSize}" height="${clusterSize}" viewBox="0 0 ${clusterSize} ${clusterSize}">
+                                    <circle cx="${clusterSize/2}" cy="${clusterSize/2}" r="${clusterRadius}" fill="${color}" opacity="0.8" stroke="white" stroke-width="2"/>
+                                    <text x="${clusterSize/2}" y="${clusterSize/2 + 4}" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="${clusterFontSize}" font-weight="bold">${count}</text>
+                                  </svg>
+                                `)}`,
+                                scaledSize: new google.maps.Size(clusterSize, clusterSize),
+                              },
+                              label: {
+                                text: " ",
+                                color: "transparent",
+                              },
+                              zIndex: Number(google.maps.Marker.MAX_ZINDEX) + count,
+                            });
+
+                            // Click en cluster: hacer zoom para expandir
+                            clusterMarker.addListener('click', () => {
+                              if (mapRef.current && markers && markers.length > 0) {
+                                const bounds = new google.maps.LatLngBounds();
+                                markers.forEach((marker: any) => {
+                                  bounds.extend(marker.getPosition()!);
+                                });
+                                mapRef.current?.fitBounds(bounds);
+                                
+                                // Limitar zoom máximo
+                                const listener = google.maps.event.addListenerOnce(mapRef.current, 'idle', () => {
+                                  const currentZoom = mapRef.current?.getZoom();
+                                  if (currentZoom && currentZoom > 16) {
+                                    mapRef.current?.setZoom(16);
+                                  }
+                                });
+                              }
+                            });
+
+                            return clusterMarker;
+                          },
+                        };
+                        
+                        // Inicializar clusterer con renderer personalizado
                         clustererRef.current = new MarkerClusterer({
                           map,
                           markers,
+                          renderer,
                         });
                         
                         console.log('✅ Clustering inicializado con', markers.length, 'markers');
