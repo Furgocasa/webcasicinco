@@ -1,7 +1,8 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
-import { MapPin, Star, Phone, Globe, Navigation, Calendar, ArrowLeft, ExternalLink } from 'lucide-react';
+import { MapPin, Star, Phone, Globe, Navigation, Calendar, ArrowLeft, ExternalLink, Facebook, Twitter, Linkedin, MessageCircle } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import Footer from '@/components/layout/Footer';
@@ -9,6 +10,7 @@ import { getPlacePhotoUrl } from '@/lib/utils/photo-helper';
 import { getPlaceUrl } from '@/lib/utils/url-helper';
 import { FurgocasaBanner } from '@/components/ad/FurgocasaBanner';
 import type { BlogPostWithPlaces } from '@/types/blog';
+import { Eye, Share2, Copy, Check } from 'lucide-react';
 
 // Función para renderizar Markdown básico
 const renderMarkdown = (text: string) => {
@@ -36,6 +38,49 @@ type BlogPostContentProps = {
 export function BlogPostContent({ post }: BlogPostContentProps) {
   // Usar la foto del primer lugar (URL directa de Supabase Storage)
   const featuredImage = post.first_place_photo || post.featured_image_url;
+  const [copied, setCopied] = useState(false);
+  
+  // URL completa del artículo
+  const fullUrl = typeof window !== 'undefined' ? window.location.href : `https://www.casicinco.com/blog/${post.slug}`;
+  
+  // Función para compartir en redes sociales
+  const shareOnSocial = (platform: string) => {
+    const encodedUrl = encodeURIComponent(fullUrl);
+    const encodedTitle = encodeURIComponent(post.title);
+    const encodedDescription = encodeURIComponent(post.intro_text.substring(0, 200));
+    
+    let shareUrl = '';
+    
+    switch(platform) {
+      case 'facebook':
+        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`;
+        break;
+      case 'twitter':
+        shareUrl = `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`;
+        break;
+      case 'linkedin':
+        shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`;
+        break;
+      case 'whatsapp':
+        shareUrl = `https://wa.me/?text=${encodedTitle}%20${encodedUrl}`;
+        break;
+    }
+    
+    if (shareUrl) {
+      window.open(shareUrl, '_blank', 'width=600,height=400');
+    }
+  };
+  
+  // Copiar enlace al portapapeles
+  const copyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(fullUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Error copiando:', err);
+    }
+  };
 
   return (
     <>
@@ -90,7 +135,7 @@ export function BlogPostContent({ post }: BlogPostContentProps) {
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto">
               {/* Imagen destacada */}
-              <div className="mb-12 rounded-2xl overflow-hidden shadow-xl bg-gray-200">
+              <div className="mb-8 rounded-2xl overflow-hidden shadow-xl bg-gray-200">
                 <img 
                   src={featuredImage || '/images/placeholder.jpg'} 
                   alt={post.title}
@@ -100,6 +145,73 @@ export function BlogPostContent({ post }: BlogPostContentProps) {
                     e.currentTarget.src = '/images/placeholder.jpg';
                   }}
                 />
+              </div>
+
+              {/* Estadísticas y Compartir */}
+              <div className="mb-8 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-100">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                  {/* Contador de visitas */}
+                  <div className="flex items-center gap-2 text-gray-700">
+                    <Eye className="h-5 w-5 text-blue-600" />
+                    <span className="text-sm font-medium">
+                      <span className="font-bold text-blue-700">{post.views_count?.toLocaleString() || 0}</span> visitas
+                    </span>
+                  </div>
+
+                  {/* Botones de compartir */}
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-600 mr-2 hidden sm:inline">Compartir:</span>
+                    
+                    {/* Facebook */}
+                    <button
+                      onClick={() => shareOnSocial('facebook')}
+                      className="p-2 rounded-lg bg-white hover:bg-blue-600 hover:text-white transition-all shadow-sm border border-gray-200 hover:border-blue-600 group"
+                      title="Compartir en Facebook"
+                    >
+                      <Facebook className="h-5 w-5 text-blue-600 group-hover:text-white" />
+                    </button>
+
+                    {/* Twitter/X */}
+                    <button
+                      onClick={() => shareOnSocial('twitter')}
+                      className="p-2 rounded-lg bg-white hover:bg-black hover:text-white transition-all shadow-sm border border-gray-200 hover:border-black group"
+                      title="Compartir en Twitter/X"
+                    >
+                      <Twitter className="h-5 w-5 text-gray-800 group-hover:text-white" />
+                    </button>
+
+                    {/* LinkedIn */}
+                    <button
+                      onClick={() => shareOnSocial('linkedin')}
+                      className="p-2 rounded-lg bg-white hover:bg-blue-700 hover:text-white transition-all shadow-sm border border-gray-200 hover:border-blue-700 group"
+                      title="Compartir en LinkedIn"
+                    >
+                      <Linkedin className="h-5 w-5 text-blue-700 group-hover:text-white" />
+                    </button>
+
+                    {/* WhatsApp */}
+                    <button
+                      onClick={() => shareOnSocial('whatsapp')}
+                      className="p-2 rounded-lg bg-white hover:bg-green-600 hover:text-white transition-all shadow-sm border border-gray-200 hover:border-green-600 group"
+                      title="Compartir en WhatsApp"
+                    >
+                      <MessageCircle className="h-5 w-5 text-green-600 group-hover:text-white" />
+                    </button>
+
+                    {/* Copiar enlace */}
+                    <button
+                      onClick={copyLink}
+                      className="p-2 rounded-lg bg-white hover:bg-gray-700 hover:text-white transition-all shadow-sm border border-gray-200 hover:border-gray-700 group"
+                      title="Copiar enlace"
+                    >
+                      {copied ? (
+                        <Check className="h-5 w-5 text-green-600" />
+                      ) : (
+                        <Copy className="h-5 w-5 text-gray-700 group-hover:text-white" />
+                      )}
+                    </button>
+                  </div>
+                </div>
               </div>
 
               {/* Intro */}
