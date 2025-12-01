@@ -4,8 +4,9 @@
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { GoogleMap, useLoadScript, Marker, InfoWindow } from '@react-google-maps/api';
+import { MarkerClusterer } from '@googlemaps/markerclusterer';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
@@ -54,12 +55,19 @@ export default function LugaresPage() {
   });
 
   const [places, setPlaces] = useState<any[]>([]);
+  const [mapPlaces, setMapPlaces] = useState<any[]>([]); // 🚀 NUEVO: Lugares para el mapa (todos)
   const [loading, setLoading] = useState(true);
+  const [mapLoading, setMapLoading] = useState(false); // 🚀 NUEVO: Loading del mapa
   const [selectedPlace, setSelectedPlace] = useState<any>(null);
   const [mapCenter, setMapCenter] = useState(defaultCenter);
   const [showMap, setShowMap] = useState(false); // 🚀 Desactivado por defecto
   const [enriching, setEnriching] = useState(false);
   const [enrichProgress, setEnrichProgress] = useState({ current: 0, total: 0 });
+  
+  // 🚀 NUEVO: Refs para clustering
+  const mapRef = useRef<google.maps.Map | null>(null);
+  const clustererRef = useRef<MarkerClusterer | null>(null);
+  const markersRef = useRef<google.maps.Marker[]>([]);
   
   // Stats globales (sin cargar todos los lugares)
   const [totalPlaces, setTotalPlaces] = useState(0);
@@ -96,6 +104,13 @@ export default function LugaresPage() {
     loadPlaces();
   }, []);
 
+  // 🚀 NUEVO: Cargar datos del mapa cuando se abre
+  useEffect(() => {
+    if (showMap && mapPlaces.length === 0) {
+      loadMapData();
+    }
+  }, [showMap]);
+
   // 🚀 OPTIMIZACIÓN: Cargar datos del servidor cuando cambien filtros o paginación
   useEffect(() => {
     loadPlaces();
@@ -127,13 +142,44 @@ export default function LugaresPage() {
     }
   };
 
+  // 🚀 NUEVO: Cargar datos optimizados para el mapa (solo coordenadas + info básica)
+  const loadMapData = async () => {
+    setMapLoading(true);
+    try {
+      console.log('🗺️ Cargando datos del mapa...');
+      const response = await fetch('/api/admin/places/map-data');
+      const data = await response.json();
+      
+      if (data.success && data.places) {
+        setMapPlaces(data.places);
+        console.log(`✅ ${data.places.length} lugares cargados para mapa con clustering`);
+        
+        // Centrar en el primer lugar si hay datos
+        if (data.places.length > 0) {
+          setMapCenter({
+            lat: data.places[0].latitude,
+            lng: data.places[0].longitude,
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error cargando datos del mapa:', error);
+      toast.error('Error al cargar el mapa');
+    } finally {
+      setMapLoading(false);
+    }
+  };
+
   const loadPlaces = async () => {
     setLoading(true);
     try {
+      // Si itemsPerPage es 0 (Todos), cargar con límite alto
+      const effectiveLimit = itemsPerPage === 0 ? 10000 : itemsPerPage;
+      
       // Construir query con filtros
       const params = new URLSearchParams({
-        page: currentPage.toString(),
-        limit: itemsPerPage.toString(),
+        page: itemsPerPage === 0 ? '1' : currentPage.toString(),
+        limit: effectiveLimit.toString(),
       });
 
       if (searchTerm) params.append('search', searchTerm);
@@ -149,8 +195,8 @@ export default function LugaresPage() {
       if (data.success && data.places) {
         setPlaces(data.places);
         setTotalPlaces(data.total);
-        setTotalPages(data.totalPages || 1);
-        console.log(`✅ Cargados ${data.places.length} de ${data.total} lugares (página ${currentPage})`);
+        setTotalPages(itemsPerPage === 0 ? 1 : (data.totalPages || 1));
+        console.log(`✅ Cargados ${data.places.length} de ${data.total} lugares (${itemsPerPage === 0 ? 'TODOS' : `página ${currentPage}`})`);
         
         if (data.places.length > 0) {
           setMapCenter({
@@ -647,32 +693,89 @@ export default function LugaresPage() {
           </CardHeader>
           {showMap && (
             <CardContent>
-              <div className="relative">
-                <GoogleMap
-                  mapContainerStyle={mapContainerStyle}
-                  center={mapCenter}
-                  zoom={6}
-                  onClick={() => setSelectedPlace(null)}
-                  options={{
-                    disableDefaultUI: false,
-                    zoomControl: true,
-                    mapTypeControl: false,
-                    streetViewControl: false,
-                    fullscreenControl: true,
-                  }}
-                >
-                  {/* 🚀 OPTIMIZACIÓN: Solo mostrar primeros 100 markers para no saturar mapa */}
-                  {places.slice(0, 100).map((place) => (
-                    <Marker
-                      key={place.id}
-                      position={{ lat: place.latitude, lng: place.longitude }}
-                      onClick={() => handleMarkerClick(place)}
-                      icon={getMarkerIcon(place)}
-                    />
-                  ))}
+              {mapLoading ? (
+                <div className="flex items-center justify-center h-[400px]">
+                  <div className="text-center">
+                    <Loader2 className="h-8 w-8 animate-spin text-indigo-600 mx-auto mb-2" />
+                    <p className="text-sm text-gray-600">Cargando mapa...</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="relative">
+                  <GoogleMap
+                    mapContainerStyle={mapContainerStyle}
+                    center={mapCenter}
+                    zoom={6}
+                    onClick={() => setSelectedPlace(null)}
+                    onLoad={(map) => {
+                      mapRef.current = map;
+                      
+                      // 🚀 Inicializar clustering cuando el mapa esté listo
+                      if (mapPlaces.length > 0 && !clustererRef.current) {
+                        console.log('🎯 Inicializando MarkerClusterer con', mapPlaces.length, 'lugares');
+                        
+                        // Limpiar markers anteriores
+                        markersRef.current.forEach(marker => marker.setMap(null));
+                        markersRef.current = [];
+                        
+                        // Crear markers
+                        const markers = mapPlaces.map((place) => {
+                          const tier = calculateQualityTier(place.rating, place.review_count);
+                          const color = getTierMarkerColor(tier);
+                          
+                          const marker = new google.maps.Marker({
+                            position: { lat: place.latitude, lng: place.longitude },
+                            icon: {
+                              path: google.maps.SymbolPath.CIRCLE,
+                              fillColor: color,
+                              fillOpacity: 1,
+                              strokeWeight: 2,
+                              strokeColor: '#ffffff',
+                              scale: 6,
+                            },
+                            title: place.name,
+                          });
+                          
+                          // Click handler
+                          marker.addListener('click', () => {
+                            handleMarkerClick(place);
+                          });
+                          
+                          return marker;
+                        });
+                        
+                        markersRef.current = markers;
+                        
+                        // Inicializar clusterer
+                        clustererRef.current = new MarkerClusterer({
+                          map,
+                          markers,
+                        });
+                        
+                        console.log('✅ Clustering inicializado con', markers.length, 'markers');
+                      }
+                    }}
+                    onUnmount={() => {
+                      // Limpiar al desmontar
+                      if (clustererRef.current) {
+                        clustererRef.current.clearMarkers();
+                        clustererRef.current = null;
+                      }
+                      markersRef.current.forEach(marker => marker.setMap(null));
+                      markersRef.current = [];
+                      mapRef.current = null;
+                    }}
+                    options={{
+                      disableDefaultUI: false,
+                      zoomControl: true,
+                      mapTypeControl: false,
+                      streetViewControl: false,
+                      fullscreenControl: true,
+                    }}
+                  >
 
-                {selectedPlace && (
-                  <InfoWindow
+                  {selectedPlace && (
+                    <InfoWindow
                     position={{
                       lat: selectedPlace.latitude,
                       lng: selectedPlace.longitude,
@@ -762,13 +865,13 @@ export default function LugaresPage() {
                           </div>
                         </div>
                       </div>
-                    </div>
-                  </InfoWindow>
-                )}
-              </GoogleMap>
-              
-              {/* LEYENDA DE TIERS */}
-              <div className="absolute bottom-4 left-4 bg-white rounded-lg shadow-xl p-4 border border-gray-200 z-10">
+                      </div>
+                    </InfoWindow>
+                  )}
+                  </GoogleMap>
+                  
+                  {/* LEYENDA DE TIERS */}
+                  <div className="absolute bottom-4 left-4 bg-white rounded-lg shadow-xl p-4 border border-gray-200 z-10">
                 <h4 className="font-bold text-sm mb-3 text-gray-900">Leyenda de Calidad</h4>
                 <div className="space-y-2 text-xs">
                   <div className="flex items-center gap-2">
@@ -801,9 +904,10 @@ export default function LugaresPage() {
                     <span className="font-medium">⭐ Standard</span>
                     <span className="text-gray-500 text-[10px]">(&lt;4.7 estrellas)</span>
                   </div>
+                  </div>
                 </div>
               </div>
-            </div>
+              )}
             </CardContent>
           )}
         </Card>
@@ -836,7 +940,11 @@ export default function LugaresPage() {
                 </span>
               </div>
               <div className="text-sm text-gray-600">
-                Mostrando {((currentPage - 1) * itemsPerPage) + 1}-{Math.min(currentPage * itemsPerPage, totalPlaces)} de {totalPlaces}
+                {itemsPerPage === 0 ? (
+                  `Mostrando todos (${totalPlaces})`
+                ) : (
+                  `Mostrando ${((currentPage - 1) * itemsPerPage) + 1}-${Math.min(currentPage * itemsPerPage, totalPlaces)} de ${totalPlaces}`
+                )}
               </div>
             </div>
             
