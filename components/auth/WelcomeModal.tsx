@@ -133,53 +133,84 @@ export function WelcomeModal() {
     }
   };
 
+  // Función para cerrar el modal
+  const handleClose = () => {
+    localStorage.setItem('hasSeenWelcome', 'true');
+    setShow(false);
+  };
+
   if (!show) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-      <Card className="max-w-2xl w-full p-8 bg-white rounded-2xl shadow-2xl animate-in fade-in zoom-in duration-300">
-        <h2 className="text-3xl font-bold text-center mb-3 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+    // Overlay - permite cerrar haciendo clic fuera
+    <div 
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-2 sm:p-4"
+      onClick={handleClose}
+    >
+      {/* Modal - evita que el clic dentro cierre el modal */}
+      <Card 
+        className="relative max-w-2xl w-full max-h-[90vh] overflow-y-auto p-4 sm:p-6 md:p-8 bg-white rounded-xl sm:rounded-2xl shadow-2xl animate-in fade-in zoom-in duration-300"
+        onClick={(e: React.MouseEvent) => e.stopPropagation()}
+      >
+        {/* Botón cerrar X - siempre visible y accesible */}
+        <button
+          onClick={handleClose}
+          disabled={loading}
+          className="absolute top-2 right-2 sm:top-3 sm:right-3 p-2 bg-gray-100 hover:bg-gray-200 rounded-full text-gray-500 hover:text-gray-700 transition z-10"
+          aria-label="Cerrar"
+        >
+          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+
+        <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-center mb-2 sm:mb-3 pr-8 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
           🎉 ¡Enhorabuena!
         </h2>
-        <div className="text-center mb-6 space-y-2">
-          <p className="text-xl font-semibold text-gray-900">
+        <div className="text-center mb-4 sm:mb-6 space-y-1 sm:space-y-2">
+          <p className="text-base sm:text-lg md:text-xl font-semibold text-gray-900">
             Has iniciado tu periodo de prueba gratuito
           </p>
-          <p className="text-gray-600">
+          <p className="text-sm sm:text-base text-gray-600">
             Podrás utilizar la APP <strong>sin restricciones durante 30 días</strong>
           </p>
-          <div className="inline-flex items-center gap-2 bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-medium">
-            ✓ Sin tarjeta de crédito · ✓ Sin cargos · ✓ Cancela cuando quieras
+          <div className="inline-flex items-center gap-1 sm:gap-2 bg-green-100 text-green-800 px-2 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium">
+            <span className="hidden sm:inline">✓ Sin tarjeta de crédito · ✓ Sin cargos · ✓ Cancela cuando quieras</span>
+            <span className="sm:hidden">✓ Sin tarjeta · ✓ Sin cargos</span>
           </div>
         </div>
-        <p className="text-center text-gray-700 mb-6">
+        
+        {/* Texto intermedio - oculto en móvil para ahorrar espacio */}
+        <p className="hidden sm:block text-center text-gray-700 mb-4 sm:mb-6 text-sm sm:text-base">
           Transcurridos esos 30 días deberás elegir tu suscripción:
         </p>
 
-        <div className="space-y-4">
+        <div className="space-y-2 sm:space-y-4">
           {/* OPCIÓN 1: Empezar con Trial - DESTACADA */}
           <button
             onClick={handleFreeTrial}
             disabled={loading}
-            className="w-full p-6 border-2 border-indigo-500 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl hover:from-indigo-100 hover:to-purple-100 transition-all duration-200 text-left transform hover:scale-[1.02] hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full p-3 sm:p-4 md:p-6 border-2 border-indigo-500 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-lg sm:rounded-xl hover:from-indigo-100 hover:to-purple-100 transition-all duration-200 text-left transform hover:scale-[1.01] sm:hover:scale-[1.02] hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <div className="flex items-start gap-4">
-              <div className="p-3 bg-indigo-500 rounded-lg">
-                <Clock className="h-6 w-6 text-white" />
+            <div className="flex items-start gap-2 sm:gap-4">
+              <div className="p-2 sm:p-3 bg-indigo-500 rounded-lg flex-shrink-0">
+                <Clock className="h-4 w-4 sm:h-6 sm:w-6 text-white" />
               </div>
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-2">
-                  <h3 className="text-xl font-bold text-gray-900">
-                    Empezar Ahora con Trial
+              <div className="flex-1 min-w-0">
+                <div className="flex flex-wrap items-center gap-1 sm:gap-2 mb-1 sm:mb-2">
+                  <h3 className="text-base sm:text-lg md:text-xl font-bold text-gray-900">
+                    Empezar con Trial
                   </h3>
-                  <span className="bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                  <span className="bg-green-500 text-white text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full">
                     RECOMENDADO
                   </span>
                 </div>
-                <p className="text-gray-600 text-sm mb-3">
-                  Usa todas las funciones gratis durante 30 días · Ya está activado
+                <p className="text-gray-600 text-xs sm:text-sm mb-2 sm:mb-3">
+                  <span className="hidden sm:inline">Usa todas las funciones gratis durante 30 días · Ya está activado</span>
+                  <span className="sm:hidden">30 días gratis · Ya activado</span>
                 </p>
-                <ul className="space-y-1 text-sm text-gray-700 mb-3">
+                {/* Lista de características - oculta en móvil */}
+                <ul className="hidden sm:block space-y-1 text-sm text-gray-700 mb-3">
                   <li className="flex items-center gap-2">
                     <span className="text-green-600">✓</span>
                     <span>Mapa interactivo con 3,000+ lugares</span>
@@ -193,7 +224,7 @@ export function WelcomeModal() {
                     <span>Planificador de rutas personalizado</span>
                   </li>
                 </ul>
-                <div className="inline-flex items-center gap-2 bg-indigo-600 text-white px-5 py-2.5 rounded-lg font-medium text-sm">
+                <div className="inline-flex items-center gap-1 sm:gap-2 bg-indigo-600 text-white px-3 sm:px-5 py-1.5 sm:py-2.5 rounded-lg font-medium text-xs sm:text-sm">
                   <span>Empezar a Explorar</span>
                   <span>→</span>
                 </div>
@@ -201,11 +232,48 @@ export function WelcomeModal() {
             </div>
           </button>
 
-          {/* OPCIÓN 2: Premium Mensual */}
+          {/* Sección suscripciones - colapsada en móvil */}
+          <details className="sm:hidden">
+            <summary className="text-center text-xs text-gray-500 py-2 cursor-pointer">
+              Ver opciones de suscripción anticipada
+            </summary>
+            <div className="space-y-2 pt-2">
+              {/* Premium Mensual - versión móvil */}
+              <button
+                onClick={() => handleSubscribe('premium_monthly')}
+                disabled={loading}
+                className="w-full p-3 border border-gray-200 bg-white rounded-lg text-left disabled:opacity-50"
+              >
+                <div className="flex items-center gap-2">
+                  <Zap className="h-4 w-4 text-indigo-600 flex-shrink-0" />
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-gray-900">Mensual · 2,99€/mes</p>
+                    <p className="text-xs text-gray-500">Cargo en 30 días</p>
+                  </div>
+                </div>
+              </button>
+              {/* Premium Anual - versión móvil */}
+              <button
+                onClick={() => handleSubscribe('premium_yearly')}
+                disabled={loading}
+                className="w-full p-3 border border-purple-200 bg-purple-50 rounded-lg text-left disabled:opacity-50"
+              >
+                <div className="flex items-center gap-2">
+                  <Crown className="h-4 w-4 text-purple-600 flex-shrink-0" />
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-gray-900">Anual · 24,99€/año <span className="text-orange-500 text-xs">-30%</span></p>
+                    <p className="text-xs text-gray-500">Cargo en 30 días</p>
+                  </div>
+                </div>
+              </button>
+            </div>
+          </details>
+
+          {/* OPCIÓN 2: Premium Mensual - solo desktop */}
           <button
             onClick={() => handleSubscribe('premium_monthly')}
             disabled={loading}
-            className="w-full p-5 border-2 border-gray-200 bg-white rounded-xl hover:border-gray-300 hover:shadow-md transition-all duration-200 text-left transform hover:scale-[1.01] disabled:opacity-50 disabled:cursor-not-allowed"
+            className="hidden sm:block w-full p-4 md:p-5 border-2 border-gray-200 bg-white rounded-xl hover:border-gray-300 hover:shadow-md transition-all duration-200 text-left transform hover:scale-[1.01] disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <div className="flex items-start gap-4">
               <div className="p-2.5 bg-gray-100 rounded-lg">
@@ -225,11 +293,11 @@ export function WelcomeModal() {
             </div>
           </button>
 
-          {/* OPCIÓN 3: Premium Anual - Mejor Valor */}
+          {/* OPCIÓN 3: Premium Anual - Mejor Valor - solo desktop */}
           <button
             onClick={() => handleSubscribe('premium_yearly')}
             disabled={loading}
-            className="w-full p-5 border-2 border-purple-300 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl hover:border-purple-400 hover:shadow-md transition-all duration-200 text-left transform hover:scale-[1.01] disabled:opacity-50 disabled:cursor-not-allowed"
+            className="hidden sm:block w-full p-4 md:p-5 border-2 border-purple-300 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl hover:border-purple-400 hover:shadow-md transition-all duration-200 text-left transform hover:scale-[1.01] disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <div className="flex items-start gap-4">
               <div className="p-2.5 bg-purple-100 rounded-lg">
@@ -255,23 +323,11 @@ export function WelcomeModal() {
           </button>
         </div>
 
-        <p className="text-center text-gray-500 text-sm mt-6">
-          Si eliges suscribirte ahora, introducirás tu tarjeta pero <strong>no se te cobrará hasta que finalicen los 30 días</strong>
+        {/* Nota al pie - más compacta en móvil */}
+        <p className="text-center text-gray-500 text-[10px] sm:text-xs md:text-sm mt-3 sm:mt-6">
+          <span className="hidden sm:inline">Si eliges suscribirte ahora, introducirás tu tarjeta pero </span>
+          <strong>No se cobra hasta que finalice el trial</strong>
         </p>
-
-        {/* Botón cerrar (pequeño, discreto) */}
-        <button
-          onClick={() => {
-            localStorage.setItem('hasSeenWelcome', 'true');
-            setShow(false);
-          }}
-          disabled={loading}
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition disabled:opacity-50"
-        >
-          <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
       </Card>
     </div>
   );
