@@ -114,27 +114,39 @@ export async function DELETE(
       );
     }
 
-    // Eliminar de la tabla profiles
-    const { error: deleteError } = await supabase
+    // Usar cliente admin para bypass de RLS
+    const adminClient = createAdminClient();
+
+    // Eliminar de la tabla profiles primero
+    const { error: deleteProfileError } = await adminClient
       .from('profiles')
       .delete()
       .eq('id', id);
 
-    if (deleteError) {
-      console.error('Error eliminando usuario:', deleteError);
+    if (deleteProfileError) {
+      console.error('Error eliminando perfil:', deleteProfileError);
       return NextResponse.json(
-        { success: false, error: 'Error eliminando usuario' },
+        { success: false, error: 'Error eliminando perfil de usuario' },
         { status: 500 }
       );
     }
 
-    // Nota: Para eliminar completamente de Supabase Auth, necesitarías:
-    // const adminClient = createAdminClient();
-    // await adminClient.auth.admin.deleteUser(id);
+    // Eliminar completamente de Supabase Auth
+    const { error: deleteAuthError } = await adminClient.auth.admin.deleteUser(id);
+
+    if (deleteAuthError) {
+      console.error('Error eliminando usuario de auth:', deleteAuthError);
+      // El perfil ya se eliminó, pero el usuario auth no
+      return NextResponse.json({
+        success: true,
+        message: 'Perfil eliminado. Usuario auth no pudo eliminarse.',
+        warning: deleteAuthError.message
+      });
+    }
     
     return NextResponse.json({
       success: true,
-      message: 'Usuario eliminado correctamente'
+      message: 'Usuario eliminado completamente'
     });
 
   } catch (error) {
