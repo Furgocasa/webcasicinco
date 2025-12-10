@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient, createAdminClient } from '@/lib/supabase/server';
+import { createClient } from '@/lib/supabase/server';
+import { createClient as createSupabaseAdmin } from '@supabase/supabase-js';
 
 /**
  * PATCH /api/admin/users/[id]
@@ -114,8 +115,17 @@ export async function DELETE(
       );
     }
 
-    // Usar cliente admin para bypass de RLS
-    const adminClient = createAdminClient();
+    // Crear cliente admin directamente (igual que subscription endpoint)
+    const adminClient = createSupabaseAdmin(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false,
+        },
+      }
+    );
 
     // Eliminar de la tabla profiles primero
     const { error: deleteProfileError } = await adminClient
