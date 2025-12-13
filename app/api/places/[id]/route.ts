@@ -1,6 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient, createAdminClient } from '@/lib/supabase/server';
+import { createClient } from '@/lib/supabase/server';
+import { createClient as createSupabaseAdmin } from '@supabase/supabase-js';
 import { generatePlaceSlug } from '@/lib/utils/slugify';
+
+// Helper para crear cliente admin
+function getAdminClient() {
+  return createSupabaseAdmin(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    }
+  );
+}
 
 export async function GET(
   request: NextRequest,
@@ -44,7 +59,7 @@ export async function PUT(
 ) {
   try {
     const supabase = await createClient();
-    const adminSupabase = createAdminClient();
+    const adminSupabase = getAdminClient();
     const { id } = params;
     const body = await request.json();
 
@@ -77,11 +92,13 @@ export async function PUT(
 
     // Si se cambia categoría, regenerar slug para SEO correcto
     if (body.category) {
-      const { data: currentPlace } = await adminSupabase
+      const { data: currentPlaceData } = await adminSupabase
         .from('places')
         .select('category, name, city, slug')
         .eq('id', id)
         .single();
+
+      const currentPlace = currentPlaceData as { category: string; name: string; city: string; slug: string } | null;
 
       if (currentPlace && currentPlace.category !== body.category) {
         // Regenerar slug con nueva categoría
@@ -133,7 +150,7 @@ export async function DELETE(
 ) {
   try {
     const supabase = await createClient();
-    const adminSupabase = createAdminClient();
+    const adminSupabase = getAdminClient();
     const { id } = params;
 
     // Verificar autenticación y rol admin

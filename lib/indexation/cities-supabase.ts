@@ -4,8 +4,33 @@
  * con fallback al archivo hardcodeado
  */
 
-import { createAdminClient } from '@/lib/supabase/server';
+import { createClient as createSupabaseAdmin } from '@supabase/supabase-js';
 import { CityData } from './cities-database';
+
+// Tipo para las filas de cities_to_province
+interface CityRow {
+  city_name: string;
+  province: string;
+  latitude: string;
+  longitude: string;
+  population: number;
+  priority: number;
+  active: boolean;
+}
+
+// Helper para crear cliente admin
+function getAdminClient() {
+  return createSupabaseAdmin(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    }
+  );
+}
 
 /**
  * Obtener ciudades de una provincia desde Supabase
@@ -18,7 +43,7 @@ export async function getCitiesFromSupabase(
   priorityFilter?: 1 | 2 | 3 | 'all'
 ): Promise<CityData[]> {
   try {
-    const supabase = createAdminClient();
+    const supabase = getAdminClient();
     
     // Construir query
     let query = supabase
@@ -34,12 +59,14 @@ export async function getCitiesFromSupabase(
       query = query.lte('priority', priorityFilter);
     }
     
-    const { data, error } = await query;
+    const { data: rawData, error } = await query;
     
     if (error) {
       console.error(`❌ Error obteniendo ciudades de Supabase para ${province}:`, error);
       return [];
     }
+    
+    const data = rawData as CityRow[] | null;
     
     if (!data || data.length === 0) {
       console.warn(`⚠️ No se encontraron ciudades en Supabase para: ${province}`);
@@ -70,9 +97,9 @@ export async function getCitiesFromSupabase(
  */
 export async function getAllCitiesFromSupabase(): Promise<Map<string, CityData[]>> {
   try {
-    const supabase = createAdminClient();
+    const supabase = getAdminClient();
     
-    const { data, error } = await supabase
+    const { data: rawData, error } = await supabase
       .from('cities_to_province')
       .select('*')
       .eq('active', true)
@@ -84,6 +111,8 @@ export async function getAllCitiesFromSupabase(): Promise<Map<string, CityData[]
       console.error('❌ Error obteniendo todas las ciudades de Supabase:', error);
       return new Map();
     }
+    
+    const data = rawData as CityRow[] | null;
     
     if (!data || data.length === 0) {
       console.warn('⚠️ No se encontraron ciudades en Supabase');
@@ -127,7 +156,7 @@ export async function getAllCitiesFromSupabase(): Promise<Map<string, CityData[]
  */
 export async function hasSupabaseCitiesData(): Promise<boolean> {
   try {
-    const supabase = createAdminClient();
+    const supabase = getAdminClient();
     
     const { count, error } = await supabase
       .from('cities_to_province')

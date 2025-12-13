@@ -1,7 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { createAdminClient } from '@/lib/supabase/server';
+import { createClient as createSupabaseAdmin } from '@supabase/supabase-js';
 import axios from 'axios';
+
+// Tipo para los lugares
+interface Place {
+  id: string;
+  google_place_id: string;
+  name: string;
+  rating: number;
+  review_count: number;
+  updated_at: string;
+}
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300; // 5 minutos max
@@ -58,7 +68,16 @@ export async function POST(request: NextRequest) {
     const batchSize = body.batchSize || 20; // Lotes más pequeños para evitar timeout
     const offset = body.offset || 0;
 
-    const adminSupabase = createAdminClient();
+    const adminSupabase = createSupabaseAdmin(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false,
+        },
+      }
+    );
 
     // Construir query según modo
     let query = adminSupabase
@@ -78,12 +97,14 @@ export async function POST(request: NextRequest) {
     }
     // mode === 'all' no filtra
 
-    const { data: places, error: fetchError } = await query
+    const { data: placesData, error: fetchError } = await query
       .range(offset, offset + batchSize - 1);
 
     if (fetchError) {
       return NextResponse.json({ error: fetchError.message }, { status: 500 });
     }
+
+    const places = placesData as Place[] | null;
 
     if (!places || places.length === 0) {
       return NextResponse.json({
@@ -195,7 +216,16 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const adminSupabase = createAdminClient();
+    const adminSupabase = createSupabaseAdmin(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false,
+        },
+      }
+    );
 
     // Contar lugares
     const { count: total } = await adminSupabase

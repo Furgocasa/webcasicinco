@@ -1,12 +1,21 @@
 import { NextResponse } from 'next/server';
-import { createAdminClient } from '@/lib/supabase/server';
+import { createClient as createSupabaseAdmin } from '@supabase/supabase-js';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export async function GET() {
   try {
-    const supabase = await createAdminClient();
+    const supabase = createSupabaseAdmin(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false,
+        },
+      }
+    );
 
     // Contar total de lugares
     const { count: total } = await supabase
@@ -32,7 +41,7 @@ export async function GET() {
       .not('province', 'is', null);
 
     const provinces = provincesData 
-      ? Array.from(new Set(provincesData.map(p => p.province))).sort()
+      ? Array.from(new Set((provincesData as { province: string }[]).map(p => p.province))).sort()
       : [];
 
     // Obtener categorías únicas
@@ -42,7 +51,7 @@ export async function GET() {
       .not('category', 'is', null);
 
     const categories = categoriesData
-      ? Array.from(new Set(categoriesData.map(c => c.category)))
+      ? Array.from(new Set((categoriesData as { category: string }[]).map(c => c.category)))
       : [];
 
     return NextResponse.json({

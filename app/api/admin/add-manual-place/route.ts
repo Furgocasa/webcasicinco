@@ -3,7 +3,6 @@ import { createClient } from '@/lib/supabase/server';
 import { createClient as createSupabaseAdmin } from '@supabase/supabase-js';
 import { getPlaceDetails, getPlacePhotos, downloadAndUploadPhotosToSupabase } from '@/lib/google/places';
 import { generatePlaceSlug } from '@/lib/utils/slug-generator';
-import type { Database } from '@/lib/supabase/types';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,7 +26,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verificar que no exista ya
-    const adminSupabase = createSupabaseAdmin<Database>(
+    const adminSupabase = createSupabaseAdmin(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!,
       {
@@ -44,8 +43,9 @@ export async function POST(request: NextRequest) {
       .maybeSingle();
 
     if (existing) {
+      const placeName = (existing as { name: string }).name;
       return NextResponse.json({ 
-        error: `Este lugar ya existe en la base de datos: "${existing.name}"` 
+        error: `Este lugar ya existe en la base de datos: "${placeName}"` 
       }, { status: 400 });
     }
 
