@@ -148,9 +148,45 @@ Buscar en el código y reemplazar:
 
 ### Cambiar URL de Destino
 
+⚠️ **IMPORTANTE - REGLAS SEO OBLIGATORIAS:**
+
+**TODOS los enlaces a casicinco.com desde banners publicitarios DEBEN incluir:**
+```html
+rel="nofollow sponsored noopener"
+```
+
+**¿Por qué esta combinación específica?**
+- ✅ **`nofollow`**: No transfiere autoridad SEO (evita penalizaciones por link building)
+- ✅ **`sponsored`**: Indica explícitamente que es un enlace patrocinado/publicitario
+- ✅ **`noopener`**: Seguridad contra vulnerabilidades de `target="_blank"` (tabnabbing)
+
+❌ **NUNCA uses:**
+- `rel="noopener noreferrer"` solo (no indica publicidad)
+- `rel="dofollow"` (puede penalizar el SEO de la página destino)
+- `rel="follow"` (mismo problema)
+- Sin atributo `rel` (Google puede penalizar por link building artificial)
+
+✅ **Formato correcto OBLIGATORIO para todos los enlaces:**
+```html
+<a href="https://www.casicinco.com?utm_source=furgocasa&utm_medium=banner&utm_campaign=NOMBRE_CAMPAÑA" 
+   target="_blank" 
+   rel="nofollow sponsored noopener">
+   Texto del enlace
+</a>
+```
+
+**Consecuencias de NO usar `nofollow sponsored noopener`:**
+- 🚫 Google puede detectar esquemas de enlaces artificiales
+- 📉 Penalización en el ranking de búsqueda de casicinco.com
+- ⚠️ Pérdida de posicionamiento orgánico
+- 🔴 Posible acción manual de Google Search Console
+- 🔓 Vulnerabilidades de seguridad en el navegador
+
 Reemplazar en todos los banners:
 ```html
 href="https://www.casicinco.com?utm_source=furgocasa&utm_medium=banner&utm_campaign=NOMBRE_CAMPAÑA"
+target="_blank"
+rel="nofollow sponsored noopener"
 ```
 
 Parámetros UTM incluidos para tracking:
@@ -179,6 +215,24 @@ Estos parámetros se pueden rastrear en **Google Analytics** para medir el rendi
 
 ## 🎯 Mejores Prácticas
 
+### ⚠️ REGLA CRÍTICA SEO - Enlaces Patrocinados
+
+**OBLIGATORIO:** Todos los enlaces publicitarios DEBEN usar `rel="nofollow sponsored noopener"`
+
+Esta regla es **CRÍTICA** y **NO NEGOCIABLE** para:
+- ✅ Cumplir con las directrices de Google sobre enlaces patrocinados
+- ✅ Evitar penalizaciones SEO en casicinco.com
+- ✅ Mantener el ranking orgánico de la página destino
+- ✅ Transparencia con los motores de búsqueda
+- ✅ Seguridad del navegador contra vulnerabilidades
+
+**Verifica siempre que TODOS los `<a>` incluyan:**
+```html
+rel="nofollow sponsored noopener"
+```
+
+**NO omitas ninguno de los tres atributos.**
+
 ### Colocación Recomendada
 
 1. **Hero Horizontal**: Header superior de todas las páginas
@@ -205,6 +259,25 @@ Todos los banners incluyen:
 ---
 
 ## 🔧 Solución de Problemas
+
+### Verificación de Atributos SEO
+
+Antes de publicar cualquier banner, **VERIFICA:**
+
+```bash
+# Buscar enlaces sin rel="nofollow sponsored noopener"
+grep -r 'href="https://www.casicinco.com' banners/*.html | grep -v 'rel="nofollow sponsored noopener"'
+```
+
+Si este comando devuelve resultados, **CORRIGE INMEDIATAMENTE** los enlaces.
+
+**Checklist pre-publicación:**
+- [ ] Todos los `<a>` tienen `rel="nofollow sponsored noopener"`
+- [ ] Ningún enlace tiene `rel="dofollow"`
+- [ ] Ningún enlace tiene solo `rel="noopener noreferrer"`
+- [ ] Ningún enlace omite `noopener` (necesario para seguridad)
+- [ ] Los parámetros UTM están presentes
+- [ ] El atributo `target="_blank"` está presente
 
 ### El banner no se muestra
 
@@ -246,6 +319,30 @@ Para dudas o personalizaciones adicionales:
 Estos banners son propiedad de **Casi Cinco** y están diseñados exclusivamente para uso promocional en **Furgocasa.com**.
 
 **© 2025 Casi Cinco - Todos los derechos reservados**
+
+---
+
+## ⚠️ RECORDATORIO FINAL - SEO + SEGURIDAD
+
+**NUNCA OLVIDES:** Todos los enlaces de banners publicitarios DEBEN usar:
+
+```html
+rel="nofollow sponsored noopener"
+```
+
+**Los 3 atributos juntos protegen:**
+1. 🛡️ **SEO** de casicinco.com (nofollow + sponsored)
+2. 🔒 **Seguridad** del navegador (noopener)
+3. ✅ **Cumplimiento** con políticas de Google
+
+**Enlaces incorrectos pueden causar:**
+- 📉 Pérdida de ranking en Google
+- 🚫 Penalizaciones manuales
+- ⚠️ Detección de spam/link schemes
+- 💔 Daño a la reputación del dominio
+- 🔓 Vulnerabilidades de seguridad (sin noopener)
+
+**Revisa siempre antes de publicar. Tu diligencia protege el SEO y la seguridad.**
 
 ---
 

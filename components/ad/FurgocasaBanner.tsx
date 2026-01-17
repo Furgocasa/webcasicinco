@@ -210,7 +210,7 @@ export function FurgocasaBanner({
               <a
                 href={`https://www.furgocasa.com${currentBanner.ctaLink}?utm_source=casicinco&utm_medium=${variant}_banner_horizontal&utm_campaign=${currentBanner.id}`}
                 target="_blank"
-                rel="noopener"
+                rel="nofollow sponsored noopener"
                 onClick={() => handleClick('main_cta', currentBanner.id)}
                 className="bg-white text-blue-900 font-bold py-2.5 px-5 rounded-lg text-center hover:bg-blue-50 transition-all text-sm"
               >
@@ -221,7 +221,7 @@ export function FurgocasaBanner({
                 <a
                   href={`https://www.furgocasa.com${currentBanner.secondaryLink}?utm_source=casicinco&utm_medium=banner&utm_campaign=secondary_${currentBanner.id}`}
                   target="_blank"
-                  rel="noopener"
+                  rel="nofollow sponsored noopener"
                   onClick={() => handleClick('secondary_cta', currentBanner.id)}
                   className="border-2 border-white text-white font-semibold py-2.5 px-5 rounded-lg text-center hover:bg-white/10 transition-colors text-sm"
                 >
@@ -236,7 +236,7 @@ export function FurgocasaBanner({
                   <a 
                     href="https://www.furgocasa.com/es/reservar?utm_source=casicinco&utm_medium=seo_link&utm_campaign=alquiler_camper_murcia"
                     target="_blank"
-                    rel="dofollow"
+                    rel="nofollow sponsored noopener"
                     className="hover:underline"
                   >
                     🚐 Alquiler camper Murcia
@@ -244,7 +244,7 @@ export function FurgocasaBanner({
                   <a 
                     href="https://www.furgocasa.com/es/vehiculos-campervans?utm_source=casicinco&utm_medium=seo_link&utm_campaign=alquiler_autocaravana_madrid"
                     target="_blank"
-                    rel="dofollow"
+                    rel="nofollow sponsored noopener"
                     className="hover:underline"
                   >
                     🏕️ Alquiler autocaravana Madrid
@@ -325,7 +325,7 @@ export function FurgocasaBanner({
             <a
               href={`https://www.furgocasa.com${currentBanner.ctaLink}?utm_source=casicinco&utm_medium=${variant}_banner_vertical&utm_campaign=${currentBanner.id}`}
               target="_blank"
-              rel="noopener"
+              rel="nofollow sponsored"
               onClick={() => handleClick('main_cta', currentBanner.id)}
               className="bg-white text-blue-900 font-bold py-2.5 px-5 rounded-lg text-center hover:bg-blue-50 transition-all text-sm"
             >
@@ -336,7 +336,7 @@ export function FurgocasaBanner({
               <a
                 href={`https://www.furgocasa.com${currentBanner.secondaryLink}?utm_source=casicinco&utm_medium=banner&utm_campaign=secondary_${currentBanner.id}`}
                 target="_blank"
-                rel="noopener"
+                rel="nofollow sponsored noopener"
                 onClick={() => handleClick('secondary_cta', currentBanner.id)}
                 className="border-2 border-white text-white font-semibold py-2.5 px-5 rounded-lg text-center hover:bg-white/10 transition-colors text-sm"
               >
@@ -352,7 +352,7 @@ export function FurgocasaBanner({
                   <a 
                     href="https://www.furgocasa.com/es/reservar?utm_source=casicinco&utm_medium=seo_link&utm_campaign=alquiler_camper_murcia"
                     target="_blank"
-                    rel="dofollow"
+                    rel="nofollow sponsored noopener"
                     className="hover:underline"
                   >
                     🚐 Alquiler camper Murcia
@@ -360,7 +360,7 @@ export function FurgocasaBanner({
                   <a 
                     href="https://www.furgocasa.com/es/vehiculos-campervans?utm_source=casicinco&utm_medium=seo_link&utm_campaign=alquiler_autocaravana_madrid"
                     target="_blank"
-                    rel="dofollow"
+                    rel="nofollow sponsored noopener"
                     className="hover:underline"
                   >
                     🏕️ Alquiler autocaravana Madrid
@@ -438,7 +438,7 @@ export function FurgocasaBanner({
               <a
                 href={`https://www.furgocasa.com${currentBanner.ctaLink}?utm_source=casicinco&utm_medium=${variant}_banner_sidebar&utm_campaign=${currentBanner.id}`}
                 target="_blank"
-                rel="noopener"
+                rel="nofollow sponsored noopener"
                 onClick={() => handleClick('main_cta', currentBanner.id)}
                 className="block w-full bg-white text-blue-900 font-bold py-2 px-3 rounded-lg text-center hover:bg-blue-50 transition-colors mb-2 text-sm"
               >
@@ -449,7 +449,7 @@ export function FurgocasaBanner({
                 <a
                   href={`https://www.furgocasa.com${currentBanner.secondaryLink}?utm_source=casicinco&utm_medium=banner&utm_campaign=secondary_${currentBanner.id}`}
                   target="_blank"
-                  rel="noopener"
+                  rel="nofollow sponsored noopener"
                   onClick={() => handleClick('secondary_cta', currentBanner.id)}
                   className="block w-full border-2 border-white text-white font-semibold py-2 px-3 rounded-lg text-center hover:bg-white/10 transition-colors mb-3 text-xs"
                 >
@@ -461,7 +461,7 @@ export function FurgocasaBanner({
                 <a 
                   href="https://www.furgocasa.com/es/reservar?utm_source=casicinco&utm_medium=seo_link&utm_campaign=alquiler_camper_murcia"
                   target="_blank"
-                  rel="dofollow"
+                  rel="nofollow sponsored noopener"
                   className="hover:underline text-white/90"
                 >
                   🚐 Alquiler camper Murcia

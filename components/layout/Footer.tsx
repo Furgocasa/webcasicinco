@@ -167,7 +167,7 @@ export default function Footer() {
             <a 
               href="https://www.furgocasa.com" 
               target="_blank" 
-              rel="noopener noreferrer"
+              rel="nofollow sponsored noopener"
               className="text-gray-400 hover:text-white transition-colors underline"
             >
               www.furgocasa.com
