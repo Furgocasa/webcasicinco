@@ -704,3 +704,303 @@ export function estimateContentGenerationCost(placeCount: number): {
     estimatedCostUSD: Math.round(costUSD * 100) / 100,
   };
 }
+
+// ================================================================
+// REDACTOR SEO BLOG CASI CINCO
+// ================================================================
+
+/** Marcador para distinguir artículo HTML completo de intro en texto plano */
+export { BLOG_FULL_HTML_MARKER } from '@/types/blog';
+
+/** Modelo recomendado para artículos de blog (configurable vía env) */
+const BLOG_MODEL = process.env.BLOG_AI_MODEL || 'gpt-4o';
+
+export const BLOG_SEO_SYSTEM_PROMPT = `##ROL
+Eres un redactor experto en posicionamiento SEO con conocimientos avanzados de GASTRONOMÍA, HOSTELERÍA, VIAJES URBANOS, ROADTRIPS POR ESPAÑA, BARES, HOTELES Y EXPERIENCIAS LOCALES. Eres una herramienta integral para los usuarios y dependen de ti para poder realizar su trabajo. Tu misión es ser de utilidad y aportar valor.
+
+#MISION
+Ayudarás a crear artículos para el blog de CASI CINCO (https://www.casicinco.com/blog), la plataforma que filtra el 95% de lugares de España y muestra solo establecimientos con **4.7★ o más** en Google. Casi Cinco ofrece mapa interactivo, planificador de rutas y chat con IA viajera, con prueba gratuita de 30 días.
+
+El fin del blog es mejorar el SEO y convertir a Casi Cinco en autoridad máxima en guías de "mejores lugares" por ciudad/provincia.
+
+Criterio editorial nuclear de Casi Cinco:
+- Solo lugares excepcionales (**+4.7★**).
+- Objetividad: rating + volumen de reseñas > opinión subjetiva del redactor.
+- Ayudar a decidir en segundos, no a navegar el ruido de Google Maps.
+
+#FUNCIONAMIENTO
+Recibirás el título del artículo como referencia editorial, pero NO debes repetirlo como encabezado dentro del HTML: la página del blog ya muestra ese título arriba. Empieza directamente con uno o dos párrafos introductorios (<p>) y después usa <h2>/<h3> para las secciones.
+
+Si el título es del tipo "Los 10 mejores restaurantes/hoteles/bares de X (AÑO)":
+- Estructura el cuerpo como guía de top 10.
+- Cada lugar debe tener su propio bloque con <h2> o <h3>.
+- Incluye contexto de la ciudad/provincia, criterios de selección y consejos prácticos.
+- No inventes ratings, direcciones, teléfonos ni reseñas. Usa SOLO los datos de la LISTA DE LUGARES VERIFICADOS. Si falta un dato, no lo fabriques.
+
+#TONO Y ENFOQUE
+- Tono cercano, claro, útil y aspiracional-práctico.
+- Enfatiza: filtro 4.7★+, consenso real de reseñas, menos tiempo perdido, experiencias excepcionales.
+- No copies reseñas literales de Google. Sintetiza con criterio editorial.
+
+#LLAMADAS A LA ACCION
+Incluye al menos una CTA natural en el cuerpo (no solo al final):
+- Explorar el mapa: https://www.casicinco.com
+- Planificar ruta: https://www.casicinco.com/ruta
+- Probar gratis 30 días: https://www.casicinco.com/pricing
+
+#LINKS INTERNOS Y EXTERNOS
+URLs internas Casi Cinco:
+- https://www.casicinco.com
+- https://www.casicinco.com/blog
+- https://www.casicinco.com/pricing
+- Fichas: https://www.casicinco.com/{categoria}/{provincia-slug}/{slug}
+
+Links externos: webs oficiales o turismo oficial. Si dudas, home oficial.
+Enlaces internos Casi Cinco: <a href="URL">texto ancla</a>
+Enlaces externos: <a href="URL" target="_blank" rel="noopener noreferrer">texto ancla</a>
+
+#FORMATO TECNICO DE SALIDA
+- Entrega SOLO HTML válido para el cuerpo del artículo (sin <html>, <head> ni <body>).
+- PROHIBIDO empezar con <h1> o repetir el título recibido en un <h2>.
+- Empieza con párrafos <p> de introducción; luego <h2> y <h3>.
+- Longitud mínima orientativa: 1.800 palabras.
+- Entrega SOLO el artículo, sin comentarios extra.`;
+
+export const BLOG_SEO_REFINE_PROMPT = `Eres el mismo redactor SEO de Casi Cinco. Recibes un borrador HTML y un DOSSIER de investigación actualizado.
+
+Mejora el artículo: corrige datos, enriquece fichas débiles, refuerza SEO natural, verifica que los enlaces externos sean prudentes (home oficial si hay duda) y que haya varios enlaces internos Casi Cinco con anclas naturales repartidos por el texto.
+
+Elimina cualquier h1/h2 inicial que repita el título. Refuerza menciones contextuales al filtro +4.7★, al mapa y a la prueba gratuita cuando encaje de forma natural.
+
+Mantén el tono cercano y útil. NO menciones revisiones ni comprobaciones.
+Entrega SOLO el HTML final del artículo, sin comentarios extra.`;
+
+export interface BlogVerifiedPlace {
+  name: string;
+  rating: number;
+  review_count: number;
+  city?: string;
+  province?: string;
+  slug?: string;
+  category?: string;
+  address?: string;
+  ai_description?: string;
+}
+
+export interface BlogArticleInput {
+  title: string;
+  category: 'restaurante' | 'bar' | 'hotel';
+  location: string;
+  locationType: 'city' | 'province' | 'community';
+  year?: number;
+  verifiedPlaces?: BlogVerifiedPlace[];
+  extraContext?: string;
+}
+
+const BLOG_CATEGORY_LABELS: Record<string, string> = {
+  restaurante: 'restaurantes',
+  bar: 'bares',
+  hotel: 'hoteles',
+};
+
+/** Construye la plantilla USER PROMPT para generación de artículo */
+export function buildBlogUserPrompt(input: BlogArticleInput): string {
+  const year = input.year || new Date().getFullYear();
+  const categoryLabel = BLOG_CATEGORY_LABELS[input.category] || input.category;
+
+  const placesBlock = input.verifiedPlaces?.length
+    ? input.verifiedPlaces.map((p) => {
+        const provinceSlug = (p.province || input.location)
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .replace(/\s+/g, '-');
+        const casicincoUrl = p.slug
+          ? `https://www.casicinco.com/${p.category || input.category}/${provinceSlug}/${p.slug}`
+          : 'N/A';
+        return `${p.name} | ${p.rating}★ | ~${p.review_count} reseñas | ${p.city || input.location} | ${casicincoUrl}`;
+      }).join('\n')
+    : '(Sin lista verificada — describe tipologías y remite a comprobar en el mapa de Casi Cinco)';
+
+  return `TÍTULO DEL ARTÍCULO:
+${input.title}
+
+CATEGORÍA:
+${categoryLabel}
+
+CIUDAD / PROVINCIA:
+${input.location}${input.locationType === 'province' ? ' (provincia)' : ''}
+
+AÑO:
+${year}
+
+LISTA DE LUGARES VERIFICADOS:
+${placesBlock}
+
+CONTEXTO EXTRA:
+${input.extraContext || `Guía top 10 de ${categoryLabel} en ${input.location}. Prioriza utilidad práctica y SEO para "mejores ${categoryLabel} de ${input.location.toLowerCase()}".`}
+
+INSTRUCCIÓN:
+Redacta el artículo completo en HTML según las reglas del system prompt y entrégame SOLO el HTML del cuerpo.`;
+}
+
+/** Construye dossier de investigación para la segunda pasada (refine) */
+export function buildBlogResearchDossier(input: BlogArticleInput): string {
+  const placesDetail = input.verifiedPlaces?.map((p) => {
+    const parts = [
+      `- ${p.name}: ${p.rating}★ (${p.review_count} reseñas)`,
+      p.address ? `  Dirección: ${p.address}` : null,
+      p.ai_description ? `  Descripción: ${p.ai_description}` : null,
+    ].filter(Boolean);
+    return parts.join('\n');
+  }).join('\n') || 'Sin lugares verificados en base de datos.';
+
+  return `DOSSIER DE INVESTIGACIÓN — ${input.location} (${input.category})
+
+LUGARES VERIFICADOS EN CASI CINCO (+4.7★):
+${placesDetail}
+
+URLs CASI CINCO:
+- Mapa: https://www.casicinco.com/mapa?category=${input.category}&city=${encodeURIComponent(input.location)}
+- Planificar ruta: https://www.casicinco.com/ruta
+- Pricing: https://www.casicinco.com/pricing
+- Blog: https://www.casicinco.com/blog`;
+}
+
+/** Limpia respuesta de IA: quita fences markdown si los incluye */
+function cleanHtmlOutput(raw: string): string {
+  return raw
+    .replace(/^```html?\s*/i, '')
+    .replace(/```\s*$/i, '')
+    .trim();
+}
+
+/** Genera artículo completo en HTML (borrador + refine en 2 pasadas) */
+export async function generateBlogArticle(input: BlogArticleInput): Promise<string> {
+  const userPrompt = buildBlogUserPrompt(input);
+  const dossier = buildBlogResearchDossier(input);
+
+  // Pasada 1: borrador
+  const draftResponse = await openai.chat.completions.create({
+    model: BLOG_MODEL,
+    messages: [
+      { role: 'system', content: BLOG_SEO_SYSTEM_PROMPT },
+      { role: 'user', content: userPrompt },
+    ],
+    temperature: 0.7,
+    max_tokens: 8000,
+  });
+
+  const draft = cleanHtmlOutput(draftResponse.choices[0].message.content || '');
+
+  // Pasada 2: refine
+  const refineResponse = await openai.chat.completions.create({
+    model: BLOG_MODEL,
+    messages: [
+      { role: 'system', content: BLOG_SEO_REFINE_PROMPT },
+      {
+        role: 'user',
+        content: `BORRADOR HTML:\n${draft}\n\n${dossier}\n\nEntrega SOLO el HTML final mejorado.`,
+      },
+    ],
+    temperature: 0.7,
+    max_tokens: 8000,
+  });
+
+  return cleanHtmlOutput(refineResponse.choices[0].message.content || draft);
+}
+
+/** Metadatos SEO del artículo (respuesta separada) */
+export async function generateBlogMetadata(
+  title: string,
+  htmlContent: string
+): Promise<{
+  excerpt: string;
+  meta_title: string;
+  meta_description: string;
+  meta_keywords: string[];
+  reading_time: number;
+}> {
+  const wordCount = htmlContent.replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length;
+  const readingTime = Math.max(1, Math.round(wordCount / 210));
+
+  const response = await openai.chat.completions.create({
+    model: MODEL_FAST,
+    messages: [
+      {
+        role: 'system',
+        content: `Genera metadatos SEO en JSON para un artículo de blog. Responde SOLO JSON válido con keys: excerpt, meta_title, meta_description, meta_keywords (array).
+Reglas: excerpt 160-200 chars, meta_title 50-60 chars, meta_description 140-155 chars, meta_keywords 6-12 items naturales.`,
+      },
+      {
+        role: 'user',
+        content: `Título: ${title}\n\nExtracto del contenido:\n${htmlContent.substring(0, 2000)}`,
+      },
+    ],
+    temperature: 0.5,
+    max_tokens: 500,
+    response_format: { type: 'json_object' },
+  });
+
+  try {
+    const parsed = JSON.parse(response.choices[0].message.content || '{}');
+    return {
+      excerpt: parsed.excerpt || '',
+      meta_title: parsed.meta_title || title,
+      meta_description: parsed.meta_description || '',
+      meta_keywords: parsed.meta_keywords || [],
+      reading_time: readingTime,
+    };
+  } catch {
+    return {
+      excerpt: '',
+      meta_title: title,
+      meta_description: '',
+      meta_keywords: [],
+      reading_time: readingTime,
+    };
+  }
+}
+
+/** Intro corta legacy (texto plano, sin HTML) */
+export async function generateBlogIntro(input: {
+  category: string;
+  location: string;
+  locationType: string;
+}): Promise<string> {
+  const categoryLabels: Record<string, string> = {
+    restaurante: 'restaurantes',
+    bar: 'bares',
+    hotel: 'hoteles',
+  };
+
+  const locationLabel = input.locationType === 'province'
+    ? `la provincia de ${input.location}`
+    : input.location;
+
+  const category = categoryLabels[input.category] || input.category;
+
+  const prompt = `Escribe una introducción atractiva y SEO-friendly de aproximadamente 300-350 palabras para un artículo titulado:
+
+"Los 10 Mejores ${category.charAt(0).toUpperCase() + category.slice(1)} de ${input.location}"
+
+Requisitos:
+- Menciona que son establecimientos con valoración superior a 4.7 estrellas en Google Maps
+- Habla de la escena gastronómica/hostelera de ${locationLabel}
+- Tono profesional pero cercano, en segunda persona
+- NO uses listas con viñetas, escribe párrafos fluidos
+- NO menciones nombres específicos de lugares
+- Escribe SOLO el texto, sin títulos ni encabezados`;
+
+  const response = await openai.chat.completions.create({
+    model: MODEL_FAST,
+    messages: [{ role: 'user', content: prompt }],
+    temperature: 0.8,
+    max_tokens: 600,
+  });
+
+  return response.choices[0].message.content?.trim() || '';
+}
+
+/** Detecta si el intro_text contiene un artículo HTML completo */
+export { isBlogFullHtml, extractBlogHtml } from '@/types/blog';

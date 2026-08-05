@@ -64,8 +64,8 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const mode = body.mode || 'critical'; // 'all' | 'critical' | 'old'
-    const batchSize = body.batchSize || 20; // Lotes más pequeños para evitar timeout
+    const mode = body.mode || 'all'; // 'all' | 'critical' | 'old'
+    const batchSize = body.batchSize || 50; // Lotes de 50 (~25s por lote, dentro del timeout)
     const offset = body.offset || 0;
 
     const adminSupabase = createSupabaseAdmin(
@@ -96,6 +96,8 @@ export async function POST(request: NextRequest) {
       query = query.lt('updated_at', threeMonthsAgo.toISOString());
     }
     // mode === 'all' no filtra
+    // Orden fijo por ID para paginación estable durante la actualización masiva
+    query = query.order('id', { ascending: true });
 
     const { data: placesData, error: fetchError } = await query
       .range(offset, offset + batchSize - 1);

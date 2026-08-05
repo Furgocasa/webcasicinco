@@ -10,8 +10,9 @@ import { toast } from 'sonner';
 export default function UpdateRatingsPage() {
   const [stats, setStats] = useState<any>(null);
   const [updating, setUpdating] = useState(false);
-  const [mode, setMode] = useState<'all' | 'critical' | 'old'>('critical');
-  const [progress, setProgress] = useState({ updated: 0, deleted: 0, failed: 0, total: 0, cost: '$0' });
+  const [mode, setMode] = useState<'all' | 'critical' | 'old'>('all');
+  const BATCH_SIZE = 50;
+  const [progress, setProgress] = useState({ updated: 0, deleted: 0, failed: 0, processed: 0, target: 0, cost: '$0' });
   const [logs, setLogs] = useState<string[]>([]);
 
   useEffect(() => {
@@ -37,6 +38,13 @@ export default function UpdateRatingsPage() {
     }
   };
 
+  const getTargetCount = () => {
+    if (!stats) return 0;
+    if (mode === 'critical') return stats.critical;
+    if (mode === 'old') return stats.old;
+    return stats.total;
+  };
+
   const startUpdate = async () => {
     const modeLabels = {
       all: 'TODOS los lugares',
@@ -44,81 +52,110 @@ export default function UpdateRatingsPage() {
       old: 'lugares antiguos (>3 meses)'
     };
 
+    const targetCount = getTargetCount();
     const estimatedCost = stats?.estimatedCost[mode] || '0';
+    const estimatedMinutes = Math.ceil((targetCount / BATCH_SIZE) * 0.5);
 
-    if (!confirm(`¿Actualizar ${modeLabels[mode]}?\n\nCoste estimado: $${estimatedCost}`)) {
+    if (!confirm(
+      `¿Actualizar ${modeLabels[mode]}?\n\n` +
+      `Lugares: ${targetCount}\n` +
+      `Coste estimado: $${estimatedCost}\n` +
+      `Tiempo estimado: ~${estimatedMinutes} minutos\n\n` +
+      `No cierres esta pestaña hasta que termine.`
+    )) {
       return;
     }
 
     setUpdating(true);
-    setLogs([`🔄 Iniciando actualización de ${modeLabels[mode]}...`]);
-    setProgress({ updated: 0, deleted: 0, failed: 0, total: 0, cost: '$0' });
+    setLogs([`🔄 Iniciando actualización de ${modeLabels[mode]} (${targetCount} lugares)...`]);
+    setProgress({ updated: 0, deleted: 0, failed: 0, processed: 0, target: targetCount, cost: '$0' });
     
     let offset = 0;
     let totalUpdated = 0;
     let totalDeleted = 0;
     let totalFailed = 0;
+    let totalProcessed = 0;
     let totalCost = 0;
     let hasMore = true;
+    let batchNumber = 0;
 
     while (hasMore) {
-      try {
-        const res = await fetch('/api/admin/update-ratings', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ mode, batchSize: 20, offset })
-        });
+      batchNumber++;
+      let batchSuccess = false;
+      let lastError = '';
 
-        // Verificar que la respuesta es OK antes de parsear JSON
-        if (!res.ok) {
-          const errorText = await res.text();
-          throw new Error(`HTTP ${res.status}: ${errorText}`);
+      // Reintento automático por lote (red de producción puede cortar conexiones largas)
+      for (let attempt = 1; attempt <= 2; attempt++) {
+        try {
+          const res = await fetch('/api/admin/update-ratings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ mode, batchSize: BATCH_SIZE, offset })
+          });
+
+          if (!res.ok) {
+            const errorText = await res.text();
+            throw new Error(`HTTP ${res.status}: ${errorText}`);
+          }
+
+          const data = await res.json();
+
+          if (!data.success) {
+            throw new Error(data.error);
+          }
+
+          totalUpdated += data.updated;
+          totalDeleted += data.deleted;
+          totalFailed += data.failed;
+          totalProcessed += data.total;
+          totalCost += parseFloat(data.cost.replace('$', ''));
+
+          setProgress({
+            updated: totalUpdated,
+            deleted: totalDeleted,
+            failed: totalFailed,
+            processed: totalProcessed,
+            target: targetCount,
+            cost: `$${totalCost.toFixed(2)}`
+          });
+
+          setLogs(prev => [
+            ...prev,
+            `✅ Lote ${batchNumber}: ${data.updated} actualizados, ${data.deleted} despublicados, ${data.failed} fallos - ${data.cost} (${totalProcessed}/${targetCount})`
+          ]);
+
+          if (data.errors && data.errors.length > 0) {
+            setLogs(prev => [...prev, `⚠️ Errores: ${data.errors.map((e: any) => e.place).join(', ')}`]);
+          }
+
+          hasMore = data.hasMore;
+          offset = data.nextOffset;
+          batchSuccess = true;
+          break;
+        } catch (error: any) {
+          lastError = error.message;
+          if (attempt < 2) {
+            setLogs(prev => [...prev, `⚠️ Lote ${batchNumber} falló, reintentando... (${error.message})`]);
+            await new Promise(resolve => setTimeout(resolve, 2000));
+          }
         }
+      }
 
-        const data = await res.json();
-
-        if (!data.success) {
-          throw new Error(data.error);
-        }
-
-        totalUpdated += data.updated;
-        totalDeleted += data.deleted;
-        totalFailed += data.failed;
-        totalCost += parseFloat(data.cost.replace('$', ''));
-
-        setProgress({
-          updated: totalUpdated,
-          deleted: totalDeleted,
-          failed: totalFailed,
-          total: totalUpdated + totalDeleted + totalFailed,
-          cost: `$${totalCost.toFixed(2)}`
-        });
-
-        setLogs(prev => [
-          ...prev,
-          `✅ Lote ${Math.floor(offset / 20) + 1}: ${data.updated} actualizados, ${data.deleted} despublicados, ${data.failed} fallos - ${data.cost}`
-        ]);
-
-        if (data.errors && data.errors.length > 0) {
-          setLogs(prev => [...prev, `⚠️ Errores: ${data.errors.map((e: any) => e.place).join(', ')}`]);
-        }
-
-        hasMore = data.hasMore;
-        offset = data.nextOffset;
-
-        // Pausa breve entre lotes
-        await new Promise(resolve => setTimeout(resolve, 500));
-
-      } catch (error: any) {
-        setLogs(prev => [...prev, `❌ Error: ${error.message}`]);
-        toast.error('Error en actualización');
+      if (!batchSuccess) {
+        setLogs(prev => [...prev, `❌ Error en lote ${batchNumber}: ${lastError}`]);
+        toast.error('Error en actualización — revisa el registro');
         break;
       }
+
+      await new Promise(resolve => setTimeout(resolve, 300));
     }
 
     setUpdating(false);
-    setLogs(prev => [...prev, `🎉 ¡Actualización completada! ${totalUpdated} actualizados, ${totalDeleted} despublicados, ${totalFailed} fallos - Coste total: $${totalCost.toFixed(2)}`]);
-    toast.success(`Actualización completada`);
+    setLogs(prev => [
+      ...prev,
+      `🎉 ¡Actualización completada! ${totalUpdated} actualizados, ${totalDeleted} despublicados, ${totalFailed} fallos - Coste total: $${totalCost.toFixed(2)}`
+    ]);
+    toast.success('Actualización completada');
     loadStats();
   };
 
@@ -192,6 +229,25 @@ export default function UpdateRatingsPage() {
         <CardContent>
           <div className="grid md:grid-cols-3 gap-3">
             <button
+              onClick={() => setMode('all')}
+              disabled={updating}
+              className={`p-4 rounded-lg border-2 transition ${
+                mode === 'all'
+                  ? 'border-blue-500 bg-blue-50'
+                  : 'border-gray-200 hover:border-blue-300'
+              }`}
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <RefreshCw className="w-5 h-5 text-blue-600" />
+                <span className="font-semibold">Todos</span>
+              </div>
+              <p className="text-sm text-gray-600">
+                Actualizar todos los lugares de la base de datos
+              </p>
+              <Badge className="mt-2 bg-blue-100 text-blue-800">Recomendado</Badge>
+            </button>
+
+            <button
               onClick={() => setMode('critical')}
               disabled={updating}
               className={`p-4 rounded-lg border-2 transition ${
@@ -207,7 +263,6 @@ export default function UpdateRatingsPage() {
               <p className="text-sm text-gray-600">
                 Solo lugares con rating 4.7-4.85 (cerca del límite)
               </p>
-              <Badge className="mt-2 bg-orange-100 text-orange-800">Recomendado</Badge>
             </button>
 
             <button
@@ -227,25 +282,6 @@ export default function UpdateRatingsPage() {
                 Lugares sin actualizar en más de 3 meses
               </p>
             </button>
-
-            <button
-              onClick={() => setMode('all')}
-              disabled={updating}
-              className={`p-4 rounded-lg border-2 transition ${
-                mode === 'all'
-                  ? 'border-blue-500 bg-blue-50'
-                  : 'border-gray-200 hover:border-blue-300'
-              }`}
-            >
-              <div className="flex items-center gap-2 mb-2">
-                <RefreshCw className="w-5 h-5 text-blue-600" />
-                <span className="font-semibold">Todos</span>
-              </div>
-              <p className="text-sm text-gray-600">
-                Actualizar todos los lugares de la base de datos
-              </p>
-              <Badge className="mt-2 bg-blue-100 text-blue-800">Más caro</Badge>
-            </button>
           </div>
         </CardContent>
       </Card>
@@ -261,8 +297,8 @@ export default function UpdateRatingsPage() {
                 <li>✅ Solo se consultan campos básicos (rating + reseñas) = $0.005 por lugar</li>
                 <li>✅ Lugares que bajen de 4.7 se despublican automáticamente (no se borran)</li>
                 <li>✅ Ratings que suban o bajen se actualizan automáticamente</li>
-                <li>⏱️ Tiempo estimado: ~20 segundos por cada 20 lugares</li>
-                <li>💰 Coste estimado: ${stats?.estimatedCost[mode] || '0'}</li>
+                <li>⏱️ Tiempo estimado: ~30 segundos por cada 50 lugares</li>
+                <li>💰 Coste estimado ({getTargetCount()} lugares): ${stats?.estimatedCost[mode] || '0'}</li>
               </ul>
             </div>
           </div>
@@ -272,19 +308,19 @@ export default function UpdateRatingsPage() {
       {/* Botón de actualización */}
       <Button 
         onClick={startUpdate}
-        disabled={updating || !stats || stats[mode === 'critical' ? 'critical' : mode === 'old' ? 'old' : 'total'] === 0}
+        disabled={updating || !stats || getTargetCount() === 0}
         className="w-full mb-6"
         size="lg"
       >
         {updating ? (
           <>
             <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-            Actualizando... {progress.total > 0 && `(${progress.updated + progress.deleted}/${progress.total})`}
+            Actualizando... {progress.processed > 0 && `(${progress.processed}/${progress.target})`}
           </>
         ) : (
           <>
             <RefreshCw className="w-5 h-5 mr-2" />
-            Iniciar Actualización de Ratings
+            Actualizar {getTargetCount()} lugares desde Google
           </>
         )}
       </Button>
@@ -293,9 +329,15 @@ export default function UpdateRatingsPage() {
       {updating && (
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle>Progreso</CardTitle>
+            <CardTitle>Progreso ({progress.processed}/{progress.target})</CardTitle>
           </CardHeader>
           <CardContent>
+            <div className="w-full bg-gray-200 rounded-full h-3 mb-4">
+              <div
+                className="bg-blue-600 h-3 rounded-full transition-all duration-300"
+                style={{ width: `${progress.target > 0 ? Math.min(100, (progress.processed / progress.target) * 100) : 0}%` }}
+              />
+            </div>
             <div className="grid grid-cols-4 gap-4 mb-4">
               <div className="text-center">
                 <p className="text-2xl font-bold text-green-600">{progress.updated}</p>

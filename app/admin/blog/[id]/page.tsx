@@ -27,6 +27,8 @@ export default function EditBlogPostPage() {
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
   const [generating, setGenerating] = useState(false);
+  const [generatingArticle, setGeneratingArticle] = useState(false);
+  const [generatingMeta, setGeneratingMeta] = useState(false);
 
   // Form data
   const [title, setTitle] = useState('');
@@ -101,6 +103,8 @@ export default function EditBlogPostPage() {
     }
   };
 
+  const isFullHtmlArticle = introText.startsWith('<!-- FULL_HTML -->');
+
   const generateIntroWithAI = async () => {
     if (!location || !category) {
       toast.error('Necesitas rellenar ubicación y categoría primero');
@@ -112,7 +116,7 @@ export default function EditBlogPostPage() {
       const response = await fetch('/api/admin/blog/generate-intro', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ category, location, locationType })
+        body: JSON.stringify({ mode: 'intro', category, location, locationType })
       });
 
       const data = await response.json();
@@ -121,12 +125,93 @@ export default function EditBlogPostPage() {
         setIntroText(data.intro);
         toast.success('Intro generada con IA');
       } else {
-        toast.error('Error generando intro');
+        toast.error(data.error || 'Error generando intro');
       }
     } catch (error) {
       toast.error('Error generando intro');
     } finally {
       setGenerating(false);
+    }
+  };
+
+  const generateFullArticleWithAI = async () => {
+    if (!location || !category || !title) {
+      toast.error('Necesitas título, ubicación y categoría primero');
+      return;
+    }
+
+    if (!confirm('Generar artículo SEO completo (~1800+ palabras). Puede tardar 1-2 minutos. ¿Continuar?')) {
+      return;
+    }
+
+    setGeneratingArticle(true);
+    try {
+      const response = await fetch('/api/admin/blog/generate-intro', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mode: 'article',
+          title,
+          category,
+          location,
+          locationType,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setIntroText(data.html);
+        toast.success(`Artículo SEO generado (${data.placesCount} lugares verificados)`);
+      } else {
+        toast.error(data.error || 'Error generando artículo');
+      }
+    } catch (error) {
+      toast.error('Error generando artículo SEO');
+    } finally {
+      setGeneratingArticle(false);
+    }
+  };
+
+  const generateMetadataWithAI = async () => {
+    if (!title || !introText) {
+      toast.error('Necesitas título y contenido primero');
+      return;
+    }
+
+    setGeneratingMeta(true);
+    try {
+      const htmlForMeta = isFullHtmlArticle
+        ? introText.replace('<!-- FULL_HTML -->', '').trim()
+        : introText;
+
+      const response = await fetch('/api/admin/blog/generate-intro', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mode: 'metadata',
+          title,
+          htmlContent: htmlForMeta,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success && data.metadata) {
+        if (data.metadata.meta_description) {
+          setMetaDescription(data.metadata.meta_description);
+        }
+        if (data.metadata.meta_keywords?.length) {
+          setKeywords(data.metadata.meta_keywords.join(', '));
+        }
+        toast.success(`Metadatos SEO generados (~${data.metadata.reading_time} min lectura)`);
+      } else {
+        toast.error(data.error || 'Error generando metadatos');
+      }
+    } catch (error) {
+      toast.error('Error generando metadatos SEO');
+    } finally {
+      setGeneratingMeta(false);
     }
   };
 
@@ -270,33 +355,60 @@ export default function EditBlogPostPage() {
 
             {/* Contenido */}
             <Card className="p-6">
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
                 <h2 className="text-lg font-semibold">Contenido</h2>
-                <Button
-                  onClick={generateIntroWithAI}
-                  variant="outline"
-                  size="sm"
-                  disabled={generating || !location || !category}
-                >
-                  <Sparkles className="h-4 w-4 mr-2" />
-                  {generating ? 'Generando...' : 'Generar con IA'}
-                </Button>
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    onClick={generateIntroWithAI}
+                    variant="outline"
+                    size="sm"
+                    disabled={generating || generatingArticle || !location || !category}
+                  >
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    {generating ? 'Generando...' : 'Intro corta'}
+                  </Button>
+                  <Button
+                    onClick={generateFullArticleWithAI}
+                    variant="outline"
+                    size="sm"
+                    disabled={generating || generatingArticle || !location || !category || !title}
+                  >
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    {generatingArticle ? 'Generando artículo...' : 'Artículo SEO completo'}
+                  </Button>
+                  <Button
+                    onClick={generateMetadataWithAI}
+                    variant="ghost"
+                    size="sm"
+                    disabled={generatingMeta || !introText || !title}
+                  >
+                    {generatingMeta ? 'Generando...' : 'Metadatos SEO'}
+                  </Button>
+                </div>
               </div>
+
+              {isFullHtmlArticle && (
+                <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-800">
+                  Modo artículo HTML completo activo. El Top 10 dinámico se ocultará en la vista pública.
+                </div>
+              )}
 
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Introducción * (300-400 palabras)
+                    {isFullHtmlArticle ? 'Artículo HTML *' : 'Introducción * (300-400 palabras)'}
                   </label>
                   <textarea
                     value={introText}
                     onChange={(e) => setIntroText(e.target.value)}
-                    rows={12}
+                    rows={isFullHtmlArticle ? 24 : 12}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent font-mono text-sm"
-                    placeholder="Texto de introducción del artículo..."
+                    placeholder={isFullHtmlArticle
+                      ? 'HTML del cuerpo del artículo (<p>, <h2>, <h3>, enlaces)...'
+                      : 'Texto de introducción del artículo...'}
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    {introText.length} caracteres | {introText.split(/\s+/).filter(w => w).length} palabras
+                    {introText.length} caracteres | {introText.replace(/<[^>]+>/g, ' ').split(/\s+/).filter(w => w).length} palabras
                   </p>
                 </div>
 

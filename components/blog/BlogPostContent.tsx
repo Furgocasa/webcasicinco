@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { MapPin, Star, Phone, Globe, Navigation, Calendar, ArrowLeft, ExternalLink, Facebook, Twitter, Linkedin, MessageCircle } from 'lucide-react';
+import { MapPin, Star, Phone, Globe, Navigation, Calendar, ArrowLeft, ExternalLink, Facebook, Twitter, Linkedin, MessageCircle, Eye, Copy, Check } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import Footer from '@/components/layout/Footer';
@@ -10,7 +10,7 @@ import { getPlacePhotoUrl } from '@/lib/utils/photo-helper';
 import { getPlaceUrl } from '@/lib/utils/url-helper';
 import { FurgocasaBanner } from '@/components/ad/FurgocasaBanner';
 import type { BlogPostWithPlaces } from '@/types/blog';
-import { Eye, Share2, Copy, Check } from 'lucide-react';
+import { isBlogFullHtml, extractBlogHtml } from '@/types/blog';
 
 // Función para renderizar Markdown básico
 const renderMarkdown = (text: string) => {
@@ -39,6 +39,8 @@ export function BlogPostContent({ post }: BlogPostContentProps) {
   // Usar la foto del primer lugar (URL directa de Supabase Storage)
   const featuredImage = post.first_place_photo || post.featured_image_url;
   const [copied, setCopied] = useState(false);
+  const fullHtmlMode = isBlogFullHtml(post.intro_text);
+  const articleHtml = fullHtmlMode ? extractBlogHtml(post.intro_text) : '';
   
   // URL completa del artículo
   const fullUrl = typeof window !== 'undefined' ? window.location.href : `https://www.casicinco.com/blog/${post.slug}`;
@@ -214,130 +216,166 @@ export function BlogPostContent({ post }: BlogPostContentProps) {
                 </div>
               </div>
 
-              {/* Intro */}
-              <div className="prose prose-lg max-w-none mb-12">
-                <div 
-                  className="text-gray-700 text-lg leading-relaxed"
-                  dangerouslySetInnerHTML={{ __html: renderMarkdown(post.intro_text) }}
+              {/* Contenido principal */}
+              {fullHtmlMode ? (
+                <div
+                  className="prose prose-lg max-w-none mb-12 blog-article-html"
+                  dangerouslySetInnerHTML={{ __html: articleHtml }}
                 />
-              </div>
+              ) : (
+                <>
+                  {/* Intro legacy */}
+                  <div className="prose prose-lg max-w-none mb-12">
+                    <div 
+                      className="text-gray-700 text-lg leading-relaxed"
+                      dangerouslySetInnerHTML={{ __html: renderMarkdown(post.intro_text) }}
+                    />
+                  </div>
 
-              {/* 🚐 BANNER FURGOCASA - Responsive: Horizontal en Desktop, Vertical en Móvil */}
-              <div className="hidden md:block">
-                <FurgocasaBanner 
-                  variant="blog"
-                  orientation="horizontal"
-                  location={post.location || 'España'}
-                  placeName={post.title}
-                  autoRotate={true}
-                  rotateInterval={10000}
-                />
-              </div>
-              <div className="md:hidden">
-                <FurgocasaBanner 
-                  variant="blog"
-                  orientation="vertical"
-                  location={post.location || 'España'}
-                  placeName={post.title}
-                  autoRotate={true}
-                  rotateInterval={10000}
-                />
-              </div>
+                  {/* 🚐 BANNER FURGOCASA - Responsive: Horizontal en Desktop, Vertical en Móvil */}
+                  <div className="hidden md:block">
+                    <FurgocasaBanner 
+                      variant="blog"
+                      orientation="horizontal"
+                      location={post.location || 'España'}
+                      placeName={post.title}
+                      autoRotate={true}
+                      rotateInterval={10000}
+                    />
+                  </div>
+                  <div className="md:hidden">
+                    <FurgocasaBanner 
+                      variant="blog"
+                      orientation="vertical"
+                      location={post.location || 'España'}
+                      placeName={post.title}
+                      autoRotate={true}
+                      rotateInterval={10000}
+                    />
+                  </div>
 
-              {/* TOP 10 */}
-              <div className="mb-12">
-                <h2 className="text-3xl font-bold text-gray-900 mb-8 flex items-center gap-3">
-                  <span className="text-4xl">🏆</span>
-                  Top 10 Lugares
-                </h2>
+                  {/* TOP 10 */}
+                  <div className="mb-12">
+                    <h2 className="text-3xl font-bold text-gray-900 mb-8 flex items-center gap-3">
+                      <span className="text-4xl">🏆</span>
+                      Top 10 Lugares
+                    </h2>
 
-                {post.places && post.places.length > 0 ? (
-                  <div className="space-y-6">
-                    {post.places.map((place, index) => (
-                      <Card key={place.id} className="overflow-hidden hover:shadow-xl transition">
-                        <div className="md:flex">
-                          {/* Imagen */}
-                          {(place.photo_urls || place.photos || place.photo_reference) && (
-                            <div className="md:w-1/3 h-48 md:h-auto">
-                              <img
-                                src={getPlacePhotoUrl({ 
-                                  photo_urls: place.photo_urls, 
-                                  photos: place.photos || (place.photo_reference ? [place.photo_reference] : null)
-                                }, 0, 400) || '/images/placeholder.png'}
-                                alt={place.name}
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                          )}
-
-                          {/* Contenido */}
-                          <div className="p-6 flex-1">
-                            <div className="flex items-start justify-between mb-3">
-                              <div>
-                                <div className="flex items-center gap-3 mb-2">
-                                  <span className="text-2xl font-bold text-[#002297]">#{index + 1}</span>
-                                  <h3 className="text-xl font-bold text-gray-900">{place.name}</h3>
+                    {post.places && post.places.length > 0 ? (
+                      <div className="space-y-6">
+                        {post.places.map((place, index) => (
+                          <Card key={place.id} className="overflow-hidden hover:shadow-xl transition">
+                            <div className="md:flex">
+                              {/* Imagen */}
+                              {(place.photo_urls || place.photos || place.photo_reference) && (
+                                <div className="md:w-1/3 h-48 md:h-auto">
+                                  <img
+                                    src={getPlacePhotoUrl({ 
+                                      photo_urls: place.photo_urls, 
+                                      photos: place.photos || (place.photo_reference ? [place.photo_reference] : null)
+                                    }, 0, 400) || '/images/placeholder.png'}
+                                    alt={place.name}
+                                    className="w-full h-full object-cover"
+                                  />
                                 </div>
-                                <div className="flex items-center gap-4 text-sm text-gray-600">
-                                  <div className="flex items-center gap-1">
-                                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                                    <span className="font-semibold">{place.rating}</span>
+                              )}
+
+                              {/* Contenido */}
+                              <div className="p-6 flex-1">
+                                <div className="flex items-start justify-between mb-3">
+                                  <div>
+                                    <div className="flex items-center gap-3 mb-2">
+                                      <span className="text-2xl font-bold text-[#002297]">#{index + 1}</span>
+                                      <h3 className="text-xl font-bold text-gray-900">{place.name}</h3>
+                                    </div>
+                                    <div className="flex items-center gap-4 text-sm text-gray-600">
+                                      <div className="flex items-center gap-1">
+                                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                                        <span className="font-semibold">{place.rating}</span>
+                                      </div>
+                                      {place.review_count && (
+                                        <span>({place.review_count} reseñas)</span>
+                                      )}
+                                    </div>
                                   </div>
-                                  {place.review_count && (
-                                    <span>({place.review_count} reseñas)</span>
+                                </div>
+
+                                {place.address && (
+                                  <div className="flex items-start gap-2 text-gray-600 mb-3">
+                                    <MapPin className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                                    <span className="text-sm">{place.address}</span>
+                                  </div>
+                                )}
+
+                                {place.ai_description && (
+                                  <p className="text-gray-700 mb-4 line-clamp-3">{place.ai_description}</p>
+                                )}
+
+                                {/* Botones */}
+                                <div className="flex flex-wrap gap-2">
+                                  <Link href={getPlaceUrl(place.category, place.province, place.slug)}>
+                                    <Button variant="outline" size="sm">
+                                      Ver Detalles
+                                    </Button>
+                                  </Link>
+                                  {place.google_maps_url && (
+                                    <a href={place.google_maps_url} target="_blank" rel="noopener noreferrer">
+                                      <Button variant="ghost" size="sm">
+                                        <Navigation className="h-4 w-4 mr-1" />
+                                        Cómo llegar
+                                      </Button>
+                                    </a>
                                   )}
                                 </div>
                               </div>
                             </div>
-
-                            {place.address && (
-                              <div className="flex items-start gap-2 text-gray-600 mb-3">
-                                <MapPin className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                                <span className="text-sm">{place.address}</span>
-                              </div>
-                            )}
-
-                            {place.ai_description && (
-                              <p className="text-gray-700 mb-4 line-clamp-3">{place.ai_description}</p>
-                            )}
-
-                            {/* Botones */}
-                            <div className="flex flex-wrap gap-2">
-                              <Link href={getPlaceUrl(place.category, place.province, place.slug)}>
-                                <Button variant="outline" size="sm">
-                                  Ver Detalles
-                                </Button>
-                              </Link>
-                              {place.google_maps_url && (
-                                <a href={place.google_maps_url} target="_blank" rel="noopener noreferrer">
-                                  <Button variant="ghost" size="sm">
-                                    <Navigation className="h-4 w-4 mr-1" />
-                                    Cómo llegar
-                                  </Button>
-                                </a>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </Card>
-                    ))}
+                          </Card>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-12 bg-white rounded-xl">
+                        <MapPin className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                        <p className="text-gray-600">No hay lugares disponibles para esta ubicación</p>
+                      </div>
+                    )}
                   </div>
-                ) : (
-                  <div className="text-center py-12 bg-white rounded-xl">
-                    <MapPin className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-600">No hay lugares disponibles para esta ubicación</p>
-                  </div>
-                )}
-              </div>
 
-              {/* Conclusión */}
-              {post.conclusion_text && (
-                <div className="prose prose-lg max-w-none mb-12 bg-gray-100 p-6 rounded-xl">
-                  <div 
-                    className="text-gray-700"
-                    dangerouslySetInnerHTML={{ __html: renderMarkdown(post.conclusion_text) }}
-                  />
-                </div>
+                  {/* Conclusión */}
+                  {post.conclusion_text && (
+                    <div className="prose prose-lg max-w-none mb-12 bg-gray-100 p-6 rounded-xl">
+                      <div 
+                        className="text-gray-700"
+                        dangerouslySetInnerHTML={{ __html: renderMarkdown(post.conclusion_text) }}
+                      />
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/* Banner Furgocasa también en modo HTML completo (después del artículo) */}
+              {fullHtmlMode && (
+                <>
+                  <div className="hidden md:block mb-12">
+                    <FurgocasaBanner 
+                      variant="blog"
+                      orientation="horizontal"
+                      location={post.location || 'España'}
+                      placeName={post.title}
+                      autoRotate={true}
+                      rotateInterval={10000}
+                    />
+                  </div>
+                  <div className="md:hidden mb-12">
+                    <FurgocasaBanner 
+                      variant="blog"
+                      orientation="vertical"
+                      location={post.location || 'España'}
+                      placeName={post.title}
+                      autoRotate={true}
+                      rotateInterval={10000}
+                    />
+                  </div>
+                </>
               )}
 
               {/* CTA */}

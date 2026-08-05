@@ -22,3 +22,14 @@ export interface BlogPostWithPlaces extends BlogPost {
   places: any[]; // Array de lugares filtrados
 }
 
+/** Marcador para artículo HTML completo (vs intro legacy en texto plano) */
+export const BLOG_FULL_HTML_MARKER = '<!-- FULL_HTML -->';
+
+export function isBlogFullHtml(content: string | null | undefined): boolean {
+  return Boolean(content?.startsWith(BLOG_FULL_HTML_MARKER));
+}
+
+export function extractBlogHtml(content: string): string {
+  return content.replace(BLOG_FULL_HTML_MARKER, '').trim();
+}
+
