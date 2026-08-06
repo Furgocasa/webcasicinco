@@ -250,6 +250,9 @@ export const CITIES_BY_PROVINCE: Record<string, ProvinceData> = {
     cities: [
       { name: 'Ciudad Real', coords: { lat: 38.9848, lng: -3.9274 }, population: 75000, priority: 2 },
       { name: 'Puertollano', coords: { lat: 38.6856, lng: -4.1050 }, population: 49000, priority: 2 },
+      { name: 'Tomelloso', coords: { lat: 39.1522, lng: -3.0244 }, population: 36000, priority: 3 },
+      { name: 'Alcázar de San Juan', coords: { lat: 39.3908, lng: -3.2089 }, population: 31000, priority: 3 },
+      { name: 'Valdepeñas', coords: { lat: 38.7622, lng: -3.3844 }, population: 31000, priority: 3 },
     ],
   },
   'Cuenca': {
@@ -269,6 +272,14 @@ export const CITIES_BY_PROVINCE: Record<string, ProvinceData> = {
     cities: [
       { name: 'Toledo', coords: { lat: 39.8628, lng: -4.0273 }, population: 85000, priority: 2 },
       { name: 'Talavera de la Reina', coords: { lat: 39.9636, lng: -4.8303 }, population: 83000, priority: 2 },
+      { name: 'Illescas', coords: { lat: 40.1222, lng: -3.8478 }, population: 29000, priority: 3 },
+      { name: 'Seseña', coords: { lat: 40.1047, lng: -3.6978 }, population: 27000, priority: 3 },
+      { name: 'Consuegra', coords: { lat: 39.4597, lng: -3.6083 }, population: 10000, priority: 3 },
+      { name: 'Oropesa', coords: { lat: 39.9183, lng: -5.1733 }, population: 2800, priority: 3 },
+      { name: 'Mora', coords: { lat: 39.6844, lng: -3.3400 }, population: 9800, priority: 3 },
+      { name: 'Madridejos', coords: { lat: 39.4683, lng: -3.5317 }, population: 11000, priority: 3 },
+      { name: 'Villacañas', coords: { lat: 39.6236, lng: -3.3428 }, population: 10000, priority: 3 },
+      { name: 'Tembleque', coords: { lat: 39.9761, lng: -3.6336 }, population: 3200, priority: 3 },
     ],
   },
 

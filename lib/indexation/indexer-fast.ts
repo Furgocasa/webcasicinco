@@ -570,6 +570,17 @@ export async function startFastIndexation(
             const beforeFilter = cities.length;
             cities = cities.filter(c => selectedCityNames.includes(c.name));
             await logger.info(`🎯 Filtro de ciudades: ${beforeFilter} → ${cities.length} ciudades seleccionadas`);
+
+            // Completar con cities-database las que no estén en Supabase
+            const fileCities = getCitiesFromFile(province);
+            for (const cityName of selectedCityNames) {
+              if (cities.some((c) => c.name === cityName)) continue;
+              const fromFile = fileCities.find((c) => c.name === cityName);
+              if (fromFile) {
+                cities.push(fromFile);
+                await logger.info(`➕ ${cityName} añadida desde cities-database (no en Supabase)`);
+              }
+            }
             
             if (cities.length === 0) {
               await logger.warning(`⚠️ No hay ciudades seleccionadas válidas para ${province}, saltando...`);

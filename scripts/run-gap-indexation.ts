@@ -7,39 +7,26 @@ import * as dotenv from 'dotenv';
 // Cargar env ANTES de importar módulos que leen GOOGLE_MAPS_API_KEY al iniciar
 dotenv.config({ path: '.env.local' });
 
-// Ciudades vacías P0 + Ceuta/Melilla (oleada inicial)
-const CITIES = [
-  'Jerez de la Frontera',
-  'Getafe',
-  'Algeciras',
-  'Alcorcón',
-  'Roquetas de Mar',
-  'Arona',
-  'El Puerto de Santa María',
-  'Chiclana de la Frontera',
-  'Dos Hermanas',
-  'Fuengirola',
-  'Torrejón de Ardoz',
-  'Parla',
-  'Mataró',
-  'Getxo',
-  'Estepona',
-  'Benalmádena',
-  'Alcobendas',
-  'La Línea de la Concepción',
-  'Reus',
-  'Telde',
-  'Ceuta',
-  'Melilla',
-  'San Sebastián',
-  'El Ejido',
-  'Adeje',
-  'Sitges',
-  'Salou',
-  'Cornellà de Llobregat',
-  'Irún',
-  'Ibiza',
+// Comarca Montes de Toledo + sur Castilla-La Mancha (usa INDEX_CITIES env para otras oleadas)
+const DEFAULT_CITIES = [
+  'Talavera de la Reina',
+  'Consuegra',
+  'Oropesa',
+  'Mora',
+  'Madridejos',
+  'Villacañas',
+  'Tembleque',
+  'Illescas',
+  'Seseña',
+  'Puertollano',
+  'Tomelloso',
+  'Alcázar de San Juan',
+  'Valdepeñas',
 ];
+
+const CITIES = process.env.INDEX_CITIES
+  ? process.env.INDEX_CITIES.split(',').map((c) => c.trim())
+  : DEFAULT_CITIES;
 
 const CATEGORIES = ['restaurante', 'bar', 'hotel'];
 const MIN_RATING = 4.7;
