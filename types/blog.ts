@@ -33,3 +33,29 @@ export function extractBlogHtml(content: string): string {
   return content.replace(BLOG_FULL_HTML_MARKER, '').trim();
 }
 
+const BLOG_CATEGORY_TITLES: Record<BlogPost['category'], string> = {
+  restaurante: 'Restaurantes',
+  bar: 'Bares',
+  hotel: 'Hoteles',
+};
+
+/** Preposición natural: "de Valencia", "de la Costa del Sol", "del País Vasco" */
+export function blogLocationPhrase(location: string): string {
+  const loc = location.trim();
+  if (/^costa del/i.test(loc)) return `de la ${loc}`;
+  if (loc === 'País Vasco') return 'del País Vasco';
+  return `de ${loc}`;
+}
+
+/**
+ * Título editorial estándar Casi Cinco — criterio por valoración (+4.7★), no opinión subjetiva.
+ * Ej: "Los 10 Restaurantes Mejor Valorados de Valencia (2026)"
+ */
+export function buildBlogPostTitle(
+  category: BlogPost['category'],
+  location: string,
+  year: number = new Date().getFullYear()
+): string {
+  return `Los 10 ${BLOG_CATEGORY_TITLES[category]} Mejor Valorados ${blogLocationPhrase(location)} (${year})`;
+}
+

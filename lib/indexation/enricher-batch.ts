@@ -124,6 +124,13 @@ export async function enrichPendingPlaces(
 
       console.log(`[ENRICHER]   Categoría IA: ${categorization.category} (confianza: ${categorization.confidence})`);
 
+      // Mapear categorías: BD solo acepta restaurante | bar | hotel
+      let finalCategory = categorization.category;
+      if (finalCategory === 'cafe') {
+        finalCategory = 'bar';
+        console.log('[ENRICHER]   ↪️ cafe → bar (categoría permitida en BD)');
+      }
+
       // 2. Fotos: reutilizar Supabase existente; NO descargar de Google salvo opt-in explícito
       let supabaseUrls: string[] = Array.isArray(place.photo_urls)
         ? place.photo_urls.filter(Boolean)
@@ -152,7 +159,7 @@ export async function enrichPendingPlaces(
       // 3. Generar contenido con IA (usar la categoría correcta de la IA)
       const description = await generatePlaceDescription({
         name: place.name,
-        category: categorization.category, // ✅ Usar categoría de la IA
+        category: finalCategory, // ✅ Usar categoría mapeada
         city: place.city,
         province: place.province,
         rating: place.rating,
@@ -167,7 +174,7 @@ export async function enrichPendingPlaces(
 
       const highlights = await generateHighlights({
         name: place.name,
-        category: categorization.category, // ✅ Usar categoría de la IA
+        category: finalCategory, // ✅ Usar categoría mapeada
         rating: place.rating,
         reviews: reviews.map(r => r.text || '').filter(Boolean),
         description,
@@ -177,7 +184,7 @@ export async function enrichPendingPlaces(
       const { error: updateError } = await supabase
         .from('places')
         .update({
-          category: categorization.category, // ✅ ACTUALIZAR categoría con la correcta de IA
+          category: finalCategory, // ✅ ACTUALIZAR categoría (mapeada a BD)
           photo_urls: supabaseUrls,
           ai_description: description,
           ai_review_summary: reviewSummary,

@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { buildBlogPostTitle } from '@/types/blog';
 import { toast } from 'sonner';
 
 export default function EditBlogPostPage() {
@@ -101,6 +102,11 @@ export default function EditBlogPostPage() {
     if (isNew && !slug) {
       setSlug(generateSlugFromTitle(newTitle));
     }
+  };
+
+  const suggestTitleFromMeta = () => {
+    if (!location || !category) return;
+    setTitle(buildBlogPostTitle(category, location, new Date().getFullYear()));
   };
 
   const isFullHtmlArticle = introText.startsWith('<!-- FULL_HTML -->');
@@ -309,13 +315,20 @@ export default function EditBlogPostPage() {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Título del Post *
                   </label>
-                  <input
-                    type="text"
-                    value={title}
-                    onChange={(e) => handleTitleChange(e.target.value)}
-                    placeholder="Los 10 Mejores Restaurantes de Madrid"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                  />
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={title}
+                      onChange={(e) => handleTitleChange(e.target.value)}
+                      placeholder="Los 10 Restaurantes Mejor Valorados de Madrid (2026)"
+                      className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    />
+                    {isNew && location && category && (
+                      <Button type="button" variant="outline" size="sm" onClick={suggestTitleFromMeta}>
+                        Sugerir título
+                      </Button>
+                    )}
+                  </div>
                 </div>
 
                 <div>

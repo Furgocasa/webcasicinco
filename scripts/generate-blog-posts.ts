@@ -1,290 +1,358 @@
 /**
- * Script para generar posts de blog con IA
- * 
- * Uso: ts-node scripts/generate-blog-posts.ts
+ * Script para generar posts de blog con IA (SEO HTML completo)
+ *
+ * Uso:
+ *   npx tsx scripts/generate-blog-posts.ts --calendar     → 31 posts ene–ago 2026
+ *   npx tsx scripts/generate-blog-posts.ts --next5        → 22 posts ago 2026–ene 2027
+ *   npx tsx scripts/generate-blog-posts.ts --next5 --from=8
  */
 
+import dotenv from 'dotenv';
+dotenv.config({ path: '.env.local' });
+dotenv.config();
+
+// Proxy SSL corporativo / antivirus: Node no confía en el certificado intermedio
+// y falla con UNABLE_TO_VERIFY_LEAF_SIGNATURE. Necesario para scripts locales.
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+
 import { createClient } from '@supabase/supabase-js';
-import OpenAI from 'openai';
+import {
+  generateBlogArticle,
+  generateBlogMetadata,
+} from '../lib/ai/openai';
+import { BLOG_FULL_HTML_MARKER, buildBlogPostTitle } from '../types/blog';
+import { comparePlacesByTier } from '../lib/utils/tier-calculator';
+import type { BlogVerifiedPlace } from '../lib/ai/openai';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY!
-});
+const YEAR = 2026;
 
-interface PostConfig {
-  category: 'restaurante' | 'bar' | 'cafe' | 'hotel';
+type Category = 'restaurante' | 'bar' | 'hotel';
+
+interface CalendarPost {
+  category: Category;
   location: string;
   locationType: 'city' | 'province' | 'community';
+  publishAt: string; // YYYY-MM-DD (lunes)
+  title?: string;
+  slug?: string;
+  phase: 1 | 2 | 3 | 4;
+}
+
+function yearFromDate(date: string): number {
+  return parseInt(date.slice(0, 4), 10);
 }
 
 // ================================================================
-// CONFIGURACIÓN: 30 POSTS INICIALES
+// CALENDARIO EDITORIAL 2026 — 31 semanas (reconstrucción ene–ago)
 // ================================================================
 
-const POSTS_TO_GENERATE: PostConfig[] = [
-  // TIER 1: Ciudades grandes - Restaurantes
-  { category: 'restaurante', location: 'Madrid', locationType: 'city' },
-  { category: 'restaurante', location: 'Barcelona', locationType: 'city' },
-  { category: 'restaurante', location: 'Valencia', locationType: 'city' },
-  { category: 'restaurante', location: 'Sevilla', locationType: 'city' },
-  { category: 'restaurante', location: 'Málaga', locationType: 'city' },
-  
-  // TIER 1: Ciudades grandes - Bares
-  { category: 'bar', location: 'Madrid', locationType: 'city' },
-  { category: 'bar', location: 'Barcelona', locationType: 'city' },
-  { category: 'bar', location: 'Sevilla', locationType: 'city' },
-  { category: 'bar', location: 'Valencia', locationType: 'city' },
-  
-  // TIER 1: Ciudades grandes - Hoteles
-  { category: 'hotel', location: 'Madrid', locationType: 'city' },
-  { category: 'hotel', location: 'Barcelona', locationType: 'city' },
-  { category: 'hotel', location: 'Málaga', locationType: 'city' },
-  
-  // TIER 1: Ciudades grandes - Cafés
-  { category: 'cafe', location: 'Madrid', locationType: 'city' },
-  { category: 'cafe', location: 'Barcelona', locationType: 'city' },
-  
-  // TIER 2: Ciudades medianas
-  { category: 'restaurante', location: 'Murcia', locationType: 'city' },
-  { category: 'restaurante', location: 'Granada', locationType: 'city' },
-  { category: 'restaurante', location: 'Bilbao', locationType: 'city' },
-  { category: 'restaurante', location: 'Zaragoza', locationType: 'city' },
-  { category: 'restaurante', location: 'Alicante', locationType: 'city' },
-  
-  { category: 'bar', location: 'Murcia', locationType: 'city' },
-  { category: 'bar', location: 'Granada', locationType: 'city' },
-  { category: 'bar', location: 'Bilbao', locationType: 'city' },
-  
-  { category: 'hotel', location: 'Granada', locationType: 'city' },
-  { category: 'hotel', location: 'Bilbao', locationType: 'city' },
-  { category: 'hotel', location: 'Zaragoza', locationType: 'city' },
-  
-  // TIER 3: Provincias
-  { category: 'hotel', location: 'Cuenca', locationType: 'province' },
-  { category: 'restaurante', location: 'Asturias', locationType: 'province' },
-  { category: 'hotel', location: 'Cantabria', locationType: 'province' },
-  { category: 'restaurante', location: 'Cádiz', locationType: 'province' },
+const CALENDAR_2026: CalendarPost[] = [
+  // FASE 1 — Completar ciudades ya iniciadas
+  { phase: 1, category: 'hotel', location: 'Valencia', locationType: 'city', publishAt: '2026-01-06' },
+  { phase: 1, category: 'hotel', location: 'Sevilla', locationType: 'city', publishAt: '2026-01-13' },
+  { phase: 1, category: 'bar', location: 'Málaga', locationType: 'city', publishAt: '2026-01-20' },
+  { phase: 1, category: 'hotel', location: 'Murcia', locationType: 'city', publishAt: '2026-01-27' },
+  { phase: 1, category: 'bar', location: 'Alicante', locationType: 'city', publishAt: '2026-02-03' },
+  { phase: 1, category: 'hotel', location: 'Alicante', locationType: 'city', publishAt: '2026-02-10' },
+  { phase: 1, category: 'bar', location: 'Zaragoza', locationType: 'city', publishAt: '2026-02-17' },
+
+  // FASE 2 — Expansión Tier 2
+  { phase: 2, category: 'restaurante', location: 'Córdoba', locationType: 'city', publishAt: '2026-02-24' },
+  { phase: 2, category: 'restaurante', location: 'San Sebastián', locationType: 'city', publishAt: '2026-03-03' },
+  { phase: 2, category: 'restaurante', location: 'Palma', locationType: 'city', publishAt: '2026-03-10' },
+  { phase: 2, category: 'restaurante', location: 'Marbella', locationType: 'city', publishAt: '2026-03-17' },
+  { phase: 2, category: 'restaurante', location: 'Las Palmas', locationType: 'city', publishAt: '2026-03-24' },
+  { phase: 2, category: 'restaurante', location: 'Salamanca', locationType: 'city', publishAt: '2026-03-31' },
+  { phase: 2, category: 'restaurante', location: 'Santander', locationType: 'city', publishAt: '2026-04-07' },
+  { phase: 2, category: 'restaurante', location: 'A Coruña', locationType: 'city', publishAt: '2026-04-14' },
+  { phase: 2, category: 'restaurante', location: 'Pamplona', locationType: 'city', publishAt: '2026-04-21' },
+  { phase: 2, category: 'restaurante', location: 'Valladolid', locationType: 'city', publishAt: '2026-04-28' },
+  { phase: 2, category: 'restaurante', location: 'Toledo', locationType: 'city', publishAt: '2026-05-05' },
+  { phase: 2, category: 'restaurante', location: 'Gijón', locationType: 'city', publishAt: '2026-05-12' },
+  { phase: 2, category: 'restaurante', location: 'Oviedo', locationType: 'city', publishAt: '2026-05-19' },
+  {
+    phase: 2,
+    category: 'restaurante',
+    location: 'Santa Cruz de Tenerife',
+    locationType: 'city',
+    publishAt: '2026-05-26',
+    title: buildBlogPostTitle('restaurante', 'Tenerife', 2026),
+    slug: 'mejores-restaurantes-tenerife',
+  },
+  { phase: 2, category: 'restaurante', location: 'Benidorm', locationType: 'city', publishAt: '2026-06-02' },
+  { phase: 2, category: 'bar', location: 'Córdoba', locationType: 'city', publishAt: '2026-06-09' },
+  { phase: 2, category: 'hotel', location: 'Córdoba', locationType: 'city', publishAt: '2026-06-16' },
+
+  // FASE 3 — Mix premium + provincias
+  { phase: 3, category: 'bar', location: 'San Sebastián', locationType: 'city', publishAt: '2026-06-23' },
+  { phase: 3, category: 'hotel', location: 'San Sebastián', locationType: 'city', publishAt: '2026-06-30' },
+  { phase: 3, category: 'bar', location: 'Palma', locationType: 'city', publishAt: '2026-07-07' },
+  { phase: 3, category: 'hotel', location: 'Palma', locationType: 'city', publishAt: '2026-07-14' },
+  { phase: 3, category: 'restaurante', location: 'Galicia', locationType: 'community', publishAt: '2026-07-21' },
+  { phase: 3, category: 'restaurante', location: 'País Vasco', locationType: 'community', publishAt: '2026-07-28' },
+  {
+    phase: 3,
+    category: 'restaurante',
+    location: 'Costa del Sol',
+    locationType: 'province',
+    publishAt: '2026-08-04',
+    title: buildBlogPostTitle('restaurante', 'Costa del Sol', 2026),
+    slug: 'mejores-restaurantes-costa-del-sol',
+  },
 ];
 
 // ================================================================
-// GENERACIÓN DE IMÁGENES
+// FASE 4 — Próximos 5 meses (ago 2026 → ene 2027) — 22 semanas
+// Completa Tier 2 (bar/hotel) + ciudades/provincias nuevas
 // ================================================================
 
-function generateFeaturedImageUrl(config: PostConfig): string {
-  // Usar Unsplash Source API para imágenes relevantes y gratuitas
-  const searchTerms: Record<string, string> = {
-    restaurante: 'restaurant,food,dining',
-    bar: 'bar,cocktail,drinks',
-    cafe: 'cafe,coffee,espresso',
-    hotel: 'hotel,luxury,accommodation'
-  };
-  
-  const terms = searchTerms[config.category];
-  const location = config.location.toLowerCase();
-  
-  // Unsplash Source API - Imágenes aleatorias de alta calidad
-  // https://source.unsplash.com/featured/?{query}
-  return `https://source.unsplash.com/1200x600/?${terms},${location},spain`;
+const CALENDAR_NEXT_5_MONTHS: CalendarPost[] = [
+  { phase: 4, category: 'hotel', location: 'Marbella', locationType: 'city', publishAt: '2026-08-11' },
+  { phase: 4, category: 'bar', location: 'Marbella', locationType: 'city', publishAt: '2026-08-18' },
+  { phase: 4, category: 'hotel', location: 'Salamanca', locationType: 'city', publishAt: '2026-08-25' },
+  { phase: 4, category: 'bar', location: 'Salamanca', locationType: 'city', publishAt: '2026-09-01' },
+  { phase: 4, category: 'hotel', location: 'Santander', locationType: 'city', publishAt: '2026-09-08' },
+  { phase: 4, category: 'bar', location: 'Santander', locationType: 'city', publishAt: '2026-09-15' },
+  { phase: 4, category: 'hotel', location: 'A Coruña', locationType: 'city', publishAt: '2026-09-22' },
+  { phase: 4, category: 'bar', location: 'A Coruña', locationType: 'city', publishAt: '2026-09-29' },
+  { phase: 4, category: 'hotel', location: 'Pamplona', locationType: 'city', publishAt: '2026-10-06' },
+  { phase: 4, category: 'bar', location: 'Pamplona', locationType: 'city', publishAt: '2026-10-13' },
+  { phase: 4, category: 'hotel', location: 'Valladolid', locationType: 'city', publishAt: '2026-10-20' },
+  { phase: 4, category: 'bar', location: 'Valladolid', locationType: 'city', publishAt: '2026-10-27' },
+  { phase: 4, category: 'hotel', location: 'Toledo', locationType: 'city', publishAt: '2026-11-03' },
+  { phase: 4, category: 'bar', location: 'Toledo', locationType: 'city', publishAt: '2026-11-10' },
+  { phase: 4, category: 'restaurante', location: 'Almería', locationType: 'city', publishAt: '2026-11-17' },
+  { phase: 4, category: 'restaurante', location: 'Logroño', locationType: 'city', publishAt: '2026-11-24' },
+  { phase: 4, category: 'restaurante', location: 'Santiago de Compostela', locationType: 'city', publishAt: '2026-12-01' },
+  { phase: 4, category: 'restaurante', location: 'León', locationType: 'city', publishAt: '2026-12-08' },
+  { phase: 4, category: 'restaurante', location: 'Burgos', locationType: 'city', publishAt: '2026-12-15' },
+  { phase: 4, category: 'restaurante', location: 'Tarragona', locationType: 'city', publishAt: '2026-12-22' },
+  { phase: 4, category: 'hotel', location: 'Benidorm', locationType: 'city', publishAt: '2026-12-29' },
+  { phase: 4, category: 'restaurante', location: 'Navarra', locationType: 'province', publishAt: '2027-01-05' },
+];
+
+const PROVINCES_BY_COMMUNITY: Record<string, string[]> = {
+  Galicia: ['A Coruña', 'Lugo', 'Ourense', 'Pontevedra'],
+  'País Vasco': ['Álava', 'Bizkaia', 'Vizcaya', 'Guipúzcoa', 'Gipuzkoa'],
+  Navarra: ['Navarra'],
+  Andalucía: ['Sevilla', 'Málaga', 'Cádiz', 'Córdoba', 'Granada', 'Huelva', 'Jaén', 'Almería'],
+};
+
+const CATEGORY_SLUG: Record<Category, string> = {
+  restaurante: 'restaurantes',
+  bar: 'bares',
+  hotel: 'hoteles',
+};
+
+function buildTitle(post: CalendarPost): string {
+  if (post.title) return post.title;
+  return buildBlogPostTitle(post.category, post.location, yearFromDate(post.publishAt));
 }
 
-// ================================================================
-// GENERACIÓN DE CONTENIDO CON IA
-// ================================================================
-
-async function generateIntro(config: PostConfig): Promise<string> {
-  const categoryLabels = {
-    restaurante: 'restaurantes',
-    bar: 'bares',
-    cafe: 'cafeterías',
-    hotel: 'hoteles'
-  };
-
-  const locationLabel = config.locationType === 'province' 
-    ? `la provincia de ${config.location}`
-    : config.location;
-
-  const prompt = `Escribe una introducción atractiva y SEO-friendly de aproximadamente 300-350 palabras para un artículo titulado:
-
-"Los 10 Mejores ${categoryLabels[config.category].charAt(0).toUpperCase() + categoryLabels[config.category].slice(1)} de ${config.location}"
-
-Requisitos:
-- Menciona que son establecimientos con valoración superior a 4.7 estrellas en Google Maps
-- Habla de la escena gastronómica/hostelera de ${locationLabel}
-- Menciona características únicas de la zona (gastronomía local, ambiente, turismo, etc.)
-- Tono profesional pero cercano, en segunda persona ("encontrarás", "descubrirás")
-- NO uses listas con viñetas, escribe párrafos fluidos
-- NO menciones nombres específicos de lugares (eso va en el Top 10)
-- Termina con una frase que invite a leer el Top 10
-- Escribe SOLO el texto, sin títulos ni encabezados
-
-Ejemplo de estructura:
-Párrafo 1: Intro sobre ${config.location} y su escena de ${categoryLabels[config.category]}
-Párrafo 2: Criterios de selección (4.7+ estrellas, calidad verificada)
-Párrafo 3: Qué hace especial a estos lugares
-Párrafo 4: Cierre invitando a descubrir el Top 10`;
-
-  const response = await openai.chat.completions.create({
-    model: 'gpt-4o-mini',
-    messages: [{ role: 'user', content: prompt }],
-    temperature: 0.8,
-    max_tokens: 600
-  });
-
-  return response.choices[0].message.content?.trim() || '';
-}
-
-function generateSlug(config: PostConfig): string {
-  const categoryLabels = {
-    restaurante: 'restaurantes',
-    bar: 'bares',
-    cafe: 'cafeterias',
-    hotel: 'hoteles'
-  };
-
-  const locationSlug = config.location
+function toSlug(text: string): string {
+  return text
     .toLowerCase()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/[^\w\s-]/g, '')
-    .replace(/[\s_-]+/g, '-');
-
-  return `mejores-${categoryLabels[config.category]}-${locationSlug}`;
+    .replace(/[\s_-]+/g, '-')
+    .replace(/^-+|-+$/g, '');
 }
 
-function generateTitle(config: PostConfig): string {
-  const categoryLabels = {
-    restaurante: 'Restaurantes',
-    bar: 'Bares',
-    cafe: 'Cafeterías',
-    hotel: 'Hoteles'
+function formatError(err: unknown): string {
+  if (err instanceof Error) return err.message;
+  if (typeof err === 'object' && err !== null && 'message' in err) {
+    return String((err as { message: unknown }).message);
+  }
+  return JSON.stringify(err);
+}
+
+function buildSlug(post: CalendarPost): string {
+  if (post.slug) return post.slug;
+  return `mejores-${CATEGORY_SLUG[post.category]}-${toSlug(post.location)}`;
+}
+
+function publishAtIso(date: string): string {
+  // Lunes 09:00 hora España (UTC+1 invierno / +2 verano) → 08:00 UTC en ene–mar
+  return `${date}T08:00:00.000Z`;
+}
+
+function featuredImageUrl(category: Category, location: string): string {
+  const terms: Record<Category, string> = {
+    restaurante: 'restaurant,food,dining',
+    bar: 'bar,cocktail,drinks',
+    hotel: 'hotel,luxury,accommodation',
   };
-
-  const year = new Date().getFullYear();
-  return `Los 10 Mejores ${categoryLabels[config.category]} de ${config.location} (${year})`;
+  return `https://source.unsplash.com/1200x600/?${terms[category]},${toSlug(location)},spain`;
 }
 
-function generateMetaDescription(config: PostConfig): string {
-  const categoryLabels = {
-    restaurante: 'restaurantes',
-    bar: 'bares',
-    cafe: 'cafeterías',
-    hotel: 'hoteles'
-  };
+async function fetchVerifiedPlaces(post: CalendarPost): Promise<BlogVerifiedPlace[]> {
+  let query = supabase
+    .from('places')
+    .select('name, rating, review_count, city, province, slug, category, address, ai_description, photo_urls')
+    .eq('category', post.category)
+    .eq('published', true)
+    .gte('rating', 4.7);
 
-  const locationLabel = config.locationType === 'province'
-    ? `la provincia de ${config.location}`
-    : config.location;
+  if (post.locationType === 'community') {
+    const provinces = PROVINCES_BY_COMMUNITY[post.location];
+    if (provinces?.length) {
+      query = query.in('province', provinces);
+    } else {
+      query = query.or(`city.eq.${post.location},province.eq.${post.location}`);
+    }
+  } else if (post.location === 'Costa del Sol') {
+    // Costa del Sol → provincia de Málaga (costa)
+    query = query.eq('province', 'Málaga');
+  } else {
+    query = query.or(`city.eq.${post.location},province.eq.${post.location}`);
+  }
 
-  return `Descubre los mejores ${categoryLabels[config.category]} de ${locationLabel} con más de 4.7 estrellas en Google. Guía actualizada ${new Date().getFullYear()} con los lugares top.`;
+  const { data: places, error } = await query;
+  if (error) throw error;
+
+  return (places || [])
+    .sort(comparePlacesByTier)
+    .slice(0, 10)
+    .map((p) => ({
+      name: p.name,
+      rating: p.rating,
+      review_count: p.review_count,
+      city: p.city,
+      province: p.province,
+      slug: p.slug,
+      category: p.category,
+      address: p.address,
+      ai_description: p.ai_description,
+    }));
 }
 
-function generateKeywords(config: PostConfig): string[] {
-  const categoryLabels = {
-    restaurante: 'restaurantes',
-    bar: 'bares',
-    cafe: 'cafeterías',
-    hotel: 'hoteles'
-  };
+async function generateCalendarPosts(calendar: CalendarPost[], fromIndex = 1) {
+  console.log('🚀 Generación de artículos HTML SEO\n');
+  console.log(`📅 ${calendar.length} posts | Cadencia semanal\n`);
 
-  const location = config.location.toLowerCase();
-  const category = categoryLabels[config.category];
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY || !process.env.OPENAI_API_KEY) {
+    throw new Error('Faltan variables en .env.local: NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, OPENAI_API_KEY');
+  }
 
-  return [
-    `mejores ${category} ${location}`,
-    `${category} ${location}`,
-    `donde ${config.category === 'restaurante' ? 'comer' : config.category === 'hotel' ? 'dormir' : 'ir'} ${location}`,
-    `${category} 5 estrellas ${location}`,
-    `${category} bien valorados ${location}`,
-    `top ${category} ${location}`,
-    `guia ${category} ${location}`
-  ];
-}
+  let created = 0;
+  let skipped = 0;
+  let errors = 0;
 
-// ================================================================
-// FUNCIÓN PRINCIPAL
-// ================================================================
+  for (let i = 0; i < calendar.length; i++) {
+    const post = calendar[i];
+    const num = i + 1;
+    const year = yearFromDate(post.publishAt);
 
-async function generatePosts() {
-  console.log('🚀 Iniciando generación de posts de blog...\n');
+    if (num < fromIndex) continue;
 
-  let successCount = 0;
-  let errorCount = 0;
-
-  for (let i = 0; i < POSTS_TO_GENERATE.length; i++) {
-    const config = POSTS_TO_GENERATE[i];
-    const slug = generateSlug(config);
+    const slug = buildSlug(post);
+    const title = buildTitle(post);
 
     try {
-      console.log(`[${i + 1}/${POSTS_TO_GENERATE.length}] Generando: ${slug}`);
+      console.log(`\n[${num}/${calendar.length}] Fase ${post.phase} | ${slug}`);
+      console.log(`   📆 Publicación: ${post.publishAt} | ${title}`);
 
-      // Verificar si ya existe
       const { data: existing } = await supabase
         .from('blog_posts')
-        .select('id')
+        .select('id, slug')
         .eq('slug', slug)
-        .single();
+        .maybeSingle();
 
       if (existing) {
-        console.log(`⏭️  Ya existe, saltando...\n`);
+        console.log('   ⏭️  Ya existe — saltando');
+        skipped++;
         continue;
       }
 
-      // Generar contenido con IA
-      console.log('   🤖 Generando intro con OpenAI...');
-      const introText = await generateIntro(config);
+      const verifiedPlaces = await fetchVerifiedPlaces(post);
+      console.log(`   📍 Lugares verificados: ${verifiedPlaces.length}`);
 
-      // Generar URL de imagen
-      const featuredImageUrl = generateFeaturedImageUrl(config);
-      console.log('   🖼️  Imagen destacada: Unsplash');
-
-      // Insertar en base de datos
-      const { error } = await supabase
-        .from('blog_posts')
-        .insert({
-          slug,
-          title: generateTitle(config),
-          meta_description: generateMetaDescription(config),
-          category: config.category,
-          location: config.location,
-          location_type: config.locationType,
-          intro_text: introText,
-          keywords: generateKeywords(config),
-          featured_image_url: featuredImageUrl,
-          published: true
-        });
-
-      if (error) {
-        throw error;
+      if (verifiedPlaces.length < 3) {
+        console.warn(`   ⚠️  Pocos lugares (${verifiedPlaces.length}) — se genera igual, revisar manualmente`);
       }
 
-      console.log('   ✅ Post creado exitosamente!\n');
-      successCount++;
+      console.log('   🤖 Generando artículo SEO (2 pasadas)...');
+      const html = await generateBlogArticle({
+        title,
+        category: post.category,
+        location: post.location,
+        locationType: post.locationType,
+        year,
+        verifiedPlaces,
+        extraContext: `Artículo programado fase ${post.phase}. Enlaza al mapa de Casi Cinco y a fichas verificadas.`,
+      });
 
-      // Esperar 2 segundos entre requests para no saturar API
-      if (i < POSTS_TO_GENERATE.length - 1) {
-        await new Promise(resolve => setTimeout(resolve, 2000));
+      const markedHtml = `${BLOG_FULL_HTML_MARKER}\n${html}`;
+
+      console.log('   🏷️  Generando metadatos SEO...');
+      const metadata = await generateBlogMetadata(title, html);
+
+      // Nota: first_place_photo se calcula en runtime desde places; no forzar insert
+      const { error: insertError } = await supabase.from('blog_posts').insert({
+        slug,
+        title,
+        meta_description: metadata.meta_description || `Guía ${year}: ${title}. Solo lugares +4.7★ verificados.`,
+        category: post.category,
+        location: post.location,
+        location_type: post.locationType,
+        intro_text: markedHtml,
+        keywords: metadata.meta_keywords?.length ? metadata.meta_keywords : [
+          `${CATEGORY_SLUG[post.category]} mejor valorados ${toSlug(post.location)}`,
+          `mejores ${CATEGORY_SLUG[post.category]} ${toSlug(post.location)}`,
+        ],
+        featured_image_url: featuredImageUrl(post.category, post.location),
+        published: true,
+        created_at: publishAtIso(post.publishAt),
+      });
+
+      if (insertError) throw insertError;
+
+      console.log('   ✅ Creado y programado');
+      created++;
+
+      // Pausa entre artículos (evitar rate limits OpenAI)
+      if (i < calendar.length - 1) {
+        await new Promise((r) => setTimeout(r, 5000));
       }
-
-    } catch (error: any) {
-      console.error(`   ❌ Error: ${error.message}\n`);
-      errorCount++;
+    } catch (err: unknown) {
+      console.error(`   ❌ Error: ${formatError(err)}`);
+      errors++;
     }
   }
 
+  console.log('\n════════════════════════════════════════');
+  console.log('📊 RESUMEN');
   console.log('════════════════════════════════════════');
-  console.log('📊 RESUMEN FINAL');
-  console.log('════════════════════════════════════════');
-  console.log(`✅ Posts creados: ${successCount}`);
-  console.log(`❌ Errores: ${errorCount}`);
-  console.log(`📝 Total procesados: ${POSTS_TO_GENERATE.length}`);
+  console.log(`✅ Creados: ${created}`);
+  console.log(`⏭️  Saltados (ya existían): ${skipped}`);
+  console.log(`❌ Errores: ${errors}`);
   console.log('════════════════════════════════════════\n');
 }
 
-// Ejecutar
-generatePosts().catch(console.error);
+// --- Punto de entrada ---
+const args = process.argv.slice(2);
+const fromArg = args.find((a) => a.startsWith('--from='));
+const fromIndex = fromArg ? parseInt(fromArg.split('=')[1], 10) : 1;
 
+if (args.includes('--next5')) {
+  generateCalendarPosts(CALENDAR_NEXT_5_MONTHS, fromIndex).catch((e) => {
+    console.error(e);
+    process.exit(1);
+  });
+} else if (args.includes('--calendar')) {
+  generateCalendarPosts(CALENDAR_2026, fromIndex).catch((e) => {
+    console.error(e);
+    process.exit(1);
+  });
+} else {
+  console.log('Usa:');
+  console.log('  npx tsx scripts/generate-blog-posts.ts --calendar   → ene–ago 2026 (31 posts)');
+  console.log('  npx tsx scripts/generate-blog-posts.ts --next5      → ago 2026–ene 2027 (22 posts)');
+  console.log('  ... --from=8  → reanudar desde el nº N');
+}
