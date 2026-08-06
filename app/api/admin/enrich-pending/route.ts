@@ -23,15 +23,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const body = await request.json();
-    const { batchSize = 100 } = body;
+    const body = await request.json().catch(() => ({}));
+    const { batchSize = 100, skipGooglePhotos = true } = body;
 
-    console.log(`[API] Iniciando enriquecimiento de hasta ${batchSize} lugares...`);
+    console.log(
+      `[API] Iniciando enriquecimiento de hasta ${batchSize} lugares (skipGooglePhotos=${skipGooglePhotos})...`
+    );
 
     // Ejecutar en background
     Promise.resolve().then(async () => {
       try {
-        await enrichPendingPlaces(batchSize, user.id);
+        await enrichPendingPlaces(batchSize, user.id, { skipGooglePhotos });
       } catch (err) {
         console.error('Error en enriquecimiento:', err);
       }

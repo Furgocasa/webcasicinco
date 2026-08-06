@@ -9,13 +9,22 @@
 
 import OpenAI from 'openai';
 
-// Inicializar cliente de OpenAI
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || 'sk-dummy-key-for-build',
-});
+// Cliente lazy: se crea al primer uso para leer OPENAI_API_KEY tras dotenv en scripts
+let openai: OpenAI | null = null;
 
-// Modelos a usar
-const MODEL = 'gpt-4-turbo-preview';
+function getOpenAI(): OpenAI {
+  if (!openai) {
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey || apiKey.includes('dummy')) {
+      throw new Error('OPENAI_API_KEY no configurada o inválida. Revisa .env.local');
+    }
+    openai = new OpenAI({ apiKey });
+  }
+  return openai;
+}
+
+// Modelos a usar (gpt-4o-mini: estable y económico para enriquecimiento)
+const MODEL = process.env.OPENAI_ENRICHMENT_MODEL || 'gpt-4o-mini';
 const MODEL_FAST = 'gpt-3.5-turbo'; // Para chatbot más rápido
 
 /**
@@ -59,7 +68,7 @@ REQUISITOS:
 Genera SOLO la descripción, sin títulos ni introducciones.`;
 
   try {
-    const completion = await openai.chat.completions.create({
+    const completion = await getOpenAI().chat.completions.create({
       model: MODEL,
       messages: [
         {
@@ -105,7 +114,7 @@ Crea un resumen que:
 Genera SOLO el resumen, sin títulos.`;
 
   try {
-    const completion = await openai.chat.completions.create({
+    const completion = await getOpenAI().chat.completions.create({
       model: MODEL,
       messages: [
         {
@@ -165,7 +174,7 @@ Terraza con vistas al mar
 Ambiente familiar y acogedor`;
 
   try {
-    const completion = await openai.chat.completions.create({
+    const completion = await getOpenAI().chat.completions.create({
       model: MODEL,
       messages: [
         {
@@ -610,7 +619,7 @@ ${userMessage}
       { role: 'user', content: userContext },
     ];
 
-    const completion = await openai.chat.completions.create({
+    const completion = await getOpenAI().chat.completions.create({
       model: chatbotConfig.model || MODEL_FAST,
       messages,
       temperature: chatbotConfig.temperature !== undefined ? chatbotConfig.temperature : 0.7,
@@ -672,7 +681,7 @@ export async function generateCompleteContent(place: {
  */
 export async function testOpenAIConnection(): Promise<boolean> {
   try {
-    await openai.chat.completions.create({
+    await getOpenAI().chat.completions.create({
       model: MODEL_FAST,
       messages: [{ role: 'user', content: 'test' }],
       max_tokens: 5,
@@ -731,7 +740,7 @@ Criterio editorial nuclear de Casi Cinco:
 #FUNCIONAMIENTO
 Recibirás el título del artículo como referencia editorial, pero NO debes repetirlo como encabezado dentro del HTML: la página del blog ya muestra ese título arriba. Empieza directamente con uno o dos párrafos introductorios (<p>) y después usa <h2>/<h3> para las secciones.
 
-Si el título es del tipo "Los 10 mejores restaurantes/hoteles/bares de X (AÑO)":
+Si el título es del tipo "Los 10 [restaurantes/hoteles/bares] mejor valorados de X (AÑO)":
 - Estructura el cuerpo como guía de top 10.
 - Cada lugar debe tener su propio bloque con <h2> o <h3>.
 - Incluye contexto de la ciudad/provincia, criterios de selección y consejos prácticos.
@@ -838,7 +847,7 @@ LISTA DE LUGARES VERIFICADOS:
 ${placesBlock}
 
 CONTEXTO EXTRA:
-${input.extraContext || `Guía top 10 de ${categoryLabel} en ${input.location}. Prioriza utilidad práctica y SEO para "mejores ${categoryLabel} de ${input.location.toLowerCase()}".`}
+${input.extraContext || `Guía top 10 de ${categoryLabel} mejor valorados en ${input.location}. Prioriza SEO para "${categoryLabel} mejor valorados ${input.location.toLowerCase()}" y "mejores ${categoryLabel} ${input.location.toLowerCase()}".`}
 
 INSTRUCCIÓN:
 Redacta el artículo completo en HTML según las reglas del system prompt y entrégame SOLO el HTML del cuerpo.`;
@@ -881,7 +890,7 @@ export async function generateBlogArticle(input: BlogArticleInput): Promise<stri
   const dossier = buildBlogResearchDossier(input);
 
   // Pasada 1: borrador
-  const draftResponse = await openai.chat.completions.create({
+  const draftResponse = await getOpenAI().chat.completions.create({
     model: BLOG_MODEL,
     messages: [
       { role: 'system', content: BLOG_SEO_SYSTEM_PROMPT },
@@ -894,7 +903,7 @@ export async function generateBlogArticle(input: BlogArticleInput): Promise<stri
   const draft = cleanHtmlOutput(draftResponse.choices[0].message.content || '');
 
   // Pasada 2: refine
-  const refineResponse = await openai.chat.completions.create({
+  const refineResponse = await getOpenAI().chat.completions.create({
     model: BLOG_MODEL,
     messages: [
       { role: 'system', content: BLOG_SEO_REFINE_PROMPT },
@@ -924,7 +933,7 @@ export async function generateBlogMetadata(
   const wordCount = htmlContent.replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length;
   const readingTime = Math.max(1, Math.round(wordCount / 210));
 
-  const response = await openai.chat.completions.create({
+  const response = await getOpenAI().chat.completions.create({
     model: MODEL_FAST,
     messages: [
       {
@@ -982,7 +991,7 @@ export async function generateBlogIntro(input: {
 
   const prompt = `Escribe una introducción atractiva y SEO-friendly de aproximadamente 300-350 palabras para un artículo titulado:
 
-"Los 10 Mejores ${category.charAt(0).toUpperCase() + category.slice(1)} de ${input.location}"
+"Los 10 ${category.charAt(0).toUpperCase() + category.slice(1)} Mejor Valorados de ${input.location}"
 
 Requisitos:
 - Menciona que son establecimientos con valoración superior a 4.7 estrellas en Google Maps
@@ -992,7 +1001,7 @@ Requisitos:
 - NO menciones nombres específicos de lugares
 - Escribe SOLO el texto, sin títulos ni encabezados`;
 
-  const response = await openai.chat.completions.create({
+  const response = await getOpenAI().chat.completions.create({
     model: MODEL_FAST,
     messages: [{ role: 'user', content: prompt }],
     temperature: 0.8,

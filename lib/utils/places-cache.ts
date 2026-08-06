@@ -10,7 +10,7 @@
 
 const DB_NAME = 'CasiCincoDB';
 const STORE_NAME = 'places';
-const CACHE_VERSION = 2; // Incrementar para invalidar cache antiguo tras cambios admin
+const CACHE_VERSION = 3; // v3: invalidar tras indexación masiva ago 2026 (+900 lugares)
 const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 horas en milisegundos
 
 interface CacheEntry {

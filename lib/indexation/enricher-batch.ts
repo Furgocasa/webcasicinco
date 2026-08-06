@@ -21,17 +21,30 @@ export interface EnrichmentResult {
   errors: string[];
 }
 
+export interface EnrichmentOptions {
+  /** Si true (por defecto), NO descarga fotos de Google Places Photo API */
+  skipGooglePhotos?: boolean;
+}
+
 /**
  * Enriquece lugares pendientes (needs_enrichment = true)
  */
 export async function enrichPendingPlaces(
   batchSize: number = 100,
-  adminUserId?: string
+  adminUserId?: string,
+  options: EnrichmentOptions = {}
 ): Promise<EnrichmentResult> {
+  // Por defecto: cero coste Google Photos (solo IA + datos ya en BD)
+  const skipGooglePhotos =
+    options.skipGooglePhotos ??
+    process.env.SKIP_GOOGLE_PHOTOS !== 'false';
   const supabase = createAdminClient();
 
   console.log('\n[ENRICHER] 🎨 INICIANDO ENRIQUECIMIENTO CON IA');
-  console.log(`[ENRICHER] Tamaño de lote: ${batchSize}\n`);
+  console.log(`[ENRICHER] Tamaño de lote: ${batchSize}`);
+  console.log(
+    `[ENRICHER] Fotos Google: ${skipGooglePhotos ? '❌ DESACTIVADAS (0€ fotos)' : '⚠️ ACTIVADAS (coste por foto)'}\n`
+  );
 
   // Obtener lugares pendientes
   const { data: pendingPlaces, error: fetchError } = await supabase
@@ -111,18 +124,30 @@ export async function enrichPendingPlaces(
 
       console.log(`[ENRICHER]   Categoría IA: ${categorization.category} (confianza: ${categorization.confidence})`);
 
-      // 2. Descargar fotos a Supabase usando referencias ya guardadas en BD
-      // ✅ OPTIMIZACIÓN: No pedimos 'photos' a Google (ahorro $0.005 por lugar)
-      // Las referencias ya están en place.photos desde la indexación
-      const photoReferences = place.photos || [];
-      const photosArray = photoReferences.map((ref: string) => ({ photo_reference: ref }));
-      
-      const { supabaseUrls } = await downloadAndUploadPhotosToSupabase(
-        photosArray,
-        place.name,
-        place.google_place_id,
-        5
-      );
+      // 2. Fotos: reutilizar Supabase existente; NO descargar de Google salvo opt-in explícito
+      let supabaseUrls: string[] = Array.isArray(place.photo_urls)
+        ? place.photo_urls.filter(Boolean)
+        : [];
+
+      if (!skipGooglePhotos && supabaseUrls.length === 0) {
+        const photoReferences = place.photos || [];
+        if (photoReferences.length > 0) {
+          const photosArray = photoReferences.map((ref: string) => ({
+            photo_reference: ref,
+          }));
+          const { supabaseUrls: downloadedUrls } = await downloadAndUploadPhotosToSupabase(
+            photosArray,
+            place.name,
+            place.google_place_id,
+            5
+          );
+          supabaseUrls = downloadedUrls;
+        }
+      } else if (skipGooglePhotos) {
+        console.log(
+          `[ENRICHER]   📷 Fotos Google omitidas (${supabaseUrls.length} ya en Supabase)`
+        );
+      }
 
       // 3. Generar contenido con IA (usar la categoría correcta de la IA)
       const description = await generatePlaceDescription({
