@@ -33,6 +33,60 @@ export function extractBlogHtml(content: string): string {
   return content.replace(BLOG_FULL_HTML_MARKER, '').trim();
 }
 
+/**
+ * Parte el HTML SEO en intro (antes del primer h2) y cuerpo posterior.
+ * El cuerpo se limpia de fichas de lugares (h2/h3 con nombre del Top 10)
+ * para no duplicar el bloque visual de cards.
+ */
+export function splitBlogArticleHtml(
+  html: string,
+  placeNames: string[] = []
+): { introHtml: string; restHtml: string } {
+  const cleaned = html.trim();
+  if (!cleaned) return { introHtml: '', restHtml: '' };
+
+  const firstHeading = cleaned.search(/<h[23][\s>]/i);
+  if (firstHeading === -1) {
+    return { introHtml: cleaned, restHtml: '' };
+  }
+
+  const introHtml = cleaned.slice(0, firstHeading).trim();
+  let restHtml = cleaned.slice(firstHeading).trim();
+
+  if (placeNames.length > 0) {
+    const normalized = placeNames
+      .map((n) => n.trim().toLowerCase())
+      .filter(Boolean);
+
+    // Quita bloques h2/h3…hasta el siguiente h2/h3 si el título coincide con un lugar
+    restHtml = restHtml.replace(
+      /<h([23])(\s[^>]*)?>([\s\S]*?)<\/h\1>([\s\S]*?)(?=<h[23]\b|$)/gi,
+      (full, _level, _attrs, inner) => {
+        const headingText = String(inner)
+          .replace(/<[^>]+>/g, '')
+          .replace(/&nbsp;/g, ' ')
+          .replace(/^\s*\d+[\.\):-]\s*/, '')
+          .replace(/^#?\d+\s*/, '')
+          .trim()
+          .toLowerCase();
+
+        const isPlace = normalized.some(
+          (name) =>
+            headingText === name ||
+            headingText.includes(name) ||
+            name.includes(headingText)
+        );
+
+        return isPlace ? '' : full;
+      }
+    );
+
+    restHtml = restHtml.replace(/\n{3,}/g, '\n\n').trim();
+  }
+
+  return { introHtml, restHtml };
+}
+
 const BLOG_CATEGORY_TITLES: Record<BlogPost['category'], string> = {
   restaurante: 'Restaurantes',
   bar: 'Bares',

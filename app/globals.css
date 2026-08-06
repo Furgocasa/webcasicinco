@@ -87,6 +87,39 @@
 }
 
 @layer components {
+  /* Artículo SEO del blog — misma estética que posts clásicos */
+  .blog-article-html {
+    @apply text-gray-700 text-lg leading-relaxed;
+  }
+
+  .blog-article-html p {
+    @apply mb-5;
+  }
+
+  .blog-article-html h2 {
+    @apply text-2xl md:text-3xl font-bold text-gray-900 mt-10 mb-4;
+  }
+
+  .blog-article-html h3 {
+    @apply text-xl font-bold text-gray-900 mt-8 mb-3;
+  }
+
+  .blog-article-html ul {
+    @apply list-disc pl-6 mb-5 space-y-2;
+  }
+
+  .blog-article-html ol {
+    @apply list-decimal pl-6 mb-5 space-y-2;
+  }
+
+  .blog-article-html a {
+    @apply text-[#002297] font-medium underline underline-offset-2 hover:text-[#052d5a];
+  }
+
+  .blog-article-html strong {
+    @apply font-semibold text-gray-900;
+  }
+
   /* Estilos personalizados para el mapa */
   .mapboxgl-popup-content {
     @apply rounded-lg shadow-lg p-0;
