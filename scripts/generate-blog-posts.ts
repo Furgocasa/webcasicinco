@@ -256,8 +256,13 @@ async function generateCalendarPosts(calendar: CalendarPost[], fromIndex = 1) {
       const verifiedPlaces = await fetchVerifiedPlaces(post);
       console.log(`   📍 Lugares verificados: ${verifiedPlaces.length}`);
 
-      if (verifiedPlaces.length < 3) {
-        console.warn(`   ⚠️  Pocos lugares (${verifiedPlaces.length}) — se genera igual, revisar manualmente`);
+      // No publicar artículos sin Top 10 real (evita "No hay lugares disponibles")
+      if (verifiedPlaces.length < 5) {
+        console.warn(
+          `   ⏭️  Saltando: solo ${verifiedPlaces.length} lugares para ${post.category}/${post.location}. Cambia categoría o indexa más sitios.`
+        );
+        skipped++;
+        continue;
       }
 
       console.log('   🤖 Generando artículo SEO (2 pasadas)...');

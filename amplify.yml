@@ -10,7 +10,6 @@ applications:
             - npm ci --legacy-peer-deps
         build:
           commands:
-            - env | grep -E 'OPENAI|STRIPE|SUPABASE|GOOGLE' || true
             - npm run build
       artifacts:
         baseDirectory: .next

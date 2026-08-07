@@ -1,14 +1,13 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { createClient } from '@/lib/supabase/server';
-import { createClient as createClientBrowser } from '@supabase/supabase-js';
+import { createPublicClient } from '@/lib/supabase/server';
 import Link from 'next/link';
 import { Star, MapPin, TrendingUp, ArrowRight, Users } from 'lucide-react';
 import Footer from '@/components/layout/Footer';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { getPlacePhotoUrl } from '@/lib/utils/photo-helper';
-import { getPlaceUrl } from '@/lib/utils/url-helper';
+import { getPlaceUrl, toSlug } from '@/lib/utils/url-helper';
 
 type Props = {
   params: { category: string }
@@ -98,7 +97,7 @@ export default async function CategoryPage({ params }: Props) {
   }
 
   const config = CATEGORY_CONFIG[category];
-  const supabase = await createClient();
+  const supabase = createPublicClient();
 
   // Obtener top 10 lugares de esta categoría
   const { data: places, error } = await supabase
@@ -110,7 +109,7 @@ export default async function CategoryPage({ params }: Props) {
     .order('review_count', { ascending: false })
     .limit(10);
 
-  if (error || !places) {
+  if (error || !places || places.length === 0) {
     console.error('Error fetching places:', error);
     return notFound();
   }
@@ -322,7 +321,8 @@ export default async function CategoryPage({ params }: Props) {
                     {topCitiesFormatted.map(({ city, province, count }) => (
                       <Link 
                         key={`${city}-${province}`}
-                        href={`/${category}/${city.toLowerCase().replace(/\s+/g, '-')}`}
+                        // Enlazar a provincia (ruta real), no a ciudad (provoca 404/500)
+                        href={`/${category}/${toSlug(province)}`}
                         className="p-4 bg-white rounded-lg border-2 border-gray-200 hover:border-indigo-500 transition text-center"
                       >
                         <p className="font-bold text-gray-900">{city}</p>

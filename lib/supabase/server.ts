@@ -4,6 +4,7 @@
  */
 
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
+import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 import type { Database } from './types';
 
@@ -42,6 +43,18 @@ export async function createClient() {
         },
       },
     }
+  );
+}
+
+/**
+ * Cliente público sin cookies — seguro en SSG/ISR (páginas públicas).
+ * Evita crashes por cookies() en generateStaticParams / Amplify.
+ * Sin genérico Database: el tipado parcial de places provoca `never` en selects.
+ */
+export function createPublicClient() {
+  return createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
 }
 

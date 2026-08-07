@@ -1,7 +1,6 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { createClient } from '@/lib/supabase/server';
-import { createClient as createClientBrowser } from '@supabase/supabase-js';
+import { createPublicClient } from '@/lib/supabase/server';
 import Link from 'next/link';
 import { Star, MapPin, TrendingUp, ChevronRight, Home } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
@@ -9,7 +8,7 @@ import { Badge } from '@/components/ui/Badge';
 import Footer from '@/components/layout/Footer';
 import { getPlacePhotoUrl } from '@/lib/utils/photo-helper';
 import { calculateQualityTier, getTierInfo } from '@/lib/utils/tier-calculator';
-import { toSlug, fromSlug, getPlaceUrl } from '@/lib/utils/url-helper';
+import { toSlug, fromSlug, getPlaceUrl, getProvinceSearchNames } from '@/lib/utils/url-helper';
 
 type Props = {
   params: { category: string; province: string }
@@ -65,15 +64,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   const config = CATEGORY_CONFIG[category];
-  const provinceName = fromSlug(province); // Convertir slug de URL a nombre de provincia
+  const provinceName = fromSlug(province);
+  const provinceNames = getProvinceSearchNames(province);
   
-  // Obtener cantidad de lugares
-  const supabase = await createClient();
+  // Cliente público (sin cookies) — seguro en SSG/ISR
+  const supabase = createPublicClient();
   const { count } = await supabase
     .from('places')
     .select('*', { count: 'exact', head: true })
     .eq('category', category)
-    .eq('province', provinceName)
+    .in('province', provinceNames)
     .eq('published', true)
     .gte('rating', 4.7);
   
@@ -90,34 +90,40 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-// Pre-generar rutas estáticas (SSG) para las combinaciones más populares
+// Pre-generar rutas estáticas (SSG) para combinaciones categoría × provincia
 export async function generateStaticParams() {
-  const supabase = createClientBrowser(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  const supabase = createPublicClient();
   
-  // Obtener todas las provincias únicas de TODAS las categorías
   const { data: places } = await supabase
     .from('places')
-    .select('province')
-    .eq('published', true);
+    .select('category, province')
+    .eq('published', true)
+    .gte('rating', 4.7);
   
   if (!places) return [];
   
-  // Crear Set de provincias únicas
-  const provinces = new Set<string>();
-  places.forEach(place => {
-    if (place.province) {
-      provinces.add(place.province);
+  const seen = new Set<string>();
+  const params: { category: string; province: string }[] = [];
+
+  for (const place of places) {
+    if (!place.category || !place.province) continue;
+    if (!VALID_CATEGORIES.includes(place.category)) continue;
+    const provinceSlug = toSlug(place.province);
+    const key = `${place.category}/${provinceSlug}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    params.push({ category: place.category, province: provinceSlug });
+  }
+
+  // Alias útiles (bilbao → Vizcaya ya resuelto en fromSlug)
+  for (const category of ['restaurante', 'bar', 'hotel'] as const) {
+    const key = `${category}/bilbao`;
+    if (!seen.has(key)) {
+      params.push({ category, province: 'bilbao' });
     }
-  });
-  
-  // Convertir a array de params con slug correcto
-  // Next.js ejecutará esto para CADA categoría generada por el padre
-  return Array.from(provinces).map(province => ({
-    province: toSlug(province), // Aplicar toSlug para URLs limpias sin tildes
-  }));
+  }
+
+  return params;
 }
 
 // Página principal
@@ -129,43 +135,39 @@ export default async function CategoryProvincePage({ params }: Props) {
   }
 
   const config = CATEGORY_CONFIG[category];
-  // Convertir slug de URL a nombre de provincia para buscar en BD
-  // BD tiene: "Málaga", "Madrid", "A Coruña"
-  // URL tiene: "malaga", "madrid", "a-coruna"
   const provinceName = fromSlug(province);
+  const provinceNames = getProvinceSearchNames(province);
   
-  const supabase = await createClient();
+  // Sin cookies: evita 500 en Amplify durante ISR/SSG
+  const supabase = createPublicClient();
   
-  // Obtener total de lugares para mostrar en estadísticas
   const { count: totalPlacesCount } = await supabase
     .from('places')
     .select('*', { count: 'exact', head: true })
     .eq('category', category)
-    .eq('province', provinceName)
+    .in('province', provinceNames)
     .eq('published', true)
     .gte('rating', 4.7);
   
   const totalPlaces = totalPlacesCount || 0;
   
-  // Obtener solo Top 10 para mostrar públicamente
   const { data: places, error } = await supabase
     .from('places')
     .select('*')
     .eq('category', category)
-    .eq('province', provinceName)
+    .in('province', provinceNames)
     .eq('published', true)
     .gte('rating', 4.7)
     .order('rating', { ascending: false })
     .order('review_count', { ascending: false })
-    .limit(10); // Solo Top 10 públicos - resto en el mapa
+    .limit(10);
   
-  // Debug: Log si no hay lugares
   if (error) {
-    console.error('Error fetching places:', error, { category, provinceName });
+    console.error('Error fetching places:', error, { category, provinceName, provinceNames });
   }
   
   if (!places || places.length === 0) {
-    console.log('No places found for:', { category, province, provinceName, totalPlaces });
+    console.log('No places found for:', { category, province, provinceName, provinceNames, totalPlaces });
     notFound();
   }
 

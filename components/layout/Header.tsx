@@ -354,14 +354,6 @@ export default function Header() {
                       <span className="font-medium text-gray-900">Bares</span>
                     </Link>
                     <Link
-                      href="/cafeteria"
-                      className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-orange-50 transition"
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      <span className="text-2xl">☕</span>
-                      <span className="font-medium text-gray-900">Cafeterías</span>
-                    </Link>
-                    <Link
                       href="/hotel"
                       className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-blue-50 transition"
                       onClick={() => setIsMenuOpen(false)}

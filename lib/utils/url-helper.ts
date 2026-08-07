@@ -19,6 +19,7 @@ export function toSlug(text: string): string {
  */
 export function fromSlug(slug: string): string {
   // Mapeo manual para provincias con tildes y caracteres especiales
+  // Valores canónicos alineados con lo más frecuente en BD
   const provinceMap: Record<string, string> = {
     // Provincias con tildes
     'malaga': 'Málaga',
@@ -30,12 +31,18 @@ export function fromSlug(slug: string): string {
     'jaen': 'Jaén',
     'caceres': 'Cáceres',
     'alava': 'Álava',
+    'guipuzcoa': 'Guipúzcoa',
+    'gipuzkoa': 'Gipuzkoa',
+    'vizcaya': 'Vizcaya',
+    'bizkaia': 'Bizkaia',
+    // Ciudad usada como provincia en URLs estáticas
+    'bilbao': 'Vizcaya',
     // Provincias con múltiples palabras o caracteres especiales
     'a-coruna': 'A Coruña',
-    'la-coruna': 'A Coruña', // Alias común
-    'islas-baleares': 'Islas Baleares',
-    'baleares': 'Islas Baleares',
-    'illes-balears': 'Islas Baleares',
+    'la-coruna': 'A Coruña',
+    'islas-baleares': 'Baleares',
+    'baleares': 'Baleares',
+    'illes-balears': 'Illes Balears',
     'las-palmas': 'Las Palmas',
     'santa-cruz-de-tenerife': 'Santa Cruz de Tenerife',
     'castellon': 'Castellón',
@@ -52,6 +59,28 @@ export function fromSlug(slug: string): string {
     .split('-')
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
+}
+
+/**
+ * Nombres de provincia a buscar en BD (incluye alias fragmentados).
+ * Ej: "baleares" → Baleares + Illes Balears + Islas Baleares
+ */
+export function getProvinceSearchNames(provinceSlug: string): string[] {
+  const canonical = fromSlug(provinceSlug);
+  const aliasGroups: string[][] = [
+    ['Baleares', 'Illes Balears', 'Islas Baleares'],
+    ['Vizcaya', 'Bizkaia'],
+    ['Guipúzcoa', 'Gipuzkoa'],
+    ['Álava', 'Araba'],
+  ];
+
+  for (const group of aliasGroups) {
+    if (group.some((name) => name.toLowerCase() === canonical.toLowerCase())) {
+      return group;
+    }
+  }
+
+  return [canonical];
 }
 
 /**
