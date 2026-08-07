@@ -5,6 +5,7 @@ import { createClient as createClientBrowser } from '@supabase/supabase-js';
 import { BlogPostContent } from '@/components/blog/BlogPostContent';
 import type { BlogPostWithPlaces } from '@/types/blog';
 import { comparePlacesByTier } from '@/lib/utils/tier-calculator';
+import { applyBlogLocationFilter, isBrokenFeaturedImage } from '@/lib/utils/blog-places';
 
 type Props = {
   params: { slug: string }
@@ -30,23 +31,24 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   // 🎯 Obtener el PRIMER LUGAR (mejor tier) para la imagen OpenGraph
-  const { data: allPlaces } = await supabase
+  let placesQuery = supabase
     .from('places')
     .select('photo_urls, rating, review_count, name')
     .eq('category', post.category)
     .eq('published', true)
-    .or(`city.eq.${post.location},province.eq.${post.location}`)
     .gte('rating', 4.7);
+
+  placesQuery = applyBlogLocationFilter(placesQuery, post);
+
+  const { data: allPlaces } = await placesQuery;
   
   // Ordenar por tier (diamante primero) y obtener el primero
   const sortedPlaces = (allPlaces || []).sort(comparePlacesByTier);
   const firstPlace = sortedPlaces.length > 0 ? sortedPlaces[0] : null;
   
-  // Imagen OpenGraph: siempre del primer lugar (mejor tier)
-  let ogImage = firstPlace?.photo_urls?.[0] || post.first_place_photo || post.featured_image_url;
-  
-  // Fallback a imagen por defecto de Casi Cinco si no hay foto
-  if (!ogImage) {
+  // Imagen OpenGraph: foto del primer lugar; nunca Unsplash Source (API muerta)
+  let ogImage = firstPlace?.photo_urls?.[0] || post.featured_image_url;
+  if (isBrokenFeaturedImage(ogImage)) {
     ogImage = `${process.env.NEXT_PUBLIC_APP_URL}/images/opengraph_casicinco_wide.png`;
   }
   
@@ -156,13 +158,16 @@ export default async function BlogPostPage({ params }: Props) {
   }
 
   // Obtener los lugares top 10 para este post
-  const { data: places } = await supabase
+  let placesQuery = supabase
     .from('places')
     .select('*')
     .eq('category', post.category)
     .eq('published', true)
-    .or(`city.eq.${post.location},province.eq.${post.location}`)
-    .gte('rating', 4.7); // Traer todos los lugares +4.7★
+    .gte('rating', 4.7);
+
+  placesQuery = applyBlogLocationFilter(placesQuery, post);
+
+  const { data: places } = await placesQuery;
 
   // 🎯 Ordenar por tier (diamante primero) en memoria
   const sortedPlaces = (places || [])
@@ -170,15 +175,18 @@ export default async function BlogPostPage({ params }: Props) {
     .slice(0, 10); // Top 10
 
   // Obtener URL de foto del primer lugar (priorizar Supabase)
-  let firstPlacePhotoUrl = post.first_place_photo;
-  if (!firstPlacePhotoUrl && sortedPlaces && sortedPlaces.length > 0) {
+  let firstPlacePhotoUrl: string | null = null;
+  if (sortedPlaces && sortedPlaces.length > 0) {
     const firstPlace = sortedPlaces[0];
     if (firstPlace.photo_urls && firstPlace.photo_urls.length > 0) {
-      firstPlacePhotoUrl = firstPlace.photo_urls[0]; // URL completa de Supabase
+      firstPlacePhotoUrl = firstPlace.photo_urls[0];
     }
   }
 
-  // Fallback a imagen por defecto
+  // Fallback: featured válido o OpenGraph corporativo (nunca Unsplash Source)
+  if (!firstPlacePhotoUrl && !isBrokenFeaturedImage(post.featured_image_url)) {
+    firstPlacePhotoUrl = post.featured_image_url;
+  }
   if (!firstPlacePhotoUrl) {
     firstPlacePhotoUrl = `${process.env.NEXT_PUBLIC_APP_URL}/images/opengraph_casicinco_wide.png`;
   }

@@ -182,13 +182,10 @@ function publishAtIso(date: string): string {
   return `${date}T08:00:00.000Z`;
 }
 
-function featuredImageUrl(category: Category, location: string): string {
-  const terms: Record<Category, string> = {
-    restaurante: 'restaurant,food,dining',
-    bar: 'bar,cocktail,drinks',
-    hotel: 'hotel,luxury,accommodation',
-  };
-  return `https://source.unsplash.com/1200x600/?${terms[category]},${toSlug(location)},spain`;
+function featuredImageUrl(_category: Category, _location: string): string | null {
+  // Unsplash Source API está muerto; la portada se resuelve en runtime
+  // desde photo_urls del Top 1. No guardar URLs rotas.
+  return null;
 }
 
 async function fetchVerifiedPlaces(post: CalendarPost): Promise<BlogVerifiedPlace[]> {

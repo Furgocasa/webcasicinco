@@ -6,6 +6,7 @@ import { BookOpen, MapPin, Calendar, TrendingUp } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import Footer from '@/components/layout/Footer';
 import type { BlogPost } from '@/types/blog';
+import { isBrokenFeaturedImage } from '@/lib/utils/blog-places';
 
 const getCategoryEmoji = (category: string) => {
   const emojis: Record<string, string> = {
@@ -120,8 +121,11 @@ export function BlogListContent({ initialPosts }: BlogListContentProps) {
             {posts.length > 0 ? (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
                 {posts.map((post) => {
-                  // Usar la foto del primer lugar (URL directa de Supabase Storage)
-                  const featuredImage = post.first_place_photo || post.featured_image_url || '/images/placeholder.jpg';
+                  // Foto del Top 1; ignorar Unsplash Source (API muerta)
+                  const raw = post.first_place_photo || post.featured_image_url;
+                  const featuredImage = isBrokenFeaturedImage(raw)
+                    ? '/images/opengraph_casicinco_wide.png'
+                    : (raw as string);
 
                   return (
                     <Link key={post.id} href={`/blog/${post.slug}`}>
@@ -133,8 +137,8 @@ export function BlogListContent({ initialPosts }: BlogListContentProps) {
                             alt={post.title}
                             className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-500"
                             onError={(e) => {
-                              // Fallback si la imagen no carga
-                              e.currentTarget.src = '/images/placeholder.jpg';
+                              // Fallback corporativo si la imagen no carga
+                              e.currentTarget.src = '/images/opengraph_casicinco_wide.png';
                             }}
                           />
                           <div className="absolute top-3 left-3">
