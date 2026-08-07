@@ -22,6 +22,7 @@ import {
 } from '../lib/ai/openai';
 import { BLOG_FULL_HTML_MARKER, buildBlogPostTitle } from '../types/blog';
 import { comparePlacesByTier } from '../lib/utils/tier-calculator';
+import { applyBlogLocationFilter } from '../lib/utils/blog-places';
 import type { BlogVerifiedPlace } from '../lib/ai/openai';
 
 const supabase = createClient(
@@ -136,13 +137,6 @@ const CALENDAR_NEXT_5_MONTHS: CalendarPost[] = [
   { phase: 4, category: 'restaurante', location: 'Navarra', locationType: 'province', publishAt: '2027-01-05' },
 ];
 
-const PROVINCES_BY_COMMUNITY: Record<string, string[]> = {
-  Galicia: ['A Coruña', 'Lugo', 'Ourense', 'Pontevedra'],
-  'País Vasco': ['Álava', 'Bizkaia', 'Vizcaya', 'Guipúzcoa', 'Gipuzkoa'],
-  Navarra: ['Navarra'],
-  Andalucía: ['Sevilla', 'Málaga', 'Cádiz', 'Córdoba', 'Granada', 'Huelva', 'Jaén', 'Almería'],
-};
-
 const CATEGORY_SLUG: Record<Category, string> = {
   restaurante: 'restaurantes',
   bar: 'bares',
@@ -196,19 +190,11 @@ async function fetchVerifiedPlaces(post: CalendarPost): Promise<BlogVerifiedPlac
     .eq('published', true)
     .gte('rating', 4.7);
 
-  if (post.locationType === 'community') {
-    const provinces = PROVINCES_BY_COMMUNITY[post.location];
-    if (provinces?.length) {
-      query = query.in('province', provinces);
-    } else {
-      query = query.or(`city.eq.${post.location},province.eq.${post.location}`);
-    }
-  } else if (post.location === 'Costa del Sol') {
-    // Costa del Sol → provincia de Málaga (costa)
-    query = query.eq('province', 'Málaga');
-  } else {
-    query = query.or(`city.eq.${post.location},province.eq.${post.location}`);
-  }
+  query = applyBlogLocationFilter(query, {
+    location: post.location,
+    location_type: post.locationType,
+    category: post.category,
+  });
 
   const { data: places, error } = await query;
   if (error) throw error;

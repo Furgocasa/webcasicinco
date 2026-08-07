@@ -27,14 +27,17 @@ export type BlogLocationInput = {
   category: string;
 };
 
+export type BlogLocationFilter =
+  | { mode: 'or'; value: string }
+  | { mode: 'in'; value: string[] }
+  | { mode: 'eq-city'; value: string }
+  | { mode: 'eq-province'; value: string }
+  | { mode: 'eq-community'; value: string };
+
 /**
- * Construye filtro PostgREST `.or(...)` para city/province según el post.
- * Devuelve null si hay que usar `.in('province', ...)` (comunidades).
+ * Construye el filtro de ubicación para places según el post del blog.
  */
-export function getBlogLocationFilter(post: BlogLocationInput): {
-  mode: 'or' | 'in' | 'eq-city' | 'eq-province';
-  value: string | string[];
-} {
+export function getBlogLocationFilter(post: BlogLocationInput): BlogLocationFilter {
   const location = post.location?.trim() || '';
 
   // Destinos especiales
@@ -42,21 +45,27 @@ export function getBlogLocationFilter(post: BlogLocationInput): {
     return { mode: 'eq-province', value: 'Málaga' };
   }
 
+  // Comunidades: community=X O provincias del listado
+  // (algunos lugares tienen community null pero province correcto)
   if (post.location_type === 'community' || COMMUNITY_PROVINCES[location]) {
     const provinces = COMMUNITY_PROVINCES[location];
     if (provinces?.length) {
-      return { mode: 'in', value: provinces };
+      const provinceIn = `province.in.(${provinces.join(',')})`;
+      return {
+        mode: 'or',
+        value: `community.eq.${location},${provinceIn}`,
+      };
     }
+    return { mode: 'eq-community', value: location };
   }
 
   const aliases = CITY_ALIASES[location];
   if (aliases?.length) {
-    // Solo ciudades alias — no toda la provincia (evita mezclar Getaria en SS, Ibiza en Palma…)
-    const parts = aliases.map((c) => `city.eq.${c}`);
-    return { mode: 'or', value: parts.join(',') };
+    // Solo ciudades alias — no toda la provincia
+    return { mode: 'or', value: aliases.map((c) => `city.eq.${c}`).join(',') };
   }
 
-  // Por defecto: ciudad O provincia con el mismo nombre (cubre Madrid ciudad/provincia)
+  // Ciudad O provincia con el mismo nombre (Madrid, Valencia…)
   return {
     mode: 'or',
     value: `city.eq.${location},province.eq.${location}`,
@@ -64,22 +73,24 @@ export function getBlogLocationFilter(post: BlogLocationInput): {
 }
 
 /** Aplica el filtro de ubicación a una query de Supabase places */
-export function applyBlogLocationFilter<T extends { or: Function; in: Function; eq: Function }>(
-  query: T,
-  post: BlogLocationInput
-): T {
+export function applyBlogLocationFilter<
+  T extends { or: Function; in: Function; eq: Function }
+>(query: T, post: BlogLocationInput): T {
   const filter = getBlogLocationFilter(post);
 
   if (filter.mode === 'in') {
-    return query.in('province', filter.value as string[]) as T;
+    return query.in('province', filter.value) as T;
   }
   if (filter.mode === 'eq-province') {
-    return query.eq('province', filter.value as string) as T;
+    return query.eq('province', filter.value) as T;
   }
   if (filter.mode === 'eq-city') {
-    return query.eq('city', filter.value as string) as T;
+    return query.eq('city', filter.value) as T;
   }
-  return query.or(filter.value as string) as T;
+  if (filter.mode === 'eq-community') {
+    return query.eq('community', filter.value) as T;
+  }
+  return query.or(filter.value) as T;
 }
 
 /** True si la URL de portada es inválida / Unsplash Source (API muerta) */
