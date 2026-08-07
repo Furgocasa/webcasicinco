@@ -183,8 +183,11 @@ export async function enrichPendingPlaces(
         (place.photos && place.photos.length > 0 ? place.photos : photoRefsFromDetails) as string[];
 
       if (!skipGooglePhotos && supabaseUrls.length === 0 && photoReferences.length > 0) {
+        // GooglePlacePhoto exige height/width; la descarga solo usa photo_reference
         const photosArray = photoReferences.map((ref: string) => ({
           photo_reference: ref,
+          height: 1200,
+          width: 1200,
         }));
         const { supabaseUrls: downloadedUrls } = await downloadAndUploadPhotosToSupabase(
           photosArray,
