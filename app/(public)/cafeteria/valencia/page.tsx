@@ -48,7 +48,7 @@ export default async function CafeteríasMadridPage() {
     .eq('published', true)
     .gte('rating', 4.7)
     .order('rating', { ascending: false })
-    .order('user_ratings_total', { ascending: false })
+    .order('review_count', { ascending: false })
     .limit(10);
   
   if (error) {
@@ -61,7 +61,7 @@ export default async function CafeteríasMadridPage() {
 
   // Calcular estadísticas
   const avgRating = (places.reduce((sum, p) => sum + p.rating, 0) / places.length).toFixed(1);
-  const totalReviews = places.reduce((sum, p) => sum + (p.user_ratings_total || 0), 0);
+  const totalReviews = places.reduce((sum, p) => sum + (p.review_count || 0), 0);
 
   // Schema.org para SEO
   const schema = {
@@ -79,7 +79,7 @@ export default async function CafeteríasMadridPage() {
         "aggregateRating": {
           "@type": "AggregateRating",
           "ratingValue": place.rating,
-          "reviewCount": place.user_ratings_total,
+          "reviewCount": place.review_count,
           "bestRating": 5
         }
       }
@@ -188,7 +188,7 @@ export default async function CafeteríasMadridPage() {
           <div className="grid gap-6">
             {places.map((place, index) => {
               const photoUrl = getPlacePhotoUrl(place, 0, 800);
-              const tier = calculateQualityTier(place.rating, place.user_ratings_total || 0);
+              const tier = calculateQualityTier(place.rating, place.review_count || 0);
               const tierInfo = getTierInfo(tier);
 
               return (
@@ -235,7 +235,7 @@ export default async function CafeteríasMadridPage() {
                         </div>
                         <div className="flex items-center gap-2 text-gray-600">
                           <Users className="h-5 w-5" />
-                          <span className="font-semibold">{place.user_ratings_total?.toLocaleString()} reseñas</span>
+                          <span className="font-semibold">{place.review_count?.toLocaleString()} reseñas</span>
                         </div>
                         {place.price_level && (
                           <span className="text-gray-600 font-semibold">

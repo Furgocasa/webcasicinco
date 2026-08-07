@@ -357,7 +357,6 @@ export default function LugaresPage() {
     try {
       setEnriching(true);
       
-      // 🎯 UNIFICADO: Usar el mismo endpoint que el dashboard
       const checkResponse = await fetch(`/api/admin/enrich-pending?t=${Date.now()}`);
       const checkData = await checkResponse.json();
       
@@ -367,7 +366,7 @@ export default function LugaresPage() {
         return;
       }
 
-      const { pending, completed, totalPlaces, percentage } = checkData.stats;
+      const { pending, emptyPublished, completed, totalPlaces, percentage } = checkData.stats;
       
       if (pending === 0) {
         toast.info(`✅ Todos los lugares ya están enriquecidos (${completed}/${totalPlaces} - ${percentage}%)`);
@@ -375,64 +374,43 @@ export default function LugaresPage() {
         return;
       }
 
+      const batchSize = 100;
+      const batchesNeeded = Math.ceil(pending / batchSize);
       const estimatedMinutes = Math.ceil(pending * 3 / 60);
-      if (!confirm(`¿Enriquecer ${pending} lugares con IA? (incluye borradores)\n\n📊 Progreso actual: ${completed}/${totalPlaces} (${percentage}%)\n⏱️ Tiempo estimado: ~${estimatedMinutes} minutos\n\n⚠️ El proceso se ejecutará en segundo plano.`)) {
+      const emptyNote = emptyPublished > 0
+        ? `\n\n⚠️ ${emptyPublished} fichas vacías publicadas se despublicarán hasta enriquecer.`
+        : '';
+
+      if (!confirm(
+        `¿Iniciar enriquecimiento Fase 2?\n\n` +
+        `📋 Pendientes: ${pending}\n` +
+        `📊 Progreso: ${completed}/${totalPlaces} (${percentage}%)\n` +
+        `📦 Este clic lanza ${batchSize} lugares (quedan ~${batchesNeeded} lotes de ${batchSize})\n` +
+        `⏱️ Tiempo total estimado: ~${estimatedMinutes} min` +
+        emptyNote +
+        `\n\nEl proceso corre en segundo plano en el servidor.`
+      )) {
         setEnriching(false);
         return;
       }
 
-      setEnrichProgress({ current: 0, total: pending });
+      setEnrichProgress({ current: 0, total: batchSize });
 
-      // Obtener los lugares pendientes reales desde Supabase (INCLUYENDO BORRADORES)
-      const supabase = createClient();
-      const { data: placesToEnrich } = await supabase
-        .from('places')
-        .select('id, name, published')
-        .is('ai_description', null)
-        .limit(pending);
+      const response = await fetch('/api/admin/enrich-pending', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ batchSize, skipGooglePhotos: true, queueLegacy: true }),
+      });
 
-      if (!placesToEnrich || placesToEnrich.length === 0) {
-        toast.info('No hay lugares pendientes de enriquecer');
-        setEnriching(false);
-        return;
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Error al iniciar enriquecimiento');
       }
 
-      let enriched = 0;
-      let errors = 0;
-
-      // Procesar en lotes de 5 para mejor rendimiento
-      const batchSize = 5;
-      for (let i = 0; i < placesToEnrich.length; i += batchSize) {
-        const batch = placesToEnrich.slice(i, i + batchSize);
-        
-        await Promise.all(batch.map(async (place) => {
-          try {
-            const response = await fetch('/api/admin/enrich-single-place', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ placeId: place.id }),
-            });
-
-            if (response.ok) {
-              enriched++;
-              console.log(`✅ ${place.name} enriquecido`);
-            } else {
-              errors++;
-              console.error(`❌ Error enriqueciendo ${place.name}`);
-            }
-          } catch (error) {
-            errors++;
-            console.error(`❌ Error en ${place.name}:`, error);
-          }
-        }));
-
-        setEnrichProgress({ current: Math.min(i + batchSize, placesToEnrich.length), total: pending });
-        
-        // Pequeña pausa entre lotes para no saturar
-        await new Promise(resolve => setTimeout(resolve, 500));
-      }
-
-      toast.success(`✅ Completado: ${enriched} enriquecidos, ${errors} errores`);
+      toast.success(
+        `🎨 Lote de ${batchSize} lugares en cola. Repite el botón o usa scripts/run-enrichment-batch.ts para los ${pending - batchSize > 0 ? pending - batchSize : 0} restantes.`
+      );
       loadPlaces();
       
     } catch (error: any) {

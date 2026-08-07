@@ -107,7 +107,7 @@ export default async function CategoryPage({ params }: Props) {
     .eq('category', category)
     .eq('published', true)
     .order('rating', { ascending: false })
-    .order('user_ratings_total', { ascending: false })
+    .order('review_count', { ascending: false })
     .limit(10);
 
   if (error || !places) {
@@ -284,7 +284,7 @@ export default async function CategoryPage({ params }: Props) {
                             </div>
                             <div className="flex items-center gap-2 text-gray-600">
                               <Users className="h-5 w-5" />
-                              <span className="font-semibold">{place.user_ratings_total?.toLocaleString()} reseñas</span>
+                              <span className="font-semibold">{place.review_count?.toLocaleString()} reseñas</span>
                             </div>
                             {place.price_level && (
                               <span className="text-gray-600 font-semibold">

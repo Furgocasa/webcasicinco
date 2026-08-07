@@ -156,7 +156,7 @@ export default async function CategoryProvincePage({ params }: Props) {
     .eq('published', true)
     .gte('rating', 4.7)
     .order('rating', { ascending: false })
-    .order('user_ratings_total', { ascending: false })
+    .order('review_count', { ascending: false })
     .limit(10); // Solo Top 10 públicos - resto en el mapa
   
   // Debug: Log si no hay lugares
@@ -315,7 +315,7 @@ export default async function CategoryProvincePage({ params }: Props) {
           {/* Grid de lugares */}
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {places.map((place, index) => {
-              const tier = calculateQualityTier(place.rating, place.user_ratings_total);
+              const tier = calculateQualityTier(place.rating, place.review_count);
               const tierInfo = getTierInfo(tier);
               const photoUrl = getPlacePhotoUrl(place, 0, 600);
               
@@ -374,7 +374,7 @@ export default async function CategoryProvincePage({ params }: Props) {
                           <span className="font-bold text-gray-900">{place.rating}</span>
                         </div>
                         <span className="text-sm text-gray-600">
-                          ({place.user_ratings_total?.toLocaleString()} reseñas)
+                          ({place.review_count?.toLocaleString()} reseñas)
                         </span>
                       </div>
                       

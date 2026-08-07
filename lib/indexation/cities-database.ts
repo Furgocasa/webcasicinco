@@ -131,6 +131,11 @@ export const CITIES_BY_PROVINCE: Record<string, ProvinceData> = {
       { name: 'Oviedo', coords: { lat: 43.3614, lng: -5.8490 }, population: 220000, priority: 1 },
       { name: 'Avilés', coords: { lat: 43.5564, lng: -5.9250 }, population: 78000, priority: 2 },
       { name: 'Siero', coords: { lat: 43.3911, lng: -5.6622 }, population: 52000, priority: 2 },
+      { name: 'Langreo', coords: { lat: 43.3247, lng: -5.6914 }, population: 39000, priority: 3 },
+      { name: 'Navia', coords: { lat: 43.5389, lng: -6.7236 }, population: 8400, priority: 3 },
+      { name: 'Tapia de Casariego', coords: { lat: 43.5703, lng: -6.9442 }, population: 3900, priority: 3 },
+      { name: 'Luarca', coords: { lat: 43.5422, lng: -6.5339 }, population: 5200, priority: 3 },
+      { name: 'Cudillero', coords: { lat: 43.5619, lng: -6.1456 }, population: 5100, priority: 3 },
     ],
   },
 
@@ -385,6 +390,13 @@ export const CITIES_BY_PROVINCE: Record<string, ProvinceData> = {
     name: 'Lugo',
     cities: [
       { name: 'Lugo', coords: { lat: 43.0097, lng: -7.5567 }, population: 98000, priority: 2 },
+      { name: 'Monforte de Lemos', coords: { lat: 42.5206, lng: -7.5147 }, population: 19000, priority: 3 },
+      { name: 'Vilalba', coords: { lat: 43.2978, lng: -7.6811 }, population: 14000, priority: 3 },
+      { name: 'Mondoñedo', coords: { lat: 43.4278, lng: -7.3636 }, population: 3400, priority: 3 },
+      { name: 'Foz', coords: { lat: 43.5686, lng: -7.2569 }, population: 9800, priority: 3 },
+      { name: 'Ribadeo', coords: { lat: 43.5372, lng: -7.0419 }, population: 9500, priority: 3 },
+      { name: 'Burela', coords: { lat: 43.6583, lng: -7.3583 }, population: 9400, priority: 3 },
+      { name: 'Viveiro', coords: { lat: 43.6628, lng: -7.5936 }, population: 15000, priority: 3 },
     ],
   },
   'Ourense': {

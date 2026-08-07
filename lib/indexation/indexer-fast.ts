@@ -300,9 +300,10 @@ async function processPlacesFromZone(
         photos: details.photos ? details.photos.map((p: any) => p.photo_reference) : [],
         phone: details.formatted_phone_number,
         website: details.website,
-        // opening_hours: (details as any).opening_hours?.weekday_text || [], // ❌ ELIMINADO - columna no existe en BD
-        // geometry: details.geometry, // ❌ ELIMINADO - columna no existe en BD
-        published: true,
+        // Fase 1: borrador hasta Fase 2 (IA + fotos)
+        published: false,
+        needs_enrichment: true,
+        enrichment_status: 'pending',
         created_at: new Date().toISOString(),
       };
 

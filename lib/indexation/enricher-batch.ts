@@ -1,7 +1,7 @@
 /**
  * ENRICHER - FASE 2
- * Toma lugares "aprobados" (needs_enrichment = true) y los enriquece con:
- * - Fotos descargadas a Supabase Storage
+ * Toma lugares pendientes (needs_enrichment = true, sin ai_description) y los enriquece con:
+ * - Fotos descargadas a Supabase Storage (opcional)
  * - Descripción generada con IA
  * - Resumen de reseñas con IA
  * - Highlights con IA
@@ -12,22 +12,52 @@ import { createAdminClient } from '../supabase/server';
 import { getPlaceDetails, downloadAndUploadPhotosToSupabase, extractReviews } from '../google/places';
 import { generatePlaceDescription, summarizeReviews, generateHighlights } from '../ai/openai';
 import { categorizePlaceWithAI } from '../ai/categorize';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 export interface EnrichmentResult {
   totalPending: number;
   processed: number;
   successful: number;
   failed: number;
+  queued: number;
   errors: string[];
 }
 
 export interface EnrichmentOptions {
   /** Si true (por defecto), NO descarga fotos de Google Places Photo API */
   skipGooglePhotos?: boolean;
+  /** Si true (por defecto), encola fichas vacías publicadas por error en Fase 1 */
+  queueLegacy?: boolean;
 }
 
 /**
- * Enriquece lugares pendientes (needs_enrichment = true)
+ * Encola fichas vacías que Fase 1 publicó por error: despublica y marca needs_enrichment.
+ */
+export async function queueEmptyPlacesForEnrichment(
+  supabase: SupabaseClient
+): Promise<number> {
+  const { data, error } = await supabase
+    .from('places')
+    .update({
+      needs_enrichment: true,
+      published: false,
+      enrichment_status: 'pending',
+    })
+    .is('ai_description', null)
+    .eq('enrichment_status', 'pending')
+    .eq('published', true)
+    .select('id');
+
+  if (error) {
+    console.error('[ENRICHER] Error encolando fichas vacías:', error.message);
+    return 0;
+  }
+
+  return data?.length ?? 0;
+}
+
+/**
+ * Enriquece lugares pendientes (needs_enrichment = true, sin IA)
  */
 export async function enrichPendingPlaces(
   batchSize: number = 100,
@@ -38,6 +68,7 @@ export async function enrichPendingPlaces(
   const skipGooglePhotos =
     options.skipGooglePhotos ??
     process.env.SKIP_GOOGLE_PHOTOS !== 'false';
+  const queueLegacy = options.queueLegacy ?? true;
   const supabase = createAdminClient();
 
   console.log('\n[ENRICHER] 🎨 INICIANDO ENRIQUECIMIENTO CON IA');
@@ -46,12 +77,21 @@ export async function enrichPendingPlaces(
     `[ENRICHER] Fotos Google: ${skipGooglePhotos ? '❌ DESACTIVADAS (0€ fotos)' : '⚠️ ACTIVADAS (coste por foto)'}\n`
   );
 
-  // Obtener lugares pendientes
+  let queued = 0;
+  if (queueLegacy) {
+    queued = await queueEmptyPlacesForEnrichment(supabase);
+    if (queued > 0) {
+      console.log(`[ENRICHER] 📥 ${queued} fichas vacías encoladas (despublicadas hasta enriquecer)\n`);
+    }
+  }
+
+  // Lugares pendientes de Fase 2 (incluye legacy mal publicados en Fase 1)
   const { data: pendingPlaces, error: fetchError } = await supabase
     .from('places')
     .select('*')
     .eq('needs_enrichment', true)
     .eq('enrichment_status', 'pending')
+    .is('ai_description', null)
     .limit(batchSize);
 
   if (fetchError) {
@@ -65,6 +105,7 @@ export async function enrichPendingPlaces(
       processed: 0,
       successful: 0,
       failed: 0,
+      queued,
       errors: []
     };
   }
@@ -131,25 +172,28 @@ export async function enrichPendingPlaces(
         console.log('[ENRICHER]   ↪️ cafe → bar (categoría permitida en BD)');
       }
 
-      // 2. Fotos: reutilizar Supabase existente; NO descargar de Google salvo opt-in explícito
+      // 2. Fotos: reutilizar Supabase; si no hay, usar refs de BD o de Google Details
       let supabaseUrls: string[] = Array.isArray(place.photo_urls)
         ? place.photo_urls.filter(Boolean)
         : [];
 
-      if (!skipGooglePhotos && supabaseUrls.length === 0) {
-        const photoReferences = place.photos || [];
-        if (photoReferences.length > 0) {
-          const photosArray = photoReferences.map((ref: string) => ({
-            photo_reference: ref,
-          }));
-          const { supabaseUrls: downloadedUrls } = await downloadAndUploadPhotosToSupabase(
-            photosArray,
-            place.name,
-            place.google_place_id,
-            5
-          );
-          supabaseUrls = downloadedUrls;
-        }
+      const photoRefsFromDetails =
+        details.photos?.map((p: { photo_reference: string }) => p.photo_reference) || [];
+      const photoReferences =
+        (place.photos && place.photos.length > 0 ? place.photos : photoRefsFromDetails) as string[];
+
+      if (!skipGooglePhotos && supabaseUrls.length === 0 && photoReferences.length > 0) {
+        const photosArray = photoReferences.map((ref: string) => ({
+          photo_reference: ref,
+        }));
+        const { supabaseUrls: downloadedUrls } = await downloadAndUploadPhotosToSupabase(
+          photosArray,
+          place.name,
+          place.google_place_id,
+          5
+        );
+        supabaseUrls = downloadedUrls;
+        console.log(`[ENRICHER]   📷 ${supabaseUrls.length} fotos subidas a Supabase`);
       } else if (skipGooglePhotos) {
         console.log(
           `[ENRICHER]   📷 Fotos Google omitidas (${supabaseUrls.length} ya en Supabase)`
@@ -185,13 +229,14 @@ export async function enrichPendingPlaces(
         .from('places')
         .update({
           category: finalCategory, // ✅ ACTUALIZAR categoría (mapeada a BD)
+          photos: photoReferences.length > 0 ? photoReferences : place.photos,
           photo_urls: supabaseUrls,
           ai_description: description,
           ai_review_summary: reviewSummary,
           ai_highlights: highlights,
           needs_enrichment: false,
           enrichment_status: 'completed',
-          published: true, // ✅ Ahora sí publicar
+          published: true, // ✅ Publicar solo tras Fase 2
           updated_at: new Date().toISOString(),
         })
         .eq('id', place.id);
@@ -228,6 +273,7 @@ export async function enrichPendingPlaces(
     processed,
     successful,
     failed,
+    queued,
     errors
   };
 }

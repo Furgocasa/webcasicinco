@@ -24,16 +24,16 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json().catch(() => ({}));
-    const { batchSize = 100, skipGooglePhotos = true } = body;
+    const { batchSize = 100, skipGooglePhotos = true, queueLegacy = true } = body;
 
     console.log(
-      `[API] Iniciando enriquecimiento de hasta ${batchSize} lugares (skipGooglePhotos=${skipGooglePhotos})...`
+      `[API] Iniciando enriquecimiento de hasta ${batchSize} lugares (skipGooglePhotos=${skipGooglePhotos}, queueLegacy=${queueLegacy})...`
     );
 
     // Ejecutar en background
     Promise.resolve().then(async () => {
       try {
-        await enrichPendingPlaces(batchSize, user.id, { skipGooglePhotos });
+        await enrichPendingPlaces(batchSize, user.id, { skipGooglePhotos, queueLegacy });
       } catch (err) {
         console.error('Error en enriquecimiento:', err);
       }
@@ -71,6 +71,19 @@ export async function GET(request: NextRequest) {
       .select('*', { count: 'exact', head: true })
       .is('ai_description', null);
 
+    const { count: emptyPublished } = await supabase
+      .from('places')
+      .select('*', { count: 'exact', head: true })
+      .is('ai_description', null)
+      .eq('published', true);
+
+    const { count: queuedForEnrichment } = await supabase
+      .from('places')
+      .select('*', { count: 'exact', head: true })
+      .eq('needs_enrichment', true)
+      .eq('enrichment_status', 'pending')
+      .is('ai_description', null);
+
     const { count: completed } = await supabase
       .from('places')
       .select('*', { count: 'exact', head: true })
@@ -84,6 +97,8 @@ export async function GET(request: NextRequest) {
       success: true,
       stats: {
         pending: pending || 0,
+        emptyPublished: emptyPublished || 0,
+        queuedForEnrichment: queuedForEnrichment || 0,
         completed: completed || 0,
         totalPlaces: totalPlaces || 0,
         percentage: totalPlaces ? Math.round(((completed || 0) / totalPlaces) * 100) : 0,

@@ -256,21 +256,36 @@ export function BlogPostContent({ post }: BlogPostContentProps) {
 
                 {post.places && post.places.length > 0 ? (
                   <div className="space-y-6">
-                    {post.places.map((place, index) => (
+                    {post.places.map((place, index) => {
+                      // Solo photo_urls de Supabase: el fallback Google suele fallar en el navegador
+                      // (key restringida / refs caducadas) y [] vacío es truthy → imagen rota.
+                      const photoUrl = getPlacePhotoUrl(
+                        { photo_urls: place.photo_urls, photos: null },
+                        0,
+                        400
+                      );
+
+                      return (
                       <Card key={place.id} className="overflow-hidden hover:shadow-xl transition">
                         <div className="md:flex">
-                          {(place.photo_urls || place.photos || place.photo_reference) && (
-                            <div className="md:w-1/3 h-48 md:h-auto">
+                          <div className="md:w-1/3 h-48 md:h-auto min-h-[12rem] bg-gray-100 flex items-center justify-center overflow-hidden">
+                            {photoUrl ? (
                               <img
-                                src={getPlacePhotoUrl({
-                                  photo_urls: place.photo_urls,
-                                  photos: place.photos || (place.photo_reference ? [place.photo_reference] : null)
-                                }, 0, 400) || '/images/placeholder.png'}
+                                src={photoUrl}
                                 alt={place.name}
                                 className="w-full h-full object-cover"
+                                loading="lazy"
+                                onError={(e) => {
+                                  // Si la URL de Storage falla, ocultar img y dejar el fondo gris
+                                  e.currentTarget.style.display = 'none';
+                                }}
                               />
-                            </div>
-                          )}
+                            ) : (
+                              <span className="text-gray-400 text-4xl" aria-hidden>
+                                📍
+                              </span>
+                            )}
+                          </div>
 
                           <div className="p-6 flex-1">
                             <div className="flex items-start justify-between mb-3">
@@ -320,7 +335,8 @@ export function BlogPostContent({ post }: BlogPostContentProps) {
                           </div>
                         </div>
                       </Card>
-                    ))}
+                      );
+                    })}
                   </div>
                 ) : (
                   <div className="text-center py-12 bg-white rounded-xl">
