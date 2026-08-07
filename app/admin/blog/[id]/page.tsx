@@ -35,7 +35,7 @@ export default function EditBlogPostPage() {
   const [title, setTitle] = useState('');
   const [slug, setSlug] = useState('');
   const [metaDescription, setMetaDescription] = useState('');
-  const [category, setCategory] = useState<'restaurante' | 'bar' | 'cafe' | 'hotel'>('restaurante');
+  const [category, setCategory] = useState<'restaurante' | 'bar' | 'hotel'>('restaurante');
   const [location, setLocation] = useState('');
   const [locationType, setLocationType] = useState<'city' | 'province' | 'community'>('city');
   const [introText, setIntroText] = useState('');
@@ -70,7 +70,9 @@ export default function EditBlogPostPage() {
         setTitle(post.title);
         setSlug(post.slug);
         setMetaDescription(post.meta_description);
-        setCategory(post.category);
+        // Solo 3 categorías permitidas; cafe legacy → bar
+        const rawCategory = post.category === 'cafe' ? 'bar' : post.category;
+        setCategory(rawCategory as 'restaurante' | 'bar' | 'hotel');
         setLocation(post.location);
         setLocationType(post.location_type);
         setIntroText(post.intro_text);
@@ -513,12 +515,11 @@ export default function EditBlogPostPage() {
                   </label>
                   <select
                     value={category}
-                    onChange={(e) => setCategory(e.target.value as any)}
+                    onChange={(e) => setCategory(e.target.value as 'restaurante' | 'bar' | 'hotel')}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                   >
                     <option value="restaurante">🍽️ Restaurantes</option>
                     <option value="bar">🍺 Bares</option>
-                    <option value="cafe">☕ Cafeterías</option>
                     <option value="hotel">🏨 Hoteles</option>
                   </select>
                 </div>
