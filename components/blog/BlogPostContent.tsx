@@ -349,7 +349,7 @@ export function BlogPostContent({ post }: BlogPostContentProps) {
               {/* Contenido SEO extra (consejos, FAQ…) sin duplicar fichas de lugares */}
               {fullHtmlMode && restHtml && (
                 <div className="mb-12">
-                  <h2 className="text-2xl font-bold text-gray-900 mb-6">Guía y consejos prácticos</h2>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-6">Guía y consejos</h2>
                   <div
                     className="blog-article-html prose prose-lg max-w-none"
                     dangerouslySetInnerHTML={{ __html: restHtml }}

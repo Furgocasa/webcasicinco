@@ -17,7 +17,7 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 import { createClient } from '@supabase/supabase-js';
 import {
-  generateBlogArticle,
+  generateBlogArticleWithReview,
   generateBlogMetadata,
 } from '../lib/ai/openai';
 import { BLOG_FULL_HTML_MARKER, buildBlogPostTitle } from '../types/blog';
@@ -265,16 +265,21 @@ async function generateCalendarPosts(calendar: CalendarPost[], fromIndex = 1) {
         continue;
       }
 
-      console.log('   🤖 Generando artículo SEO (2 pasadas)...');
-      const html = await generateBlogArticle({
+      console.log('   🤖 Generando artículo SEO (redactor + agente revisor)...');
+      const genResult = await generateBlogArticleWithReview({
         title,
         category: post.category,
         location: post.location,
         locationType: post.locationType,
         year,
         verifiedPlaces,
-        extraContext: `Artículo programado fase ${post.phase}. Enlaza al mapa de Casi Cinco y a fichas verificadas.`,
+        extraContext: `Artículo programado fase ${post.phase}. Enlaza al mapa de Casi Cinco y a fichas verificadas. NO dupliques fichas h2/h3 por lugar (cards Top 10 en página).`,
       });
+
+      const html = genResult.html;
+      console.log(
+        `   📋 Revisor: ${genResult.review.score}/100 (${genResult.iterations} pasadas) · ${genResult.wordCount} palabras`
+      );
 
       const markedHtml = `${BLOG_FULL_HTML_MARKER}\n${html}`;
 

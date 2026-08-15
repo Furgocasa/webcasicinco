@@ -164,49 +164,26 @@ export default function RutaPage() {
     });
   }, [placesNearRoute, sortBy, userLocation, calculateDistance]);
 
-  // ✅ OPTIMIZACIÓN: Cache de rutas en localStorage (ahorro 50% Directions)
-  const getCachedRoute = (origin: string, dest: string): google.maps.DirectionsResult | null => {
-    try {
-      const cacheKey = `route_${origin.toLowerCase()}_${dest.toLowerCase()}`;
-      const cached = localStorage.getItem(cacheKey);
-      
-      if (cached) {
-        const { data, timestamp } = JSON.parse(cached);
-        const CACHE_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 días
-        
-        // Cache válido por 7 días
-        if (Date.now() - timestamp < CACHE_DURATION) {
-          console.log('💾 Ruta encontrada en caché - Ahorro: $0.005');
-          return data;
-        }
-      }
-    } catch (error) {
-      // Si falla el caché, continuar normalmente
-      console.warn('Error leyendo caché de rutas:', error);
+  // Traducir errores de Google Directions a mensajes claros en español
+  // Evita mensajes engañosos: solo hablamos de "sin conexión" si realmente no hay red
+  const getRouteErrorMessage = (error: unknown): string => {
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      return 'No tienes conexión a internet. Revisa tu red e inténtalo de nuevo.';
     }
-    return null;
-  };
-
-  const saveRouteToCache = (origin: string, dest: string, data: google.maps.DirectionsResult) => {
-    try {
-      // ✅ OPTIMIZACIÓN: Desactivar caché de rutas para evitar QuotaExceededError
-      // DirectionsResult es muy pesado (~500KB-2MB) y localStorage tiene límite de 5-10MB total
-      // Las rutas cambian con el tráfico, así que el caché no es tan útil
-      console.log('💾 Caché de ruta omitido (evita QuotaExceededError)');
-      return;
-      
-      /* Código original (desactivado):
-      const cacheKey = `route_${origin.toLowerCase()}_${dest.toLowerCase()}`;
-      localStorage.setItem(cacheKey, JSON.stringify({
-        data,
-        timestamp: Date.now()
-      }));
-      console.log('💾 Ruta guardada en caché');
-      */
-    } catch (error) {
-      // Si falla guardar en caché, no afecta funcionalidad
-      console.warn('Error guardando ruta en caché:', error);
+    const code = String((error as any)?.code || (error as any)?.message || '');
+    if (code.includes('NOT_FOUND')) {
+      return 'No se encontró el origen o el destino. Revisa las direcciones.';
     }
+    if (code.includes('ZERO_RESULTS')) {
+      return 'No existe una ruta en coche entre esos dos puntos.';
+    }
+    if (code.includes('OVER_QUERY_LIMIT')) {
+      return 'Demasiadas peticiones seguidas. Espera unos segundos e inténtalo de nuevo.';
+    }
+    if (code.includes('REQUEST_DENIED')) {
+      return 'El servicio de rutas no está disponible en este momento.';
+    }
+    return 'Error temporal calculando la ruta. Inténtalo de nuevo.';
   };
 
   const calculateRoute = async () => {
@@ -260,29 +237,37 @@ export default function RutaPage() {
     setCalculating(true);
     
     try {
-      // ✅ Verificar caché primero (con valores finales)
-      const cachedRoute = getCachedRoute(finalOrigin, finalDestination);
-      
+      // Calcular ruta (sin caché en localStorage: el DirectionsResult no es
+      // serializable de forma fiable y las entradas antiguas rompían el renderizado)
+      const directionsService = new google.maps.DirectionsService();
+
+      const routeRequest: google.maps.DirectionsRequest = {
+        origin: finalOrigin,
+        destination: finalDestination,
+        travelMode: google.maps.TravelMode.DRIVING,
+      };
+
       let results: google.maps.DirectionsResult;
-      
-      if (cachedRoute) {
-        // Usar ruta cacheada
-        results = cachedRoute;
-        toast.success('✅ Ruta cargada desde caché');
-      } else {
-        // Calcular nueva ruta
-        const directionsService = new google.maps.DirectionsService();
-        
-        results = await directionsService.route({
-          origin: finalOrigin,
-          destination: finalDestination,
-          travelMode: google.maps.TravelMode.DRIVING,
-        });
-        
-        // Guardar en caché (con valores finales)
-        saveRouteToCache(finalOrigin, finalDestination, results);
-        toast.success('✅ Ruta calculada correctamente');
+
+      try {
+        results = await directionsService.route(routeRequest);
+      } catch (firstError: any) {
+        // Si el error es definitivo (dirección inválida, sin ruta), no reintentar
+        const code = String(firstError?.code || firstError?.message || '');
+        const isDefinitive =
+          code.includes('NOT_FOUND') ||
+          code.includes('ZERO_RESULTS') ||
+          code.includes('REQUEST_DENIED');
+
+        if (isDefinitive) throw firstError;
+
+        // Error transitorio (microcorte de red, límite puntual): reintentar una vez
+        console.warn('⚠️ Fallo transitorio calculando ruta, reintentando...', firstError);
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        results = await directionsService.route(routeRequest);
       }
+
+      toast.success('✅ Ruta calculada correctamente');
 
       setDirectionsResponse(results);
       
@@ -334,7 +319,7 @@ export default function RutaPage() {
       }
     } catch (error) {
       console.error('Error calculando ruta:', error);
-      toast.error('No se pudo calcular la ruta. Verifica las direcciones.');
+      toast.error(getRouteErrorMessage(error));
     } finally {
       setCalculating(false);
     }
@@ -348,7 +333,9 @@ export default function RutaPage() {
       
       // 1. Obtener solo lugares de categoría seleccionada (optimización)
       // ✅ OPTIMIZACIÓN: fields=light reduce payload 80% (solo campos esenciales)
-      let queryParams = 'limit=2000&fields=light';
+      // ⚠️ limit=5000 activa la carga por lotes en la API y devuelve TODOS los lugares
+      // (con límites menores Supabase corta en 1000 filas y faltaban lugares en la ruta)
+      let queryParams = 'limit=5000&fields=light';
       if (categoryFilter) {
         queryParams += `&category=${categoryFilter}`;
       }
@@ -356,6 +343,11 @@ export default function RutaPage() {
       console.log(`📡 Llamando a API: /api/places?${queryParams}`);
       // Agregar timestamp para forzar recarga de lugares frescos (sin caché)
       const response = await fetch(`/api/places?${queryParams}&t=${Date.now()}`);
+
+      if (!response.ok) {
+        throw new Error(`Error HTTP ${response.status} cargando lugares`);
+      }
+
       const data = await response.json();
       
       console.log('📦 Respuesta de API:', {
@@ -432,7 +424,12 @@ export default function RutaPage() {
       
     } catch (error) {
       console.error('❌ Error buscando lugares:', error);
-      toast.error('Error al buscar lugares cercanos. Revisa la consola para más detalles.');
+      // Solo hablar de conexión si realmente no hay red
+      if (typeof navigator !== 'undefined' && !navigator.onLine) {
+        toast.error('No tienes conexión a internet. No se pudieron cargar los lugares.');
+      } else {
+        toast.error('Error al buscar lugares cercanos. Inténtalo de nuevo.');
+      }
     } finally {
       setLoadingPlaces(false);
     }

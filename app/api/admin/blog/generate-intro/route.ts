@@ -1,25 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { createClient as createAdminClient } from '@supabase/supabase-js';
+import { createClient as createAdminClient, type SupabaseClient } from '@supabase/supabase-js';
 import {
   generateBlogIntro,
   generateBlogArticle,
+  generateBlogArticleWithReview,
   generateBlogMetadata,
+  reviewExistingBlogArticle,
+  regenerateBlogArticleUntilApproved,
   type BlogVerifiedPlace,
 } from '@/lib/ai/openai';
-import { BLOG_FULL_HTML_MARKER } from '@/types/blog';
+import { BLOG_FULL_HTML_MARKER, extractBlogHtml, isBlogFullHtml } from '@/types/blog';
 import { comparePlacesByTier } from '@/lib/utils/tier-calculator';
+import { applyBlogLocationFilter } from '@/lib/utils/blog-places';
 
 export const dynamic = 'force-dynamic';
-export const maxDuration = 120;
+export const maxDuration = 300;
 
-type GenerateMode = 'intro' | 'article' | 'metadata';
+type GenerateMode = 'intro' | 'article' | 'metadata' | 'review' | 'regenerate';
 
 /**
  * POST /api/admin/blog/generate-intro
  * Genera contenido de blog con IA
  * - mode: 'intro' → intro corta en texto plano (legacy)
- * - mode: 'article' → artículo HTML completo SEO (2 pasadas)
+ * - mode: 'article' → artículo HTML completo SEO (borrador + refine + agente revisor)
+ * - mode: 'review' → revisar HTML existente (SEO/UX) sin regenerar
+ * - mode: 'regenerate' → revisar y corregir/regenerar hasta aprobación del revisor
  * - mode: 'metadata' → metadatos SEO a partir del HTML existente
  */
 export async function POST(request: NextRequest) {
@@ -40,6 +46,7 @@ export async function POST(request: NextRequest) {
       locationType,
       extraContext,
       htmlContent,
+      withReview = true,
     } = body as {
       mode?: GenerateMode;
       title?: string;
@@ -48,6 +55,7 @@ export async function POST(request: NextRequest) {
       locationType?: 'city' | 'province' | 'community';
       extraContext?: string;
       htmlContent?: string;
+      withReview?: boolean;
     };
 
     // Metadatos SEO: solo requiere título + HTML
@@ -76,56 +84,158 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, intro });
     }
 
+    // Helper: top 10 verificados con filtro unificado (comunidades, alias, Costa del Sol…)
+    async function fetchVerifiedPlacesForPost(
+      adminSupabase: SupabaseClient<any, any, any>,
+      postCategory: typeof category,
+      postLocation: typeof location,
+      postLocationType: typeof locationType
+    ): Promise<BlogVerifiedPlace[]> {
+      let placesQuery = adminSupabase
+        .from('places')
+        .select('name, rating, review_count, city, province, slug, category, address, ai_description')
+        .eq('category', postCategory!)
+        .eq('published', true)
+        .gte('rating', 4.7);
+
+      placesQuery = applyBlogLocationFilter(placesQuery, {
+        location: postLocation!,
+        location_type: postLocationType || 'city',
+        category: postCategory!,
+      });
+
+      const { data: places } = await placesQuery;
+      return (places || [])
+        .sort(comparePlacesByTier)
+        .slice(0, 10)
+        .map((p) => ({
+          name: p.name,
+          rating: p.rating,
+          review_count: p.review_count,
+          city: p.city,
+          province: p.province,
+          slug: p.slug,
+          category: p.category,
+          address: p.address,
+          ai_description: p.ai_description,
+        }));
+    }
+
+    function buildArticleInput(
+      postTitle: string,
+      verifiedPlaces: BlogVerifiedPlace[]
+    ) {
+      const yearMatch = postTitle.match(/\((20\d{2})\)/);
+      const year = yearMatch ? parseInt(yearMatch[1], 10) : new Date().getFullYear();
+      return {
+        title: postTitle,
+        category: category!,
+        location: location!,
+        locationType: locationType || 'city',
+        year,
+        verifiedPlaces,
+        extraContext,
+      };
+    }
+
+    const adminSupabase = createAdminClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
+    // Revisar HTML existente (sin regenerar)
+    if (mode === 'review') {
+      if (!title || !htmlContent) {
+        return NextResponse.json(
+          { error: 'Se requiere title y htmlContent para revisar' },
+          { status: 400 }
+        );
+      }
+
+      const verifiedPlaces = await fetchVerifiedPlacesForPost(
+        adminSupabase,
+        category,
+        location,
+        locationType
+      );
+      const articleInput = buildArticleInput(title, verifiedPlaces);
+      const html = extractBlogHtml(htmlContent.startsWith(BLOG_FULL_HTML_MARKER) ? htmlContent : htmlContent);
+      const { review, audit } = await reviewExistingBlogArticle(html, articleInput);
+
+      return NextResponse.json({
+        success: true,
+        review,
+        audit,
+        approved: review.approved && audit.passed,
+      });
+    }
+
+    // Regenerar/corregir hasta aprobación del revisor
+    if (mode === 'regenerate') {
+      if (!title) {
+        return NextResponse.json({ error: 'Se requiere title' }, { status: 400 });
+      }
+
+      const verifiedPlaces = await fetchVerifiedPlacesForPost(
+        adminSupabase,
+        category,
+        location,
+        locationType
+      );
+      const articleInput = buildArticleInput(title, verifiedPlaces);
+      const existingHtml = htmlContent
+        ? extractBlogHtml(
+            htmlContent.startsWith(BLOG_FULL_HTML_MARKER) ? htmlContent : htmlContent
+          )
+        : undefined;
+
+      const result = await regenerateBlogArticleUntilApproved(articleInput, existingHtml);
+      const markedHtml = `${BLOG_FULL_HTML_MARKER}\n${result.html}`;
+
+      return NextResponse.json({
+        success: true,
+        html: markedHtml,
+        review: result.review,
+        auditPassed: result.auditPassed,
+        iterations: result.iterations,
+        wordCount: result.wordCount,
+        approved: result.review.approved && result.auditPassed,
+        placesCount: verifiedPlaces.length,
+      });
+    }
+
     // Artículo HTML completo
     if (mode === 'article') {
       if (!title) {
         return NextResponse.json({ error: 'Se requiere title para generar artículo' }, { status: 400 });
       }
 
-      const adminSupabase = createAdminClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!
-      );
-
-      // Obtener top 10 lugares verificados de la BD
-      const { data: places } = await adminSupabase
-        .from('places')
-        .select('name, rating, review_count, city, province, slug, category, address, ai_description')
-        .eq('category', category)
-        .eq('published', true)
-        .or(`city.eq.${location},province.eq.${location}`)
-        .gte('rating', 4.7);
-
-      const sortedPlaces = (places || [])
-        .sort(comparePlacesByTier)
-        .slice(0, 10);
-
-      const verifiedPlaces: BlogVerifiedPlace[] = sortedPlaces.map((p) => ({
-        name: p.name,
-        rating: p.rating,
-        review_count: p.review_count,
-        city: p.city,
-        province: p.province,
-        slug: p.slug,
-        category: p.category,
-        address: p.address,
-        ai_description: p.ai_description,
-      }));
-
-      const yearMatch = title.match(/\((20\d{2})\)/);
-      const year = yearMatch ? parseInt(yearMatch[1], 10) : new Date().getFullYear();
-
-      const html = await generateBlogArticle({
-        title,
+      const verifiedPlaces = await fetchVerifiedPlacesForPost(
+        adminSupabase,
         category,
         location,
-        locationType: locationType || 'city',
-        year,
-        verifiedPlaces,
-        extraContext,
-      });
+        locationType
+      );
 
-      // Marcador para distinguir artículo HTML completo de intro legacy
+      const articleInput = buildArticleInput(title, verifiedPlaces);
+
+      if (withReview) {
+        const result = await generateBlogArticleWithReview(articleInput);
+        const markedHtml = `${BLOG_FULL_HTML_MARKER}\n${result.html}`;
+
+        return NextResponse.json({
+          success: true,
+          html: markedHtml,
+          review: result.review,
+          auditPassed: result.auditPassed,
+          iterations: result.iterations,
+          wordCount: result.wordCount,
+          approved: result.review.approved && result.auditPassed,
+          placesCount: verifiedPlaces.length,
+        });
+      }
+
+      const html = await generateBlogArticle(articleInput);
       const markedHtml = `${BLOG_FULL_HTML_MARKER}\n${html}`;
 
       return NextResponse.json({

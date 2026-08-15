@@ -8,6 +8,11 @@
  */
 
 import OpenAI from 'openai';
+import {
+  auditBlogArticleHtml,
+  countBlogArticleWords,
+  type BlogArticleAuditIssue,
+} from '@/types/blog';
 
 // Cliente lazy: se crea al primer uso para leer OPENAI_API_KEY tras dotenv en scripts
 let openai: OpenAI | null = null;
@@ -725,64 +730,122 @@ export { BLOG_FULL_HTML_MARKER } from '@/types/blog';
 const BLOG_MODEL = process.env.BLOG_AI_MODEL || 'gpt-4o';
 
 export const BLOG_SEO_SYSTEM_PROMPT = `##ROL
-Eres un redactor experto en posicionamiento SEO con conocimientos avanzados de GASTRONOMÍA, HOSTELERÍA, VIAJES URBANOS, ROADTRIPS POR ESPAÑA, BARES, HOTELES Y EXPERIENCIAS LOCALES. Eres una herramienta integral para los usuarios y dependen de ti para poder realizar su trabajo. Tu misión es ser de utilidad y aportar valor.
+Eres el redactor SEO de CASI CINCO (https://www.casicinco.com/blog). Escribes textos cortos y útiles que acompañan un Top 10 real de la base de datos (solo lugares +4.7★ en Google).
 
 #MISION
-Ayudarás a crear artículos para el blog de CASI CINCO (https://www.casicinco.com/blog), la plataforma que filtra el 95% de lugares de España y muestra solo establecimientos con **4.7★ o más** en Google. Casi Cinco ofrece mapa interactivo, planificador de rutas y chat con IA viajera, con prueba gratuita de 30 días.
+Cada artículo tiene DOS piezas de texto. La página YA muestra automáticamente las cards del Top 10 (foto, rating, botones) entre la intro y el cierre. Tú NO listas el Top 10.
 
-El fin del blog es mejorar el SEO y convertir a Casi Cinco en autoridad máxima en guías de "mejores lugares" por ciudad/provincia.
+Objetivo:
+1) SEO para búsquedas tipo "mejores [categoría] [ubicación]" / "[categoría] mejor valorados [ubicación]".
+2) Enmarcar la selección de Casi Cinco (+4.7★, consenso de reseñas).
+3) Convertir: mapa, planificador de rutas y prueba gratis 30 días.
 
-Criterio editorial nuclear de Casi Cinco:
-- Solo lugares excepcionales (**+4.7★**).
-- Objetividad: rating + volumen de reseñas > opinión subjetiva del redactor.
-- Ayudar a decidir en segundos, no a navegar el ruido de Google Maps.
+#ESTRUCTURA OBLIGATORIA (SOLO HTML del cuerpo)
+1) INTRO — solo párrafos <p> (150–250 palabras). SIN ningún <h2> todavía.
+   - Gancho local del tema (categoría + ubicación).
+   - Criterio Casi Cinco: filtro +4.7★ y volumen de reseñas (no opinión subjetiva).
+   - Anticipa que debajo verán el Top 10 verificado.
+   - Puedes citar 1–2 lugares de la LISTA VERIFICADA en línea con <a> a su ficha.
 
-#FUNCIONAMIENTO
-Recibirás el título del artículo como referencia editorial, pero NO debes repetirlo como encabezado dentro del HTML: la página del blog ya muestra ese título arriba. Empieza directamente con uno o dos párrafos introductorios (<p>) y después usa <h2>/<h3> para las secciones.
+2) CIERRE SEO — a partir del primer <h2> (450–650 palabras en total).
+   Incluye ESTAS secciones (títulos flexibles):
+   - <h2>Cómo elegir bien en [ubicación]</h2> (~120–160 palabras): tipologías, errores típicos, cuándo reservar.
+   - <h2>Zonas y momentos ideales</h2> (~120–160 palabras): 3–4 barrios/zonas o contextos (noche, comida, escapada).
+   - <h2>Preguntas frecuentes</h2> (~150–200 palabras): 3–5 <h3> + <p> (¿por qué +4.7★?, presupuesto, cómo usar Casi Cinco).
+   - <h2>Sigue explorando con Casi Cinco</h2> (~60–90 palabras): CTAs a mapa, /ruta y /pricing.
 
-Si el título es del tipo "Los 10 [restaurantes/hoteles/bares] mejor valorados de X (AÑO)":
-- Estructura el cuerpo como guía de top 10.
-- Cada lugar debe tener su propio bloque con <h2> o <h3>.
-- Incluye contexto de la ciudad/provincia, criterios de selección y consejos prácticos.
-- No inventes ratings, direcciones, teléfonos ni reseñas. Usa SOLO los datos de la LISTA DE LUGARES VERIFICADOS. Si falta un dato, no lo fabriques.
+Longitud total del HTML: mínimo 700 palabras, objetivo 750–900. Ni muro de texto ni intro suelta.
 
-#TONO Y ENFOQUE
-- Tono cercano, claro, útil y aspiracional-práctico.
-- Enfatiza: filtro 4.7★+, consenso real de reseñas, menos tiempo perdido, experiencias excepcionales.
-- No copies reseñas literales de Google. Sintetiza con criterio editorial.
+#PROHIBIDO
+- <h1> o headings que repitan el título del artículo.
+- Un <h2>/<h3> por cada restaurante/bar/hotel del Top 10 (duplica las cards).
+- Inventar ratings, direcciones, teléfonos o reseñas.
+- Empezar con heading: SIEMPRE empieza con <p>.
+- Frases genéricas vacías ("destino imperdible", "experiencia inolvidable") sin criterio concreto.
 
-#LLAMADAS A LA ACCION
-Incluye al menos una CTA natural en el cuerpo (no solo al final):
-- Explorar el mapa: https://www.casicinco.com
-- Planificar ruta: https://www.casicinco.com/ruta
-- Probar gratis 30 días: https://www.casicinco.com/pricing
+#ENLACES (obligatorio)
+- Al menos un enlace a https://www.casicinco.com o /mapa
+- Al menos uno a https://www.casicinco.com/ruta
+- Al menos uno a https://www.casicinco.com/pricing
+- 2–4 fichas de la lista: https://www.casicinco.com/{categoria}/{provincia-slug}/{slug}
+Externos solo home oficial: target="_blank" rel="noopener noreferrer".
 
-#LINKS INTERNOS Y EXTERNOS
-URLs internas Casi Cinco:
-- https://www.casicinco.com
-- https://www.casicinco.com/blog
-- https://www.casicinco.com/pricing
-- Fichas: https://www.casicinco.com/{categoria}/{provincia-slug}/{slug}
+#FORMATO
+- SOLO HTML (sin <html>/<head>/<body>, sin markdown fences, sin comentarios).
+- Empieza con <p>. Luego intro. Luego <h2>… del cierre.`;
 
-Links externos: webs oficiales o turismo oficial. Si dudas, home oficial.
-Enlaces internos Casi Cinco: <a href="URL">texto ancla</a>
-Enlaces externos: <a href="URL" target="_blank" rel="noopener noreferrer">texto ancla</a>
+export const BLOG_SEO_REFINE_PROMPT = `Eres el editor SEO de Casi Cinco. Recibes un borrador HTML y un DOSSIER.
 
-#FORMATO TECNICO DE SALIDA
-- Entrega SOLO HTML válido para el cuerpo del artículo (sin <html>, <head> ni <body>).
-- PROHIBIDO empezar con <h1> o repetir el título recibido en un <h2>.
-- Empieza con párrafos <p> de introducción; luego <h2> y <h3>.
-- Longitud mínima orientativa: 1.800 palabras.
-- Entrega SOLO el artículo, sin comentarios extra.`;
+Modelo de página: INTRO (<p>) → cards Top 10 (ya en la web) → CIERRE SEO (<h2>).
 
-export const BLOG_SEO_REFINE_PROMPT = `Eres el mismo redactor SEO de Casi Cinco. Recibes un borrador HTML y un DOSSIER de investigación actualizado.
+Tu trabajo:
+1) Mantener mínimo 700 palabras (objetivo 750–900). Si hay fichas por lugar, elimínalas y convierte a guía breve.
+2) Intro solo en <p> (150–250 palabras) antes del primer h2.
+3) Cierre con 3–4 h2 útiles (elegir bien / zonas / FAQ / CTA Casi Cinco).
+4) CTAs a casicinco.com o /mapa, /ruta y /pricing + mención +4.7★.
+5) Lugares de la lista solo inline con <a>, nunca como h2/h3.
+6) Tono concreto, sin relleno.
 
-Mejora el artículo: corrige datos, enriquece fichas débiles, refuerza SEO natural, verifica que los enlaces externos sean prudentes (home oficial si hay duda) y que haya varios enlaces internos Casi Cinco con anclas naturales repartidos por el texto.
+NO digas que has revisado el texto. Entrega SOLO el HTML final.`;
 
-Elimina cualquier h1/h2 inicial que repita el título. Refuerza menciones contextuales al filtro +4.7★, al mapa y a la prueba gratuita cuando encaje de forma natural.
+export const BLOG_SEO_REVIEW_PROMPT = `Eres el AGENTE REVISOR de Casi Cinco. Evalúas intro + cierre SEO (las cards Top 10 las pinta la web).
 
-Mantén el tono cercano y útil. NO menciones revisiones ni comprobaciones.
-Entrega SOLO el HTML final del artículo, sin comentarios extra.`;
+APRUEBA solo si:
+- 600–900 palabras (aprox.; crítico si <450 o >1200)
+- Empieza con <p>; intro sin h2; cierre con h2 útiles
+- 0 h2/h3 con nombre de establecimiento del Top 10
+- CTAs a mapa/casicinco.com + /ruta + /pricing
+- Mención +4.7★
+- Tono útil y concreto
+
+Responde SOLO JSON:
+{
+  "approved": boolean,
+  "score": number,
+  "seoScore": number,
+  "uxScore": number,
+  "contentScore": number,
+  "issues": [
+    { "severity": "critical"|"warning"|"suggestion", "category": "seo"|"ux"|"content"|"format", "message": string, "fixHint": string }
+  ],
+  "summary": string
+}
+
+approved=true SOLO si score>=88, seo>=85, ux>=85 y cero critical.`;
+
+export const BLOG_SEO_FIX_PROMPT = `Eres el redactor SEO de Casi Cinco. Corrige el HTML según los issues.
+
+Modelo correcto:
+1) INTRO en <p> (150–250 palabras) — sin listar el Top 10.
+2) CIERRE con h2 (elegir bien / zonas / FAQ / CTA) — 450–650 palabras.
+Total 700–900 palabras. Si estás por debajo de 700, amplía FAQ o zonas (sin inventar fichas).
+
+Si hay h2/h3 con nombres de lugares del Top 10: bórralos y escribe guía breve.
+Asegura CTAs (mapa, /ruta, /pricing) y mención +4.7★.
+No inventes datos. Entrega SOLO el HTML corregido.`;
+
+export interface BlogArticleReviewResult {
+  approved: boolean;
+  score: number;
+  seoScore: number;
+  uxScore: number;
+  contentScore: number;
+  issues: Array<{
+    severity: 'critical' | 'warning' | 'suggestion';
+    category: 'seo' | 'ux' | 'content' | 'format';
+    message: string;
+    fixHint?: string;
+  }>;
+  summary: string;
+}
+
+export interface BlogArticleGenerationResult {
+  html: string;
+  review: BlogArticleReviewResult;
+  auditPassed: boolean;
+  iterations: number;
+  wordCount: number;
+}
 
 export interface BlogVerifiedPlace {
   name: string;
@@ -850,7 +913,8 @@ CONTEXTO EXTRA:
 ${input.extraContext || `Guía top 10 de ${categoryLabel} mejor valorados en ${input.location}. Prioriza SEO para "${categoryLabel} mejor valorados ${input.location.toLowerCase()}" y "mejores ${categoryLabel} ${input.location.toLowerCase()}".`}
 
 INSTRUCCIÓN:
-Redacta el artículo completo en HTML según las reglas del system prompt y entrégame SOLO el HTML del cuerpo.`;
+Redacta INTRO (<p>, 150–250 palabras) + CIERRE SEO (<h2>, 500–650 palabras). Total mínimo 700 palabras (objetivo 750–900).
+NO listes el Top 10 en h2 (las cards ya se muestran en la página). Entrega SOLO el HTML.`;
 }
 
 /** Construye dossier de investigación para la segunda pasada (refine) */
@@ -884,12 +948,11 @@ function cleanHtmlOutput(raw: string): string {
     .trim();
 }
 
-/** Genera artículo completo en HTML (borrador + refine en 2 pasadas) */
-export async function generateBlogArticle(input: BlogArticleInput): Promise<string> {
+/** Genera borrador + refine (2 pasadas, sin revisor) */
+export async function generateBlogArticleDraft(input: BlogArticleInput): Promise<string> {
   const userPrompt = buildBlogUserPrompt(input);
   const dossier = buildBlogResearchDossier(input);
 
-  // Pasada 1: borrador
   const draftResponse = await getOpenAI().chat.completions.create({
     model: BLOG_MODEL,
     messages: [
@@ -902,7 +965,6 @@ export async function generateBlogArticle(input: BlogArticleInput): Promise<stri
 
   const draft = cleanHtmlOutput(draftResponse.choices[0].message.content || '');
 
-  // Pasada 2: refine
   const refineResponse = await getOpenAI().chat.completions.create({
     model: BLOG_MODEL,
     messages: [
@@ -917,6 +979,323 @@ export async function generateBlogArticle(input: BlogArticleInput): Promise<stri
   });
 
   return cleanHtmlOutput(refineResponse.choices[0].message.content || draft);
+}
+
+/** Fusiona issues del auditor programático y del revisor LLM (sin duplicados) */
+function mergeReviewIssues(
+  ...lists: Array<BlogArticleAuditIssue[] | BlogArticleReviewResult['issues']>
+): BlogArticleReviewResult['issues'] {
+  const seen = new Set<string>();
+  const merged: BlogArticleReviewResult['issues'] = [];
+
+  for (const list of lists) {
+    for (const issue of list) {
+      const key = `${issue.severity}:${issue.message}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      merged.push(issue);
+    }
+  }
+
+  return merged;
+}
+
+/** Agente revisor: evalúa SEO/UX y devuelve veredicto JSON */
+export async function reviewBlogArticle(
+  html: string,
+  input: BlogArticleInput,
+  programmaticIssues: BlogArticleAuditIssue[] = []
+): Promise<BlogArticleReviewResult> {
+  const placeNames = input.verifiedPlaces?.map((p) => p.name) || [];
+  const issuesBlock =
+    programmaticIssues.length > 0
+      ? `\nISSUES DETECTADOS AUTOMÁTICAMENTE:\n${programmaticIssues
+          .map((i) => `- [${i.severity}/${i.category}] ${i.message}${i.fixHint ? ` → ${i.fixHint}` : ''}`)
+          .join('\n')}`
+      : '';
+
+  const response = await getOpenAI().chat.completions.create({
+    model: BLOG_MODEL,
+    messages: [
+      { role: 'system', content: BLOG_SEO_REVIEW_PROMPT },
+      {
+        role: 'user',
+        content: `TÍTULO: ${input.title}
+CATEGORÍA: ${input.category}
+UBICACIÓN: ${input.location}
+LUGARES TOP 10 (cards visuales en página — NO deben duplicarse como h2/h3):
+${placeNames.join(', ') || 'N/A'}
+${issuesBlock}
+
+HTML A REVISAR:
+${html.substring(0, 12000)}`,
+      },
+    ],
+    temperature: 0.2,
+    max_tokens: 2000,
+    response_format: { type: 'json_object' },
+  });
+
+  try {
+    const parsed = JSON.parse(response.choices[0].message.content || '{}');
+    return {
+      approved: Boolean(parsed.approved),
+      score: Number(parsed.score) || 0,
+      seoScore: Number(parsed.seoScore) || 0,
+      uxScore: Number(parsed.uxScore) || 0,
+      contentScore: Number(parsed.contentScore) || 0,
+      issues: Array.isArray(parsed.issues) ? parsed.issues : [],
+      summary: String(parsed.summary || ''),
+    };
+  } catch {
+    return {
+      approved: false,
+      score: 0,
+      seoScore: 0,
+      uxScore: 0,
+      contentScore: 0,
+      issues: [{ severity: 'critical', category: 'format', message: 'Revisor no devolvió JSON válido' }],
+      summary: 'Error parseando revisión',
+    };
+  }
+}
+
+/** Aplica correcciones según issues del revisor */
+export async function fixBlogArticleFromReview(
+  html: string,
+  input: BlogArticleInput,
+  issues: BlogArticleReviewResult['issues']
+): Promise<string> {
+  if (issues.length === 0) return html;
+
+  const dossier = buildBlogResearchDossier(input);
+  const issuesText = issues
+    .map(
+      (i) =>
+        `[${i.severity.toUpperCase()}/${i.category}] ${i.message}${i.fixHint ? `\n  Cómo arreglar: ${i.fixHint}` : ''}`
+    )
+    .join('\n\n');
+
+  const response = await getOpenAI().chat.completions.create({
+    model: BLOG_MODEL,
+    messages: [
+      { role: 'system', content: BLOG_SEO_FIX_PROMPT },
+      {
+        role: 'user',
+        content: `TÍTULO (no repetir en headings): ${input.title}
+
+ISSUES A CORREGIR:
+${issuesText}
+
+${dossier}
+
+HTML ACTUAL:
+${html}
+
+Entrega SOLO el HTML corregido.`,
+      },
+    ],
+    temperature: 0.5,
+    max_tokens: 8000,
+  });
+
+  return cleanHtmlOutput(response.choices[0].message.content || html);
+}
+
+/** Construye extraContext dinámico a partir de issues recurrentes (mejora el prompt) */
+function buildPromptCorrectionsFromIssues(issues: BlogArticleReviewResult['issues']): string {
+  if (!issues.length) return '';
+  const hints = issues
+    .filter((i) => i.severity !== 'suggestion')
+    .map((i) => i.fixHint || i.message)
+    .slice(0, 8);
+  return `\n\nCORRECCIONES OBLIGATORIAS (agente revisor):\n${hints.map((h, i) => `${i + 1}. ${h}`).join('\n')}`;
+}
+
+const DEFAULT_MIN_REVIEW_SCORE = 88;
+const DEFAULT_MAX_REVIEW_ITERATIONS = 4;
+
+/**
+ * Pipeline completo: borrador → refine → bucle revisor → corrección hasta aprobación.
+ */
+export async function generateBlogArticleWithReview(
+  input: BlogArticleInput,
+  options: {
+    maxIterations?: number;
+    minScore?: number;
+    onIteration?: (info: {
+      iteration: number;
+      review: BlogArticleReviewResult;
+      auditPassed: boolean;
+      wordCount: number;
+    }) => void;
+  } = {}
+): Promise<BlogArticleGenerationResult> {
+  const maxIterations = options.maxIterations ?? DEFAULT_MAX_REVIEW_ITERATIONS;
+  const minScore = options.minScore ?? DEFAULT_MIN_REVIEW_SCORE;
+  const placeNames = input.verifiedPlaces?.map((p) => p.name) || [];
+
+  let workingInput: BlogArticleInput = { ...input };
+  let html = await generateBlogArticleDraft(workingInput);
+  let lastReview: BlogArticleReviewResult = {
+    approved: false,
+    score: 0,
+    seoScore: 0,
+    uxScore: 0,
+    contentScore: 0,
+    issues: [],
+    summary: '',
+  };
+  let auditPassed = false;
+  let iterations = 0;
+
+  for (let i = 0; i < maxIterations; i++) {
+    iterations = i + 1;
+
+    const audit = auditBlogArticleHtml(html, {
+      title: input.title,
+      placeNames,
+    });
+    auditPassed = audit.passed;
+
+    const review = await reviewBlogArticle(html, input, audit.issues);
+    const allIssues = mergeReviewIssues(audit.issues, review.issues);
+    lastReview = { ...review, issues: allIssues };
+
+    options.onIteration?.({
+      iteration: iterations,
+      review: lastReview,
+      auditPassed,
+      wordCount: audit.wordCount,
+    });
+
+    const hasCritical = allIssues.some((iss) => iss.severity === 'critical');
+    const scoreOk = review.score >= minScore && review.seoScore >= 85 && review.uxScore >= 85;
+
+    if (review.approved && auditPassed && scoreOk && !hasCritical) {
+      return {
+        html,
+        review: lastReview,
+        auditPassed,
+        iterations,
+        wordCount: audit.wordCount,
+      };
+    }
+
+    if (i === maxIterations - 1) break;
+
+    // Si el score es muy bajo, regenerar borrador con correcciones en el prompt
+    if (review.score < 70 && i >= 1) {
+      workingInput = {
+        ...input,
+        extraContext: (input.extraContext || '') + buildPromptCorrectionsFromIssues(allIssues),
+      };
+      html = await generateBlogArticleDraft(workingInput);
+    } else {
+      html = await fixBlogArticleFromReview(html, input, allIssues);
+    }
+  }
+
+  return {
+    html,
+    review: lastReview,
+    auditPassed,
+    iterations,
+    wordCount: countBlogArticleWords(html),
+  };
+}
+
+/** Genera artículo completo con agente revisor (recomendado) */
+export async function generateBlogArticle(input: BlogArticleInput): Promise<string> {
+  const result = await generateBlogArticleWithReview(input);
+  return result.html;
+}
+
+/** Revisa un HTML existente sin regenerar */
+export async function reviewExistingBlogArticle(
+  html: string,
+  input: BlogArticleInput
+): Promise<{ review: BlogArticleReviewResult; audit: ReturnType<typeof auditBlogArticleHtml> }> {
+  const placeNames = input.verifiedPlaces?.map((p) => p.name) || [];
+  const audit = auditBlogArticleHtml(html, { title: input.title, placeNames });
+  const review = await reviewBlogArticle(html, input, audit.issues);
+  return {
+    review: { ...review, issues: mergeReviewIssues(audit.issues, review.issues) },
+    audit,
+  };
+}
+
+/**
+ * Revisa un artículo existente y lo corrige/regenera hasta aprobación del revisor.
+ * Si no hay HTML previo, genera desde cero con el pipeline completo.
+ */
+export async function regenerateBlogArticleUntilApproved(
+  input: BlogArticleInput,
+  existingHtml?: string,
+  options: { maxIterations?: number; minScore?: number } = {}
+): Promise<BlogArticleGenerationResult> {
+  const maxIterations = options.maxIterations ?? DEFAULT_MAX_REVIEW_ITERATIONS;
+  const minScore = options.minScore ?? DEFAULT_MIN_REVIEW_SCORE;
+  const placeNames = input.verifiedPlaces?.map((p) => p.name) || [];
+
+  if (!existingHtml?.trim()) {
+    return generateBlogArticleWithReview(input, { maxIterations, minScore });
+  }
+
+  let html = existingHtml.trim();
+  let lastReview: BlogArticleReviewResult = {
+    approved: false,
+    score: 0,
+    seoScore: 0,
+    uxScore: 0,
+    contentScore: 0,
+    issues: [],
+    summary: '',
+  };
+  let auditPassed = false;
+  let iterations = 0;
+
+  for (let i = 0; i < maxIterations; i++) {
+    iterations = i + 1;
+
+    const audit = auditBlogArticleHtml(html, { title: input.title, placeNames });
+    auditPassed = audit.passed;
+    const review = await reviewBlogArticle(html, input, audit.issues);
+    const allIssues = mergeReviewIssues(audit.issues, review.issues);
+    lastReview = { ...review, issues: allIssues };
+
+    const hasCritical = allIssues.some((iss) => iss.severity === 'critical');
+    const scoreOk = review.score >= minScore && review.seoScore >= 85 && review.uxScore >= 85;
+
+    if (review.approved && auditPassed && scoreOk && !hasCritical) {
+      return { html, review: lastReview, auditPassed, iterations, wordCount: audit.wordCount };
+    }
+
+    if (i === maxIterations - 1) break;
+
+    if (review.score < 65) {
+      const regen = await generateBlogArticleWithReview(
+        {
+          ...input,
+          extraContext: (input.extraContext || '') + buildPromptCorrectionsFromIssues(allIssues),
+        },
+        { maxIterations: 2, minScore }
+      );
+      html = regen.html;
+      lastReview = regen.review;
+      auditPassed = regen.auditPassed;
+    } else {
+      html = await fixBlogArticleFromReview(html, input, allIssues);
+    }
+  }
+
+  return {
+    html,
+    review: lastReview,
+    auditPassed,
+    iterations,
+    wordCount: countBlogArticleWords(html),
+  };
 }
 
 /** Metadatos SEO del artículo (respuesta separada) */

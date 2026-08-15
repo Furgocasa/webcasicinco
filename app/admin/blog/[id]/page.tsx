@@ -30,6 +30,16 @@ export default function EditBlogPostPage() {
   const [generating, setGenerating] = useState(false);
   const [generatingArticle, setGeneratingArticle] = useState(false);
   const [generatingMeta, setGeneratingMeta] = useState(false);
+  const [reviewing, setReviewing] = useState(false);
+  const [regenerating, setRegenerating] = useState(false);
+  const [lastReview, setLastReview] = useState<{
+    approved: boolean;
+    score: number;
+    seoScore: number;
+    uxScore: number;
+    summary: string;
+    issues: Array<{ severity: string; message: string }>;
+  } | null>(null);
 
   // Form data
   const [title, setTitle] = useState('');
@@ -148,7 +158,7 @@ export default function EditBlogPostPage() {
       return;
     }
 
-    if (!confirm('Generar artículo SEO completo (~1800+ palabras). Puede tardar 1-2 minutos. ¿Continuar?')) {
+    if (!confirm('Generar artículo (intro + cierre SEO, ~700 palabras). Las cards Top 10 salen de la BD. ¿Continuar?')) {
       return;
     }
 
@@ -170,7 +180,22 @@ export default function EditBlogPostPage() {
 
       if (data.success) {
         setIntroText(data.html);
-        toast.success(`Artículo SEO generado (${data.placesCount} lugares verificados)`);
+        setLastReview(
+          data.review
+            ? {
+                approved: Boolean(data.approved),
+                score: data.review.score,
+                seoScore: data.review.seoScore,
+                uxScore: data.review.uxScore,
+                summary: data.review.summary,
+                issues: data.review.issues?.slice(0, 5) || [],
+              }
+            : null
+        );
+        const reviewMsg = data.review
+          ? ` | Revisor: ${data.review.score}/100 (${data.iterations} pasadas)`
+          : '';
+        toast.success(`Artículo SEO generado (${data.placesCount} lugares)${reviewMsg}`);
       } else {
         toast.error(data.error || 'Error generando artículo');
       }
@@ -178,6 +203,105 @@ export default function EditBlogPostPage() {
       toast.error('Error generando artículo SEO');
     } finally {
       setGeneratingArticle(false);
+    }
+  };
+
+  const reviewArticleWithAI = async () => {
+    if (!location || !category || !title || !introText) {
+      toast.error('Necesitas título, ubicación, categoría y contenido');
+      return;
+    }
+
+    setReviewing(true);
+    try {
+      const response = await fetch('/api/admin/blog/generate-intro', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mode: 'review',
+          title,
+          category,
+          location,
+          locationType,
+          htmlContent: introText,
+        }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setLastReview({
+          approved: Boolean(data.approved),
+          score: data.review.score,
+          seoScore: data.review.seoScore,
+          uxScore: data.review.uxScore,
+          summary: data.review.summary,
+          issues: data.review.issues?.slice(0, 8) || [],
+        });
+        toast[data.approved ? 'success' : 'warning'](
+          data.approved
+            ? `✅ Artículo aprobado (${data.review.score}/100)`
+            : `⚠️ Requiere mejoras (${data.review.score}/100)`
+        );
+      } else {
+        toast.error(data.error || 'Error en revisión');
+      }
+    } catch {
+      toast.error('Error revisando artículo');
+    } finally {
+      setReviewing(false);
+    }
+  };
+
+  const regenerateArticleWithAI = async () => {
+    if (!location || !category || !title) {
+      toast.error('Necesitas título, ubicación y categoría');
+      return;
+    }
+
+    if (
+      !confirm(
+        'El agente revisor analizará el artículo y lo corregirá/regenerará hasta cumplir SEO y UX. Puede tardar varios minutos. ¿Continuar?'
+      )
+    ) {
+      return;
+    }
+
+    setRegenerating(true);
+    try {
+      const response = await fetch('/api/admin/blog/generate-intro', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mode: 'regenerate',
+          title,
+          category,
+          location,
+          locationType,
+          htmlContent: introText || undefined,
+        }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setIntroText(data.html);
+        setLastReview({
+          approved: Boolean(data.approved),
+          score: data.review.score,
+          seoScore: data.review.seoScore,
+          uxScore: data.review.uxScore,
+          summary: data.review.summary,
+          issues: data.review.issues?.slice(0, 8) || [],
+        });
+        toast[data.approved ? 'success' : 'warning'](
+          `Regenerado (${data.iterations} pasadas) — ${data.review.score}/100 · ${data.wordCount} palabras`
+        );
+      } else {
+        toast.error(data.error || 'Error regenerando');
+      }
+    } catch {
+      toast.error('Error regenerando artículo');
+    } finally {
+      setRegenerating(false);
     }
   };
 
@@ -399,12 +523,57 @@ export default function EditBlogPostPage() {
                   >
                     {generatingMeta ? 'Generando...' : 'Metadatos SEO'}
                   </Button>
+                  {isFullHtmlArticle && (
+                    <>
+                      <Button
+                        onClick={reviewArticleWithAI}
+                        variant="outline"
+                        size="sm"
+                        disabled={reviewing || regenerating || !introText}
+                      >
+                        {reviewing ? 'Revisando...' : 'Revisar SEO/UX'}
+                      </Button>
+                      <Button
+                        onClick={regenerateArticleWithAI}
+                        variant="outline"
+                        size="sm"
+                        disabled={regenerating || reviewing || !title}
+                      >
+                        {regenerating ? 'Corrigiendo...' : 'Corregir con revisor'}
+                      </Button>
+                    </>
+                  )}
                 </div>
               </div>
 
               {isFullHtmlArticle && (
-                <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-800">
-                  Modo artículo HTML completo activo. El Top 10 dinámico se ocultará en la vista pública.
+                <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-900">
+                  Modo artículo HTML completo. La página pública muestra intro + banner + <strong>cards Top 10</strong> + guía SEO. El revisor penaliza fichas h2/h3 duplicadas por lugar.
+                </div>
+              )}
+
+              {lastReview && (
+                <div
+                  className={`mb-4 p-3 rounded-lg text-sm border ${
+                    lastReview.approved
+                      ? 'bg-green-50 border-green-200 text-green-900'
+                      : 'bg-amber-50 border-amber-200 text-amber-900'
+                  }`}
+                >
+                  <p className="font-semibold">
+                    Agente revisor: {lastReview.score}/100 · SEO {lastReview.seoScore} · UX {lastReview.uxScore}
+                    {lastReview.approved ? ' · ✅ Aprobado' : ' · ⚠️ Pendiente de mejoras'}
+                  </p>
+                  {lastReview.summary && <p className="mt-1">{lastReview.summary}</p>}
+                  {lastReview.issues.length > 0 && (
+                    <ul className="mt-2 list-disc pl-5 space-y-1">
+                      {lastReview.issues.map((issue, idx) => (
+                        <li key={idx}>
+                          [{issue.severity}] {issue.message}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               )}
 

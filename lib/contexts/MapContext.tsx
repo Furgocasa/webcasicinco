@@ -29,6 +29,10 @@ export function MapProvider({ children }: { children: ReactNode }) {
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '',
     libraries,
+    // Canal trimestral (más estable que el semanal por defecto):
+    // evita que Google introduzca cambios de comportamiento sin previo aviso
+    // en el autocomplete y el cálculo de rutas
+    version: 'quarterly',
   });
 
   return (
