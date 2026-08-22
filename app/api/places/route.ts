@@ -1,14 +1,80 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createClient, createPublicClient } from '@/lib/supabase/server';
 import { getNumbersFromReviewsRange } from '@/types/filters';
 import type { ReviewsRange, QualityTier } from '@/types/filters';
 
 export const dynamic = 'force-dynamic';
 
+// Campos mínimos para el mapa: solo lo que necesitan pines y cards de la lista.
+// Prohibido añadir descripciones largas o galerías completas.
+const MAP_SELECT =
+  'id,slug,name,category,rating,review_count,latitude,longitude,city,province,region,google_maps_url,photo_urls';
+
+/**
+ * Modo mapa: devuelve TODOS los lugares publicados en una sola respuesta ligera.
+ * - Cliente anónimo sin cookies → respuesta cacheable en CDN (s-maxage=30).
+ * - photo_urls recortado a 1 foto (la card solo muestra una).
+ */
+async function getMapPayload() {
+  const supabase = createPublicClient();
+  const batchSize = 1000;
+  let allData: any[] = [];
+  let currentOffset = 0;
+  let hasMore = true;
+
+  while (hasMore) {
+    const { data, error } = await supabase
+      .from('places')
+      .select(MAP_SELECT)
+      .eq('published', true)
+      .order('review_count', { ascending: false })
+      .order('rating', { ascending: false })
+      .range(currentOffset, currentOffset + batchSize - 1);
+
+    if (error) {
+      console.error('Error cargando lugares (modo mapa):', error);
+      return NextResponse.json(
+        { error: 'Error al cargar los lugares' },
+        { status: 500 }
+      );
+    }
+
+    if (data && data.length > 0) {
+      allData = allData.concat(data);
+      currentOffset += batchSize;
+      if (data.length < batchSize) hasMore = false;
+    } else {
+      hasMore = false;
+    }
+  }
+
+  // Recortar galería: solo la primera foto
+  const places = allData.map((p) => ({
+    ...p,
+    photo_urls: Array.isArray(p.photo_urls) && p.photo_urls.length > 0 ? [p.photo_urls[0]] : null,
+  }));
+
+  return NextResponse.json(
+    { success: true, places, total: places.length },
+    {
+      headers: {
+        // Cache CDN corto + revalidación en background
+        'Cache-Control': 'public, s-maxage=30, stale-while-revalidate=300',
+      },
+    }
+  );
+}
+
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient();
     const { searchParams } = new URL(request.url);
+
+    // 🗺️ Modo mapa: payload ligero completo y cacheado (sin filtros: se filtran en cliente)
+    if (searchParams.get('fields') === 'map') {
+      return getMapPayload();
+    }
+
+    const supabase = await createClient();
 
     // Parámetros básicos
     const category = searchParams.get('category');

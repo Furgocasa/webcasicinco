@@ -256,6 +256,131 @@
   animation: pulse-subtle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
+/* ============================================
+   MAPA (MapLibre + Supercluster)
+   Los markers son wrappers posicionados por MapLibre;
+   el visual va en el elemento interno para no pisar el transform.
+   ============================================ */
+
+/* Cluster: círculo con contador, color = tier dominante de Casi Cinco */
+.cc-cluster {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: #fff;
+  font-weight: 700;
+  font-family: Arial, sans-serif;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  transform: translate(-50%, -50%);
+  position: absolute;
+}
+
+/* Punto suelto: círculo pequeño con borde blanco, color = tier */
+.cc-point {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  position: absolute;
+  transform: translate(-50%, -50%);
+  transition: width 0.15s ease, height 0.15s ease;
+}
+
+.cc-point--selected {
+  width: 22px;
+  height: 22px;
+  border-width: 3px;
+  z-index: 5;
+}
+
+/* Tooltip con el nombre: SOLO en dispositivos con hover real (nunca táctil) */
+.cc-point-label {
+  display: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cc-point:hover {
+    width: 20px;
+    height: 20px;
+  }
+
+  .cc-point:hover .cc-point-label {
+    display: block;
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #111827;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    pointer-events: none;
+    z-index: 30;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  }
+}
+
+/* Marcador de ubicación del usuario (distinto a los pins de lugares) */
+.cc-user-marker {
+  position: relative;
+  width: 36px;
+  height: 36px;
+}
+
+.cc-user-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(59, 130, 246, 0.2);
+  border: 2px solid rgba(59, 130, 246, 0.5);
+  animation: ccUserPulse 2s ease-out infinite;
+}
+
+.cc-user-dot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 14px;
+  height: 14px;
+  transform: translate(-50%, -50%);
+  background: #3b82f6;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+@keyframes ccUserPulse {
+  0% {
+    transform: scale(0.8);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+
+/* Respetar prefers-reduced-motion: sin animación de pins */
+@media (prefers-reduced-motion: reduce) {
+  .cc-user-ring {
+    animation: none;
+  }
+  .cc-point {
+    transition: none;
+  }
+}
+
 /* Print styles */
 @media print {
   .no-print {

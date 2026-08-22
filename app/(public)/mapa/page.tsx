@@ -2,25 +2,25 @@
 
 import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { GoogleMap, Marker, InfoWindow } from '@react-google-maps/api';
-import { MarkerClusterer } from '@googlemaps/markerclusterer';
-import { useMap } from '@/lib/contexts/MapContext';
+import * as maplibregl from 'maplibre-gl';
+import 'maplibre-gl/dist/maplibre-gl.css';
+import Supercluster from 'supercluster';
 import { useAuth } from '@/lib/hooks/useAuth';
-import { 
-  Search, 
-  X, 
-  MapPin, 
-  Star, 
+import {
+  Search,
+  X,
+  MapPin,
+  Star,
   SlidersHorizontal,
   Loader2,
   ChevronDown,
   ChevronUp,
   Filter,
   Heart,
-  Check
+  Check,
+  Home,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
 import BottomNavigation from '@/components/mobile/BottomNavigation';
 import BottomSheet from '@/components/mobile/BottomSheet';
 import LoginOverlay from '@/components/auth/LoginOverlay';
@@ -29,127 +29,146 @@ import type { PlaceWithTier, PlaceFilters, QualityTier, ReviewsRange } from '@/t
 import { calculateQualityTier, getTierMarkerColor, getTierInfo } from '@/lib/utils/tier-calculator';
 import { trackEvent, EVENTS, CATEGORIES as ANALYTICS_CATEGORIES } from '@/lib/analytics/tracker';
 import { getPlaceUrl } from '@/lib/utils/url-helper';
-import { 
-  QUALITY_TIERS, 
-  REVIEWS_RANGES, 
-  PRICE_LEVELS, 
-  COMMUNITIES,
-  getNumbersFromReviewsRange 
-} from '@/types/filters';
+import { QUALITY_TIERS } from '@/types/filters';
 import { PROVINCES, CATEGORIES } from '@/lib/utils/constants';
 import { toast } from 'sonner';
-import { getPlacesFromCache, savePlacesToCache } from '@/lib/utils/places-cache';
 import { getPlacePhotoUrl } from '@/lib/utils/photo-helper';
 
 // 🚀 HOOK DE DEBOUNCE para optimizar búsquedas
 function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
-  
+
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedValue(value);
     }, delay);
-    
+
     return () => {
       clearTimeout(handler);
     };
   }, [value, delay]);
-  
+
   return debouncedValue;
 }
 
-const mapContainerStyle = {
-  width: '100%',
-  height: '100%',
-};
+// Centro de España para vista inicial
+const DEFAULT_CENTER: [number, number] = [-3.7038, 40.5]; // [lng, lat]
 
-// Centro de España para vista inicial (más al norte para mejor vista móvil)
-const defaultCenter = {
-  lat: 40.5,  // ✅ Subido para mejor vista del norte en móvil
-  lng: -3.7038,  // Madrid
-};
+// Zoom inicial (MapLibre usa tiles de 512px: equivale aprox. a zoom de Google - 1)
+const DEFAULT_ZOOM_DESKTOP = 5.3;
+const DEFAULT_ZOOM_MOBILE = 5.0;
 
 // Límites del mapa para península ibérica (mejor UX móvil)
-const SPAIN_BOUNDS_PENINSULA = {
-  north: 43.8,    // Norte de España (Costa Vasca)
-  south: 36.0,    // Sur de Andalucía (Tarifa)
-  west: -9.5,     // Galicia (Cabo Finisterre)
-  east: 3.5,      // Cataluña/Girona
-};
+const BOUNDS_PENINSULA: [[number, number], [number, number]] = [
+  [-9.5, 36.0], // suroeste [lng, lat]
+  [3.5, 43.8], // noreste
+];
 
-// Límites completos incluyendo Canarias y Baleares (para desktop)
-const SPAIN_BOUNDS_FULL = {
-  north: 46.0,    // Más margen para centrar el norte (Galicia, Asturias, País Vasco)
-  south: 26.0,    // Más margen para centrar Canarias (El Hierro)
-  west: -18.5,    // Oeste de Canarias (La Palma)
-  east: 4.5,      // Este de Baleares (Menorca)
-};
+// Límites completos incluyendo Canarias y Baleares (desktop)
+const BOUNDS_FULL: [[number, number], [number, number]] = [
+  [-18.5, 26.0],
+  [4.5, 46.0],
+];
+
+// Estilo del basemap: MapTiler si hay clave, si no Carto Voyager (tiles vectoriales OSM, gratuito)
+const MAPTILER_KEY = process.env.NEXT_PUBLIC_MAPTILER_KEY;
+const MAP_STYLE = MAPTILER_KEY
+  ? `https://api.maptiler.com/maps/streets-v2/style.json?key=${MAPTILER_KEY}`
+  : 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json';
+
+// Persistencia de filtros (solo selección manual; el GPS nunca escribe aquí)
+const FILTERS_STORAGE_KEY = 'mapaFilters_v1';
+
+// Propiedades de los puntos/clusters en Supercluster
+type MapPointProps = { placeId: string; tier: QualityTier };
+type MapClusterProps = { tierCounts: Partial<Record<QualityTier, number>> };
+
+// Tamaño visual del cluster según count
+function getClusterSize(count: number): number {
+  if (count < 10) return 22;
+  if (count < 50) return 30;
+  if (count < 100) return 38;
+  return 45;
+}
+
+// Tier dominante de un cluster (en empate gana el mejor tier)
+const TIER_ORDER: QualityTier[] = ['diamond', 'platinum', 'gold', 'silver', 'bronze', 'none'];
+function getDominantTier(tierCounts: Partial<Record<QualityTier, number>>): QualityTier {
+  let best: QualityTier = 'bronze';
+  let bestCount = -1;
+  for (const tier of TIER_ORDER) {
+    const count = tierCounts[tier] || 0;
+    if (count > bestCount) {
+      bestCount = count;
+      best = tier;
+    }
+  }
+  return best;
+}
+
+// Coordenadas válidas para España (incluye Canarias)
+function hasValidCoords(place: PlaceWithTier): boolean {
+  return (
+    typeof place.latitude === 'number' &&
+    typeof place.longitude === 'number' &&
+    place.latitude >= 26 &&
+    place.latitude <= 46 &&
+    place.longitude >= -18.5 &&
+    place.longitude <= 5
+  );
+}
 
 export default function MapPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, loading: authLoading } = useAuth();
-  const mapRef = useRef<google.maps.Map | null>(null);
-  const clustererRef = useRef<MarkerClusterer | null>(null);
-  const markersRef = useRef<google.maps.Marker[]>([]);
-  const isUserInteractingRef = useRef(false); // 🔧 Nuevo: rastrear si el usuario está moviendo el mapa manualmente
+
+  // ===== REFS DEL MOTOR DE MAPA (MapLibre + Supercluster) =====
+  const mapDivRef = useRef<HTMLDivElement | null>(null);
+  const mapRef = useRef<maplibregl.Map | null>(null);
+  const clusterIndexRef = useRef<Supercluster<MapPointProps, MapClusterProps> | null>(null);
+  // Pool de markers en pantalla: si un id ya existe se reutiliza su DOM, si sale del viewport se elimina
+  const markerPoolRef = useRef<Map<string, maplibregl.Marker>>(new Map());
+  const placesByIdRef = useRef<Map<string, PlaceWithTier>>(new Map());
+  const userMarkerRef = useRef<maplibregl.Marker | null>(null);
+  const geoWatchIdRef = useRef<number | null>(null);
+  const hasCenteredOnUserRef = useRef(false);
+  const isUserInteractingRef = useRef(false);
+  const prefersReducedMotionRef = useRef(false);
+  const hoverEnabledRef = useRef(false);
 
   // Establecer título de la página
   useEffect(() => {
     document.title = 'Mapa de Lugares | Casi Cinco';
   }, []);
 
-  // ✅ Detectar si es móvil para ajustar límites del mapa
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
-  // ✅ OPTIMIZACIÓN: Usar contexto del mapa (ahorro 66% en navegaciones)
-  const { isLoaded, loadError } = useMap();
-
-  // State
-  const [allPlaces, setAllPlaces] = useState<PlaceWithTier[]>([]); // TODOS los lugares
-  const [filteredPlaces, setFilteredPlaces] = useState<PlaceWithTier[]>([]); // Lugares que cumplen filtros
+  // ===== STATE =====
+  const [allPlaces, setAllPlaces] = useState<PlaceWithTier[]>([]);
   const [selectedPlace, setSelectedPlace] = useState<PlaceWithTier | null>(null);
   const [loading, setLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(true);
   const [showPlacesList, setShowPlacesList] = useState(true);
-  const [mapReady, setMapReady] = useState(false); // ✅ Nuevo: saber cuándo el mapa está listo
-  const [isMobile, setIsMobile] = useState(false); // ✅ Detectar dispositivo móvil
-  
+  const [mapReady, setMapReady] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
   // Vista móvil: 'map', 'filters', 'list'
   const [mobileView, setMobileView] = useState<'map' | 'filters' | 'list'>('map');
-  const [mapCenter, setMapCenter] = useState(defaultCenter);
-  const [mapZoom, setMapZoom] = useState(6.2); // Zoom enfocado en península con mejor vista del norte
   const [showVisitModal, setShowVisitModal] = useState(false);
   const [visitNotes, setVisitNotes] = useState('');
   const [visitRating, setVisitRating] = useState(0);
 
   // Geolocalización
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
-  const [isGeolocationActive, setIsGeolocationActive] = useState(false); // ✅ Siempre false inicialmente (sin hidratación)
-  const [shouldReactivateGeo, setShouldReactivateGeo] = useState(false); // Flag para reactivar geo después de definir la función
+  const [isGeolocationActive, setIsGeolocationActive] = useState(false);
   const [geolocationError, setGeolocationError] = useState<string | null>(null);
-  
-  // ✅ Recuperar flag de localStorage al montar (sin hidratar)
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('geolocationActive') === 'true';
-      if (saved) {
-        setShouldReactivateGeo(true);
-      }
-    }
-  }, []);
+
+  // Buscador geográfico sobre el mapa
+  const [geoQuery, setGeoQuery] = useState('');
+  const [showGeoSuggestions, setShowGeoSuggestions] = useState(false);
 
   // Ordenamiento de lista
   const [sortBy, setSortBy] = useState<'rating' | 'reviews' | 'proximity'>('reviews');
-  
+
   // Control de leyenda expandida (solo móvil)
   const [isLegendExpanded, setIsLegendExpanded] = useState(false);
 
@@ -162,708 +181,840 @@ export default function MapPage() {
     minRating: 4.7,
     maxRating: 5.0,
     reviewsRange: (searchParams.get('reviewsRange') as ReviewsRange) || undefined,
-    qualityTier: searchParams.get('qualityTier')?.split(',') as QualityTier[] || undefined,
+    qualityTier: (searchParams.get('qualityTier')?.split(',') as QualityTier[]) || undefined,
     searchTerm: searchParams.get('q') || undefined,
   });
-  
-  // 🚀 OPTIMIZACIÓN: Debounce para búsqueda (espera 500ms antes de aplicar)
+
+  // 🚀 Debounce para búsqueda (espera 500ms antes de aplicar)
   const debouncedSearchTerm = useDebounce(filters.searchTerm, 500);
 
   // Rango de reseñas con slider
   const [minReviews, setMinReviews] = useState(0);
   const [maxReviews, setMaxReviews] = useState(10000);
 
-  // 🚀 CARGA CON CACHE: Primero intenta cache (24h), luego API
-  const loadPlaces = async () => {
-    setLoading(true);
-    let loadedPlaces: PlaceWithTier[] = [];
-    
+  // ✅ Detectar si es móvil
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // ===== PERSISTENCIA DE FILTROS EN LOCALSTORAGE =====
+  // Restaurar al montar (solo si la URL no trae filtros; la URL siempre tiene prioridad)
+  useEffect(() => {
+    const hasUrlFilters = ['community', 'province', 'city', 'category', 'reviewsRange', 'qualityTier', 'q'].some(
+      (key) => searchParams.get(key)
+    );
+    if (hasUrlFilters) return;
+
     try {
-      // 1️⃣ INTENTAR CARGAR DESDE CACHE (IndexedDB - 24 horas)
-      console.log('📦 Intentando cargar desde cache...');
-      const cachedPlaces = await getPlacesFromCache();
-      
-      if (cachedPlaces && cachedPlaces.length > 0) {
-        // ✅ CACHE HIT: Usar datos cacheados
-        loadedPlaces = cachedPlaces;
-        setAllPlaces(loadedPlaces);
-        setLoading(false);
-        console.log(`✅ ${loadedPlaces.length} lugares cargados desde cache (instantáneo)`);
-        return; // Terminar aquí, no cargar desde API
+      const raw = localStorage.getItem(FILTERS_STORAGE_KEY);
+      if (!raw) return;
+      const saved = JSON.parse(raw);
+      if (saved.filters) {
+        setFilters((prev) => ({ ...prev, ...saved.filters }));
       }
-      
-      // 2️⃣ CACHE MISS: Cargar desde API
-      console.log('🔄 Cache no disponible, cargando desde API...');
-      
-      const batchSize = 1000;
-      let offset = 0;
-      let hasMore = true;
-      
-      while (hasMore) {
-        try {
-          // ✅ OPTIMIZACIÓN: fields=light reduce payload 80% (evita error 413)
-          const response = await fetch(`/api/places?limit=${batchSize}&offset=${offset}&fields=light`);
-          
-          // ✅ Verificar error 413 (Payload Too Large)
-          if (!response.ok) {
-            if (response.status === 413) {
-              console.error('❌ Error 413: Payload demasiado grande');
-              toast.error('Error cargando lugares. Intenta recargar.');
-              hasMore = false;
-              break;
-            }
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-          }
-          
-          const data = await response.json();
-          
-          if (data.success && data.places && data.places.length > 0) {
-            loadedPlaces = [...loadedPlaces, ...data.places];
-            offset += batchSize;
-            
-            // Si recibimos menos del tamaño del lote, ya no hay más
-            if (data.places.length < batchSize) {
-              hasMore = false;
-            }
-          } else {
-            hasMore = false;
-          }
-        } catch (batchError) {
-          // Si falla un lote pero ya tenemos datos, continuar
-          console.error(`❌ Error en lote offset ${offset}:`, batchError);
-          
-          // Mostrar error al usuario si no hay datos cargados
-          if (loadedPlaces.length === 0) {
-            toast.error('Error cargando lugares. Revisa tu conexión.');
-          }
-          
-          hasMore = false;
-        }
-      }
-      
-      // 3️⃣ GUARDAR EN CACHE para próximas visitas
-      if (loadedPlaces.length > 0) {
-        setAllPlaces(loadedPlaces);
-        
-        // Guardar en IndexedDB (asíncrono, no bloquea)
-        savePlacesToCache(loadedPlaces).catch(err => {
-          console.warn('⚠️ Error guardando en cache (no crítico):', err);
-        });
-        
-        console.log(`✅ ${loadedPlaces.length} lugares cargados desde API y guardados en cache`);
-      } else {
-        console.warn('⚠️ No se encontraron lugares');
-      }
-    } catch (error) {
-      // Error crítico - solo mostrar toast si NO hay datos cargados
-      console.error('❌ Error crítico:', error);
-      if (loadedPlaces.length === 0) {
-        toast.error('Error cargando lugares. Recarga la página.');
-      }
-    } finally {
-      setLoading(false);
+      if (typeof saved.minReviews === 'number') setMinReviews(saved.minReviews);
+      if (typeof saved.maxReviews === 'number') setMaxReviews(saved.maxReviews);
+    } catch {
+      // Cache corrupto: ignorar
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Guardar selección manual de filtros (el GPS no guarda ningún filtro geográfico)
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        FILTERS_STORAGE_KEY,
+        JSON.stringify({
+          filters: {
+            community: filters.community,
+            province: filters.province,
+            city: filters.city,
+            category: filters.category,
+            minRating: filters.minRating,
+            qualityTier: filters.qualityTier,
+          },
+          minReviews,
+          maxReviews,
+        })
+      );
+    } catch {
+      // Almacenamiento no disponible: no es crítico
+    }
+  }, [filters.community, filters.province, filters.city, filters.category, filters.minRating, filters.qualityTier, minReviews, maxReviews]);
+
+  // ===== CARGA DE DATOS =====
+  // Endpoint ligero cacheado en CDN (una sola respuesta). Fallback: paginar de 1000 en 1000.
+  const allPlacesCountRef = useRef(0);
+  useEffect(() => {
+    allPlacesCountRef.current = allPlaces.length;
+  }, [allPlaces.length]);
+
+  const loadPlacesPaginated = async (): Promise<PlaceWithTier[]> => {
+    const batchSize = 1000;
+    let offset = 0;
+    let hasMore = true;
+    let loaded: PlaceWithTier[] = [];
+
+    while (hasMore) {
+      const response = await fetch(`/api/places?limit=${batchSize}&offset=${offset}&fields=light`);
+      if (!response.ok) break;
+      const data = await response.json();
+      if (data.success && data.places && data.places.length > 0) {
+        loaded = loaded.concat(data.places);
+        offset += batchSize;
+        if (data.places.length < batchSize) hasMore = false;
+      } else {
+        hasMore = false;
+      }
+    }
+    return loaded;
   };
 
-  // Aplicar filtros en el cliente
-  const applyClientSideFilters = useCallback((placesToFilter: PlaceWithTier[]) => {
-    let filtered = placesToFilter;
-    console.log(`🔍 Aplicando filtros. Total lugares: ${placesToFilter.length}`);
-    console.log(`   - Filtros activos:`, { 
-      community: filters.community, 
-      province: filters.province, 
-      city: filters.city,
-      category: filters.category,
-      minReviews, 
-      maxReviews,
-      qualityTier: filters.qualityTier 
-    });
+  const loadPlaces = useCallback(async (isRevalidation = false) => {
+    if (!isRevalidation) setLoading(true);
+    try {
+      // Cubo temporal de 30s: URL estable para aprovechar el cache CDN sin petar el origen
+      const bucket = Math.floor(Date.now() / 30000);
+      const response = await fetch(`/api/places?fields=map&t=${bucket}`, { cache: 'no-store' });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const data = await response.json();
+      if (!data.success || !Array.isArray(data.places)) throw new Error('Respuesta inválida');
+
+      const previousCount = allPlacesCountRef.current;
+      setAllPlaces(data.places);
+      if (isRevalidation && data.places.length > previousCount) {
+        toast.success(`🆕 ${data.places.length - previousCount} lugares nuevos disponibles`, { duration: 5000 });
+      }
+    } catch (error) {
+      console.error('❌ Error en endpoint de mapa, usando fallback paginado:', error);
+      try {
+        const loaded = await loadPlacesPaginated();
+        if (loaded.length > 0) {
+          setAllPlaces(loaded);
+        } else if (!isRevalidation) {
+          toast.error('Error cargando lugares. Recarga la página.');
+        }
+      } catch (fallbackError) {
+        console.error('❌ Error crítico cargando lugares:', fallbackError);
+        if (!isRevalidation) toast.error('Error cargando lugares. Revisa tu conexión.');
+      }
+    } finally {
+      if (!isRevalidation) setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadPlaces();
+  }, [loadPlaces]);
+
+  // 🔄 Revalidación automática cada 5 minutos
+  useEffect(() => {
+    const REVALIDATE_INTERVAL = 5 * 60 * 1000;
+    const interval = setInterval(() => {
+      loadPlaces(true);
+    }, REVALIDATE_INTERVAL);
+    return () => clearInterval(interval);
+  }, [loadPlaces]);
+
+  // Índice de lugares por id (para resolver clicks de markers sin closures obsoletos)
+  useEffect(() => {
+    placesByIdRef.current = new Map(allPlaces.map((p) => [p.id, p]));
+  }, [allPlaces]);
+
+  // ===== FILTRADO: UN SOLO useMemo COMPARTIDO POR MAPA Y LISTA =====
+  const filteredPlaces = useMemo(() => {
+    let filtered = allPlaces;
 
     // Filtro de comunidad
     if (filters.community) {
-      filtered = filtered.filter(p => p.region === filters.community);
-      console.log(`   - Después de filtro comunidad: ${filtered.length}`);
+      filtered = filtered.filter((p) => p.region === filters.community);
     }
 
     // Filtro de provincia
     if (filters.province) {
-      filtered = filtered.filter(p => p.province === filters.province);
+      filtered = filtered.filter((p) => p.province === filters.province);
     }
 
-    // 🔍 BÚSQUEDA UNIVERSAL - Busca en múltiples campos (nombre, ciudad, provincia, región, categoría, tier, etc.)
+    // 🔍 Búsqueda universal (nombre, ciudad, provincia, región, categoría, tier)
     if (debouncedSearchTerm && debouncedSearchTerm.trim()) {
       const searchLower = debouncedSearchTerm.toLowerCase().trim();
-      const searchWords = searchLower.split(' ').filter(word => word.length > 2);
-      
-      filtered = filtered.filter(p => {
-        // Campos de ubicación
-        const city = p.city?.toLowerCase() || '';
-        const province = p.province?.toLowerCase() || '';
-        const region = p.region?.toLowerCase() || '';
-        
-        // Campos del negocio
-        const name = p.name?.toLowerCase() || '';
-        const category = p.category?.toLowerCase() || '';
-        const subcategory = p.subcategory?.toLowerCase() || '';
-        
-        // Campos de calidad
-        const tier = calculateQualityTier(p.rating, p.review_count || 0).toLowerCase();
-        
-        // Concatenar todos los campos buscables
+      const searchWords = searchLower.split(' ').filter((word) => word.length > 2);
+
+      filtered = filtered.filter((p) => {
         const searchableText = [
-          city, province, region, name, category, subcategory, tier
+          p.city?.toLowerCase() || '',
+          p.province?.toLowerCase() || '',
+          p.region?.toLowerCase() || '',
+          p.name?.toLowerCase() || '',
+          p.category?.toLowerCase() || '',
+          p.subcategory?.toLowerCase() || '',
+          calculateQualityTier(p.rating, p.review_count || 0).toLowerCase(),
         ].join(' ');
-        
-        // Si hay múltiples palabras (ej: "hotel murcia"), todas deben estar presentes
+
         if (searchWords.length > 1) {
-          return searchWords.every(word => searchableText.includes(word));
+          return searchWords.every((word) => searchableText.includes(word));
         }
-        
-        // Si es una sola palabra, buscar en cualquier campo
         return searchableText.includes(searchLower);
       });
-      
-      console.log(`   - Búsqueda universal "${searchLower}": ${filtered.length}`);
     }
 
-    // Filtro de ciudad (específico, para combinar con otros filtros) 🏙️
+    // Filtro de ciudad
     if (filters.city && filters.city.trim()) {
       const cityTerm = filters.city.toLowerCase().trim();
-      
-      filtered = filtered.filter(p => {
-        const cityName = p.city?.toLowerCase() || '';
-        return cityName.includes(cityTerm);
-      });
-      console.log(`   - Filtro ciudad específico "${cityTerm}": ${filtered.length}`);
+      filtered = filtered.filter((p) => (p.city?.toLowerCase() || '').includes(cityTerm));
     }
 
     // Filtro de categoría
     if (filters.category) {
-      filtered = filtered.filter(p => p.category === filters.category);
+      filtered = filtered.filter((p) => p.category === filters.category);
     }
 
     // Filtro de rating
     if (filters.minRating) {
-      filtered = filtered.filter(p => p.rating >= filters.minRating!);
+      filtered = filtered.filter((p) => p.rating >= filters.minRating!);
     }
     if (filters.maxRating) {
-      filtered = filtered.filter(p => p.rating <= filters.maxRating!);
+      filtered = filtered.filter((p) => p.rating <= filters.maxRating!);
     }
 
     // Filtro de precio
     if (filters.priceLevel) {
-      filtered = filtered.filter(p => p.price_level === filters.priceLevel);
+      filtered = filtered.filter((p) => p.price_level === filters.priceLevel);
     }
 
-    // Filtro de Tier de Calidad - CALCULAR DINÁMICAMENTE
+    // Filtro de tier de calidad (calculado dinámicamente)
     if (filters.qualityTier && filters.qualityTier.length > 0) {
-      filtered = filtered.filter(p => {
+      filtered = filtered.filter((p) => {
         const tier = calculateQualityTier(p.rating, p.review_count || 0);
         return filters.qualityTier!.includes(tier);
       });
     }
 
-    // Filtro de rango de reseñas con slider
-    const beforeReviewsFilter = filtered.length;
-    filtered = filtered.filter(p => {
+    // Filtro de rango de reseñas
+    filtered = filtered.filter((p) => {
       const count = p.review_count || 0;
       return count >= minReviews && count <= maxReviews;
     });
-    console.log(`   - Filtro reseñas (${minReviews}-${maxReviews}): ${beforeReviewsFilter} → ${filtered.length}`);
 
-    console.log(`✅ Total filtrados final: ${filtered.length}`);
-    setFilteredPlaces(filtered);
-  }, [filters, minReviews, maxReviews, debouncedSearchTerm]);
+    return filtered;
+  }, [allPlaces, filters, minReviews, maxReviews, debouncedSearchTerm]);
 
-  // 🚀 AUTO-ZOOM: Ajustar mapa cuando cambien los filtros (IGNORA ubicación del usuario)
+  // ===== SELECCIÓN DE LUGAR (única fuente de verdad: pin, card y lista) =====
+  const selectPlace = useCallback((place: PlaceWithTier, source: string) => {
+    trackEvent(EVENTS.PLACE_VIEW, ANALYTICS_CATEGORIES.PLACE, {
+      place_id: place.id,
+      place_name: place.name,
+      place_category: place.category,
+      place_city: place.city,
+      place_rating: place.rating,
+      source,
+    });
+
+    setSelectedPlace(place);
+
+    const map = mapRef.current;
+    if (!map) return;
+
+    // Desplazar la cámara con offset vertical: el pin queda arriba y la card cabe debajo
+    const mapHeight = map.getContainer().clientHeight;
+    const offsetY = -Math.round(mapHeight * 0.22);
+    const currentZoom = map.getZoom();
+    const targetZoom = source === 'map_marker' ? currentZoom : Math.max(currentZoom, 13);
+    // easeTo con duration 0 = salto instantáneo (prefers-reduced-motion) pero admite offset
+    map.easeTo({
+      center: [place.longitude, place.latitude],
+      zoom: targetZoom,
+      offset: [0, offsetY],
+      duration: prefersReducedMotionRef.current ? 0 : 500,
+    });
+  }, []);
+
+  const selectPlaceRef = useRef(selectPlace);
   useEffect(() => {
-    if (!mapRef.current || filteredPlaces.length === 0) return;
+    selectPlaceRef.current = selectPlace;
+  }, [selectPlace]);
+
+  // ===== SUPERCLUSTER: PINTAR SOLO EL VIEWPORT REUTILIZANDO DOM =====
+  const createClusterElement = useCallback(
+    (props: { cluster_id: number; point_count: number; tierCounts: Partial<Record<QualityTier, number>> }, lng: number, lat: number) => {
+      const count = props.point_count;
+      const size = getClusterSize(count);
+      const dominant = getDominantTier(props.tierCounts);
+
+      const wrapper = document.createElement('div');
+      const el = document.createElement('div');
+      el.className = 'cc-cluster';
+      el.style.width = `${size}px`;
+      el.style.height = `${size}px`;
+      el.style.backgroundColor = getTierMarkerColor(dominant);
+      el.style.fontSize = size < 30 ? '10px' : '12px';
+      el.textContent = count >= 1000 ? `${Math.round(count / 100) / 10}k` : String(count);
+      wrapper.appendChild(el);
+
+      el.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const map = mapRef.current;
+        const index = clusterIndexRef.current;
+        if (!map || !index) return;
+
+        let targetZoom = 16;
+        try {
+          targetZoom = Math.min(index.getClusterExpansionZoom(props.cluster_id), 16);
+        } catch {
+          targetZoom = Math.min(map.getZoom() + 2, 16);
+        }
+
+        if (prefersReducedMotionRef.current) {
+          map.jumpTo({ center: [lng, lat], zoom: targetZoom });
+        } else {
+          map.flyTo({ center: [lng, lat], zoom: targetZoom, speed: 1.6 });
+        }
+      });
+
+      return wrapper;
+    },
+    []
+  );
+
+  const createPointElement = useCallback((props: MapPointProps) => {
+    const place = placesByIdRef.current.get(props.placeId);
+
+    const wrapper = document.createElement('div');
+    const el = document.createElement('div');
+    el.className = 'cc-point';
+    el.style.backgroundColor = getTierMarkerColor(props.tier);
+    wrapper.appendChild(el);
+
+    // Hover con nombre SOLO en dispositivos con puntero fino (nunca en táctil)
+    if (hoverEnabledRef.current && place) {
+      const label = document.createElement('span');
+      label.className = 'cc-point-label';
+      label.textContent = place.name;
+      el.appendChild(label);
+    }
+
+    el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const currentPlace = placesByIdRef.current.get(props.placeId);
+      if (currentPlace) {
+        selectPlaceRef.current(currentPlace, 'map_marker');
+      }
+    });
+
+    return wrapper;
+  }, []);
+
+  // Pide SOLO los clusters/puntos del bbox visible y reutiliza el DOM existente
+  const updateMarkers = useCallback(() => {
+    const map = mapRef.current;
+    const index = clusterIndexRef.current;
+    if (!map || !index) return;
+
+    const bounds = map.getBounds();
+    const bbox: [number, number, number, number] = [
+      bounds.getWest(),
+      bounds.getSouth(),
+      bounds.getEast(),
+      bounds.getNorth(),
+    ];
+    const zoom = Math.floor(map.getZoom());
+    const clusters = index.getClusters(bbox, zoom);
+
+    const pool = markerPoolRef.current;
+    const visibleKeys = new Set<string>();
+
+    for (const feature of clusters) {
+      const [lng, lat] = feature.geometry.coordinates as [number, number];
+      const props: any = feature.properties;
+      const key = props.cluster ? `c:${props.cluster_id}` : `p:${props.placeId}`;
+      visibleKeys.add(key);
+
+      // Si el id ya está en pantalla, NO recrear su DOM
+      if (pool.has(key)) continue;
+
+      const element = props.cluster ? createClusterElement(props, lng, lat) : createPointElement(props);
+      const marker = new maplibregl.Marker({ element }).setLngLat([lng, lat]).addTo(map);
+      pool.set(key, marker);
+    }
+
+    // Eliminar los que salieron del viewport
+    pool.forEach((marker, key) => {
+      if (!visibleKeys.has(key)) {
+        marker.remove();
+        pool.delete(key);
+      }
+    });
+  }, [createClusterElement, createPointElement]);
+
+  const updateMarkersRef = useRef(updateMarkers);
+  useEffect(() => {
+    updateMarkersRef.current = updateMarkers;
+  }, [updateMarkers]);
+
+  // ===== INICIALIZAR MAPLIBRE (una sola vez, sin esperar al dataset) =====
+  useEffect(() => {
+    if (!mapDivRef.current || mapRef.current) return;
+
+    prefersReducedMotionRef.current = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    hoverEnabledRef.current = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    const mobile = window.innerWidth < 768;
+
+    const map = new maplibregl.Map({
+      container: mapDivRef.current,
+      style: MAP_STYLE,
+      center: DEFAULT_CENTER,
+      zoom: mobile ? DEFAULT_ZOOM_MOBILE : DEFAULT_ZOOM_DESKTOP,
+      minZoom: mobile ? 5 : 4.3,
+      maxZoom: 18,
+      maxBounds: mobile ? BOUNDS_PENINSULA : BOUNDS_FULL,
+      attributionControl: false,
+      fadeDuration: prefersReducedMotionRef.current ? 0 : 300,
+    });
+
+    // Controles nativos de MapLibre: zoom + attribution compacta
+    map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-left');
+    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-right');
+
+    // Repintar viewport en cada movimiento (moveend cubre también zoomend)
+    map.on('moveend', () => updateMarkersRef.current());
+
+    // Rastrear interacción manual del usuario (desactiva auto-zoom de filtros)
+    map.on('dragstart', () => {
+      isUserInteractingRef.current = true;
+    });
+    map.on('zoomstart', (e: any) => {
+      if (e.originalEvent) isUserInteractingRef.current = true;
+    });
+    map.on('moveend', () => {
+      setTimeout(() => {
+        isUserInteractingRef.current = false;
+      }, 2000);
+    });
+
+    // Click en el canvas (no en un pin): cerrar la card
+    map.on('click', () => setSelectedPlace(null));
+
+    map.on('load', () => setMapReady(true));
+
+    mapRef.current = map;
+
+    return () => {
+      markerPoolRef.current.forEach((marker) => marker.remove());
+      markerPoolRef.current.clear();
+      userMarkerRef.current?.remove();
+      userMarkerRef.current = null;
+      map.remove();
+      mapRef.current = null;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // ===== CONSTRUIR ÍNDICE SUPERCLUSTER CON EL SET FILTRADO =====
+  // NUNCA se crea un marker por punto: solo el índice + los nodos del viewport
+  useEffect(() => {
+    if (!mapReady) return;
+
+    const index = new Supercluster<MapPointProps, MapClusterProps>({
+      radius: 60, // 100 agrupa de más y obliga a zooms absurdos
+      maxZoom: 12, // desde zoom 13 todo son puntos individuales
+      minPoints: 3,
+      map: (props) => ({ tierCounts: { [props.tier]: 1 } }),
+      reduce: (accumulated, props) => {
+        const merged: Partial<Record<QualityTier, number>> = { ...accumulated.tierCounts };
+        for (const tier in props.tierCounts) {
+          merged[tier as QualityTier] =
+            (merged[tier as QualityTier] || 0) + (props.tierCounts[tier as QualityTier] || 0);
+        }
+        accumulated.tierCounts = merged;
+      },
+    });
+
+    const features = filteredPlaces.filter(hasValidCoords).map((place) => ({
+      type: 'Feature' as const,
+      geometry: {
+        type: 'Point' as const,
+        coordinates: [place.longitude, place.latitude],
+      },
+      properties: {
+        placeId: place.id,
+        tier: calculateQualityTier(place.rating, place.review_count || 0),
+      },
+    }));
+
+    index.load(features);
+    clusterIndexRef.current = index;
+
+    // El índice cambió: los cluster_id son nuevos, vaciar pool y repintar viewport
+    markerPoolRef.current.forEach((marker) => marker.remove());
+    markerPoolRef.current.clear();
+    updateMarkersRef.current();
+  }, [filteredPlaces, mapReady]);
+
+  // Resaltar el pin seleccionado (si está en el viewport)
+  useEffect(() => {
+    markerPoolRef.current.forEach((marker, key) => {
+      const inner = marker.getElement().firstElementChild;
+      if (inner) {
+        inner.classList.toggle('cc-point--selected', key === `p:${selectedPlace?.id}`);
+      }
+    });
+  }, [selectedPlace]);
+
+  // ===== AUTO-ZOOM CUANDO CAMBIAN LOS FILTROS =====
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapReady || filteredPlaces.length === 0) return;
 
     // NO aplicar auto-zoom si viene con ?place=ID (desde chatbot o enlace directo)
-    const placeIdFromUrl = searchParams.get('place');
-    if (placeIdFromUrl) {
-      console.log('⏸️ Auto-zoom de filtros desactivado - modo lugar específico');
-      return;
-    }
-    
-    // 🔧 NO aplicar auto-zoom si el usuario está moviendo el mapa manualmente
-    if (isUserInteractingRef.current) {
-      console.log('⏸️ Auto-zoom de filtros desactivado - usuario interactuando con el mapa');
-      return;
-    }
+    if (searchParams.get('place')) return;
 
-    // Detectar si hay filtros activos
-    const hasActiveFilters = filters.community || filters.province || filters.city || 
-                             filters.category || filters.qualityTier?.length || 
-                             debouncedSearchTerm || minReviews > 0 || maxReviews < 10000;
+    // NO aplicar auto-zoom si el usuario está moviendo el mapa manualmente
+    if (isUserInteractingRef.current) return;
 
-    // Delay para que no se ejecute mientras se está ajustando
+    const hasActiveFilters =
+      filters.community ||
+      filters.province ||
+      filters.city ||
+      filters.category ||
+      filters.qualityTier?.length ||
+      debouncedSearchTerm ||
+      minReviews > 0 ||
+      maxReviews < 10000;
+
     const timer = setTimeout(() => {
-      if (hasActiveFilters && filteredPlaces.length > 0 && filteredPlaces.length < allPlaces.length) {
-        // HAY FILTROS: Hacer zoom PERFECTO solo a los lugares filtrados (NO incluir ubicación usuario)
-        const bounds = new google.maps.LatLngBounds();
-        
-        // Incluir SOLO los lugares filtrados con coordenadas válidas
-        let validPlaces = 0;
-        filteredPlaces.forEach(place => {
-          // Validar que las coordenadas sean válidas para España
-          if (place.latitude && place.longitude &&
-              place.latitude >= 27 && place.latitude <= 44 &&
-              place.longitude >= -18 && place.longitude <= 5) {
-            bounds.extend({ lat: place.latitude, lng: place.longitude });
-            validPlaces++;
-          } else {
-            console.warn(`⚠️ Coordenadas inválidas: ${place.name} (${place.latitude}, ${place.longitude})`);
+      const currentMap = mapRef.current;
+      if (!currentMap) return;
+
+      if (hasActiveFilters && filteredPlaces.length < allPlaces.length) {
+        const bounds = new maplibregl.LngLatBounds();
+        let validCount = 0;
+        filteredPlaces.forEach((place) => {
+          if (hasValidCoords(place)) {
+            bounds.extend([place.longitude, place.latitude]);
+            validCount++;
           }
         });
-        
-        if (validPlaces > 0 && mapRef.current) {
-          // Calcular padding dinámico según paneles
-          const leftPadding = showFilters ? 400 : 20;
-          const rightPadding = showPlacesList ? 400 : 20;
-          
-          // Ajustar bounds con padding - CENTRADO EN LOS LUGARES
-          mapRef.current.fitBounds(bounds, {
-            top: 50,
-            bottom: 100,
-            left: leftPadding,
-            right: rightPadding,
+
+        if (validCount > 0) {
+          currentMap.fitBounds(bounds, {
+            padding: { top: 80, bottom: 100, left: 60, right: 60 },
+            maxZoom: 15,
+            animate: !prefersReducedMotionRef.current,
           });
-          
-          console.log(`🔍 Zoom centrado en ${validPlaces} lugares válidos de ${filteredPlaces.length} total`);
         }
-      } else if (!hasActiveFilters && filteredPlaces.length === allPlaces.length && mapRef.current) {
-        // SIN FILTROS: Restaurar vista de España (península centrada)
-        mapRef.current.setCenter(defaultCenter);
-        mapRef.current?.setZoom(6);
-        console.log(`🗺️ Zoom restaurado a vista de España`);
+      } else if (!hasActiveFilters && filteredPlaces.length === allPlaces.length) {
+        // Sin filtros: restaurar vista de España
+        const cameraOptions = {
+          center: DEFAULT_CENTER,
+          zoom: window.innerWidth < 768 ? DEFAULT_ZOOM_MOBILE : DEFAULT_ZOOM_DESKTOP,
+        };
+        if (prefersReducedMotionRef.current) currentMap.jumpTo(cameraOptions);
+        else currentMap.easeTo({ ...cameraOptions, duration: 600 });
       }
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [filteredPlaces, filters, minReviews, maxReviews, debouncedSearchTerm, showFilters, showPlacesList, allPlaces]);
-
-  // 🚀 OPTIMIZACIÓN: Calcular opciones con useMemo para evitar recalcular constantemente
-  const availableOptions = useMemo(() => {
-    // Debug: Ver todas las regiones sin filtrar
-    const allRegions = allPlaces.map(p => p.region);
-    const uniqueRegions = Array.from(new Set(allRegions));
-    console.log('🔍 DEBUG: Regiones únicas encontradas (sin filtrar):', uniqueRegions);
-    console.log('🔍 DEBUG: Total de lugares:', allPlaces.length);
-    
-    // Filtrar comunidades válidas
-    const validCommunities = Array.from(new Set(
-      allPlaces
-        .map(p => p.region)
-        .filter(r => r && r !== 'España' && r !== 'Todas')
-    )).sort();
-    
-    console.log('✅ Comunidades válidas después de filtrar:', validCommunities);
-    
-    return {
-      communities: validCommunities,
-      provinces: Array.from(new Set(allPlaces.map(p => p.province))).filter(Boolean).sort(),
-      categories: Array.from(new Set(allPlaces.map(p => p.category))).filter(Boolean),
-      cities: Array.from(new Set(allPlaces.map(p => p.city))).filter(Boolean).sort(),
-    };
-  }, [allPlaces]);
-
-  useEffect(() => {
-    loadPlaces();
-  }, []);
-
-  // 🔄 REVALIDACIÓN AUTOMÁTICA: Recargar cada 5 minutos
-  useEffect(() => {
-    const REVALIDATE_INTERVAL = 5 * 60 * 1000; // 5 minutos
-    
-    const interval = setInterval(async () => {
-      console.log('🔄 Revalidación automática (cada 5 minutos)...');
-      
-      try {
-        // Forzar recarga desde API (bypass cache)
-        const batchSize = 1000;
-        let offset = 0;
-        let hasMore = true;
-        let freshPlaces: PlaceWithTier[] = [];
-        
-        while (hasMore) {
-          // ✅ OPTIMIZACIÓN: fields=light reduce payload 80%
-          const response = await fetch(`/api/places?limit=${batchSize}&offset=${offset}&fields=light&t=${Date.now()}`);
-          
-          if (!response.ok) {
-            console.error(`❌ Error HTTP ${response.status} en revalidación`);
-            hasMore = false;
-            break;
-          }
-          
-          const data = await response.json();
-          
-          if (data.success && data.places && data.places.length > 0) {
-            freshPlaces = [...freshPlaces, ...data.places];
-            offset += batchSize;
-            
-            if (data.places.length < batchSize) {
-              hasMore = false;
-            }
-          } else {
-            hasMore = false;
-          }
-        }
-        
-        if (freshPlaces.length > 0) {
-          const oldCount = allPlaces.length;
-          const newCount = freshPlaces.length;
-          
-          setAllPlaces(freshPlaces);
-          savePlacesToCache(freshPlaces);
-          
-          if (newCount > oldCount) {
-            const diff = newCount - oldCount;
-            toast.success(`🆕 ${diff} lugares nuevos disponibles`, { duration: 5000 });
-            console.log(`✅ Revalidación: ${newCount} lugares (${diff} nuevos)`);
-          } else {
-            console.log(`✅ Revalidación: ${newCount} lugares (sin cambios)`);
-          }
-        }
-      } catch (error) {
-        console.error('⚠️ Error en revalidación automática:', error);
-      }
-    }, REVALIDATE_INTERVAL);
-    
-    return () => clearInterval(interval);
-  }, [allPlaces.length]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filteredPlaces, mapReady]);
 
   // 🔗 Abrir lugar desde URL (ej: desde chatbot con ?place=ID)
   useEffect(() => {
     const placeIdFromUrl = searchParams.get('place');
-    
-    // Solo ejecutar si:
-    // 1. Hay un ID en la URL
-    // 2. Los lugares ya cargaron
-    // 3. El mapa está listo
-    // 4. NO está ya seleccionado ese mismo lugar
-    if (!placeIdFromUrl || !allPlaces.length || !mapRef.current || !isLoaded) return;
+    if (!placeIdFromUrl || !allPlaces.length || !mapReady) return;
     if (selectedPlace && selectedPlace.id === placeIdFromUrl) return;
-    
-    const placeToOpen = allPlaces.find(p => p.id === placeIdFromUrl);
+
+    const placeToOpen = allPlaces.find((p) => p.id === placeIdFromUrl);
     if (placeToOpen) {
-      console.log(`🎯 Abriendo lugar desde URL: ${placeToOpen.name}`);
       setSelectedPlace(placeToOpen);
-      
-      // Centrar y hacer zoom INMEDIATAMENTE (el auto-zoom está desactivado para ?place=ID)
-      mapRef.current?.setCenter({
-        lat: placeToOpen.latitude,
-        lng: placeToOpen.longitude
+      // easeTo con duration 0 = salto instantáneo pero admite offset vertical
+      mapRef.current?.easeTo({
+        center: [placeToOpen.longitude, placeToOpen.latitude],
+        zoom: 14,
+        offset: [0, -Math.round((mapRef.current?.getContainer().clientHeight || 600) * 0.22)],
+        duration: 0,
       });
-      mapRef.current?.setZoom(15);
     }
-  }, [allPlaces, isLoaded]); // NO incluir searchParams ni selectedPlace para evitar loops
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allPlaces, mapReady]);
 
-  // 🎨 CACHE DE ICONOS: Pre-renderizar iconos una sola vez (mejora performance)
-  const markerIcons = useMemo(() => {
-    // ✅ CRÍTICO: Verificar que Google Maps esté cargado
-    if (!isLoaded || typeof google === 'undefined' || !google.maps) {
-      console.log('⏳ Google Maps aún no está listo, esperando...');
-      return null;
+  // ===== GEOLOCALIZACIÓN: CENTRA el mapa en el usuario, NO filtra el dataset =====
+  const activateGeolocation = useCallback(() => {
+    if (!navigator.geolocation) {
+      setGeolocationError('Tu navegador no soporta geolocalización');
+      toast.error('Tu navegador no soporta geolocalización');
+      return;
     }
 
-    const isMobile = typeof window !== 'undefined' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    const markerSize = isMobile ? 28 : 36;
-    const markerRadius = isMobile ? 12 : 16;
-    const fontSize = isMobile ? 16 : 20;
-    const grayMarkerSize = isMobile ? 18 : 24;
-    const grayMarkerRadius = isMobile ? 8 : 10;
-    const grayFontSize = isMobile ? 11 : 14;
+    if (typeof window !== 'undefined' && window.location.protocol === 'http:' && !window.location.hostname.includes('localhost')) {
+      setGeolocationError('La geolocalización requiere HTTPS');
+      toast.error('La geolocalización requiere una conexión segura (HTTPS)');
+      return;
+    }
 
-    const tierColors: Record<string, string> = {
-      diamond: '#93c5fd',
-      platinum: '#e5e7eb',
-      gold: '#fbbf24',
-      silver: '#d1d5db',
-      bronze: '#fb923c',
-      none: '#ffffff'
+    setGeolocationError(null);
+    const mobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+    const options = {
+      enableHighAccuracy: mobile,
+      timeout: mobile ? 10000 : 8000,
+      maximumAge: mobile ? 0 : 60000,
     };
 
-    const tierIcons: Record<string, string> = {
-      diamond: '💎',
-      platinum: '🏆',
-      gold: '🥇',
-      silver: '🥈',
-      bronze: '🥉',
-      none: '⚪'
-    };
+    // watchPosition: la posición del usuario se mantiene actualizada
+    const watchId = navigator.geolocation.watchPosition(
+      (position) => {
+        const location = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        };
+        setUserLocation(location);
+        setIsGeolocationActive(true);
+        localStorage.setItem('geolocationActive', 'true');
 
-    // Pre-renderizar todos los iconos de tiers
-    const icons: Record<string, any> = {};
-    
-    Object.keys(tierColors).forEach(tier => {
-      icons[tier] = {
-        url: `data:image/svg+xml,${encodeURIComponent(`
-          <svg xmlns="http://www.w3.org/2000/svg" width="${markerSize}" height="${markerSize}" viewBox="0 0 ${markerSize} ${markerSize}">
-            <circle cx="${markerSize/2}" cy="${markerSize/2}" r="${markerRadius}" fill="${tierColors[tier]}" stroke="#d1d5db" stroke-width="2"/>
-            <text x="${markerSize/2}" y="${markerSize/2 + 7}" text-anchor="middle" font-size="${fontSize}">${tierIcons[tier]}</text>
-          </svg>
-        `)}`,
-        scaledSize: new google.maps.Size(markerSize, markerSize),
-        anchor: new google.maps.Point(markerSize/2, markerSize/2),
-      };
-
-      // Iconos grises para lugares no filtrados
-      icons[`${tier}_gray`] = {
-        url: `data:image/svg+xml,${encodeURIComponent(`
-          <svg xmlns="http://www.w3.org/2000/svg" width="${grayMarkerSize}" height="${grayMarkerSize}" viewBox="0 0 ${grayMarkerSize} ${grayMarkerSize}">
-            <circle cx="${grayMarkerSize/2}" cy="${grayMarkerSize/2}" r="${grayMarkerRadius}" fill="#f3f4f6" stroke="#d1d5db" stroke-width="1.5" opacity="0.4"/>
-            <text x="${grayMarkerSize/2}" y="${grayMarkerSize/2 + 4}" text-anchor="middle" font-size="${grayFontSize}" opacity="0.4">${tierIcons[tier]}</text>
-          </svg>
-        `)}`,
-        scaledSize: new google.maps.Size(grayMarkerSize, grayMarkerSize),
-        anchor: new google.maps.Point(grayMarkerSize/2, grayMarkerSize/2),
-      };
-    });
-
-    console.log('🎨 Iconos pre-renderizados:', Object.keys(icons).length);
-    return icons;
-  }, [isLoaded]); // Solo recrear si cambia isLoaded
-
-  // 🚀 CLUSTERING: Mostrar TODOS los lugares (filtrados en color, no filtrados en gris)
-  useEffect(() => {
-    console.log('🔄 useEffect marcadores triggered:', {
-      mapReady,
-      mapRef: !!mapRef.current,
-      isLoaded,
-      allPlacesLength: allPlaces.length,
-      filteredPlacesLength: filteredPlaces.length,
-      markerIconsReady: !!markerIcons,
-      markerIconsCount: markerIcons ? Object.keys(markerIcons).length : 0,
-      googleAvailable: typeof google !== 'undefined' && !!google.maps,
-    });
-
-    // ✅ Verificar que Google Maps esté completamente listo
-    if (!mapReady) {
-      console.log('⏭️ Marcadores: Esperando que el mapa se cargue (mapReady=false)');
-      return;
-    }
-    
-    if (!mapRef.current) {
-      console.log('⏭️ Marcadores: mapRef no disponible (no debería pasar si mapReady=true)');
-      return;
-    }
-    
-    if (!isLoaded) {
-      console.log('⏭️ Marcadores: Google Maps no cargado (isLoaded=false)');
-      return;
-    }
-    
-    if (allPlaces.length === 0) {
-      console.log('⏭️ Marcadores: No hay lugares cargados aún');
-      return;
-    }
-    
-    if (!markerIcons || Object.keys(markerIcons).length === 0) {
-      console.log('⏭️ Marcadores: Iconos no pre-renderizados aún');
-      return;
-    }
-    
-    if (typeof google === 'undefined' || !google.maps) {
-      console.log('⚠️ Google Maps API no disponible globalmente');
-      return;
-    }
-
-    console.log('✅ TODOS LOS REQUISITOS CUMPLIDOS - Creando marcadores...');
-
-    // Ejecutar INMEDIATAMENTE (sin setTimeout)
-    console.time('⏱️ Creación de marcadores');
-    console.log(`📍 Creando ${allPlaces.length} marcadores (${filteredPlaces.length} filtrados)`);
-      
-      // Limpiar marcadores anteriores de forma eficiente
-      if (clustererRef.current) {
-        clustererRef.current.clearMarkers();
-      }
-      markersRef.current.forEach(marker => marker.setMap(null));
-      markersRef.current = [];
-
-    // Separar marcadores filtrados y no filtrados
-    const filteredIds = new Set(filteredPlaces.map(p => p.id));
-    const notFilteredPlaces = allPlaces.filter(p => !filteredIds.has(p.id));
-    
-    // 1️⃣ Crear marcadores FILTRADOS (van al cluster) - USANDO CACHE DE ICONOS
-    const filteredMarkers = filteredPlaces.map((place) => {
-      const tier = calculateQualityTier(place.rating, place.review_count || 0);
-      const tierInfo = getTierInfo(tier);
-      
-      const marker = new google.maps.Marker({
-        position: { lat: place.latitude, lng: place.longitude },
-        icon: markerIcons[tier], // ← REUTILIZAR icono pre-renderizado
-        title: `${place.name} - ${tierInfo.name}`,
-        zIndex: 100,
-      });
-
-      marker.addListener('click', () => {
-        handleMarkerClick(place);
-      });
-
-      return marker;
-    });
-    
-    // 2️⃣ Crear marcadores NO FILTRADOS (grises) - USANDO CACHE DE ICONOS
-    const notFilteredMarkers = notFilteredPlaces.map((place) => {
-      const tier = calculateQualityTier(place.rating, place.review_count || 0);
-      const tierInfo = getTierInfo(tier);
-      
-      const marker = new google.maps.Marker({
-        position: { lat: place.latitude, lng: place.longitude },
-        icon: markerIcons[`${tier}_gray`], // ← REUTILIZAR icono gris pre-renderizado
-        title: `${place.name} - ${tierInfo.name}`,
-        zIndex: 10,
-        map: mapRef.current, // Añadir directamente al mapa (SIN cluster)
-      });
-
-      marker.addListener('click', () => {
-        handleMarkerClick(place);
-      });
-
-      return marker;
-    });
-    
-    console.timeEnd('⏱️ Creación de marcadores');
-
-    markersRef.current = [...filteredMarkers, ...notFilteredMarkers];
-
-    // Crear o actualizar clusterer con estilo personalizado simple
-    // Tamaño adaptativo para clusters
-    const isMobile = typeof window !== 'undefined' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    const clusterSize = isMobile ? 32 : 40;
-    const clusterRadius = isMobile ? 14 : 18;
-    const clusterFontSize = isMobile ? 10 : 12;
-    
-    const renderer = {
-      render: ({ count, position, markers }: any) => {
-        // Estilo simple y discreto
-        const color = count > 100 ? "#dc2626" : count > 50 ? "#f59e0b" : count > 20 ? "#3b82f6" : "#10b981";
-        
-        const clusterMarker = new google.maps.Marker({
-          position,
-          icon: {
-            url: `data:image/svg+xml,${encodeURIComponent(`
-              <svg xmlns="http://www.w3.org/2000/svg" width="${clusterSize}" height="${clusterSize}" viewBox="0 0 ${clusterSize} ${clusterSize}">
-                <circle cx="${clusterSize/2}" cy="${clusterSize/2}" r="${clusterRadius}" fill="${color}" opacity="0.8" stroke="white" stroke-width="2"/>
-                <text x="${clusterSize/2}" y="${clusterSize/2 + 4}" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="${clusterFontSize}" font-weight="bold">${count}</text>
-              </svg>
-            `)}`,
-            scaledSize: new google.maps.Size(clusterSize, clusterSize),
-          },
-          label: {
-            text: " ",
-            color: "transparent",
-          },
-          zIndex: Number(google.maps.Marker.MAX_ZINDEX) + count,
-        });
-
-        // Click en cluster: hacer zoom para mostrar todos los marcadores dentro
-        clusterMarker.addListener('click', () => {
-          if (mapRef.current && markers && markers.length > 0) {
-            const bounds = new google.maps.LatLngBounds();
-            markers.forEach((marker: any) => {
-              bounds.extend(marker.getPosition()!);
-            });
-            mapRef.current?.fitBounds(bounds);
-            
-            // Limitar zoom máximo para no acercarse demasiado
-            const listener = google.maps.event.addListenerOnce(mapRef.current, 'idle', () => {
-              const currentZoom = mapRef.current?.getZoom();
-              if (currentZoom && currentZoom > 16) {
-                mapRef.current?.setZoom(16);
-              }
-            });
-          }
-        });
-
-        return clusterMarker;
-      },
-    };
-
-    // Clusterer SOLO con marcadores filtrados
-    if (!clustererRef.current) {
-      clustererRef.current = new MarkerClusterer({
-        map: mapRef.current,
-        markers: filteredMarkers, // SOLO los filtrados
-        renderer,
-      });
-    } else {
-      clustererRef.current.clearMarkers();
-      clustererRef.current.addMarkers(filteredMarkers); // SOLO los filtrados
-    }
-
-    console.log(`🎯 Clustering: ${filteredMarkers.length} marcadores filtrados + ${notFilteredMarkers.length} grises individuales`);
-
-    // Cleanup: limpiar marcadores al desmontar
-    return () => {
-      if (clustererRef.current) {
-        clustererRef.current.clearMarkers();
-      }
-      markersRef.current.forEach(marker => marker.setMap(null));
-    };
-  }, [allPlaces, filteredPlaces, isLoaded, markerIcons, mapReady]); // ✅ Agregado mapReady
-
-  // Reactivar geolocalización si estaba activa antes
-  useEffect(() => {
-    if (isGeolocationActive && !userLocation && typeof window !== 'undefined' && navigator.geolocation) {
-      // Si el flag está activo pero no tenemos ubicación, obtenerla automáticamente
-      
-      // Opciones optimizadas para todos los dispositivos
-      const options = {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 0
-      };
-      
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const location = {
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
+        // Centrar el mapa en el usuario SOLO la primera vez (no en cada actualización)
+        if (!hasCenteredOnUserRef.current && mapRef.current) {
+          hasCenteredOnUserRef.current = true;
+          const cameraOptions = {
+            center: [location.lng, location.lat] as [number, number],
+            zoom: Math.max(mapRef.current.getZoom(), 11),
           };
-          setUserLocation(location);
-          console.log('✅ Ubicación reactivada correctamente');
-        },
-        (error) => {
-          console.error('Error reactivando geolocalización:', error);
-          
-          // Mensaje específico según el error
-          let errorMsg = 'No pudimos obtener tu ubicación';
-          if (error.code === error.PERMISSION_DENIED) {
-            errorMsg = 'Permiso de ubicación denegado';
-          } else if (error.code === error.TIMEOUT) {
-            errorMsg = 'Tiempo agotado al obtener ubicación';
+          if (prefersReducedMotionRef.current) mapRef.current.jumpTo(cameraOptions);
+          else mapRef.current.easeTo({ ...cameraOptions, duration: 800 });
+
+          const accuracy = position.coords.accuracy;
+          if (accuracy > 5000) {
+            toast.warning(`⚠️ Ubicación aproximada (±${Math.round(accuracy / 1000)}km). Para mayor precisión, usa un dispositivo móvil.`);
+          } else {
+            toast.success('✅ Ubicación activada correctamente');
           }
-          
-          setGeolocationError(errorMsg);
-          localStorage.setItem('geolocationActive', 'false');
-          setIsGeolocationActive(false);
-        },
-        options
-      );
+        }
+      },
+      (error) => {
+        let errorMessage = 'No pudimos obtener tu ubicación';
+        let helpText = '';
+
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            errorMessage = 'Permiso de ubicación denegado';
+            helpText = mobile
+              ? 'Safari/Chrome → Configuración del sitio → Permitir ubicación'
+              : 'Click en el candado 🔒 → Permisos del sitio → Ubicación → Permitir';
+            break;
+          case error.POSITION_UNAVAILABLE:
+            errorMessage = 'Ubicación no disponible';
+            helpText = 'Verifica que GPS/WiFi estén activos';
+            break;
+          case error.TIMEOUT:
+            errorMessage = 'Tiempo agotado';
+            helpText = 'Intenta de nuevo, asegúrate de tener buena señal';
+            break;
+        }
+
+        setGeolocationError(errorMessage + (helpText ? ` - ${helpText}` : ''));
+        toast.error(`❌ ${errorMessage}`);
+        localStorage.setItem('geolocationActive', 'false');
+        setIsGeolocationActive(false);
+        if (geoWatchIdRef.current !== null) {
+          navigator.geolocation.clearWatch(geoWatchIdRef.current);
+          geoWatchIdRef.current = null;
+        }
+      },
+      options
+    );
+
+    geoWatchIdRef.current = watchId;
+  }, []);
+
+  // Desactivar geolocalización
+  const deactivateGeolocation = useCallback(() => {
+    if (geoWatchIdRef.current !== null) {
+      navigator.geolocation.clearWatch(geoWatchIdRef.current);
+      geoWatchIdRef.current = null;
     }
-  }, []); // Solo ejecutar una vez al montar el componente
+    hasCenteredOnUserRef.current = false;
+    setUserLocation(null);
+    setIsGeolocationActive(false);
+    setGeolocationError(null);
+    localStorage.setItem('geolocationActive', 'false');
 
-  // ✅ OPTIMIZACIÓN: Activar carga del mapa cuando sea necesario
-  
-  // ❌ ELIMINADO: useEffect duplicado (ya existe en línea 415)
+    setSortBy((current) => (current === 'proximity' ? 'reviews' : current));
+  }, []);
 
-  // Aplicar filtros cuando cambian (automático) - 🚀 Incluye debouncedSearchTerm
+  // ✅ Reactivar geolocalización si estaba activa (persistencia on/off en localStorage)
   useEffect(() => {
-    if (allPlaces.length > 0) {
-      applyClientSideFilters(allPlaces);
+    if (typeof window !== 'undefined' && localStorage.getItem('geolocationActive') === 'true') {
+      activateGeolocation();
     }
-  }, [allPlaces, filters, minReviews, maxReviews, debouncedSearchTerm, applyClientSideFilters]);
+    return () => {
+      if (geoWatchIdRef.current !== null) {
+        navigator.geolocation.clearWatch(geoWatchIdRef.current);
+        geoWatchIdRef.current = null;
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  // (Auto-zoom ahora se maneja arriba con detección de filtros activos)
+  // Marcador de usuario (distinto a los pins de lugares)
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapReady) return;
 
-  // Aplicar filtros (llamado desde el botón)
+    if (userLocation) {
+      if (!userMarkerRef.current) {
+        const el = document.createElement('div');
+        el.className = 'cc-user-marker';
+        el.innerHTML = '<div class="cc-user-ring"></div><div class="cc-user-dot"></div>';
+        el.title = 'Tu ubicación';
+        userMarkerRef.current = new maplibregl.Marker({ element: el })
+          .setLngLat([userLocation.lng, userLocation.lat])
+          .addTo(map);
+      } else {
+        userMarkerRef.current.setLngLat([userLocation.lng, userLocation.lat]);
+      }
+    } else if (userMarkerRef.current) {
+      userMarkerRef.current.remove();
+      userMarkerRef.current = null;
+    }
+  }, [userLocation, mapReady]);
+
+  // ===== RESTABLECER VISTA (según filtro geográfico activo) =====
+  const resetView = useCallback(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    const hasGeoFilter = filters.community || filters.province || filters.city;
+
+    if (hasGeoFilter && filteredPlaces.length > 0 && filteredPlaces.length < allPlaces.length) {
+      // Encuadrar la zona filtrada (CCAA / provincia / ciudad)
+      const bounds = new maplibregl.LngLatBounds();
+      let validCount = 0;
+      filteredPlaces.forEach((place) => {
+        if (hasValidCoords(place)) {
+          bounds.extend([place.longitude, place.latitude]);
+          validCount++;
+        }
+      });
+      if (validCount > 0) {
+        map.fitBounds(bounds, {
+          padding: { top: 80, bottom: 100, left: 60, right: 60 },
+          maxZoom: 15,
+          animate: !prefersReducedMotionRef.current,
+        });
+        return;
+      }
+    }
+
+    // Vista de España
+    const cameraOptions = {
+      center: DEFAULT_CENTER,
+      zoom: window.innerWidth < 768 ? DEFAULT_ZOOM_MOBILE : DEFAULT_ZOOM_DESKTOP,
+    };
+    if (prefersReducedMotionRef.current) map.jumpTo(cameraOptions);
+    else map.easeTo({ ...cameraOptions, duration: 600 });
+  }, [filters.community, filters.province, filters.city, filteredPlaces, allPlaces.length]);
+
+  // ===== BUSCADOR GEOGRÁFICO SOBRE EL MAPA (BD: nombre/ciudad, top 8, startsWith primero) =====
+  type GeoSuggestion =
+    | { type: 'place'; label: string; sublabel: string; place: PlaceWithTier }
+    | { type: 'city'; label: string; sublabel: string; city: string };
+
+  const geoSuggestions = useMemo<GeoSuggestion[]>(() => {
+    const query = geoQuery.trim().toLowerCase();
+    if (query.length < 2) return [];
+
+    const placeStarts: GeoSuggestion[] = [];
+    const placeContains: GeoSuggestion[] = [];
+    const cityStarts = new Map<string, number>();
+    const seenCities = new Set<string>();
+
+    for (const place of allPlaces) {
+      const name = place.name?.toLowerCase() || '';
+      const city = place.city || '';
+      const cityLower = city.toLowerCase();
+
+      if (name.startsWith(query) && placeStarts.length < 8) {
+        placeStarts.push({
+          type: 'place',
+          label: place.name,
+          sublabel: `${place.city}, ${place.province}`,
+          place,
+        });
+      } else if (name.includes(query) && placeContains.length < 8) {
+        placeContains.push({
+          type: 'place',
+          label: place.name,
+          sublabel: `${place.city}, ${place.province}`,
+          place,
+        });
+      }
+
+      if (cityLower.startsWith(query) && !seenCities.has(cityLower)) {
+        seenCities.add(cityLower);
+        cityStarts.set(city, (cityStarts.get(city) || 0) + 1);
+      }
+    }
+
+    const citySuggestions: GeoSuggestion[] = Array.from(cityStarts.keys())
+      .slice(0, 3)
+      .map((city) => ({
+        type: 'city',
+        label: city,
+        sublabel: 'Ciudad',
+        city,
+      }));
+
+    return [...citySuggestions, ...placeStarts, ...placeContains].slice(0, 8);
+  }, [geoQuery, allPlaces]);
+
+  const handleGeoSuggestionSelect = useCallback(
+    (suggestion: GeoSuggestion) => {
+      setGeoQuery('');
+      setShowGeoSuggestions(false);
+
+      if (suggestion.type === 'place') {
+        selectPlace(suggestion.place, 'geo_search');
+        return;
+      }
+
+      // Ciudad: centrar el mapa en el centroide de sus lugares (NO filtra el dataset)
+      const cityPlaces = allPlaces.filter(
+        (p) => p.city?.toLowerCase() === suggestion.city.toLowerCase() && hasValidCoords(p)
+      );
+      if (cityPlaces.length === 0 || !mapRef.current) return;
+
+      const bounds = new maplibregl.LngLatBounds();
+      cityPlaces.forEach((p) => bounds.extend([p.longitude, p.latitude]));
+      mapRef.current.fitBounds(bounds, {
+        padding: { top: 80, bottom: 100, left: 60, right: 60 },
+        maxZoom: 13,
+        animate: !prefersReducedMotionRef.current,
+      });
+    },
+    [allPlaces, selectPlace]
+  );
+
+  // ===== OPCIONES DE FILTROS CON CONTEOS =====
+  const availableOptions = useMemo(() => {
+    const validCommunities = Array.from(
+      new Set(allPlaces.map((p) => p.region).filter((r) => r && r !== 'España' && r !== 'Todas'))
+    ).sort();
+
+    return {
+      communities: validCommunities,
+      provinces: Array.from(new Set(allPlaces.map((p) => p.province))).filter(Boolean).sort(),
+      categories: Array.from(new Set(allPlaces.map((p) => p.category))).filter(Boolean),
+      cities: Array.from(new Set(allPlaces.map((p) => p.city))).filter(Boolean).sort(),
+    };
+  }, [allPlaces]);
+
+  // Aplicar filtros (botón): sincroniza la URL; el filtrado ya es automático vía useMemo
   const applyFilters = () => {
-    applyClientSideFilters(allPlaces);
-    
-    // Actualizar URL
     const params = new URLSearchParams();
     if (filters.community) params.set('community', filters.community);
     if (filters.province) params.set('province', filters.province);
@@ -872,7 +1023,7 @@ export default function MapPage() {
     if (filters.reviewsRange) params.set('reviewsRange', filters.reviewsRange);
     if (filters.qualityTier) params.set('qualityTier', filters.qualityTier.join(','));
     if (filters.searchTerm) params.set('q', filters.searchTerm);
-    
+
     router.push(`/mapa?${params.toString()}`, { scroll: false });
   };
 
@@ -884,199 +1035,40 @@ export default function MapPage() {
     });
     setMinReviews(0);
     setMaxReviews(10000);
+    try {
+      localStorage.removeItem(FILTERS_STORAGE_KEY);
+    } catch {
+      // No crítico
+    }
     router.push('/mapa');
-    
-    // Resetear zoom a vista de España
+
     setTimeout(() => {
-      if (mapRef.current) {
-        mapRef.current.setCenter(defaultCenter);
-        mapRef.current.setZoom(6); // Península centrada
-        console.log('🗺️ Zoom reseteado a vista península');
+      const map = mapRef.current;
+      if (map) {
+        const cameraOptions = {
+          center: DEFAULT_CENTER,
+          zoom: window.innerWidth < 768 ? DEFAULT_ZOOM_MOBILE : DEFAULT_ZOOM_DESKTOP,
+        };
+        if (prefersReducedMotionRef.current) map.jumpTo(cameraOptions);
+        else map.easeTo({ ...cameraOptions, duration: 600 });
       }
     }, 100);
   };
 
-  // Activar geolocalización
-  const activateGeolocation = useCallback(() => {
-    // Verificar soporte del navegador
-    if (!navigator.geolocation) {
-      setGeolocationError('Tu navegador no soporta geolocalización');
-      toast.error('Tu navegador no soporta geolocalización');
-      return;
-    }
-
-    // Verificar que estamos en HTTPS (requerido en iOS)
-    if (typeof window !== 'undefined' && window.location.protocol === 'http:' && !window.location.hostname.includes('localhost')) {
-      setGeolocationError('La geolocalización requiere HTTPS');
-      toast.error('La geolocalización requiere una conexión segura (HTTPS)');
-      return;
-    }
-
-    setGeolocationError(null);
-    
-    // Detectar si es móvil o desktop
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    
-    if (isMobile) {
-      toast.info('📍 Solicitando tu ubicación GPS...');
-    } else {
-      toast.info('📍 Obteniendo ubicación aproximada (WiFi/IP)...');
-    }
-    
-    // Opciones adaptativas: GPS en móvil, WiFi/IP en desktop
-    const options = {
-      enableHighAccuracy: isMobile,  // GPS solo en móviles (más preciso pero consume batería)
-      timeout: isMobile ? 10000 : 5000,  // Más tiempo en móvil
-      maximumAge: isMobile ? 0 : 60000   // Permitir caché de 1 min en desktop
-    };
-    
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const location = {
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-        };
-        
-        // Verificar precisión de la ubicación
-        const accuracy = position.coords.accuracy; // En metros
-        
-        setUserLocation(location);
-        setIsGeolocationActive(true);
-        
-        // Guardar en localStorage para persistir entre recargas
-        localStorage.setItem('geolocationActive', 'true');
-        
-        // Mensaje según precisión
-        if (accuracy > 5000) {
-          // Muy impreciso (> 5km) - Típico de PC con WiFi/IP
-          toast.warning(`⚠️ Ubicación aproximada (±${Math.round(accuracy/1000)}km). Para mayor precisión, usa un dispositivo móvil.`);
-        } else if (accuracy > 1000) {
-          // Impreciso (1-5km)
-          toast.success(`✅ Ubicación obtenida (±${Math.round(accuracy/1000)}km de precisión)`);
-        } else {
-          // Preciso (< 1km) - GPS
-          toast.success('✅ Ubicación GPS activada correctamente');
-        }
-        
-        console.log('📍 Ubicación obtenida:', {
-          lat: location.lat,
-          lng: location.lng,
-          accuracy: `±${Math.round(accuracy)}m`,
-          isMobile
-        });
-      },
-      (error) => {
-        // Mensajes de error específicos según el código
-        let errorMessage = 'No pudimos obtener tu ubicación';
-        let toastMessage = '';
-        let helpText = '';
-        
-        switch (error.code) {
-          case error.PERMISSION_DENIED:
-            errorMessage = 'Permiso de ubicación denegado';
-            toastMessage = '❌ Permiso denegado';
-            if (isMobile) {
-              helpText = 'Safari/Chrome → Configuración del sitio → Permitir ubicación';
-            } else {
-              helpText = 'Click en el candado 🔒 → Permisos del sitio → Ubicación → Permitir';
-            }
-            break;
-          case error.POSITION_UNAVAILABLE:
-            errorMessage = 'Ubicación no disponible';
-            toastMessage = '❌ Ubicación no disponible';
-            helpText = 'Verifica que GPS/WiFi estén activos';
-            break;
-          case error.TIMEOUT:
-            errorMessage = 'Tiempo agotado';
-            toastMessage = '❌ Tiempo agotado (tardó > 10s)';
-            helpText = 'Intenta de nuevo, asegúrate de tener buena señal';
-            break;
-          default:
-            errorMessage = 'Error al obtener ubicación';
-            toastMessage = '❌ Error desconocido';
-        }
-        
-        setGeolocationError(errorMessage + (helpText ? ` - ${helpText}` : ''));
-        toast.error(toastMessage + (helpText ? `\n${helpText}` : ''));
-        
-        console.error('❌ Error de geolocalización:', {
-          code: error.code,
-          message: error.message,
-          userAgent: navigator.userAgent,
-          isMobile,
-          isHTTPS: window.location.protocol === 'https:'
-        });
-        
-        // Si falla, limpiar el flag
-        localStorage.setItem('geolocationActive', 'false');
-        setIsGeolocationActive(false);
-      },
-      options // ✅ Opciones adaptativas según dispositivo
-    );
-  }, []); // ✅ useCallback sin dependencias para que sea estable
-
-  // ✅ Reactivar geolocalización si el flag está activo (ejecuta después de que activateGeolocation esté definido)
-  useEffect(() => {
-    if (shouldReactivateGeo) {
-      activateGeolocation();
-      setShouldReactivateGeo(false); // Resetear flag
-    }
-  }, [shouldReactivateGeo, activateGeolocation]);
-
-  // Desactivar geolocalización
-  const deactivateGeolocation = () => {
-    setUserLocation(null);
-    setIsGeolocationActive(false);
-    setGeolocationError(null);
-    
-    // Guardar en localStorage que está desactivado
-    localStorage.setItem('geolocationActive', 'false');
-    
-    // Si estaba ordenando por proximidad, cambiar a reseñas
-    if (sortBy === 'proximity') {
-      setSortBy('reviews');
-    }
-  };
-
-  // Calcular distancia entre dos puntos (en km)
+  // Calcular distancia entre dos puntos (Haversine, en km)
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
-    const R = 6371; // Radio de la Tierra en km
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = 
-      Math.sin(dLat/2) * Math.sin(dLat/2) +
-      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-      Math.sin(dLon/2) * Math.sin(dLon/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    const R = 6371;
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+    const dLon = ((lon2 - lon1) * Math.PI) / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
-  };
-
-  // Manejar click en marcador
-  const handleMarkerClick = (place: PlaceWithTier) => {
-    // 🎯 Trackear click en marcador del mapa
-    trackEvent(EVENTS.PLACE_VIEW, ANALYTICS_CATEGORIES.PLACE, {
-      place_id: place.id,
-      place_name: place.name,
-      place_category: place.category,
-      place_city: place.city,
-      place_rating: place.rating,
-      source: 'map_marker'
-    });
-    
-    // Primero centrar el mapa en el lugar
-    if (mapRef.current) {
-      mapRef.current.panTo({ lat: place.latitude, lng: place.longitude });
-    }
-    
-    // Luego mostrar la card
-    setTimeout(() => {
-      setSelectedPlace(place);
-    }, 300);
   };
 
   // 🎯 Manejar cierre de filtros móviles (trackear búsqueda finalizada)
   const handleCloseMobileFilters = () => {
-    // Trackear búsqueda finalizada con todos los filtros aplicados
     trackEvent(EVENTS.SEARCH_FINALIZED, ANALYTICS_CATEGORIES.SEARCH, {
       category: filters.category,
       search_term: filters.searchTerm,
@@ -1087,9 +1079,9 @@ export default function MapPage() {
       reviews_range: filters.reviewsRange,
       price_level: filters.priceLevel,
       results_count: filteredPlaces.length,
-      has_filters: activeFiltersCount > 0
+      has_filters: activeFiltersCount > 0,
     });
-    
+
     setMobileView('map');
   };
 
@@ -1147,14 +1139,7 @@ export default function MapPage() {
     }
   };
 
-  // Obtener color del marcador según rating
-  const getMarkerColor = (rating: number) => {
-    if (rating >= 4.9) return '#10b981'; // Verde brillante
-    if (rating >= 4.8) return '#06b6d4'; // Cyan
-    return '#3b82f6'; // Azul
-  };
-
-  // Ordenar lugares según el criterio seleccionado usando useMemo
+  // Ordenar lugares según el criterio seleccionado
   const sortedPlaces = useMemo(() => {
     return [...filteredPlaces].sort((a, b) => {
       if (sortBy === 'rating') {
@@ -1170,8 +1155,7 @@ export default function MapPage() {
     });
   }, [filteredPlaces, sortBy, userLocation]);
 
-  // 🎯 OPTIMIZACIÓN: Limitar vista de lista a 50 lugares máximo
-  // El mapa sigue mostrando todos, solo la lista lateral se limita para mejor rendimiento
+  // 🎯 La lista muestra máximo 50 cards; el mapa muestra el set filtrado completo vía clusters
   const DISPLAY_LIMIT = 50;
   const displayedPlaces = useMemo(() => {
     return sortedPlaces.slice(0, DISPLAY_LIMIT);
@@ -1192,25 +1176,17 @@ export default function MapPage() {
     filters.reviewsRange,
   ].filter(Boolean).length;
 
-  if (loadError) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <p className="text-red-600">Error cargando el mapa</p>
-      </div>
-    );
-  }
-
   return (
     <div className="flex flex-col h-[calc(100vh-64px)]">
       {/* Modal Promocional de Rutas */}
       <RoutePromoModal />
-      
+
       <div className="flex-1 flex overflow-hidden relative pb-16 md:pb-0">
         {/* Overlay de Login para usuarios no autenticados */}
         {!authLoading && !user && <LoginOverlay feature="mapa" />}
-        
+
         {/* SIDEBAR DE FILTROS - Desktop */}
-        <div 
+        <div
           className={`hidden md:block ${
             showFilters ? 'w-96' : 'w-0'
           } transition-all duration-300 bg-white border-r border-gray-200 overflow-y-auto`}
@@ -1357,9 +1333,9 @@ export default function MapPage() {
                 <div className="space-y-2">
                   {(Object.entries(QUALITY_TIERS) as [QualityTier, typeof QUALITY_TIERS[QualityTier]][]).map(([tier, config]) => {
                     if (tier === 'none') return null;
-                    
+
                     const isSelected = filters.qualityTier?.includes(tier);
-                    
+
                     return (
                       <label
                         key={tier}
@@ -1405,12 +1381,12 @@ export default function MapPage() {
                     <span className="text-gray-400">→</span>
                     <span className="text-indigo-600">{maxReviews >= 10000 ? '∞' : `hasta ${maxReviews}`}</span>
                   </div>
-                  
+
                   {/* Barra visual con degradado */}
                   <div className="relative h-3 bg-gray-200 rounded-full overflow-hidden">
-                    <div 
+                    <div
                       className="absolute h-full bg-gradient-to-r from-indigo-500 to-indigo-600 transition-all duration-200"
-                      style={{ 
+                      style={{
                         left: `${(minReviews / 1000) * 100}%`,
                         right: `${100 - (maxReviews >= 10000 ? 100 : (maxReviews / 1000) * 100)}%`
                       }}
@@ -1501,12 +1477,12 @@ export default function MapPage() {
                     <span className="text-gray-400">→</span>
                     <span className="text-yellow-600">5.0★</span>
                   </div>
-                  
+
                   {/* Barra visual con degradado */}
                   <div className="relative h-3 bg-gray-200 rounded-full overflow-hidden">
-                    <div 
+                    <div
                       className="absolute h-full bg-gradient-to-r from-yellow-400 to-yellow-500 transition-all duration-200"
-                      style={{ 
+                      style={{
                         left: `${((filters.minRating || 4.7) - 4.7) / 0.3 * 100}%`,
                         right: '0%'
                       }}
@@ -1618,7 +1594,7 @@ export default function MapPage() {
             </button>
           )}
 
-          {/* Barra de controles superior - Móvil */}
+          {/* Barra de controles superior */}
           <div className="absolute top-2 left-2 right-2 z-10 flex items-center justify-between gap-2">
             {/* Leyenda de calidad - Izquierda */}
             <div className="bg-white/95 backdrop-blur-sm shadow-md rounded-lg px-2.5 py-1.5 border border-gray-200">
@@ -1628,7 +1604,7 @@ export default function MapPage() {
               >
                 <span className="text-base">💎</span>
                 <span className="text-[10px] font-semibold text-gray-900 whitespace-nowrap">Leyenda de Tier</span>
-                <ChevronDown 
+                <ChevronDown
                   className={`h-3 w-3 text-gray-600 transition-transform ${
                     isLegendExpanded ? 'rotate-180' : ''
                   }`}
@@ -1651,18 +1627,70 @@ export default function MapPage() {
               </span>
             </button>
 
-            {/* Contador de lugares - Derecha */}
+            {/* Contador de resultados sobre el mapa - sincronizado con el set filtrado */}
             <div className="bg-white/95 backdrop-blur-sm shadow-md rounded-full px-2.5 py-1.5 border border-gray-200">
               <div className="flex items-center gap-1">
                 <MapPin className="h-3 w-3 text-indigo-600 flex-shrink-0" />
                 <span className="font-semibold text-gray-900 text-[11px] whitespace-nowrap">
-                  {filteredPlaces.length}
+                  {loading ? '…' : filteredPlaces.length}
                 </span>
               </div>
             </div>
           </div>
 
-          {/* Panel expandible de leyenda - Debajo de barra superior */}
+          {/* Buscador geográfico centrado (BD: nombre/ciudad, top 8) */}
+          <div className="absolute top-12 left-1/2 -translate-x-1/2 z-10 w-[min(90%,340px)]">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+              <input
+                type="text"
+                placeholder="Buscar lugar o ciudad..."
+                value={geoQuery}
+                onChange={(e) => {
+                  setGeoQuery(e.target.value);
+                  setShowGeoSuggestions(true);
+                }}
+                onFocus={() => setShowGeoSuggestions(true)}
+                onBlur={() => setTimeout(() => setShowGeoSuggestions(false), 150)}
+                className="w-full pl-9 pr-8 py-2 text-sm bg-white/95 backdrop-blur-sm border border-gray-300 rounded-full shadow-md focus:ring-2 focus:ring-primary focus:border-transparent"
+              />
+              {geoQuery && (
+                <button
+                  onClick={() => {
+                    setGeoQuery('');
+                    setShowGeoSuggestions(false);
+                  }}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 hover:bg-gray-100 rounded-full"
+                >
+                  <X className="h-4 w-4 text-gray-400" />
+                </button>
+              )}
+            </div>
+
+            {/* Sugerencias */}
+            {showGeoSuggestions && geoSuggestions.length > 0 && (
+              <div className="mt-1 bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden">
+                {geoSuggestions.map((suggestion, i) => (
+                  <button
+                    key={`${suggestion.type}-${suggestion.label}-${i}`}
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      handleGeoSuggestionSelect(suggestion);
+                    }}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-gray-50 transition border-b border-gray-100 last:border-b-0"
+                  >
+                    <MapPin className={`h-4 w-4 shrink-0 ${suggestion.type === 'city' ? 'text-indigo-500' : 'text-gray-400'}`} />
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate">{suggestion.label}</p>
+                      <p className="text-xs text-gray-500 truncate">{suggestion.sublabel}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Panel expandible de leyenda */}
           {isLegendExpanded && (
             <div className="absolute top-14 left-2 z-10 bg-white/95 backdrop-blur-sm shadow-md rounded-lg p-2 border border-gray-200 max-w-[200px]">
               <div className="space-y-1">
@@ -1705,137 +1733,49 @@ export default function MapPage() {
             </div>
           )}
 
-          {/* Mensaje de error GPS - Debajo del botón */}
+          {/* Mensaje de error GPS */}
           {geolocationError && (
             <div className="absolute top-14 left-1/2 transform -translate-x-1/2 z-10 bg-red-50 text-red-600 px-2 py-1 rounded-md shadow-md text-[9px] max-w-[180px] text-center leading-tight">
               {geolocationError.split(' - ')[0]}
             </div>
           )}
 
-          {/* Contenedor del mapa y controles */}
+          {/* Contenedor del mapa MapLibre - se monta ENSEGUIDA, sin esperar al dataset */}
           <div className="h-full w-full relative">
-            {/* Loader sobre el mapa mientras se carga Google Maps API */}
-            {!isLoaded && (
-              <div className="absolute inset-0 bg-gray-100 flex items-center justify-center z-50">
-                <div className="flex flex-col items-center gap-3">
-                  <Loader2 className="h-12 w-12 animate-spin text-primary" />
-                  <p className="text-sm text-gray-600">Cargando Google Maps...</p>
+            <div ref={mapDivRef} className="h-full w-full" />
+
+            {/* Overlay de carga encima del canvas (no bloquea el mapa) */}
+            {loading && (
+              <div className="absolute inset-0 z-20 bg-white/50 backdrop-blur-[1px] flex items-center justify-center pointer-events-none">
+                <div className="flex flex-col items-center gap-3 bg-white/90 rounded-xl px-6 py-4 shadow-lg">
+                  <Loader2 className="h-10 w-10 animate-spin text-primary" />
+                  <p className="text-sm text-gray-600">Cargando lugares...</p>
                 </div>
               </div>
             )}
-            
-            {isLoaded && (
-              <GoogleMap
-                mapContainerStyle={mapContainerStyle}
-                center={mapCenter}
-                zoom={mapZoom}
-                onClick={() => setSelectedPlace(null)}
-                onLoad={(map) => {
-                  console.log('🗺️ Google Map cargado correctamente');
-                  mapRef.current = map;
-                  setMapReady(true); // ✅ Disparar creación de marcadores
-                  
-                  // 🔧 Detectar cuando el usuario mueve el mapa manualmente
-                  map.addListener('dragstart', () => {
-                    isUserInteractingRef.current = true;
-                  });
-                  
-                  map.addListener('zoom_changed', () => {
-                    isUserInteractingRef.current = true;
-                  });
-                  
-                  // Resetear después de 2 segundos de inactividad
-                  map.addListener('idle', () => {
-                    setTimeout(() => {
-                      isUserInteractingRef.current = false;
-                    }, 2000);
-                  });
-                }}
-            options={{
-              styles: [
-                {
-                  featureType: 'poi',
-                  elementType: 'labels',
-                  stylers: [{ visibility: 'off' }],
-                },
-              ],
-              disableDefaultUI: false,
-              zoomControl: true,
-              mapTypeControl: false,
-              streetViewControl: false,
-              fullscreenControl: true,
-              minZoom: isMobile ? 6 : 5, // ✅ Zoom mínimo más alto en móvil para mejor navegación vertical
-              maxZoom: 18,
-              restriction: {
-                latLngBounds: isMobile ? SPAIN_BOUNDS_PENINSULA : SPAIN_BOUNDS_FULL, // ✅ Límites según dispositivo
-                strictBounds: false, // Permite scroll flexible
-              },
-              gestureHandling: 'greedy', // Permite desplazar con 1 dedo y zoom con 2 dedos en móvil
-            }}
-          >
-            {/* Marcador de ubicación del usuario - Diseño especial */}
-            {userLocation && (
-              <>
-                {/* Círculo exterior (anillo pulsante) */}
-                <Marker
-                  position={userLocation}
-                  icon={{
-                    path: google.maps.SymbolPath.CIRCLE,
-                    fillColor: '#3b82f6',
-                    fillOpacity: 0.15,
-                    strokeWeight: 2,
-                    strokeColor: '#3b82f6',
-                    strokeOpacity: 0.4,
-                    scale: 20,
-                  }}
-                  zIndex={999}
-                />
-                {/* Círculo medio (borde blanco) */}
-                <Marker
-                  position={userLocation}
-                  icon={{
-                    path: google.maps.SymbolPath.CIRCLE,
-                    fillColor: '#ffffff',
-                    fillOpacity: 1,
-                    strokeWeight: 0,
-                    scale: 8,
-                  }}
-                  zIndex={1000}
-                />
-                {/* Círculo interior (punto azul sólido) */}
-                <Marker
-                  position={userLocation}
-                  icon={{
-                    path: google.maps.SymbolPath.CIRCLE,
-                    fillColor: '#3b82f6',
-                    fillOpacity: 1,
-                    strokeWeight: 0,
-                    scale: 5,
-                  }}
-                  zIndex={1001}
-                  title="Tu ubicación"
-                />
-              </>
-            )}
 
-            {/* 🚀 CLUSTERING: Los marcadores se renderizan con MarkerClusterer */}
-            {/* Los marcadores ya no se renderizan aquí, el clusterer los maneja */}
-
-              </GoogleMap>
-            )}
+            {/* Botón Restablecer vista (safe-area para móvil) */}
+            <button
+              onClick={resetView}
+              title="Restablecer vista"
+              className="absolute right-[10px] z-10 bg-white shadow-md rounded-lg p-2 hover:bg-gray-50 transition border border-gray-200"
+              style={{ bottom: 'calc(110px + env(safe-area-inset-bottom))' }}
+            >
+              <Home className="h-4 w-4 text-gray-700" />
+            </button>
           </div>
 
-          {/* Card flotante FUERA del GoogleMap - Siempre centrada */}
+          {/* Card flotante ÚNICA y reutilizable (debajo del pin gracias al offset de cámara) */}
           {selectedPlace && (() => {
             const tier = calculateQualityTier(selectedPlace.rating, selectedPlace.review_count || 0);
             const tierInfo = getTierInfo(tier);
-            const distance = userLocation 
+            const distance = userLocation
               ? calculateDistance(userLocation.lat, userLocation.lng, selectedPlace.latitude, selectedPlace.longitude)
               : null;
 
             return (
-              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none">
-                <div className="w-80 bg-white rounded-xl shadow-2xl border-2 border-gray-300 pointer-events-auto relative">
+              <div className="absolute top-[30%] left-1/2 transform -translate-x-1/2 z-20 pointer-events-none">
+                <div className="w-80 max-w-[90vw] bg-white rounded-xl shadow-2xl border-2 border-gray-300 pointer-events-auto relative">
                   {/* Botón cerrar */}
                   <button
                     onClick={(e) => {
@@ -1844,13 +1784,6 @@ export default function MapPage() {
                       // Limpiar parámetro place de la URL si existe
                       if (searchParams.get('place')) {
                         router.push('/mapa', { scroll: false });
-                      }
-                      // 🔧 En móvil, devolver foco al mapa para facilitar navegación
-                      if (window.innerWidth < 768 && mapRef.current) {
-                        setTimeout(() => {
-                          const mapDiv = mapRef.current?.getDiv();
-                          mapDiv?.focus();
-                        }, 100);
                       }
                     }}
                     className="absolute top-2 right-2 z-30 bg-white rounded-full p-1.5 shadow-lg hover:bg-gray-100 transition"
@@ -1869,11 +1802,11 @@ export default function MapPage() {
                           className="w-full h-32 object-cover rounded-t-xl"
                           loading="lazy"
                         />
-                        {/* Badge de distancia en esquina superior derecha */}
+                        {/* Badge de distancia */}
                         {distance !== null && (
                           <div className="absolute top-2 right-2 bg-blue-600 text-white px-2 py-1 rounded-full text-xs font-semibold shadow-lg flex items-center gap-1">
                             <MapPin className="h-3 w-3" />
-                            {distance < 1 
+                            {distance < 1
                               ? `${Math.round(distance * 1000)}m`
                               : `${distance.toFixed(1)}km`
                             }
@@ -1931,7 +1864,7 @@ export default function MapPage() {
                         size="sm"
                         variant="outline"
                         onClick={() => window.open(
-                          selectedPlace.google_maps_url || 
+                          selectedPlace.google_maps_url ||
                           `https://www.google.com/maps/search/?api=1&query=${selectedPlace.latitude},${selectedPlace.longitude}`,
                           '_blank'
                         )}
@@ -1970,7 +1903,7 @@ export default function MapPage() {
         </div>
 
         {/* PANEL LATERAL DERECHO - Lista de Lugares - Desktop */}
-        <div 
+        <div
           className={`hidden md:block ${
             showPlacesList ? 'w-96' : 'w-0'
           } transition-all duration-300 bg-white border-l border-gray-200 overflow-y-auto`}
@@ -1983,12 +1916,12 @@ export default function MapPage() {
                   <div>
                     <h3 className="font-bold text-lg">Lugares Encontrados</h3>
                     <p className="text-sm text-gray-600">{filteredPlaces.length} resultados</p>
-                    
-                    {/* 🎯 MENSAJE INFORMATIVO: Límite visual de 50 lugares */}
-                    {filteredPlaces.length > 50 && (
+
+                    {/* 🎯 Límite visual de 50 lugares */}
+                    {filteredPlaces.length > DISPLAY_LIMIT && (
                       <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded-lg">
                         <p className="text-xs text-blue-800">
-                          <span className="font-semibold">Mostrando 50 de {filteredPlaces.length} lugares</span>
+                          <span className="font-semibold">Mostrando {DISPLAY_LIMIT} de {filteredPlaces.length} lugares</span>
                           <br />
                           Usa los filtros para refinar tu búsqueda
                         </p>
@@ -2027,7 +1960,7 @@ export default function MapPage() {
                 </div>
               </div>
 
-              {/* Lista de lugares - SOLO cuando termina de cargar */}
+              {/* Lista de lugares */}
               {loading ? (
                 <div className="flex flex-col items-center justify-center py-12 gap-3">
                   <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -2037,19 +1970,18 @@ export default function MapPage() {
                 displayedPlaces.map((place) => {
                   const tier = calculateQualityTier(place.rating, place.review_count || 0);
                   const tierInfo = getTierInfo(tier);
-                  
-                  // Calcular distancia si hay geolocalización
-                  const distance = userLocation 
+
+                  const distance = userLocation
                     ? calculateDistance(userLocation.lat, userLocation.lng, place.latitude, place.longitude)
                     : null;
-                  
+
                   return (
                     <div
                       key={place.id}
                       className="border rounded-lg p-4 hover:shadow-md transition cursor-pointer bg-white"
-                      onClick={() => handleMarkerClick(place)}
+                      onClick={() => selectPlace(place, 'list_card')}
                     >
-                      {/* Foto del lugar - Lazy loading para mejor rendimiento */}
+                      {/* Foto del lugar */}
                       {(() => {
                         const photoUrl = getPlacePhotoUrl(place, 0);
                         return photoUrl ? (
@@ -2064,7 +1996,7 @@ export default function MapPage() {
                             {distance !== null && (
                               <div className="absolute top-2 right-2 bg-blue-600 text-white px-2 py-1 rounded-full text-xs font-semibold shadow-lg flex items-center gap-1">
                                 <MapPin className="h-3 w-3" />
-                                {distance < 1 
+                                {distance < 1
                                   ? `${Math.round(distance * 1000)}m`
                                   : `${distance.toFixed(1)}km`
                                 }
@@ -2101,7 +2033,7 @@ export default function MapPage() {
                         {distance !== null && !place.photo_urls?.length && !place.photos?.length && (
                           <span className="text-xs font-semibold text-blue-600 flex items-center gap-1 ml-2">
                             <MapPin className="h-3 w-3" />
-                            {distance < 1 
+                            {distance < 1
                               ? `${Math.round(distance * 1000)}m`
                               : `${distance.toFixed(1)}km`
                             }
@@ -2137,7 +2069,7 @@ export default function MapPage() {
                           onClick={(e) => {
                             e.stopPropagation();
                             window.open(
-                              place.google_maps_url || 
+                              place.google_maps_url ||
                               `https://www.google.com/maps/search/?api=1&query=${place.latitude},${place.longitude}`,
                               '_blank'
                             );
@@ -2356,8 +2288,8 @@ export default function MapPage() {
             </label>
             <div className="space-y-2">
               {Object.entries(QUALITY_TIERS).map(([key, tier]) => {
-                if (key === 'none') return null; // No mostrar "Sin clasificar"
-                
+                if (key === 'none') return null;
+
                 return (
                   <label key={key} className="flex items-start gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer active:bg-gray-100 transition">
                     <input
@@ -2396,7 +2328,7 @@ export default function MapPage() {
             <div className="flex items-center gap-2 mb-2">
               <span className="text-sm font-medium text-yellow-600">{filters.minRating || 4.7}★</span>
               <div className="flex-1 h-1 bg-gray-200 rounded-full overflow-hidden">
-                <div 
+                <div
                   className="h-full bg-gradient-to-r from-yellow-400 to-yellow-600"
                   style={{ width: `${((filters.minRating || 4.7) - 4.7) / (5.0 - 4.7) * 100}%` }}
                 />
@@ -2499,7 +2431,7 @@ export default function MapPage() {
             </select>
           </div>
 
-          {/* 🎯 MENSAJE INFORMATIVO MÓVIL: Límite visual */}
+          {/* 🎯 Límite visual móvil */}
           {!loading && filteredPlaces.length > DISPLAY_LIMIT && (
             <div className="mx-4 mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
               <p className="text-xs text-blue-800 text-center">
@@ -2522,24 +2454,22 @@ export default function MapPage() {
             displayedPlaces.map((place) => {
               const tier = calculateQualityTier(place.rating, place.review_count || 0);
               const tierInfo = getTierInfo(tier);
-              
-              // Calcular distancia si hay geolocalización
-              const distance = userLocation 
+
+              const distance = userLocation
                 ? calculateDistance(userLocation.lat, userLocation.lng, place.latitude, place.longitude)
                 : null;
-              
+
               return (
                 <div
                   key={place.id}
                   className="border rounded-xl p-3 hover:shadow-md transition cursor-pointer bg-white"
                   onClick={() => {
-                    setSelectedPlace(place);
+                    // Misma fuente de verdad que el click en el pin
                     setMobileView('map');
-                    mapRef.current?.panTo({ lat: place.latitude, lng: place.longitude });
-                    mapRef.current?.setZoom(15);
+                    selectPlace(place, 'list_card_mobile');
                   }}
                 >
-                  {/* Foto del lugar - Desde Supabase o Google (fallback) */}
+                  {/* Foto del lugar */}
                   {(() => {
                     const photoUrl = getPlacePhotoUrl(place, 0);
                     return photoUrl ? (
@@ -2550,15 +2480,14 @@ export default function MapPage() {
                           className="w-full h-32 object-cover rounded-t-xl"
                           loading="lazy"
                           onError={(e) => {
-                            // Si la imagen falla al cargar, ocultar
                             e.currentTarget.style.display = 'none';
                           }}
                         />
-                        {/* Badge de distancia en esquina superior derecha */}
+                        {/* Badge de distancia */}
                         {distance !== null && (
                           <div className="absolute top-2 right-2 bg-blue-600 text-white px-2 py-1 rounded-full text-xs font-semibold shadow-lg flex items-center gap-1">
                             <MapPin className="h-3 w-3" />
-                            {distance < 1 
+                            {distance < 1
                               ? `${Math.round(distance * 1000)}m`
                               : `${distance.toFixed(1)}km`
                             }
@@ -2584,7 +2513,6 @@ export default function MapPage() {
                         </span>
                       </div>
                     </div>
-                    {/* Icono grande de tier al lado del nombre */}
                     <span className="text-2xl">{tierInfo.icon}</span>
                   </div>
 
@@ -2593,11 +2521,10 @@ export default function MapPage() {
                     <p className="text-xs text-gray-600 line-clamp-1 flex-1">
                       {place.city}, {place.province}
                     </p>
-                    {/* Mostrar distancia solo si no hay foto */}
                     {distance !== null && !place.photo_urls?.length && !place.photos?.length && (
                       <span className="text-xs font-semibold text-blue-600 flex items-center gap-1 ml-2">
                         <MapPin className="h-3 w-3" />
-                        {distance < 1 
+                        {distance < 1
                           ? `${Math.round(distance * 1000)}m`
                           : `${distance.toFixed(1)}km`
                         }
@@ -2633,7 +2560,7 @@ export default function MapPage() {
                       onClick={(e) => {
                         e.stopPropagation();
                         window.open(
-                          place.google_maps_url || 
+                          place.google_maps_url ||
                           `https://www.google.com/maps/search/?api=1&query=${place.latitude},${place.longitude}`,
                           '_blank'
                         );
