@@ -442,6 +442,52 @@
   }
 }
 
+/* Ficha anclada al pin en el planificador: el globo de Google no debe añadir
+   su propio marco alrededor de la tarjeta */
+.cc-ruta-map .gm-style-iw-c {
+  padding: 0 !important;
+  border-radius: 16px !important;
+  overflow: hidden !important;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2) !important;
+}
+
+.cc-ruta-map .gm-style-iw-d {
+  padding: 0 !important;
+  overflow: hidden !important;
+  max-height: none !important;
+}
+
+.cc-ruta-map .gm-style-iw-chr {
+  position: absolute !important;
+  top: 0 !important;
+  right: 0 !important;
+  z-index: 2 !important;
+  background: transparent !important;
+}
+
+.cc-ruta-map .gm-style-iw-ch {
+  padding-top: 0 !important;
+}
+
+.cc-ruta-map .gm-ui-hover-effect {
+  top: 8px !important;
+  right: 8px !important;
+  width: 28px !important;
+  height: 28px !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-radius: 50% !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15) !important;
+}
+
+.cc-ruta-map .gm-ui-hover-effect > span {
+  margin: 0 !important;
+}
+
+/* El desplegable del autocompletado tiene que quedar sobre la hoja móvil */
+.pac-container {
+  z-index: 10000 !important;
+}
+
 /* Print styles */
 @media print {
   .no-print {

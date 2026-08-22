@@ -1,12 +1,15 @@
 'use client';
 
-import { Map, Filter, List } from 'lucide-react';
+import { Map, Filter, List, Navigation } from 'lucide-react';
 
 interface BottomNavigationProps {
   activeView: 'map' | 'filters' | 'list';
   onViewChange: (view: 'map' | 'filters' | 'list') => void;
   filtersCount?: number;
   placesCount?: number;
+  /** La pestaña central son los filtros en el mapa y el planificador en /ruta */
+  middleLabel?: string;
+  middleIcon?: 'filter' | 'route';
 }
 
 export default function BottomNavigation({
@@ -14,7 +17,10 @@ export default function BottomNavigation({
   onViewChange,
   filtersCount = 0,
   placesCount = 0,
+  middleLabel = 'Filtros',
+  middleIcon = 'filter',
 }: BottomNavigationProps) {
+  const MiddleIcon = middleIcon === 'route' ? Navigation : Filter;
   const itemClass = (active: boolean) =>
     `flex flex-col items-center justify-center flex-1 h-full gap-0.5 transition-all duration-200 active:scale-95 ${
       active ? 'text-primary' : 'text-gray-500'
@@ -39,7 +45,7 @@ export default function BottomNavigation({
 
         <button onClick={() => onViewChange('filters')} className={itemClass(activeView === 'filters')}>
           <span className={iconWrap(activeView === 'filters')}>
-            <Filter className="w-6 h-6" />
+            <MiddleIcon className="w-6 h-6" />
             {filtersCount > 0 && (
               <span className="absolute -top-1 -right-1 bg-secondary text-primary-900 text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-bold">
                 {filtersCount}
@@ -47,7 +53,7 @@ export default function BottomNavigation({
             )}
           </span>
           <span className={`text-[11px] ${activeView === 'filters' ? 'font-semibold' : 'font-medium'}`}>
-            Filtros
+            {middleLabel}
           </span>
         </button>
 
