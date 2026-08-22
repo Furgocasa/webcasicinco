@@ -15,56 +15,56 @@ export default function BottomNavigation({
   filtersCount = 0,
   placesCount = 0,
 }: BottomNavigationProps) {
-  const buttonClass = (view: string) => `
-    flex-1 flex flex-col items-center justify-center py-3 relative
-    transition-all duration-200
-    ${activeView === view 
-      ? 'text-indigo-600 bg-indigo-50' 
-      : 'text-gray-600 bg-white hover:bg-gray-50'
-    }
-  `;
+  const itemClass = (active: boolean) =>
+    `flex flex-col items-center justify-center flex-1 h-full gap-0.5 transition-all duration-200 active:scale-95 ${
+      active ? 'text-primary' : 'text-gray-500'
+    }`;
+
+  const iconWrap = (active: boolean) =>
+    `px-4 py-1 rounded-full transition-colors duration-200 relative ${
+      active ? 'bg-primary-50' : 'bg-transparent'
+    }`;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50 md:hidden">
-      <div className="flex">
-        {/* Botón Mapa */}
-        <button
-          onClick={() => onViewChange('map')}
-          className={buttonClass('map')}
-        >
-          <Map className="h-6 w-6 mb-1" />
-          <span className="text-xs font-medium">Mapa</span>
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg border-t border-gray-200/80 z-40 pb-[env(safe-area-inset-bottom)]">
+      <div className="flex items-center justify-around h-14 px-3">
+        <button onClick={() => onViewChange('map')} className={itemClass(activeView === 'map')}>
+          <span className={iconWrap(activeView === 'map')}>
+            <Map className="w-6 h-6" />
+          </span>
+          <span className={`text-[11px] ${activeView === 'map' ? 'font-semibold' : 'font-medium'}`}>
+            Mapa
+          </span>
         </button>
 
-        {/* Botón Filtros */}
-        <button
-          onClick={() => onViewChange('filters')}
-          className={buttonClass('filters')}
-        >
-          <Filter className="h-6 w-6 mb-1" />
-          <span className="text-xs font-medium">Filtros</span>
-          {filtersCount > 0 && (
-            <span className="absolute top-1 right-1/4 bg-indigo-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-              {filtersCount}
-            </span>
-          )}
+        <button onClick={() => onViewChange('filters')} className={itemClass(activeView === 'filters')}>
+          <span className={iconWrap(activeView === 'filters')}>
+            <Filter className="w-6 h-6" />
+            {filtersCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-secondary text-primary-900 text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-bold">
+                {filtersCount}
+              </span>
+            )}
+          </span>
+          <span className={`text-[11px] ${activeView === 'filters' ? 'font-semibold' : 'font-medium'}`}>
+            Filtros
+          </span>
         </button>
 
-        {/* Botón Lista */}
-        <button
-          onClick={() => onViewChange('list')}
-          className={buttonClass('list')}
-        >
-          <List className="h-6 w-6 mb-1" />
-          <span className="text-xs font-medium">Lista</span>
-          {placesCount > 0 && (
-            <span className="absolute top-1 text-[10px] text-indigo-600 font-bold">
-              {placesCount}
-            </span>
-          )}
+        <button onClick={() => onViewChange('list')} className={itemClass(activeView === 'list')}>
+          <span className={iconWrap(activeView === 'list')}>
+            <List className="w-6 h-6" />
+            {placesCount > 0 && (
+              <span className="absolute -top-1.5 -right-3 bg-primary text-white text-[10px] rounded-full px-1.5 py-px font-bold min-w-[20px] text-center">
+                {placesCount > 99 ? '99+' : placesCount}
+              </span>
+            )}
+          </span>
+          <span className={`text-[11px] ${activeView === 'list' ? 'font-semibold' : 'font-medium'}`}>
+            Lista
+          </span>
         </button>
       </div>
-    </div>
+    </nav>
   );
 }
-

@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '../ui/Button';
 import { useAuth } from '@/lib/hooks/useAuth';
@@ -11,6 +12,8 @@ export default function Header() {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const { user, isAdmin, signOut, loading } = useAuth();
   const userMenuRef = useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
+  const isMapa = pathname === '/mapa' || pathname?.startsWith('/mapa?');
 
   // Cerrar menú de usuario al hacer click fuera
   useEffect(() => {
@@ -26,8 +29,12 @@ export default function Header() {
     };
   }, []);
 
+  const linkClass = isMapa
+    ? 'text-white/90 hover:text-white font-medium transition relative z-10 touch-manipulation'
+    : 'text-gray-700 hover:text-brand-blue transition relative z-10 touch-manipulation';
+
   return (
-    <header className="bg-white shadow-sm sticky top-0 z-[999]">
+    <header className={`${isMapa ? 'bg-primary' : 'bg-white shadow-sm'} sticky top-0 z-[999]`}>
       <nav className="container mx-auto px-4">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
@@ -37,7 +44,7 @@ export default function Header() {
             style={{ touchAction: 'manipulation' }}
           >
             <img 
-              src="/images/casi_cinco_dark.png" 
+              src={isMapa ? '/images/casi_cinco_white.png' : '/images/casi_cinco_dark.png'}
               alt="Casi Cinco"
               className="h-8 sm:h-10 w-auto"
             />
@@ -47,21 +54,21 @@ export default function Header() {
           <div className="hidden md:flex items-center space-x-8">
             <Link 
               href="/mapa" 
-              className="text-gray-700 hover:text-brand-blue transition relative z-10 touch-manipulation"
+              className={linkClass}
               style={{ touchAction: 'manipulation' }}
             >
               Mapa
             </Link>
             <Link 
               href="/ruta" 
-              className="text-gray-700 hover:text-brand-blue transition relative z-10 touch-manipulation"
+              className={linkClass}
               style={{ touchAction: 'manipulation' }}
             >
               Planificar Ruta
             </Link>
             <Link 
               href="/blog" 
-              className="text-gray-700 hover:text-brand-blue transition relative z-10 touch-manipulation"
+              className={linkClass}
               style={{ touchAction: 'manipulation' }}
             >
               Blog
@@ -72,44 +79,43 @@ export default function Header() {
           <div className="flex md:hidden items-center gap-0.5">
             <Link 
               href="/mapa"
-              className="flex flex-col items-center gap-0.5 px-2 py-1.5 hover:bg-blue-50 rounded-lg transition-colors relative z-10 touch-manipulation min-w-[60px]"
+              className={`flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg transition-colors relative z-10 touch-manipulation min-w-[60px] ${isMapa ? 'hover:bg-white/10' : 'hover:bg-blue-50'}`}
               style={{ touchAction: 'manipulation' }}
               aria-label="Mapa"
             >
-              <Map className="h-5 w-5 text-brand-blue" />
-              <span className="text-[10px] text-gray-600 font-medium leading-none">Mapa</span>
+              <Map className={`h-5 w-5 ${isMapa ? 'text-white' : 'text-brand-blue'}`} />
+              <span className={`text-[10px] font-medium leading-none ${isMapa ? 'text-white/80' : 'text-gray-600'}`}>Mapa</span>
             </Link>
             <Link 
               href="/ruta"
-              className="flex flex-col items-center gap-0.5 px-2 py-1.5 hover:bg-blue-50 rounded-lg transition-colors relative z-10 touch-manipulation min-w-[60px]"
+              className={`flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg transition-colors relative z-10 touch-manipulation min-w-[60px] ${isMapa ? 'hover:bg-white/10' : 'hover:bg-blue-50'}`}
               style={{ touchAction: 'manipulation' }}
               aria-label="Rutas"
             >
-              <Navigation className="h-5 w-5 text-brand-blue" />
-              <span className="text-[10px] text-gray-600 font-medium leading-none">Rutas</span>
+              <Navigation className={`h-5 w-5 ${isMapa ? 'text-white' : 'text-brand-blue'}`} />
+              <span className={`text-[10px] font-medium leading-none ${isMapa ? 'text-white/80' : 'text-gray-600'}`}>Rutas</span>
             </Link>
             <Link 
               href="/blog"
-              className="flex flex-col items-center gap-0.5 px-2 py-1.5 hover:bg-blue-50 rounded-lg transition-colors relative z-10 touch-manipulation min-w-[60px]"
+              className={`flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg transition-colors relative z-10 touch-manipulation min-w-[60px] ${isMapa ? 'hover:bg-white/10' : 'hover:bg-blue-50'}`}
               style={{ touchAction: 'manipulation' }}
               aria-label="Blog"
             >
-              <BookOpen className="h-5 w-5 text-brand-blue" />
-              <span className="text-[10px] text-gray-600 font-medium leading-none">Blog</span>
+              <BookOpen className={`h-5 w-5 ${isMapa ? 'text-white' : 'text-brand-blue'}`} />
+              <span className={`text-[10px] font-medium leading-none ${isMapa ? 'text-white/80' : 'text-gray-600'}`}>Blog</span>
             </Link>
-            {/* Separador visual */}
-            <div className="w-px h-8 bg-gray-300 mx-1" />
+            <div className={`w-px h-8 mx-1 ${isMapa ? 'bg-white/30' : 'bg-gray-300'}`} />
           </div>
 
           {/* Right Side: Hamburger + Auth Buttons */}
           <div className="flex items-center gap-2">
             {/* Hamburger Menu Button - Universal (Desktop + Mobile) - Antes del auth */}
             <button
-              className="hidden md:block p-2 hover:bg-gray-100 rounded-lg transition"
+              className={`hidden md:block p-2 rounded-lg transition ${isMapa ? 'hover:bg-white/10' : 'hover:bg-gray-100'}`}
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               aria-label="Menú"
             >
-              <Menu className="w-6 h-6 text-gray-700" />
+              <Menu className={`w-6 h-6 ${isMapa ? 'text-white' : 'text-gray-700'}`} />
             </button>
 
             {/* Auth Buttons - Desktop */}

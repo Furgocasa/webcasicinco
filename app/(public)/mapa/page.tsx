@@ -15,10 +15,7 @@ import {
   X,
   MapPin,
   Star,
-  SlidersHorizontal,
   Loader2,
-  ChevronDown,
-  ChevronUp,
   Filter,
   Heart,
   Check,
@@ -34,9 +31,11 @@ import { calculateQualityTier, getTierInfo } from '@/lib/utils/tier-calculator';
 import { trackEvent, EVENTS, CATEGORIES as ANALYTICS_CATEGORIES } from '@/lib/analytics/tracker';
 import { getPlaceUrl } from '@/lib/utils/url-helper';
 import { QUALITY_TIERS } from '@/types/filters';
-import { PROVINCES, CATEGORIES } from '@/lib/utils/constants';
+import { CATEGORIES } from '@/lib/utils/constants';
 import { toast } from 'sonner';
 import { getPlacePhotoUrl } from '@/lib/utils/photo-helper';
+import { applyBrandTheme } from '@/lib/map/brand-style';
+import FiltrosMapa from '@/components/map/FiltrosMapa';
 
 // 🚀 HOOK DE DEBOUNCE para optimizar búsquedas
 function useDebounce<T>(value: T, delay: number): T {
@@ -158,8 +157,6 @@ export default function MapPage() {
   const [allPlaces, setAllPlaces] = useState<PlaceWithTier[]>([]);
   const [selectedPlace, setSelectedPlace] = useState<PlaceWithTier | null>(null);
   const [loading, setLoading] = useState(true);
-  const [showFilters, setShowFilters] = useState(true);
-  const [showPlacesList, setShowPlacesList] = useState(true);
   const [mapReady, setMapReady] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -177,6 +174,7 @@ export default function MapPage() {
   // Buscador geográfico sobre el mapa
   const [geoQuery, setGeoQuery] = useState('');
   const [showGeoSuggestions, setShowGeoSuggestions] = useState(false);
+  const [openMobileSearch, setOpenMobileSearch] = useState(false);
 
   // Ordenamiento de lista
   const [sortBy, setSortBy] = useState<'rating' | 'reviews' | 'proximity'>('reviews');
@@ -459,12 +457,13 @@ export default function MapPage() {
       const size = getClusterSize(count);
 
       const wrapper = document.createElement('div');
+      wrapper.style.cssText = `width:${size}px;height:${size}px;cursor:pointer;`;
       const el = document.createElement('div');
-      el.className = 'cc-cluster';
-      el.style.width = `${size}px`;
-      el.style.height = `${size}px`;
+      el.className = 'cc-cluster cc-marker-drop';
+      el.style.width = '100%';
+      el.style.height = '100%';
       el.style.backgroundColor = CLUSTER_COLOR;
-      el.style.fontSize = size < 30 ? '10px' : '12px';
+      el.style.fontSize = count < 100 ? '14px' : '16px';
       el.textContent = count >= 1000 ? `${Math.round(count / 100) / 10}k` : String(count);
       wrapper.appendChild(el);
 
@@ -498,7 +497,7 @@ export default function MapPage() {
 
     const wrapper = document.createElement('div');
     const el = document.createElement('div');
-    el.className = 'cc-point';
+    el.className = 'cc-point cc-marker-drop';
     el.style.backgroundColor = TIER_POINT_COLORS[props.tier] || '#ffffff';
 
     // Emoji del tier dentro del círculo (diseño original de Casi Cinco)
@@ -603,8 +602,8 @@ export default function MapPage() {
       });
 
       // Controles nativos de MapLibre: zoom + attribution compacta
-      map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-left');
-      map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-right');
+      map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-right');
+      map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
 
       // Repintar viewport en cada movimiento (moveend cubre también zoomend)
       map.on('moveend', () => updateMarkersRef.current());
@@ -625,7 +624,10 @@ export default function MapPage() {
       // Click en el canvas (no en un pin): cerrar la card
       map.on('click', () => setSelectedPlace(null));
 
-      map.on('load', () => setMapReady(true));
+      map.on('load', () => {
+        applyBrandTheme(map);
+        setMapReady(true);
+      });
 
       mapRef.current = map;
     })();
@@ -1031,20 +1033,6 @@ export default function MapPage() {
     };
   }, [allPlaces]);
 
-  // Aplicar filtros (botón): sincroniza la URL; el filtrado ya es automático vía useMemo
-  const applyFilters = () => {
-    const params = new URLSearchParams();
-    if (filters.community) params.set('community', filters.community);
-    if (filters.province) params.set('province', filters.province);
-    if (filters.city) params.set('city', filters.city);
-    if (filters.category) params.set('category', filters.category);
-    if (filters.reviewsRange) params.set('reviewsRange', filters.reviewsRange);
-    if (filters.qualityTier) params.set('qualityTier', filters.qualityTier.join(','));
-    if (filters.searchTerm) params.set('q', filters.searchTerm);
-
-    router.push(`/mapa?${params.toString()}`, { scroll: false });
-  };
-
   // Limpiar filtros
   const clearFilters = () => {
     setFilters({
@@ -1204,582 +1192,188 @@ export default function MapPage() {
         {!authLoading && !user && <LoginOverlay feature="mapa" />}
 
         {/* SIDEBAR DE FILTROS - Desktop */}
-        <div
-          className={`hidden md:block ${
-            showFilters ? 'w-96' : 'w-0'
-          } transition-all duration-300 bg-white border-r border-gray-200 overflow-y-auto`}
-        >
-          {showFilters && (
-            <div className="p-6 space-y-6">
-              {/* Header de filtros */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <SlidersHorizontal className="h-5 w-5 text-primary" />
-                  <h2 className="text-xl font-bold text-gray-900">Filtros</h2>
-                </div>
-                <button
-                  onClick={() => setShowFilters(false)}
-                  className="p-2 hover:bg-gray-100 rounded-lg transition"
-                >
-                  <X className="h-5 w-5" />
-                </button>
-              </div>
-
-              {/* Búsqueda rápida */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Buscar
-                </label>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                  <input
-                    type="text"
-                    placeholder="Ej: restaurante murcia, hotel madrid..."
-                    value={filters.searchTerm || ''}
-                    onChange={(e) => setFilters({ ...filters, searchTerm: e.target.value })}
-                    onKeyPress={(e) => e.key === 'Enter' && applyFilters()}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                  />
-                </div>
-              </div>
-
-              {/* Comunidad Autónoma */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  📍 Comunidad Autónoma
-                </label>
-                {loading ? (
-                  <div className="w-full h-10 bg-gray-200 animate-pulse rounded-lg"></div>
-                ) : (
-                  <select
-                    value={filters.community || ''}
-                    onChange={(e) => setFilters({ ...filters, community: e.target.value || undefined, province: undefined })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                  >
-                    <option value="">Todas</option>
-                    {availableOptions.communities.map((community) => (
-                      <option key={community} value={community}>
-                        {community}
-                      </option>
-                    ))}
-                  </select>
-                )}
-                <p className="text-xs text-gray-500 mt-1">
-                  {loading ? '...' : `${availableOptions.communities.length} disponibles`}
-                </p>
-              </div>
-
-              {/* Provincia */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  📍 Provincia
-                </label>
-                {loading ? (
-                  <div className="w-full h-10 bg-gray-200 animate-pulse rounded-lg"></div>
-                ) : (
-                  <select
-                    value={filters.province || ''}
-                    onChange={(e) => setFilters({ ...filters, province: e.target.value || undefined })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                  >
-                    <option value="">Todas</option>
-                    {availableOptions.provinces.map((province) => (
-                      <option key={province} value={province}>
-                        {province}
-                      </option>
-                    ))}
-                  </select>
-                )}
-                <p className="text-xs text-gray-500 mt-1">
-                  {loading ? '...' : `${availableOptions.provinces.length} disponibles`}
-                </p>
-              </div>
-
-              {/* Ciudad */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  📍 Ciudad
-                </label>
-                <input
-                  type="text"
-                  placeholder="Ej: Málaga, Marbella, San Pedro..."
-                  value={filters.city || ''}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setFilters({ ...filters, city: value || undefined });
-                  }}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                />
-                {filters.city && (
-                  <p className="text-xs text-gray-600 mt-1">
-                    Filtrando por: "{filters.city}"
-                  </p>
-                )}
-              </div>
-
-              {/* Categoría */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  🏷️ Categoría
-                </label>
-                {loading ? (
-                  <div className="w-full h-10 bg-gray-200 animate-pulse rounded-lg"></div>
-                ) : (
-                  <select
-                    value={filters.category || ''}
-                    onChange={(e) => setFilters({ ...filters, category: e.target.value || undefined })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                  >
-                    <option value="">Todas</option>
-                    {availableOptions.categories.map((category) => (
-                      <option key={category} value={category}>
-                        {CATEGORIES[category as keyof typeof CATEGORIES] || category}
-                      </option>
-                    ))}
-                  </select>
-                )}
-                <p className="text-xs text-gray-500 mt-1">
-                  {loading ? '...' : `${availableOptions.categories.length} disponibles`}
-                </p>
-              </div>
-
-              {/* TIER DE CALIDAD - LO MÁS IMPORTANTE */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-3">
-                  💎 Tier de Calidad
-                </label>
-                <div className="space-y-2">
-                  {(Object.entries(QUALITY_TIERS) as [QualityTier, typeof QUALITY_TIERS[QualityTier]][]).map(([tier, config]) => {
-                    if (tier === 'none') return null;
-
-                    const isSelected = filters.qualityTier?.includes(tier);
-
-                    return (
-                      <label
-                        key={tier}
-                        className={`flex items-start gap-3 p-3 rounded-lg border-2 cursor-pointer transition ${
-                          isSelected
-                            ? 'border-primary bg-primary/5'
-                            : 'border-gray-200 hover:border-gray-300'
-                        }`}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={isSelected}
-                          onChange={(e) => {
-                            const newTiers = e.target.checked
-                              ? [...(filters.qualityTier || []), tier]
-                              : (filters.qualityTier || []).filter(t => t !== tier);
-                            setFilters({ ...filters, qualityTier: newTiers.length > 0 ? newTiers : undefined });
-                          }}
-                          className="mt-1"
-                        />
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="text-xl">{config.icon}</span>
-                            <span className="font-semibold text-gray-900">{config.name}</span>
-                          </div>
-                          <p className="text-xs text-gray-600">{config.description}</p>
-                        </div>
-                      </label>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* NÚMERO DE RESEÑAS - SLIDER CON VISUAL */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-3">
-                  📊 Número de Reseñas
-                </label>
-                <div className="space-y-4">
-                  {/* Indicador visual */}
-                  <div className="flex items-center justify-between text-sm font-medium">
-                    <span className="text-indigo-600">{minReviews === 0 ? 'Todas' : `Desde ${minReviews}`}</span>
-                    <span className="text-gray-400">→</span>
-                    <span className="text-indigo-600">{maxReviews >= 10000 ? '∞' : `hasta ${maxReviews}`}</span>
-                  </div>
-
-                  {/* Barra visual con degradado */}
-                  <div className="relative h-3 bg-gray-200 rounded-full overflow-hidden">
-                    <div
-                      className="absolute h-full bg-gradient-to-r from-indigo-500 to-indigo-600 transition-all duration-200"
-                      style={{
-                        left: `${(minReviews / 1000) * 100}%`,
-                        right: `${100 - (maxReviews >= 10000 ? 100 : (maxReviews / 1000) * 100)}%`
-                      }}
-                    ></div>
-                  </div>
-
-                  {/* Slider */}
-                  <div className="relative">
-                    <input
-                      type="range"
-                      min="0"
-                      max="1000"
-                      step="10"
-                      value={minReviews}
-                      onChange={(e) => {
-                        const val = parseInt(e.target.value);
-                        setMinReviews(val);
-                        if (val > maxReviews && maxReviews < 10000) {
-                          setMaxReviews(val);
-                        }
-                      }}
-                      className="w-full h-2 bg-transparent appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-indigo-600 [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:shadow-md"
-                    />
-                    <div className="flex justify-between text-xs text-gray-500 mt-1 px-1">
-                      <span>0</span>
-                      <span>250</span>
-                      <span>500</span>
-                      <span>750</span>
-                      <span>1000+</span>
-                    </div>
-                  </div>
-
-                  {/* Atajos rápidos */}
-                  <div className="flex gap-2 flex-wrap">
-                    <button
-                      onClick={() => { setMinReviews(0); setMaxReviews(10000); }}
-                      className={`px-3 py-1.5 text-xs rounded-lg transition font-medium ${
-                        minReviews === 0 && maxReviews >= 10000
-                          ? 'bg-indigo-600 text-white'
-                          : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-                      }`}
-                    >
-                      Todas
-                    </button>
-                    <button
-                      onClick={() => { setMinReviews(50); setMaxReviews(10000); }}
-                      className={`px-3 py-1.5 text-xs rounded-lg transition font-medium ${
-                        minReviews === 50
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-blue-100 hover:bg-blue-200 text-blue-700'
-                      }`}
-                    >
-                      50+
-                    </button>
-                    <button
-                      onClick={() => { setMinReviews(200); setMaxReviews(10000); }}
-                      className={`px-3 py-1.5 text-xs rounded-lg transition font-medium ${
-                        minReviews === 200
-                          ? 'bg-purple-600 text-white'
-                          : 'bg-purple-100 hover:bg-purple-200 text-purple-700'
-                      }`}
-                    >
-                      200+
-                    </button>
-                    <button
-                      onClick={() => { setMinReviews(1000); setMaxReviews(10000); }}
-                      className={`px-3 py-1.5 text-xs rounded-lg transition font-medium ${
-                        minReviews === 1000
-                          ? 'bg-indigo-600 text-white'
-                          : 'bg-indigo-100 hover:bg-indigo-200 text-indigo-700'
-                      }`}
-                    >
-                      1000+
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* RATING MÍNIMO - SLIDER CON VISUAL */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-3">
-                  ⭐ Rating Mínimo
-                </label>
-                <div className="space-y-4">
-                  {/* Indicador visual */}
-                  <div className="flex items-center justify-between text-sm font-medium">
-                    <span className="text-yellow-600">{filters.minRating || 4.7}★</span>
-                    <span className="text-gray-400">→</span>
-                    <span className="text-yellow-600">5.0★</span>
-                  </div>
-
-                  {/* Barra visual con degradado */}
-                  <div className="relative h-3 bg-gray-200 rounded-full overflow-hidden">
-                    <div
-                      className="absolute h-full bg-gradient-to-r from-yellow-400 to-yellow-500 transition-all duration-200"
-                      style={{
-                        left: `${((filters.minRating || 4.7) - 4.7) / 0.3 * 100}%`,
-                        right: '0%'
-                      }}
-                    ></div>
-                  </div>
-
-                  {/* Slider */}
-                  <div className="relative">
-                    <input
-                      type="range"
-                      min="4.7"
-                      max="5.0"
-                      step="0.1"
-                      value={filters.minRating || 4.7}
-                      onChange={(e) => setFilters({ ...filters, minRating: parseFloat(e.target.value) })}
-                      className="w-full h-2 bg-transparent appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-yellow-500 [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:shadow-md"
-                    />
-                    <div className="flex justify-between text-xs text-gray-500 mt-1 px-1">
-                      <span>4.7★</span>
-                      <span>4.8★</span>
-                      <span>4.9★</span>
-                      <span>5.0★</span>
-                    </div>
-                  </div>
-
-                  {/* Atajos rápidos */}
-                  <div className="flex gap-2 flex-wrap">
-                    <button
-                      onClick={() => setFilters({ ...filters, minRating: 4.7 })}
-                      className={`px-3 py-1.5 text-xs rounded-lg transition font-medium ${
-                        filters.minRating === 4.7
-                          ? 'bg-yellow-500 text-white'
-                          : 'bg-yellow-100 hover:bg-yellow-200 text-yellow-700'
-                      }`}
-                    >
-                      4.7+
-                    </button>
-                    <button
-                      onClick={() => setFilters({ ...filters, minRating: 4.8 })}
-                      className={`px-3 py-1.5 text-xs rounded-lg transition font-medium ${
-                        filters.minRating === 4.8
-                          ? 'bg-yellow-500 text-white'
-                          : 'bg-yellow-100 hover:bg-yellow-200 text-yellow-700'
-                      }`}
-                    >
-                      4.8+
-                    </button>
-                    <button
-                      onClick={() => setFilters({ ...filters, minRating: 4.9 })}
-                      className={`px-3 py-1.5 text-xs rounded-lg transition font-medium ${
-                        filters.minRating === 4.9
-                          ? 'bg-yellow-500 text-white'
-                          : 'bg-yellow-100 hover:bg-yellow-200 text-yellow-700'
-                      }`}
-                    >
-                      4.9+
-                    </button>
-                    <button
-                      onClick={() => setFilters({ ...filters, minRating: 5.0 })}
-                      className={`px-3 py-1.5 text-xs rounded-lg transition font-medium ${
-                        filters.minRating === 5.0
-                          ? 'bg-yellow-500 text-white'
-                          : 'bg-yellow-100 hover:bg-yellow-200 text-yellow-700'
-                      }`}
-                    >
-                      5.0★
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Botones */}
-              <div className="sticky bottom-0 bg-white pt-4 pb-2 space-y-2 border-t border-gray-200">
-                <Button onClick={applyFilters} className="w-full" size="lg">
-                  <Filter className="h-5 w-5 mr-2" />
-                  Aplicar Filtros
-                </Button>
-                <Button onClick={clearFilters} variant="outline" className="w-full">
-                  Limpiar Filtros
-                </Button>
-              </div>
-
-              {/* Contador de resultados */}
-              <div className="text-center text-sm text-gray-600">
-                {loading ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Cargando...
-                  </span>
-                ) : (
-                  <span>
-                    {filteredPlaces.length} {filteredPlaces.length === 1 ? 'lugar' : 'lugares'} encontrados
-                  </span>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
+        <aside className="hidden md:block md:w-72 lg:w-80 bg-white border-r border-gray-200 overflow-hidden">
+          <FiltrosMapa
+            filters={filters}
+            onFiltersChange={setFilters}
+            minReviews={minReviews}
+            onMinReviewsChange={setMinReviews}
+            loading={loading}
+            totalResultados={filteredPlaces.length}
+            availableOptions={availableOptions}
+            onClear={clearFilters}
+            activeCount={activeFiltersCount}
+          />
+        </aside>
 
         {/* MAPA */}
         <div className="flex-1 relative">
-          {/* Botón toggle filtros */}
-          {!showFilters && (
-            <button
-              onClick={() => setShowFilters(true)}
-              className="absolute top-4 left-4 z-10 bg-white shadow-lg rounded-lg p-3 hover:bg-gray-50 transition"
-            >
-              <SlidersHorizontal className="h-5 w-5" />
-            </button>
-          )}
-
-          {/* Barra de controles superior */}
-          <div className="absolute top-2 left-2 right-2 z-10 flex items-center justify-between gap-2">
-            {/* Leyenda de calidad - Izquierda */}
-            <div className="bg-white/95 backdrop-blur-sm shadow-md rounded-lg px-2.5 py-1.5 border border-gray-200">
-              <button
-                onClick={() => setIsLegendExpanded(!isLegendExpanded)}
-                className="flex items-center gap-1.5"
-              >
-                <span className="text-base">💎</span>
-                <span className="text-[10px] font-semibold text-gray-900 whitespace-nowrap">Leyenda de Tier</span>
-                <ChevronDown
-                  className={`h-3 w-3 text-gray-600 transition-transform ${
-                    isLegendExpanded ? 'rotate-180' : ''
-                  }`}
-                />
-              </button>
-            </div>
-
-            {/* GPS - Centro */}
-            <button
-              onClick={isGeolocationActive ? deactivateGeolocation : activateGeolocation}
-              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-full shadow-md transition-all font-medium text-[10px] border whitespace-nowrap ${
-                isGeolocationActive
-                  ? 'bg-green-500 text-white border-green-600'
-                  : 'bg-white/95 backdrop-blur-sm text-gray-700 border-gray-300'
-              }`}
-            >
-              <MapPin className={`h-3 w-3 ${isGeolocationActive ? 'animate-pulse' : ''}`} />
-              <span>
-                {isGeolocationActive ? 'GPS ON' : 'Activar Geolocalización'}
-              </span>
-            </button>
-
-            {/* Contador de resultados sobre el mapa - sincronizado con el set filtrado */}
-            <div className="bg-white/95 backdrop-blur-sm shadow-md rounded-full px-2.5 py-1.5 border border-gray-200">
-              <div className="flex items-center gap-1">
-                <MapPin className="h-3 w-3 text-indigo-600 flex-shrink-0" />
-                <span className="font-semibold text-gray-900 text-[11px] whitespace-nowrap">
-                  {loading ? '…' : filteredPlaces.length}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Buscador geográfico centrado (BD: nombre/ciudad, top 8) */}
-          <div className="absolute top-12 left-1/2 -translate-x-1/2 z-10 w-[min(90%,340px)]">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
-              <input
-                type="text"
-                placeholder="Buscar lugar o ciudad..."
-                value={geoQuery}
-                onChange={(e) => {
-                  setGeoQuery(e.target.value);
-                  setShowGeoSuggestions(true);
-                }}
-                onFocus={() => setShowGeoSuggestions(true)}
-                onBlur={() => setTimeout(() => setShowGeoSuggestions(false), 150)}
-                className="w-full pl-9 pr-8 py-2 text-sm bg-white/95 backdrop-blur-sm border border-gray-300 rounded-full shadow-md focus:ring-2 focus:ring-primary focus:border-transparent"
-              />
-              {geoQuery && (
-                <button
-                  onClick={() => {
-                    setGeoQuery('');
-                    setShowGeoSuggestions(false);
-                  }}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 hover:bg-gray-100 rounded-full"
-                >
-                  <X className="h-4 w-4 text-gray-400" />
-                </button>
+          <div className="absolute top-3 left-3 max-w-[min(11rem,calc(100%-9rem))] bg-white/90 backdrop-blur-md rounded-full shadow-lg ring-1 ring-gray-900/5 px-3 py-1.5 z-10">
+            <p className="text-sm font-semibold text-gray-800 flex items-center gap-1.5">
+              <span className="text-primary font-bold tabular-nums">{loading ? '…' : filteredPlaces.length}</span>
+              {filteredPlaces.length === 1 ? 'lugar' : 'lugares'}
+              {filters.community && (
+                <span className="text-xs text-gray-500 font-normal truncate">· {filters.community}</span>
               )}
-            </div>
-
-            {/* Sugerencias */}
-            {showGeoSuggestions && geoSuggestions.length > 0 && (
-              <div className="mt-1 bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden">
-                {geoSuggestions.map((suggestion, i) => (
-                  <button
-                    key={`${suggestion.type}-${suggestion.label}-${i}`}
-                    onMouseDown={(e) => {
-                      e.preventDefault();
-                      handleGeoSuggestionSelect(suggestion);
-                    }}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-gray-50 transition border-b border-gray-100 last:border-b-0"
-                  >
-                    <MapPin className={`h-4 w-4 shrink-0 ${suggestion.type === 'city' ? 'text-indigo-500' : 'text-gray-400'}`} />
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">{suggestion.label}</p>
-                      <p className="text-xs text-gray-500 truncate">{suggestion.sublabel}</p>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
+              {loading && (
+                <span className="inline-flex animate-spin rounded-full h-3 w-3 border-2 border-primary-200 border-t-primary" />
+              )}
+            </p>
           </div>
 
-          {/* Panel expandible de leyenda */}
+          <button
+            type="button"
+            onClick={() => setIsLegendExpanded((v) => !v)}
+            className="absolute top-3 left-[11.5rem] z-10 bg-white/90 backdrop-blur-md rounded-full shadow-lg ring-1 ring-gray-900/5 w-11 h-11 flex items-center justify-center"
+            aria-label="Leyenda de tier"
+          >
+            <span className="text-lg" aria-hidden>💎</span>
+          </button>
+
           {isLegendExpanded && (
-            <div className="absolute top-14 left-2 z-10 bg-white/95 backdrop-blur-sm shadow-md rounded-lg p-2 border border-gray-200 max-w-[200px]">
-              <div className="space-y-1">
-                <div className="flex items-start gap-1.5">
-                  <span className="text-sm shrink-0">💎</span>
-                  <div className="min-w-0">
-                    <p className="font-semibold text-[10px] text-gray-900 leading-tight">Diamante</p>
-                    <p className="text-[8px] text-gray-600 leading-tight mt-0.5">4.8★+ con 1,000+</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-1.5">
-                  <span className="text-sm shrink-0">🏆</span>
-                  <div className="min-w-0">
-                    <p className="font-semibold text-[10px] text-gray-900 leading-tight">Platino</p>
-                    <p className="text-[8px] text-gray-600 leading-tight mt-0.5">4.8★+ con 500+</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-1.5">
-                  <span className="text-sm shrink-0">🥇</span>
-                  <div className="min-w-0">
-                    <p className="font-semibold text-[10px] text-gray-900 leading-tight">Oro</p>
-                    <p className="text-[8px] text-gray-600 leading-tight mt-0.5">4.8★+ con 200+</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-1.5">
-                  <span className="text-sm shrink-0">🥈</span>
-                  <div className="min-w-0">
-                    <p className="font-semibold text-[10px] text-gray-900 leading-tight">Plata</p>
-                    <p className="text-[8px] text-gray-600 leading-tight mt-0.5">4.7★+ con 100+</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-1.5">
-                  <span className="text-sm shrink-0">🥉</span>
-                  <div className="min-w-0">
-                    <p className="font-semibold text-[10px] text-gray-900 leading-tight">Bronce</p>
-                    <p className="text-[8px] text-gray-600 leading-tight mt-0.5">4.7★+ (-100)</p>
-                  </div>
-                </div>
+            <div className="absolute top-16 left-3 z-30 bg-white/95 backdrop-blur-md shadow-lg rounded-2xl p-3 ring-1 ring-gray-900/5 w-56">
+              <p className="text-xs font-semibold text-gray-900 mb-2">Leyenda de calidad</p>
+              <div className="space-y-1.5">
+                {(Object.entries(QUALITY_TIERS) as [QualityTier, typeof QUALITY_TIERS[QualityTier]][])
+                  .filter(([tier]) => tier !== 'none')
+                  .map(([tier, config]) => (
+                    <div key={tier} className="flex items-start gap-2">
+                      <span className="text-base shrink-0">{config.icon}</span>
+                      <div className="min-w-0">
+                        <p className="font-semibold text-xs text-gray-900 leading-tight">{config.name}</p>
+                        <p className="text-[11px] text-gray-500 leading-tight">{config.description}</p>
+                      </div>
+                    </div>
+                  ))}
               </div>
             </div>
           )}
 
-          {/* Mensaje de error GPS */}
+          <div className="absolute top-3 left-3 right-14 md:top-4 md:left-1/2 md:right-auto md:-translate-x-1/2 md:w-80 z-30 pointer-events-none">
+            <div className="flex justify-end md:block">
+              {!openMobileSearch && !geoQuery ? (
+                <button
+                  type="button"
+                  onClick={() => setOpenMobileSearch(true)}
+                  className="md:hidden pointer-events-auto w-11 h-11 bg-white/90 backdrop-blur-md rounded-full shadow-lg ring-1 ring-gray-900/5 flex items-center justify-center"
+                  aria-label="Buscar"
+                >
+                  <Search className="w-5 h-5 text-gray-700" />
+                </button>
+              ) : null}
+              <div className={`relative pointer-events-auto ${openMobileSearch || geoQuery ? 'block w-full' : 'hidden md:block'}`}>
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+                <input
+                  type="text"
+                  placeholder="¿A dónde ir?"
+                  value={geoQuery}
+                  onChange={(e) => {
+                    setGeoQuery(e.target.value);
+                    setShowGeoSuggestions(true);
+                  }}
+                  onFocus={() => {
+                    setOpenMobileSearch(true);
+                    setShowGeoSuggestions(true);
+                  }}
+                  onBlur={() => {
+                    setTimeout(() => {
+                      setShowGeoSuggestions(false);
+                      if (!geoQuery) setOpenMobileSearch(false);
+                    }, 150);
+                  }}
+                  className="w-full pl-9 pr-8 py-2.5 text-sm bg-white/90 backdrop-blur-md border-0 rounded-full shadow-lg ring-1 ring-gray-900/5 focus:ring-2 focus:ring-primary"
+                />
+                {geoQuery && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setGeoQuery('');
+                      setShowGeoSuggestions(false);
+                      setOpenMobileSearch(false);
+                    }}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 hover:bg-gray-100 rounded-full"
+                    aria-label="Limpiar"
+                  >
+                    <X className="h-4 w-4 text-gray-400" />
+                  </button>
+                )}
+                {showGeoSuggestions && geoSuggestions.length > 0 && (
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-xl shadow-xl ring-1 ring-gray-900/5 overflow-hidden z-[10001]">
+                    {geoSuggestions.map((suggestion, i) => (
+                      <button
+                        key={`${suggestion.type}-${suggestion.label}-${i}`}
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          handleGeoSuggestionSelect(suggestion);
+                          setOpenMobileSearch(false);
+                        }}
+                        className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-gray-50 transition border-b border-gray-100 last:border-b-0"
+                      >
+                        <MapPin className={`h-4 w-4 shrink-0 ${suggestion.type === 'city' ? 'text-primary' : 'text-gray-400'}`} />
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium text-gray-900 truncate">{suggestion.label}</p>
+                          <p className="text-xs text-gray-500 truncate">{suggestion.sublabel}</p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={isGeolocationActive ? deactivateGeolocation : activateGeolocation}
+            className={`absolute left-3 bottom-[calc(8.25rem+env(safe-area-inset-bottom,0px))] md:left-1/2 md:-translate-x-1/2 md:bottom-20 p-3 md:px-4 md:py-2 rounded-full shadow-lg font-semibold transition-all z-30 flex items-center md:gap-2 ${
+              isGeolocationActive ? 'bg-primary text-white hover:bg-primary-600' : 'bg-white text-gray-700 hover:bg-gray-50'
+            }`}
+            aria-label={isGeolocationActive ? 'GPS activo' : 'Ver ubicación'}
+          >
+            <MapPin className="w-5 h-5" />
+            <span className="hidden md:inline text-sm">{isGeolocationActive ? 'GPS activo' : 'Ver ubicación'}</span>
+          </button>
+
           {geolocationError && (
-            <div className="absolute top-14 left-1/2 transform -translate-x-1/2 z-10 bg-red-50 text-red-600 px-2 py-1 rounded-md shadow-md text-[9px] max-w-[180px] text-center leading-tight">
+            <div className="absolute left-3 z-30 bottom-[calc(12rem+env(safe-area-inset-bottom,0px))] md:left-1/2 md:-translate-x-1/2 md:bottom-32 bg-red-50 text-red-600 px-2 py-1 rounded-md shadow-md text-[11px] max-w-[180px] text-center">
               {geolocationError.split(' - ')[0]}
             </div>
           )}
 
-          {/* Contenedor del mapa MapLibre - se monta ENSEGUIDA, sin esperar al dataset */}
           <div className="h-full w-full relative">
             <div ref={mapDivRef} className="h-full w-full" />
 
-            {/* Overlay de carga encima del canvas (no bloquea el mapa) */}
             {loading && (
-              <div className="absolute inset-0 z-20 bg-white/50 backdrop-blur-[1px] flex items-center justify-center pointer-events-none">
-                <div className="flex flex-col items-center gap-3 bg-white/90 rounded-xl px-6 py-4 shadow-lg">
-                  <Loader2 className="h-10 w-10 animate-spin text-primary" />
-                  <p className="text-sm text-gray-600">Cargando lugares...</p>
+              <div className="absolute inset-0 z-30 flex items-center justify-center px-4 pointer-events-none">
+                <div className="relative overflow-hidden bg-white/95 backdrop-blur-md rounded-3xl shadow-lg ring-1 ring-gray-900/5 px-7 py-8 max-w-[22rem] w-full text-center">
+                  <div className="absolute inset-x-0 top-0 h-1 bg-secondary" />
+                  <p className="text-4xl mb-3" aria-hidden>💎</p>
+                  <h2 className="text-[1.45rem] leading-tight font-bold text-gray-900 mb-2">
+                    Cargando los mejores sitios
+                  </h2>
+                  <p className="text-gray-600 text-[13.5px] leading-relaxed mb-5">
+                    Lugares con 4.7★ o más en toda España.
+                  </p>
+                  {allPlaces.length > 0 && (
+                    <p className="text-xs font-medium text-gray-400 mb-3 tabular-nums">
+                      {allPlaces.length.toLocaleString('es-ES')} lugares encontrados
+                    </p>
+                  )}
+                  <div className="relative w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                    <div className="absolute inset-y-0 w-1/3 rounded-full bg-secondary animate-[cc-bar-slide_1.2s_ease-in-out_infinite]" />
+                  </div>
                 </div>
               </div>
             )}
 
-            {/* Botón Restablecer vista (safe-area para móvil) */}
             <button
+              type="button"
               onClick={resetView}
-              title="Restablecer vista"
-              className="absolute right-[10px] z-10 bg-white shadow-md rounded-lg p-2 hover:bg-gray-50 transition border border-gray-200"
-              style={{ bottom: 'calc(110px + env(safe-area-inset-bottom))' }}
+              className="absolute left-3 bottom-[calc(4.75rem+env(safe-area-inset-bottom,0px))] md:left-1/2 md:-translate-x-1/2 md:bottom-6 bg-white p-3 md:px-4 md:py-2 rounded-full shadow-lg hover:bg-gray-50 active:scale-95 transition-all z-30 flex items-center md:gap-2 font-semibold text-gray-700"
+              aria-label="Restablecer zoom"
             >
-              <Home className="h-4 w-4 text-gray-700" />
+              <Home className="w-5 h-5" />
+              <span className="hidden md:inline text-sm">Restablecer zoom</span>
             </button>
           </div>
 
@@ -1921,16 +1515,11 @@ export default function MapPage() {
         </div>
 
         {/* PANEL LATERAL DERECHO - Lista de Lugares - Desktop */}
-        <div
-          className={`hidden md:block ${
-            showPlacesList ? 'w-96' : 'w-0'
-          } transition-all duration-300 bg-white border-l border-gray-200 overflow-y-auto`}
-        >
-          {showPlacesList && (
-            <div className="p-4 space-y-4">
+        <div className="hidden md:block md:w-80 lg:w-96 bg-white border-l border-gray-200 overflow-y-auto">
+          <div className="p-4 space-y-4">
               {/* Header */}
               <div className="mb-4 sticky top-0 bg-white pb-2 border-b z-10">
-                <div className="flex items-center justify-between mb-3">
+                <div className="mb-3">
                   <div>
                     <h3 className="font-bold text-lg">Lugares Encontrados</h3>
                     <p className="text-sm text-gray-600">{filteredPlaces.length} resultados</p>
@@ -1946,12 +1535,6 @@ export default function MapPage() {
                       </div>
                     )}
                   </div>
-                  <button
-                    onClick={() => setShowPlacesList(false)}
-                    className="p-2 hover:bg-gray-100 rounded-lg transition"
-                  >
-                    <X className="h-5 w-5" />
-                  </button>
                 </div>
 
                 {/* Selector de ordenamiento */}
@@ -2107,18 +1690,7 @@ export default function MapPage() {
                 </div>
               )}
             </div>
-          )}
         </div>
-
-        {/* Botón para mostrar/ocultar lista */}
-        {!showPlacesList && (
-          <button
-            onClick={() => setShowPlacesList(true)}
-            className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white shadow-lg rounded-l-lg p-3 hover:bg-gray-50 transition z-10"
-          >
-            <ChevronUp className="h-6 w-6 rotate-90" />
-          </button>
-        )}
       </div>
 
       {/* Modal Registrar Visita */}
@@ -2233,194 +1805,18 @@ export default function MapPage() {
         title="Filtros"
         height="full"
       >
-        <div className="space-y-4 py-4">
-          {/* Búsqueda */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Buscar
-            </label>
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Ej: restaurante murcia, hotel madrid..."
-                value={filters.searchTerm || ''}
-                onChange={(e) => setFilters({ ...filters, searchTerm: e.target.value })}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg text-base"
-              />
-            </div>
-          </div>
-
-          {/* Provincia */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              📍 Provincia
-            </label>
-            <select
-              value={filters.province || ''}
-              onChange={(e) => setFilters({ ...filters, province: e.target.value || undefined })}
-              className="w-full px-3 py-3 border border-gray-300 rounded-lg text-base"
-            >
-              <option value="">Todas</option>
-              {PROVINCES.map(p => (
-                <option key={p} value={p}>{p}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Ciudad */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              🏙️ Ciudad
-            </label>
-            <input
-              type="text"
-              placeholder="Ej: Málaga, Marbella..."
-              value={filters.city || ''}
-              onChange={(e) => setFilters({ ...filters, city: e.target.value || undefined })}
-              className="w-full px-3 py-3 border border-gray-300 rounded-lg text-base"
-            />
-          </div>
-
-          {/* Categoría */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              🍽️ Categoría
-            </label>
-            <select
-              value={filters.category || ''}
-              onChange={(e) => setFilters({ ...filters, category: e.target.value as any || undefined })}
-              className="w-full px-3 py-3 border border-gray-300 rounded-lg text-base"
-            >
-              <option value="">Todas</option>
-              {Object.entries(CATEGORIES).map(([key, label]) => (
-                <option key={key} value={key}>{label}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Tier - Multi-selección con información detallada */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-3">
-              💎 Tier de Calidad
-            </label>
-            <div className="space-y-2">
-              {Object.entries(QUALITY_TIERS).map(([key, tier]) => {
-                if (key === 'none') return null;
-
-                return (
-                  <label key={key} className="flex items-start gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer active:bg-gray-100 transition">
-                    <input
-                      type="checkbox"
-                      checked={filters.qualityTier?.includes(key as QualityTier) || false}
-                      onChange={(e) => {
-                        const currentTiers = filters.qualityTier || [];
-                        if (e.target.checked) {
-                          setFilters({ ...filters, qualityTier: [...currentTiers, key as QualityTier] });
-                        } else {
-                          setFilters({ ...filters, qualityTier: currentTiers.filter(t => t !== key) });
-                        }
-                      }}
-                      className="w-5 h-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mt-0.5 shrink-0"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-xl">{tier.icon}</span>
-                        <span className="font-semibold text-gray-900">{tier.name}</span>
-                      </div>
-                      <p className="text-xs text-gray-600 leading-tight">
-                        {tier.description}
-                      </p>
-                    </div>
-                  </label>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Rating Mínimo - Mobile */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              ⭐ Rating Mínimo
-            </label>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-sm font-medium text-yellow-600">{filters.minRating || 4.7}★</span>
-              <div className="flex-1 h-1 bg-gray-200 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-gradient-to-r from-yellow-400 to-yellow-600"
-                  style={{ width: `${((filters.minRating || 4.7) - 4.7) / (5.0 - 4.7) * 100}%` }}
-                />
-              </div>
-              <span className="text-sm text-gray-500">5.0★</span>
-            </div>
-            <input
-              type="range"
-              min="4.7"
-              max="5.0"
-              step="0.1"
-              value={filters.minRating || 4.7}
-              onChange={(e) => setFilters({ ...filters, minRating: parseFloat(e.target.value) })}
-              className="w-full"
-            />
-          </div>
-
-          {/* Número de Reseñas - Mobile */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              📊 Número de Reseñas
-            </label>
-            <div className="space-y-3">
-              <div>
-                <div className="flex items-center justify-between text-sm mb-1">
-                  <span className="text-gray-600">Mínimo:</span>
-                  <span className="font-medium text-indigo-600">{minReviews === 0 ? 'Todas' : minReviews}</span>
-                </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="1000"
-                  step="10"
-                  value={minReviews}
-                  onChange={(e) => setMinReviews(Number(e.target.value))}
-                  className="w-full"
-                />
-              </div>
-              <div>
-                <div className="flex items-center justify-between text-sm mb-1">
-                  <span className="text-gray-600">Máximo:</span>
-                  <span className="font-medium text-indigo-600">{maxReviews >= 10000 ? '∞' : maxReviews}</span>
-                </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="10000"
-                  step="100"
-                  value={maxReviews >= 10000 ? 10000 : maxReviews}
-                  onChange={(e) => setMaxReviews(Number(e.target.value))}
-                  className="w-full"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Botones */}
-          <div className="flex gap-2 pt-4">
-            <Button
-              onClick={clearFilters}
-              variant="outline"
-              className="flex-1"
-            >
-              Limpiar
-            </Button>
-            <Button
-              onClick={() => setMobileView('map')}
-              variant="primary"
-              className="flex-1"
-            >
-              Ver Mapa
-            </Button>
-          </div>
-        </div>
+        <FiltrosMapa
+          filters={filters}
+          onFiltersChange={setFilters}
+          minReviews={minReviews}
+          onMinReviewsChange={setMinReviews}
+          loading={loading}
+          totalResultados={filteredPlaces.length}
+          availableOptions={availableOptions}
+          onClear={clearFilters}
+          onClose={handleCloseMobileFilters}
+          activeCount={activeFiltersCount}
+        />
       </BottomSheet>
 
       {/* BOTTOM SHEET - Lista de Lugares Mobile */}
