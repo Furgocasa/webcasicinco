@@ -1280,7 +1280,7 @@ export default function MapPage() {
         <div className="flex-1 relative">
           {/* Recuento arriba y diamante de leyenda justo debajo (móvil y escritorio) */}
           <div className="absolute top-3 left-3 z-10 flex flex-col items-start gap-2">
-            <div className="max-w-[min(14rem,calc(100%-9rem))] bg-white/90 backdrop-blur-md rounded-full shadow-lg ring-1 ring-gray-900/5 px-3 py-1.5">
+            <div className="w-max whitespace-nowrap bg-white/90 backdrop-blur-md rounded-full shadow-lg ring-1 ring-gray-900/5 px-3 py-1.5">
               <p className="text-sm font-semibold text-gray-800 flex items-center gap-1.5">
                 <span className="text-primary font-bold tabular-nums">{loading ? '…' : filteredPlaces.length}</span>
                 {filteredPlaces.length === 1 ? 'lugar' : 'lugares'}
