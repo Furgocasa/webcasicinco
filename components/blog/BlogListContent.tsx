@@ -1,12 +1,11 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
-import { BookOpen, MapPin, Calendar, TrendingUp } from 'lucide-react';
+import { BookOpen, MapPin, Calendar, TrendingUp, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import Footer from '@/components/layout/Footer';
 import type { BlogPost } from '@/types/blog';
-import { isBrokenFeaturedImage } from '@/lib/utils/blog-places';
+import { BLOG_COVER_FALLBACK, isBrokenFeaturedImage } from '@/lib/utils/blog-places';
 
 const getCategoryEmoji = (category: string) => {
   const emojis: Record<string, string> = {
@@ -30,22 +29,59 @@ const getCategoryLabel = (category: string) => {
 
 type BlogListContentProps = {
   initialPosts: BlogPost[];
+  currentPage: number;
+  totalPages: number;
+  totalCount: number;
+  postsPerPage: number;
+  currentCategory: string;
 };
 
-export function BlogListContent({ initialPosts }: BlogListContentProps) {
-  const [posts, setPosts] = useState<BlogPost[]>(initialPosts);
-  const [filter, setFilter] = useState<string>('all');
+function buildBlogHref(page: number, category: string, hash?: string): string {
+  const params = new URLSearchParams();
+  if (category !== 'all') params.set('categoria', category);
+  if (page > 1) params.set('page', String(page));
+  const qs = params.toString();
+  const path = qs ? `/blog?${qs}` : '/blog';
+  return hash ? `${path}#${hash}` : path;
+}
 
-  const handleFilterChange = async (newFilter: string) => {
-    setFilter(newFilter);
-    
-    // Filtrar en cliente para mejor UX (posts ya están cargados)
-    if (newFilter === 'all') {
-      setPosts(initialPosts);
-    } else {
-      setPosts(initialPosts.filter(p => p.category === newFilter));
-    }
-  };
+function getPageNumbers(current: number, total: number): Array<number | 'ellipsis'> {
+  if (total <= 7) {
+    return Array.from({ length: total }, (_, i) => i + 1);
+  }
+
+  const pages: Array<number | 'ellipsis'> = [1];
+  const start = Math.max(2, current - 1);
+  const end = Math.min(total - 1, current + 1);
+
+  if (start > 2) pages.push('ellipsis');
+  for (let i = start; i <= end; i++) pages.push(i);
+  if (end < total - 1) pages.push('ellipsis');
+  pages.push(total);
+
+  return pages;
+}
+
+export function BlogListContent({
+  initialPosts,
+  currentPage,
+  totalPages,
+  totalCount,
+  postsPerPage,
+  currentCategory,
+}: BlogListContentProps) {
+  const posts = initialPosts;
+  const filter = currentCategory;
+  const fromItem = totalCount === 0 ? 0 : (currentPage - 1) * postsPerPage + 1;
+  const toItem = Math.min(currentPage * postsPerPage, totalCount);
+  const pageNumbers = getPageNumbers(currentPage, totalPages);
+
+  const filterClass = (value: string) =>
+    `px-4 py-2 rounded-lg font-medium transition ${
+      filter === value
+        ? 'bg-white text-[#002297]'
+        : 'bg-white/20 backdrop-blur-sm hover:bg-white/30'
+    }`;
 
   return (
     <>
@@ -68,63 +104,36 @@ export function BlogListContent({ initialPosts }: BlogListContentProps) {
                 Descubre los lugares top de cada ciudad. Solo establecimientos con +4.7 estrellas.
               </p>
 
-              {/* Filtros */}
+              {/* Filtros (reinician a la página 1) */}
               <div className="flex flex-wrap justify-center gap-3">
-                <button
-                  onClick={() => handleFilterChange('all')}
-                  className={`px-4 py-2 rounded-lg font-medium transition ${
-                    filter === 'all'
-                      ? 'bg-white text-[#002297]'
-                      : 'bg-white/20 backdrop-blur-sm hover:bg-white/30'
-                  }`}
-                >
+                <Link href={buildBlogHref(1, 'all')} className={filterClass('all')}>
                   Todos
-                </button>
-                <button
-                  onClick={() => handleFilterChange('restaurante')}
-                  className={`px-4 py-2 rounded-lg font-medium transition ${
-                    filter === 'restaurante'
-                      ? 'bg-white text-[#002297]'
-                      : 'bg-white/20 backdrop-blur-sm hover:bg-white/30'
-                  }`}
-                >
+                </Link>
+                <Link href={buildBlogHref(1, 'restaurante')} className={filterClass('restaurante')}>
                   🍽️ Restaurantes
-                </button>
-                <button
-                  onClick={() => handleFilterChange('hotel')}
-                  className={`px-4 py-2 rounded-lg font-medium transition ${
-                    filter === 'hotel'
-                      ? 'bg-white text-[#002297]'
-                      : 'bg-white/20 backdrop-blur-sm hover:bg-white/30'
-                  }`}
-                >
+                </Link>
+                <Link href={buildBlogHref(1, 'hotel')} className={filterClass('hotel')}>
                   🏨 Hoteles
-                </button>
-                <button
-                  onClick={() => handleFilterChange('bar')}
-                  className={`px-4 py-2 rounded-lg font-medium transition ${
-                    filter === 'bar'
-                      ? 'bg-white text-[#002297]'
-                      : 'bg-white/20 backdrop-blur-sm hover:bg-white/30'
-                  }`}
-                >
+                </Link>
+                <Link href={buildBlogHref(1, 'bar')} className={filterClass('bar')}>
                   🍺 Bares
-                </button>
+                </Link>
               </div>
             </div>
           </div>
         </section>
 
         {/* POSTS */}
-        <section className="py-16">
+        <section id="articulos" className="py-16 scroll-mt-4">
           <div className="container mx-auto px-4">
             {posts.length > 0 ? (
+              <>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
                 {posts.map((post) => {
                   // Foto del Top 1; ignorar Unsplash Source (API muerta)
                   const raw = post.first_place_photo || post.featured_image_url;
                   const featuredImage = isBrokenFeaturedImage(raw)
-                    ? '/images/opengraph_casicinco_wide.png'
+                    ? BLOG_COVER_FALLBACK
                     : (raw as string);
 
                   return (
@@ -138,7 +147,7 @@ export function BlogListContent({ initialPosts }: BlogListContentProps) {
                             className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-500"
                             onError={(e) => {
                               // Fallback corporativo si la imagen no carga
-                              e.currentTarget.src = '/images/opengraph_casicinco_wide.png';
+                              e.currentTarget.src = BLOG_COVER_FALLBACK;
                             }}
                           />
                           <div className="absolute top-3 left-3">
@@ -184,6 +193,89 @@ export function BlogListContent({ initialPosts }: BlogListContentProps) {
                   );
                 })}
               </div>
+
+              {totalPages > 1 && (
+                <nav
+                  className="mt-12 max-w-7xl mx-auto flex flex-col items-center gap-4"
+                  aria-label="Paginación del blog"
+                >
+                  <p className="text-sm text-gray-600">
+                    Mostrando {fromItem}–{toItem} de {totalCount} artículos
+                    {totalPages > 1 && (
+                      <span className="text-gray-400"> · Página {currentPage} de {totalPages}</span>
+                    )}
+                  </p>
+
+                  <div className="flex flex-wrap items-center justify-center gap-2">
+                    {currentPage > 1 ? (
+                      <Link
+                        href={buildBlogHref(currentPage - 1, filter, 'articulos')}
+                        className="inline-flex items-center gap-1 px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm font-medium text-gray-700 hover:border-[#002297] hover:text-[#002297] transition"
+                        rel="prev"
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                        Anterior
+                      </Link>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 px-3 py-2 rounded-lg border border-gray-100 bg-gray-50 text-sm font-medium text-gray-400 cursor-not-allowed">
+                        <ChevronLeft className="h-4 w-4" />
+                        Anterior
+                      </span>
+                    )}
+
+                    <div className="hidden sm:flex items-center gap-1">
+                      {pageNumbers.map((item, index) =>
+                        item === 'ellipsis' ? (
+                          <span
+                            key={`ellipsis-${index}`}
+                            className="px-2 text-gray-400"
+                            aria-hidden="true"
+                          >
+                            …
+                          </span>
+                        ) : item === currentPage ? (
+                          <span
+                            key={item}
+                            aria-current="page"
+                            className="min-w-[2.5rem] h-10 px-3 inline-flex items-center justify-center rounded-lg bg-[#002297] text-white text-sm font-semibold"
+                          >
+                            {item}
+                          </span>
+                        ) : (
+                          <Link
+                            key={item}
+                            href={buildBlogHref(item, filter, 'articulos')}
+                            className="min-w-[2.5rem] h-10 px-3 inline-flex items-center justify-center rounded-lg border border-gray-200 bg-white text-sm font-medium text-gray-700 hover:border-[#002297] hover:text-[#002297] transition"
+                          >
+                            {item}
+                          </Link>
+                        )
+                      )}
+                    </div>
+
+                    <span className="sm:hidden text-sm font-medium text-gray-600 px-2">
+                      {currentPage} / {totalPages}
+                    </span>
+
+                    {currentPage < totalPages ? (
+                      <Link
+                        href={buildBlogHref(currentPage + 1, filter, 'articulos')}
+                        className="inline-flex items-center gap-1 px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm font-medium text-gray-700 hover:border-[#002297] hover:text-[#002297] transition"
+                        rel="next"
+                      >
+                        Siguiente
+                        <ChevronRight className="h-4 w-4" />
+                      </Link>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 px-3 py-2 rounded-lg border border-gray-100 bg-gray-50 text-sm font-medium text-gray-400 cursor-not-allowed">
+                        Siguiente
+                        <ChevronRight className="h-4 w-4" />
+                      </span>
+                    )}
+                  </div>
+                </nav>
+              )}
+              </>
             ) : (
               <div className="text-center py-20">
                 <BookOpen className="h-16 w-16 text-gray-400 mx-auto mb-4" />
@@ -191,7 +283,16 @@ export function BlogListContent({ initialPosts }: BlogListContentProps) {
                   No hay artículos disponibles
                 </h3>
                 <p className="text-gray-600">
-                  Estamos trabajando en nuevas guías. Vuelve pronto.
+                  {filter !== 'all' ? (
+                    <>
+                      No hay guías en esta categoría.{' '}
+                      <Link href="/blog" className="text-[#002297] font-medium hover:underline">
+                        Ver todos los artículos
+                      </Link>
+                    </>
+                  ) : (
+                    'Estamos trabajando en nuevas guías. Vuelve pronto.'
+                  )}
                 </p>
               </div>
             )}

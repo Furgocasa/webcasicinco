@@ -93,6 +93,9 @@ export function applyBlogLocationFilter<
   return query.or(filter.value) as T;
 }
 
+/** Imagen corporativa de respaldo (existe en public/images/) */
+export const BLOG_COVER_FALLBACK = '/images/opengraph_casicinco.png';
+
 /** True si la URL de portada es inválida / Unsplash Source (API muerta) */
 export function isBrokenFeaturedImage(url?: string | null): boolean {
   if (!url) return true;
@@ -101,4 +104,37 @@ export function isBrokenFeaturedImage(url?: string | null): boolean {
     url.includes('images.unsplash.com/source') ||
     url === '/images/placeholder.jpg'
   );
+}
+
+type PlaceWithPhotos = {
+  photo_urls?: string[] | null;
+};
+
+/**
+ * Primera foto de Supabase Storage en el Top 10 (no solo el #1).
+ * Sin fallback a Google Photos API (evita coste en listados).
+ */
+export function getBlogCoverPhotoFromPlaces(places: PlaceWithPhotos[]): string | null {
+  for (const place of places) {
+    const urls = place.photo_urls;
+    if (!urls?.length || !urls[0]) continue;
+
+    const baseUrl = urls[0];
+    if (baseUrl.includes('supabase.co')) {
+      return `${baseUrl}?width=800&quality=80`;
+    }
+    return baseUrl;
+  }
+  return null;
+}
+
+/** Portada del artículo: Top 10 con foto → featured válido → imagen corporativa */
+export function resolveBlogCoverUrl(
+  places: PlaceWithPhotos[],
+  featuredImageUrl?: string | null
+): string {
+  const fromPlaces = getBlogCoverPhotoFromPlaces(places);
+  if (fromPlaces) return fromPlaces;
+  if (!isBrokenFeaturedImage(featuredImageUrl)) return featuredImageUrl!;
+  return BLOG_COVER_FALLBACK;
 }

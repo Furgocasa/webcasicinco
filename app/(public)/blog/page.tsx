@@ -1,42 +1,134 @@
 import { Metadata } from 'next';
+import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { BlogListContent } from '@/components/blog/BlogListContent';
 import { comparePlacesByTier } from '@/lib/utils/tier-calculator';
-import { applyBlogLocationFilter, isBrokenFeaturedImage } from '@/lib/utils/blog-places';
+import {
+  applyBlogLocationFilter,
+  getBlogCoverPhotoFromPlaces,
+  isBrokenFeaturedImage,
+} from '@/lib/utils/blog-places';
 
-// ✅ 1. Metadata estática para el listado del blog
-export const metadata: Metadata = {
-  title: 'Blog - Guías de los Mejores Lugares | Casi Cinco',
-  description: 'Descubre guías completas de los mejores restaurantes, hoteles y bares de España. Solo establecimientos con 4.7+ estrellas verificadas.',
-  keywords: [
-    'mejores restaurantes',
-    'mejores hoteles',
-    'guías de viaje',
-    'españa turismo',
-    'lugares recomendados',
-    'top 10 lugares',
-    '4.7 estrellas',
-  ],
-  openGraph: {
-    title: 'Blog - Guías de Viaje | Casi Cinco',
-    description: 'Guías completas de los mejores lugares de España con +4.7 estrellas',
-    type: 'website',
-  },
+const POSTS_PER_PAGE = 15;
+const VALID_CATEGORIES = ['restaurante', 'bar', 'hotel'] as const;
+const BASE_URL = 'https://www.casicinco.com';
+
+type BlogSearchParams = {
+  page?: string;
+  categoria?: string;
 };
 
-// ✅ 2. Componente principal (Server Component)
-export default async function BlogPage() {
-  const supabase = await createClient();
+function parseCategory(value?: string): string {
+  if (value && VALID_CATEGORIES.includes(value as (typeof VALID_CATEGORIES)[number])) {
+    return value;
+  }
+  return 'all';
+}
 
-  // Obtener todos los posts publicados
-  const { data: posts } = await supabase
+function buildBlogPath(page: number, category: string): string {
+  const params = new URLSearchParams();
+  if (category !== 'all') params.set('categoria', category);
+  if (page > 1) params.set('page', String(page));
+  const qs = params.toString();
+  return qs ? `/blog?${qs}` : '/blog';
+}
+
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: BlogSearchParams;
+}): Promise<Metadata> {
+  const category = parseCategory(searchParams.categoria);
+  const requestedPage = Math.max(1, parseInt(searchParams.page || '1', 10) || 1);
+
+  const categoryTitles: Record<string, string> = {
+    restaurante: 'Restaurantes',
+    hotel: 'Hoteles',
+    bar: 'Bares',
+  };
+
+  const categoryLabel = categoryTitles[category];
+  const pageSuffix = requestedPage > 1 ? ` - Página ${requestedPage}` : '';
+  const topic = categoryLabel ? ` de ${categoryLabel}` : '';
+
+  const title = `Blog${topic}${pageSuffix} - Guías de los Mejores Lugares | Casi Cinco`;
+  const description = categoryLabel
+    ? `Guías de los mejores ${categoryLabel.toLowerCase()} de España. Solo establecimientos con 4.7+ estrellas verificadas.`
+    : 'Descubre guías completas de los mejores restaurantes, hoteles y bares de España. Solo establecimientos con 4.7+ estrellas verificadas.';
+
+  return {
+    title,
+    description,
+    keywords: [
+      'mejores restaurantes',
+      'mejores hoteles',
+      'guías de viaje',
+      'españa turismo',
+      'lugares recomendados',
+      'top 10 lugares',
+      '4.7 estrellas',
+    ],
+    alternates: {
+      canonical: `${BASE_URL}${buildBlogPath(requestedPage, category)}`,
+    },
+    openGraph: {
+      title: `Blog${topic}${pageSuffix} | Casi Cinco`,
+      description,
+      type: 'website',
+      url: `${BASE_URL}${buildBlogPath(requestedPage, category)}`,
+    },
+  };
+}
+
+export default async function BlogPage({
+  searchParams,
+}: {
+  searchParams: BlogSearchParams;
+}) {
+  const supabase = await createClient();
+  const category = parseCategory(searchParams.categoria);
+  const requestedPage = Math.max(1, parseInt(searchParams.page || '1', 10) || 1);
+  const now = new Date().toISOString();
+
+  // Conteo total para calcular páginas (con el mismo filtro)
+  let countQuery = supabase
+    .from('blog_posts')
+    .select('id', { count: 'exact', head: true })
+    .eq('published', true)
+    .lte('created_at', now);
+
+  if (category !== 'all') {
+    countQuery = countQuery.eq('category', category);
+  }
+
+  const { count } = await countQuery;
+  const totalCount = count || 0;
+  const totalPages = Math.max(1, Math.ceil(totalCount / POSTS_PER_PAGE));
+  const currentPage = Math.min(requestedPage, totalPages);
+
+  // Si la página pedida no existe, ir a la última válida
+  if (requestedPage !== currentPage) {
+    redirect(buildBlogPath(currentPage, category));
+  }
+
+  const from = (currentPage - 1) * POSTS_PER_PAGE;
+  const to = from + POSTS_PER_PAGE - 1;
+
+  let postsQuery = supabase
     .from('blog_posts')
     .select('*')
     .eq('published', true)
-    .lte('created_at', new Date().toISOString())
-    .order('created_at', { ascending: false });
+    .lte('created_at', now)
+    .order('created_at', { ascending: false })
+    .range(from, to);
 
-  // Enriquecer cada post con la foto del primer lugar de su Top 10
+  if (category !== 'all') {
+    postsQuery = postsQuery.eq('category', category);
+  }
+
+  const { data: posts } = await postsQuery;
+
+  // Enriquecer cada post de esta página con la foto del primer lugar de su Top 10
   const enrichedPosts = await Promise.all(
     (posts || []).map(async (post) => {
       let placesQuery = supabase
@@ -46,21 +138,13 @@ export default async function BlogPage() {
         .eq('published', true)
         .gte('rating', 4.7);
 
-      // Filtro de ubicación robusto (ciudades alias, comunidades, Costa del Sol…)
       placesQuery = applyBlogLocationFilter(placesQuery, post);
 
       const { data: places } = await placesQuery;
 
       const sortedPlaces = (places || []).sort(comparePlacesByTier);
-      const firstPlace = sortedPlaces.length > 0 ? sortedPlaces[0] : null;
+      const photoUrl = getBlogCoverPhotoFromPlaces(sortedPlaces);
 
-      // Foto del primer lugar (SOLO Supabase Storage — sin coste Google)
-      let photoUrl: string | null = null;
-      if (firstPlace?.photo_urls && firstPlace.photo_urls.length > 0) {
-        photoUrl = firstPlace.photo_urls[0];
-      }
-
-      // Si Unsplash Source está muerto, no usarlo como fallback
       const featured = isBrokenFeaturedImage(post.featured_image_url)
         ? null
         : post.featured_image_url;
@@ -74,45 +158,42 @@ export default async function BlogPage() {
     })
   );
 
-  // ✅ 3. Schema.org para el listado del blog
   const blogSchema = {
     "@context": "https://schema.org",
     "@type": "Blog",
     "name": "Blog de Casi Cinco",
     "description": "Guías de los mejores lugares de España con 4.7+ estrellas",
-    "url": "https://casicinco.com/blog",
+    "url": `${BASE_URL}/blog`,
     "publisher": {
       "@type": "Organization",
       "name": "Casi Cinco",
       "logo": {
         "@type": "ImageObject",
-        "url": "https://casicinco.com/images/logo.png"
+        "url": `${BASE_URL}/images/logo.png`
       }
     }
   };
 
-  // ItemList de todos los posts
   const itemListSchema = {
     "@context": "https://schema.org",
     "@type": "ItemList",
     "name": "Artículos del Blog",
-    "numberOfItems": enrichedPosts?.length || 0,
-    "itemListElement": enrichedPosts?.map((post, index) => ({
+    "numberOfItems": totalCount,
+    "itemListElement": enrichedPosts.map((post, index) => ({
       "@type": "ListItem",
-      "position": index + 1,
+      "position": from + index + 1,
       "item": {
         "@type": "Article",
         "headline": post.title,
-        "url": `https://casicinco.com/blog/${post.slug}`,
+        "url": `${BASE_URL}/blog/${post.slug}`,
         "datePublished": post.created_at,
         "image": post.first_place_photo || post.featured_image_url
       }
-    })) || []
+    }))
   };
 
   return (
     <>
-      {/* ✅ Schema.org JSON-LD */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(blogSchema) }}
@@ -122,11 +203,23 @@ export default async function BlogPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }}
       />
 
-      {/* ✅ Client Component con UI interactiva */}
-      <BlogListContent initialPosts={enrichedPosts || []} />
+      {currentPage > 1 && (
+        <link rel="prev" href={`${BASE_URL}${buildBlogPath(currentPage - 1, category)}`} />
+      )}
+      {currentPage < totalPages && (
+        <link rel="next" href={`${BASE_URL}${buildBlogPath(currentPage + 1, category)}`} />
+      )}
+
+      <BlogListContent
+        initialPosts={enrichedPosts}
+        currentPage={currentPage}
+        totalPages={totalPages}
+        totalCount={totalCount}
+        postsPerPage={POSTS_PER_PAGE}
+        currentCategory={category}
+      />
     </>
   );
 }
 
-// ✅ ISR: Revalidar cada 1 hora (para nuevos posts programados)
-export const revalidate = 3600; // 1 hora
+export const revalidate = 3600;
