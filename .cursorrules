@@ -72,3 +72,17 @@ Solo 3 categorías:
 
 Rechaza cualquier intento de agregar otras categorías (cafe, cafeteria, spa, experiencia, etc).
 
+# PROYECTO HERMANO: MAPA FURGOCASA
+==================================
+El mapa y la ruta de Casi Cinco se mantienen a la par con Mapa Furgocasa
+(carpeta "Eskala IA\6 - MAPA FURGOCASA\NEW MAPA FURGOCASA", https://www.mapafurgocasa.com).
+
+Si el usuario dice "como en Mapa Furgocasa", "como en la otra" o "igual que en el otro mapa",
+lee PARIDAD_CASI_CINCO_FURGOCASA.md (en la raiz, identico en los dos repositorios): contiene la
+tabla de archivos equivalentes, lo que ya se igualo con su commit y lo que NO se debe igualar.
+
+Al copiar de alli: abre el archivo original antes de copiar, conserva la identidad de Casi Cinco
+(los tiers diamante-bronce no se cambian por la clasificacion de Furgocasa) y anota el resultado
+en ese documento. Furgocasa es la referencia del comportamiento del mapa; Casi Cinco, la de la
+estetica de tarjetas y leyenda.
+

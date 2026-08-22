@@ -23,7 +23,8 @@
 ├── CHANGELOG.md                        # Historial de cambios
 ├── INDICE_MAESTRO_DOCUMENTACION.md     # Este documento
 ├── COMANDOS_UTILES.md                  # Comandos SQL/JS/debugging
-└── CONEXION_FRONTEND_BACKEND.md        # Mapa de APIs
+├── CONEXION_FRONTEND_BACKEND.md        # Mapa de APIs
+└── PARIDAD_CASI_CINCO_FURGOCASA.md     # Vínculo con Mapa Furgocasa (paridad de mapa y ruta)
 
 📁 docs/
 ├── 📁 strategy/                         # Documentos estratégicos
