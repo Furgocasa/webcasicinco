@@ -1099,6 +1099,12 @@ export default function RutaPage() {
                 zoom={DEFAULT_ZOOM}
                 onLoad={(map) => {
                   mapRef.current = map;
+                  // Si el contenedor nació sin tamaño, Google ignora el center inicial.
+                  requestAnimationFrame(() => {
+                    google.maps.event.trigger(map, 'resize');
+                    map.setCenter(defaultCenter);
+                    map.setZoom(DEFAULT_ZOOM);
+                  });
                 }}
                 options={{
                   styles: [

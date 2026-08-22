@@ -17,7 +17,10 @@ interface Message {
 export default function ChatbotFloating() {
   const router = useRouter();
   const pathname = usePathname();
-  const isMapa = pathname === '/mapa' || pathname?.startsWith('/mapa?');
+  // /mapa y /ruta llevan barra inferior en móvil: el botón se apoya sobre ella
+  const isMapa = ['/mapa', '/ruta'].some(
+    (ruta) => pathname === ruta || pathname?.startsWith(`${ruta}?`)
+  );
   const { user, loading: authLoading } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
