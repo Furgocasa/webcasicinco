@@ -9,9 +9,10 @@
  */
 
 import { createAdminClient } from '../supabase/server';
-import { getPlaceDetails, downloadAndUploadPhotosToSupabase, extractReviews } from '../google/places';
+import { getPlaceDetails, downloadAndUploadPhotosToSupabase, extractReviews, getPlacePhotos } from '../google/places';
 import { generatePlaceDescription, summarizeReviews, generateHighlights } from '../ai/openai';
 import { categorizePlaceWithAI } from '../ai/categorize';
+import { calculateQualityTier } from '../utils/tier-calculator';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 export interface EnrichmentResult {
@@ -172,18 +173,31 @@ export async function enrichPendingPlaces(
         console.log('[ENRICHER]   ↪️ cafe → bar (categoría permitida en BD)');
       }
 
-      // 2. Fotos: reutilizar Supabase; si no hay, usar refs de BD o de Google Details
+      // 2. Fotos: diamantes SIEMPRE piden al menos 1 a Google si no hay en Supabase
+      const isDiamond =
+        calculateQualityTier(place.rating, place.review_count || 0) === 'diamond';
+
       let supabaseUrls: string[] = Array.isArray(place.photo_urls)
         ? place.photo_urls.filter(Boolean)
         : [];
 
       const photoRefsFromDetails =
         details.photos?.map((p: { photo_reference: string }) => p.photo_reference) || [];
-      const photoReferences =
-        (place.photos && place.photos.length > 0 ? place.photos : photoRefsFromDetails) as string[];
+      let photoReferences = (
+        place.photos && place.photos.length > 0 ? place.photos : photoRefsFromDetails
+      ) as string[];
 
-      if (!skipGooglePhotos && supabaseUrls.length === 0 && photoReferences.length > 0) {
-        // GooglePlacePhoto exige height/width; la descarga solo usa photo_reference
+      const mustFetchGooglePhotos = !skipGooglePhotos || isDiamond;
+
+      if (mustFetchGooglePhotos && photoReferences.length === 0 && place.google_place_id) {
+        photoReferences = await getPlacePhotos(place.google_place_id);
+        if (photoReferences.length > 0) {
+          console.log(`[ENRICHER]   📷 ${photoReferences.length} refs obtenidas de Google Places`);
+        }
+      }
+
+      if (mustFetchGooglePhotos && supabaseUrls.length === 0 && photoReferences.length > 0) {
+        const maxPhotos = isDiamond ? 1 : 5;
         const photosArray = photoReferences.map((ref: string) => ({
           photo_reference: ref,
           height: 1200,
@@ -193,14 +207,16 @@ export async function enrichPendingPlaces(
           photosArray,
           place.name,
           place.google_place_id,
-          5
+          maxPhotos
         );
         supabaseUrls = downloadedUrls;
         console.log(`[ENRICHER]   📷 ${supabaseUrls.length} fotos subidas a Supabase`);
-      } else if (skipGooglePhotos) {
+      } else if (skipGooglePhotos && !isDiamond) {
         console.log(
           `[ENRICHER]   📷 Fotos Google omitidas (${supabaseUrls.length} ya en Supabase)`
         );
+      } else if (isDiamond && supabaseUrls.length === 0) {
+        console.log('[ENRICHER]   ⚠️ Diamante sin foto: Google no devolvió imágenes');
       }
 
       // 3. Generar contenido con IA (usar la categoría correcta de la IA)

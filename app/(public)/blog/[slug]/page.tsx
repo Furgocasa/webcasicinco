@@ -5,7 +5,12 @@ import { createClient as createClientBrowser } from '@supabase/supabase-js';
 import { BlogPostContent } from '@/components/blog/BlogPostContent';
 import type { BlogPostWithPlaces } from '@/types/blog';
 import { comparePlacesByTier } from '@/lib/utils/tier-calculator';
-import { applyBlogLocationFilter, isBrokenFeaturedImage } from '@/lib/utils/blog-places';
+import {
+  applyBlogLocationFilter,
+  BLOG_COVER_FALLBACK,
+  getBlogCoverPhotoFromPlaces,
+  isBrokenFeaturedImage,
+} from '@/lib/utils/blog-places';
 
 type Props = {
   params: { slug: string }
@@ -46,10 +51,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const sortedPlaces = (allPlaces || []).sort(comparePlacesByTier);
   const firstPlace = sortedPlaces.length > 0 ? sortedPlaces[0] : null;
   
-  // Imagen OpenGraph: foto del primer lugar; nunca Unsplash Source (API muerta)
-  let ogImage = firstPlace?.photo_urls?.[0] || post.featured_image_url;
+  // Imagen OpenGraph: primer lugar del Top 10 con foto; nunca Unsplash Source (API muerta)
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.casicinco.com';
+  let ogImage = getBlogCoverPhotoFromPlaces(sortedPlaces) || post.featured_image_url;
   if (isBrokenFeaturedImage(ogImage)) {
-    ogImage = `${process.env.NEXT_PUBLIC_APP_URL}/images/opengraph_casicinco_wide.png`;
+    ogImage = `${baseUrl}${BLOG_COVER_FALLBACK}`;
   }
   
   // 📝 Meta description optimizada para redes sociales (max 155 caracteres)
@@ -174,21 +180,16 @@ export default async function BlogPostPage({ params }: Props) {
     .sort(comparePlacesByTier)
     .slice(0, 10); // Top 10
 
-  // Obtener URL de foto del primer lugar (priorizar Supabase)
-  let firstPlacePhotoUrl: string | null = null;
-  if (sortedPlaces && sortedPlaces.length > 0) {
-    const firstPlace = sortedPlaces[0];
-    if (firstPlace.photo_urls && firstPlace.photo_urls.length > 0) {
-      firstPlacePhotoUrl = firstPlace.photo_urls[0];
-    }
-  }
+  // Portada: primer lugar del Top 10 con foto en Supabase (no solo el #1)
+  let firstPlacePhotoUrl = getBlogCoverPhotoFromPlaces(sortedPlaces);
 
   // Fallback: featured válido o OpenGraph corporativo (nunca Unsplash Source)
   if (!firstPlacePhotoUrl && !isBrokenFeaturedImage(post.featured_image_url)) {
     firstPlacePhotoUrl = post.featured_image_url;
   }
   if (!firstPlacePhotoUrl) {
-    firstPlacePhotoUrl = `${process.env.NEXT_PUBLIC_APP_URL}/images/opengraph_casicinco_wide.png`;
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.casicinco.com';
+    firstPlacePhotoUrl = `${baseUrl}${BLOG_COVER_FALLBACK}`;
   }
 
   const postWithPlaces: BlogPostWithPlaces = {

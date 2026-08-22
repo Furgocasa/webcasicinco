@@ -5,8 +5,17 @@
 import axios from 'axios';
 import type { GooglePlaceData, GooglePlacePhoto, GoogleReview } from '@/types/place';
 
-const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!;
 const PLACES_API_BASE = 'https://maps.googleapis.com/maps/api/place';
+
+/** Lee la API key en runtime (scripts deben cargar dotenv antes de importar este módulo) */
+function getGoogleMapsApiKey(): string {
+  const key =
+    process.env.GOOGLE_MAPS_API_KEY || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+  if (!key) {
+    throw new Error('❌ GOOGLE_MAPS_API_KEY no está configurada');
+  }
+  return key;
+}
 
 interface SearchPlacesParams {
   query?: string;      // 🆕 Query completo (prioritario si existe)
@@ -44,7 +53,7 @@ export async function searchPlaces(params: SearchPlacesParams): Promise<string[]
     }
 
     // Logs mínimos (solo para debugging crítico)
-    if (!GOOGLE_MAPS_API_KEY) {
+    if (!getGoogleMapsApiKey()) {
       throw new Error('❌ GOOGLE_MAPS_API_KEY no está configurada');
     }
 
@@ -102,7 +111,7 @@ export async function searchPlaces(params: SearchPlacesParams): Promise<string[]
             location: latitude && longitude ? `${latitude},${longitude}` : undefined,
             radius,
             type,
-            key: GOOGLE_MAPS_API_KEY,
+            key: getGoogleMapsApiKey(),
             pagetoken: pageToken,
             region: 'es',  // 🔒 Sesgo hacia España (region bias)
           },
@@ -210,7 +219,7 @@ export async function searchNearbyPlaces(
         location: `${latitude},${longitude}`,
         radius,
         type,
-        key: GOOGLE_MAPS_API_KEY,
+        key: getGoogleMapsApiKey(),
       },
     });
 
@@ -238,7 +247,7 @@ export async function getPlaceDetails(placeId: string): Promise<GooglePlaceData>
         place_id: placeId,
         fields: 'place_id,name,rating,user_ratings_total,formatted_address,address_components,geometry,price_level,formatted_phone_number,website,reviews,types,url',
         language: 'es',
-        key: GOOGLE_MAPS_API_KEY,
+        key: getGoogleMapsApiKey(),
       },
     });
 
@@ -264,7 +273,7 @@ export async function getPlacePhotos(placeId: string): Promise<string[]> {
       params: {
         place_id: placeId,
         fields: 'photos',
-        key: GOOGLE_MAPS_API_KEY,
+        key: getGoogleMapsApiKey(),
       },
     });
 
@@ -287,7 +296,7 @@ export function getPlacePhotoUrl(
   photoReference: string,
   maxWidth: number = 800
 ): string {
-  return `${PLACES_API_BASE}/photo?maxwidth=${maxWidth}&photo_reference=${photoReference}&key=${GOOGLE_MAPS_API_KEY}`;
+  return `${PLACES_API_BASE}/photo?maxwidth=${maxWidth}&photo_reference=${photoReference}&key=${getGoogleMapsApiKey()}`;
 }
 
 /**
