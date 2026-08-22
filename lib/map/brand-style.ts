@@ -118,41 +118,28 @@ export function applyBrandTheme(map: AnyMap) {
 }
 
 /**
- * MapTiler streets-v2 deja ciudades, regiones y países en `name:en`
- * ("Valladolid city", "Andalusia", "Spain"). El parámetro `?language=` de la
- * URL no lo cambia: hay que reescribir el text-field capa por capa.
- * Preferimos `name:es` y, si falta, el nombre local (`name`).
+ * Los basemaps rotulan en inglés: Carto Voyager usa `{name_en}` y MapTiler
+ * `name:en` / `name:latin` ("Spain", "Castile-La Mancha", "Andalusia"). El
+ * parámetro `?language=` de la URL no lo cambia, hay que reescribir el
+ * text-field capa por capa. Las teselas traen `name:es`, así que sustituimos
+ * el campo completo (también los `stops` por zoom, que no admiten
+ * expresiones dentro) por: `name:es` y, si falta, el nombre local.
  */
-const NAME_LANG_PROP = /^name:[a-z]+$/
-const NAME_LANG_TOKEN = /\{name:[a-z]+\}/g
+const NAME_REF = /^name(?:[_:][a-z0-9_-]+)?$/i
+const NAME_TOKEN = /\{name(?:[_:][a-z0-9_-]+)?\}/i
 
-function localizeTextField(field: unknown, lang: string): unknown {
-  if (typeof field === 'string') {
-    if (NAME_LANG_PROP.test(field)) return `name:${lang}`
-    if (/^\{name:[a-z]+\}$/.test(field)) {
-      return ['coalesce', ['get', `name:${lang}`], ['get', 'name']]
-    }
-    if (field.includes('{name:')) {
-      return field.replace(NAME_LANG_TOKEN, `{name:${lang}}`)
-    }
-    return field
-  }
-  if (Array.isArray(field)) {
-    return field.map((item) => localizeTextField(item, lang))
-  }
+function referencesName(field: unknown): boolean {
+  if (typeof field === 'string') return NAME_REF.test(field) || NAME_TOKEN.test(field)
+  if (Array.isArray(field)) return field.some(referencesName)
   if (field && typeof field === 'object') {
-    return Object.fromEntries(
-      Object.entries(field as Record<string, unknown>).map(([key, value]) => [
-        key,
-        localizeTextField(value, lang),
-      ])
-    )
+    return Object.values(field as Record<string, unknown>).some(referencesName)
   }
-  return field
+  return false
 }
 
 /** Pone las etiquetas del basemap en castellano. Idempotente. */
 export function applyMapLanguage(map: AnyMap, lang = 'es') {
+  const localized = ['coalesce', ['get', `name:${lang}`], ['get', 'name'], ['get', 'name_int']]
   const layers = map.getStyle()?.layers ?? []
 
   for (const layer of layers) {
@@ -160,10 +147,9 @@ export function applyMapLanguage(map: AnyMap, lang = 'es') {
     const current =
       map.getLayoutProperty?.(layer.id, 'text-field') ??
       (layer as { layout?: { 'text-field'?: unknown } }).layout?.['text-field']
-    if (current == null) continue
+    if (current == null || !referencesName(current)) continue
+    if (JSON.stringify(current) === JSON.stringify(localized)) continue
 
-    const next = localizeTextField(current, lang)
-    if (JSON.stringify(next) === JSON.stringify(current)) continue
-    safeLayout(map, layer.id, 'text-field', next)
+    safeLayout(map, layer.id, 'text-field', localized)
   }
 }
