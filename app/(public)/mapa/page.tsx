@@ -76,11 +76,14 @@ const BOUNDS_FULL: [[number, number], [number, number]] = [
   [12.0, 50.0], // noreste
 ];
 
-// Basemap: Carto Voyager (tiles vectoriales OSM). Elegido a propósito, no por
-// descarte: encima se aplica applyBrandTheme() y las etiquetas se pasan a
-// castellano con applyMapLanguage(). No condicionar a una clave de MapTiler:
-// hacerlo cambiaba el aspecto del mapa sin querer al tocar el entorno.
-const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json';
+// Basemap: MapTiler streets-v2 (mismo que Mapa Furgocasa) con la clave de la
+// cuenta Furgocasa. Sin clave cae a Carto Voyager, que también funciona: encima
+// se aplica applyBrandTheme() y applyMapLanguage() con cualquiera de los dos.
+// La variable se llama igual que en Mapa Furgocasa para no duplicar nombres.
+const MAPTILER_KEY = process.env.NEXT_PUBLIC_MAPTILER_API_KEY;
+const MAP_STYLE = MAPTILER_KEY
+  ? `https://api.maptiler.com/maps/streets-v2/style.json?key=${MAPTILER_KEY}&language=es`
+  : 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json';
 
 // Persistencia de filtros (solo selección manual; el GPS nunca escribe aquí)
 const FILTERS_STORAGE_KEY = 'mapaFilters_v1';
