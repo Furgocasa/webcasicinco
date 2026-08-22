@@ -372,8 +372,8 @@
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  background: rgba(59, 130, 246, 0.2);
-  border: 2px solid rgba(59, 130, 246, 0.5);
+  background: rgba(255, 107, 53, 0.25);
+  border: 2px solid rgba(255, 107, 53, 0.45);
   animation: ccUserPulse 2s ease-out infinite;
 }
 
@@ -384,10 +384,10 @@
   width: 14px;
   height: 14px;
   transform: translate(-50%, -50%);
-  background: #3b82f6;
+  background: #FF6B35;
   border: 3px solid #fff;
   border-radius: 50%;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.3);
 }
 
 @keyframes ccUserPulse {
