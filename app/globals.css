@@ -327,6 +327,19 @@
   font-size: 17px;
 }
 
+/* Ficha anclada al pin: el contenedor del globo ES la tarjeta */
+.cc-popup .maplibregl-popup-content {
+  padding: 0;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.cc-popup .maplibregl-popup-tip {
+  border-bottom-color: #fff;
+}
+
 /* Tooltip con el nombre: SOLO en dispositivos con hover real (nunca táctil) */
 .cc-point-label {
   display: none;

@@ -1,9 +1,10 @@
 'use client';
 
 import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { useSearchParams, useRouter } from 'next/navigation';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import type { Map as MapLibreMap, Marker as MapLibreMarker } from 'maplibre-gl';
+import type { Map as MapLibreMap, Marker as MapLibreMarker, Popup as MapLibrePopup } from 'maplibre-gl';
 import Supercluster from 'supercluster';
 
 // ⚠️ maplibre-gl usa APIs del navegador al evaluarse: NO puede importarse en SSR.
@@ -59,6 +60,12 @@ const DEFAULT_CENTER: [number, number] = [-3.7038, 40.5]; // [lng, lat]
 // Zoom inicial (MapLibre usa tiles de 512px: equivale aprox. a zoom de Google - 1)
 const DEFAULT_ZOOM_DESKTOP = 5.3;
 const DEFAULT_ZOOM_MOBILE = 5.0;
+const MIN_ZOOM = 4.3;
+
+// Vuelo de entrada: arranca sobre Europa y baja a España. Solo la primera carga.
+const INTRO_CENTER: [number, number] = [4.5, 47];
+const INTRO_ZOOM = 3.1;
+let introFlightPlayed = false;
 
 // Límites del mapa con margen generoso: en MapLibre maxBounds es estricto
 // (restringe el viewport completo), así que unos límites ajustados bloquean
@@ -139,6 +146,14 @@ export default function MapPage() {
   const geoWatchIdRef = useRef<number | null>(null);
   const hasCenteredOnUserRef = useRef(false);
   const isUserInteractingRef = useRef(false);
+  // El auto-zoom de filtros espera a que termine el vuelo de entrada para no cortarlo
+  const [introDone, setIntroDone] = useState(false);
+
+  // La ficha va anclada al pin: MapLibre mueve el globo y React pinta dentro
+  const popupRef = useRef<MapLibrePopup | null>(null);
+  const [popupNode] = useState<HTMLDivElement | null>(() =>
+    typeof document === 'undefined' ? null : document.createElement('div')
+  );
   const prefersReducedMotionRef = useRef(false);
   const hoverEnabledRef = useRef(false);
 
@@ -582,15 +597,22 @@ export default function MapPage() {
       prefersReducedMotionRef.current = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       hoverEnabledRef.current = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
       const mobile = window.innerWidth < 768;
+      const homeZoom = mobile ? DEFAULT_ZOOM_MOBILE : DEFAULT_ZOOM_DESKTOP;
+
+      // El vuelo se salta con "reducir movimiento" y con enlace directo a un lugar.
+      const playIntro =
+        !introFlightPlayed && !prefersReducedMotionRef.current && !searchParams.get('place');
+      if (playIntro) introFlightPlayed = true;
 
       const map = new maplibregl.Map({
         container: mapDivRef.current,
         style: MAP_STYLE,
-        center: DEFAULT_CENTER,
-        zoom: mobile ? DEFAULT_ZOOM_MOBILE : DEFAULT_ZOOM_DESKTOP,
-        minZoom: 4.3,
+        center: playIntro ? INTRO_CENTER : DEFAULT_CENTER,
+        zoom: playIntro ? INTRO_ZOOM : homeZoom,
+        // Durante el vuelo no hay límites: el encuadre de Europa es más ancho que ellos.
+        minZoom: playIntro ? INTRO_ZOOM : MIN_ZOOM,
         maxZoom: 18,
-        maxBounds: BOUNDS_FULL,
+        ...(playIntro ? {} : { maxBounds: BOUNDS_FULL }),
         attributionControl: false,
         fadeDuration: prefersReducedMotionRef.current ? 0 : 300,
       });
@@ -600,6 +622,17 @@ export default function MapPage() {
       map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-left');
       // Con brújula: la rotación táctil está activa y sin ella no hay forma de recuperar el norte.
       map.addControl(new maplibregl.NavigationControl(), 'top-right');
+
+      if (popupNode) {
+        popupRef.current = new maplibregl.Popup({
+          offset: 18,
+          anchor: 'top',
+          closeButton: false, // la tarjeta ya trae su propia X
+          closeOnClick: false, // el cierre lo controla el estado de React
+          maxWidth: '340px',
+          className: 'cc-popup',
+        }).setDOMContent(popupNode);
+      }
 
       // Repintar viewport en cada movimiento (moveend cubre también zoomend)
       map.on('moveend', () => updateMarkersRef.current());
@@ -624,6 +657,23 @@ export default function MapPage() {
         applyBrandTheme(map);
         applyMapLanguage(map);
         setMapReady(true);
+
+        if (!playIntro) {
+          setIntroDone(true);
+          return;
+        }
+        map.flyTo({
+          center: DEFAULT_CENTER,
+          zoom: homeZoom,
+          duration: 2600,
+          curve: 1.42,
+          essential: true,
+        });
+        map.once('moveend', () => {
+          map.setMinZoom(MIN_ZOOM);
+          map.setMaxBounds(BOUNDS_FULL);
+          setIntroDone(true);
+        });
       });
 
       mapRef.current = map;
@@ -635,6 +685,8 @@ export default function MapPage() {
       markerPoolRef.current.clear();
       userMarkerRef.current?.remove();
       userMarkerRef.current = null;
+      popupRef.current?.remove();
+      popupRef.current = null;
       mapRef.current?.remove();
       mapRef.current = null;
     };
@@ -673,6 +725,21 @@ export default function MapPage() {
     updateMarkersRef.current();
   }, [filteredPlaces, mapReady]);
 
+  // Anclar el globo al lugar seleccionado (MapLibre lo mantiene pegado al pin al mover)
+  useEffect(() => {
+    const map = mapRef.current;
+    const popup = popupRef.current;
+    if (!map || !popup) return;
+
+    if (!selectedPlace) {
+      popup.remove();
+      return;
+    }
+
+    popup.setLngLat([selectedPlace.longitude, selectedPlace.latitude]);
+    if (!popup.isOpen()) popup.addTo(map);
+  }, [selectedPlace, mapReady]);
+
   // Resaltar el pin seleccionado (si está en el viewport)
   useEffect(() => {
     markerPoolRef.current.forEach((marker, key) => {
@@ -693,6 +760,9 @@ export default function MapPage() {
 
     // NO aplicar auto-zoom si el usuario está moviendo el mapa manualmente
     if (isUserInteractingRef.current) return;
+
+    // NO cortar el vuelo de entrada
+    if (!introDone) return;
 
     const hasActiveFilters =
       filters.community ||
@@ -738,7 +808,7 @@ export default function MapPage() {
 
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filteredPlaces, mapReady]);
+  }, [filteredPlaces, mapReady, introDone]);
 
   // 🔗 Abrir lugar desde URL (ej: desde chatbot con ?place=ID)
   useEffect(() => {
@@ -1380,17 +1450,17 @@ export default function MapPage() {
             </button>
           </div>
 
-          {/* Card flotante ÚNICA y reutilizable (debajo del pin gracias al offset de cámara) */}
-          {selectedPlace && (() => {
+          {/* Ficha ÚNICA anclada al pin: se pinta dentro del globo de MapLibre */}
+          {selectedPlace && popupNode && (() => {
             const tier = calculateQualityTier(selectedPlace.rating, selectedPlace.review_count || 0);
             const tierInfo = getTierInfo(tier);
             const distance = userLocation
               ? calculateDistance(userLocation.lat, userLocation.lng, selectedPlace.latitude, selectedPlace.longitude)
               : null;
 
-            return (
-              <div className="absolute top-[30%] left-1/2 transform -translate-x-1/2 z-20 pointer-events-none">
-                <div className="w-80 max-w-[90vw] bg-white rounded-xl shadow-2xl border-2 border-gray-300 pointer-events-auto relative">
+            return createPortal(
+              (
+                <div className="w-80 max-w-[88vw] relative">
                   {/* Botón cerrar */}
                   <button
                     onClick={(e) => {
@@ -1512,7 +1582,8 @@ export default function MapPage() {
                     </div>
                   </div>
                 </div>
-              </div>
+              ),
+              popupNode
             );
           })()}
         </div>
