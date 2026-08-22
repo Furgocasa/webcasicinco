@@ -33,7 +33,7 @@ import { QUALITY_TIERS } from '@/types/filters';
 import { CATEGORIES } from '@/lib/utils/constants';
 import { toast } from 'sonner';
 import { getPlacePhotoUrl } from '@/lib/utils/photo-helper';
-import { applyBrandTheme } from '@/lib/map/brand-style';
+import { applyBrandTheme, applyMapLanguage } from '@/lib/map/brand-style';
 import FiltrosMapa from '@/components/map/FiltrosMapa';
 
 // 🚀 HOOK DE DEBOUNCE para optimizar búsquedas
@@ -77,7 +77,7 @@ const BOUNDS_FULL: [[number, number], [number, number]] = [
 // Estilo del basemap: MapTiler si hay clave, si no Carto Voyager (tiles vectoriales OSM, gratuito)
 const MAPTILER_KEY = process.env.NEXT_PUBLIC_MAPTILER_KEY;
 const MAP_STYLE = MAPTILER_KEY
-  ? `https://api.maptiler.com/maps/streets-v2/style.json?key=${MAPTILER_KEY}`
+  ? `https://api.maptiler.com/maps/streets-v2/style.json?key=${MAPTILER_KEY}&language=es`
   : 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json';
 
 // Persistencia de filtros (solo selección manual; el GPS nunca escribe aquí)
@@ -625,6 +625,7 @@ export default function MapPage() {
 
       map.on('load', () => {
         applyBrandTheme(map);
+        applyMapLanguage(map);
         setMapReady(true);
       });
 

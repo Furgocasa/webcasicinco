@@ -10,7 +10,7 @@ const BRAND = {
   landAlt: '#efe7d6',
   green: '#e2e9d4',
   sand: '#f3e6c9',
-  water: '#8091cb', // #002297 + ~50% blanco (no oscurece la UI)
+  water: '#4d749e', // azul mar aclarado con ~25% de blanco
   building: '#e9dfca',
   buildingOutline: '#dcd0b6',
   roadCasing: '#e6dcc5',
@@ -21,11 +21,12 @@ const BRAND = {
   text: '#4d4636',
   textHalo: 'rgba(245, 239, 228, 0.92)',
   waterText: '#f2f7fd',
-  waterTextHalo: 'rgba(0, 34, 151, 0.45)',
+  waterTextHalo: 'rgba(45, 84, 128, 0.55)',
 }
 
 type AnyMap = {
   getStyle: () => { layers?: { id: string; type: string }[] } | undefined
+  getLayoutProperty?: (layerId: string, prop: string) => unknown
   setPaintProperty: (layerId: string, prop: string, value: unknown) => void
   setLayoutProperty: (layerId: string, prop: string, value: unknown) => void
 }
@@ -113,5 +114,56 @@ export function applyBrandTheme(map: AnyMap) {
         break
       }
     }
+  }
+}
+
+/**
+ * MapTiler streets-v2 deja ciudades, regiones y países en `name:en`
+ * ("Valladolid city", "Andalusia", "Spain"). El parámetro `?language=` de la
+ * URL no lo cambia: hay que reescribir el text-field capa por capa.
+ * Preferimos `name:es` y, si falta, el nombre local (`name`).
+ */
+const NAME_LANG_PROP = /^name:[a-z]+$/
+const NAME_LANG_TOKEN = /\{name:[a-z]+\}/g
+
+function localizeTextField(field: unknown, lang: string): unknown {
+  if (typeof field === 'string') {
+    if (NAME_LANG_PROP.test(field)) return `name:${lang}`
+    if (/^\{name:[a-z]+\}$/.test(field)) {
+      return ['coalesce', ['get', `name:${lang}`], ['get', 'name']]
+    }
+    if (field.includes('{name:')) {
+      return field.replace(NAME_LANG_TOKEN, `{name:${lang}}`)
+    }
+    return field
+  }
+  if (Array.isArray(field)) {
+    return field.map((item) => localizeTextField(item, lang))
+  }
+  if (field && typeof field === 'object') {
+    return Object.fromEntries(
+      Object.entries(field as Record<string, unknown>).map(([key, value]) => [
+        key,
+        localizeTextField(value, lang),
+      ])
+    )
+  }
+  return field
+}
+
+/** Pone las etiquetas del basemap en castellano. Idempotente. */
+export function applyMapLanguage(map: AnyMap, lang = 'es') {
+  const layers = map.getStyle()?.layers ?? []
+
+  for (const layer of layers) {
+    if (layer.type !== 'symbol') continue
+    const current =
+      map.getLayoutProperty?.(layer.id, 'text-field') ??
+      (layer as { layout?: { 'text-field'?: unknown } }).layout?.['text-field']
+    if (current == null) continue
+
+    const next = localizeTextField(current, lang)
+    if (JSON.stringify(next) === JSON.stringify(current)) continue
+    safeLayout(map, layer.id, 'text-field', next)
   }
 }
