@@ -62,16 +62,11 @@ const DEFAULT_ZOOM_MOBILE = 5.0;
 
 // Límites del mapa con margen generoso: en MapLibre maxBounds es estricto
 // (restringe el viewport completo), así que unos límites ajustados bloquean
-// el desplazamiento lateral. Margen amplio = paneo libre alrededor de España.
-const BOUNDS_PENINSULA: [[number, number], [number, number]] = [
-  [-14.0, 32.0], // suroeste [lng, lat]
-  [8.0, 47.0], // noreste
-];
-
-// Límites completos incluyendo Canarias y Baleares (desktop)
+// el desplazamiento lateral. Mismos límites en móvil y escritorio: con la
+// península sola, Canarias quedaba fuera de alcance en el móvil.
 const BOUNDS_FULL: [[number, number], [number, number]] = [
-  [-28.0, 20.0],
-  [12.0, 50.0],
+  [-28.0, 20.0], // suroeste [lng, lat]
+  [12.0, 50.0], // noreste
 ];
 
 // Estilo del basemap: MapTiler si hay clave, si no Carto Voyager (tiles vectoriales OSM, gratuito)
@@ -593,9 +588,9 @@ export default function MapPage() {
         style: MAP_STYLE,
         center: DEFAULT_CENTER,
         zoom: mobile ? DEFAULT_ZOOM_MOBILE : DEFAULT_ZOOM_DESKTOP,
-        minZoom: mobile ? 5 : 4.3,
+        minZoom: 4.3,
         maxZoom: 18,
-        maxBounds: mobile ? BOUNDS_PENINSULA : BOUNDS_FULL,
+        maxBounds: BOUNDS_FULL,
         attributionControl: false,
         fadeDuration: prefersReducedMotionRef.current ? 0 : 300,
       });
