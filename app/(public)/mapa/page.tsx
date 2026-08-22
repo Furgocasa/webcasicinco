@@ -2,9 +2,13 @@
 
 import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import * as maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
+import type { Map as MapLibreMap, Marker as MapLibreMarker } from 'maplibre-gl';
 import Supercluster from 'supercluster';
+
+// ⚠️ maplibre-gl usa APIs del navegador al evaluarse: NO puede importarse en SSR.
+// Se carga dinámicamente en el primer useEffect (solo cliente).
+let maplibregl: typeof import('maplibre-gl') | null = null;
 import { useAuth } from '@/lib/hooks/useAuth';
 import {
   Search,
@@ -125,12 +129,12 @@ export default function MapPage() {
 
   // ===== REFS DEL MOTOR DE MAPA (MapLibre + Supercluster) =====
   const mapDivRef = useRef<HTMLDivElement | null>(null);
-  const mapRef = useRef<maplibregl.Map | null>(null);
+  const mapRef = useRef<MapLibreMap | null>(null);
   const clusterIndexRef = useRef<Supercluster<MapPointProps, MapClusterProps> | null>(null);
   // Pool de markers en pantalla: si un id ya existe se reutiliza su DOM, si sale del viewport se elimina
-  const markerPoolRef = useRef<Map<string, maplibregl.Marker>>(new Map());
+  const markerPoolRef = useRef<Map<string, MapLibreMarker>>(new Map());
   const placesByIdRef = useRef<Map<string, PlaceWithTier>>(new Map());
-  const userMarkerRef = useRef<maplibregl.Marker | null>(null);
+  const userMarkerRef = useRef<MapLibreMarker | null>(null);
   const geoWatchIdRef = useRef<number | null>(null);
   const hasCenteredOnUserRef = useRef(false);
   const isUserInteractingRef = useRef(false);
@@ -514,7 +518,7 @@ export default function MapPage() {
   const updateMarkers = useCallback(() => {
     const map = mapRef.current;
     const index = clusterIndexRef.current;
-    if (!map || !index) return;
+    if (!map || !index || !maplibregl) return;
 
     const bounds = map.getBounds();
     const bbox: [number, number, number, number] = [
@@ -539,7 +543,7 @@ export default function MapPage() {
       if (pool.has(key)) continue;
 
       const element = props.cluster ? createClusterElement(props, lng, lat) : createPointElement(props);
-      const marker = new maplibregl.Marker({ element }).setLngLat([lng, lat]).addTo(map);
+      const marker = new maplibregl!.Marker({ element }).setLngLat([lng, lat]).addTo(map);
       pool.set(key, marker);
     }
 
@@ -559,57 +563,67 @@ export default function MapPage() {
 
   // ===== INICIALIZAR MAPLIBRE (una sola vez, sin esperar al dataset) =====
   useEffect(() => {
-    if (!mapDivRef.current || mapRef.current) return;
+    let cancelled = false;
 
-    prefersReducedMotionRef.current = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    hoverEnabledRef.current = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-    const mobile = window.innerWidth < 768;
+    (async () => {
+      // Cargar maplibre-gl SOLO en el navegador (su módulo no soporta SSR)
+      if (!maplibregl) {
+        const mod: any = await import('maplibre-gl');
+        maplibregl = (mod.default ?? mod) as typeof import('maplibre-gl');
+      }
+      if (cancelled || !mapDivRef.current || mapRef.current) return;
 
-    const map = new maplibregl.Map({
-      container: mapDivRef.current,
-      style: MAP_STYLE,
-      center: DEFAULT_CENTER,
-      zoom: mobile ? DEFAULT_ZOOM_MOBILE : DEFAULT_ZOOM_DESKTOP,
-      minZoom: mobile ? 5 : 4.3,
-      maxZoom: 18,
-      maxBounds: mobile ? BOUNDS_PENINSULA : BOUNDS_FULL,
-      attributionControl: false,
-      fadeDuration: prefersReducedMotionRef.current ? 0 : 300,
-    });
+      prefersReducedMotionRef.current = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      hoverEnabledRef.current = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+      const mobile = window.innerWidth < 768;
 
-    // Controles nativos de MapLibre: zoom + attribution compacta
-    map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-left');
-    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-right');
+      const map = new maplibregl.Map({
+        container: mapDivRef.current,
+        style: MAP_STYLE,
+        center: DEFAULT_CENTER,
+        zoom: mobile ? DEFAULT_ZOOM_MOBILE : DEFAULT_ZOOM_DESKTOP,
+        minZoom: mobile ? 5 : 4.3,
+        maxZoom: 18,
+        maxBounds: mobile ? BOUNDS_PENINSULA : BOUNDS_FULL,
+        attributionControl: false,
+        fadeDuration: prefersReducedMotionRef.current ? 0 : 300,
+      });
 
-    // Repintar viewport en cada movimiento (moveend cubre también zoomend)
-    map.on('moveend', () => updateMarkersRef.current());
+      // Controles nativos de MapLibre: zoom + attribution compacta
+      map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-left');
+      map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-right');
 
-    // Rastrear interacción manual del usuario (desactiva auto-zoom de filtros)
-    map.on('dragstart', () => {
-      isUserInteractingRef.current = true;
-    });
-    map.on('zoomstart', (e: any) => {
-      if (e.originalEvent) isUserInteractingRef.current = true;
-    });
-    map.on('moveend', () => {
-      setTimeout(() => {
-        isUserInteractingRef.current = false;
-      }, 2000);
-    });
+      // Repintar viewport en cada movimiento (moveend cubre también zoomend)
+      map.on('moveend', () => updateMarkersRef.current());
 
-    // Click en el canvas (no en un pin): cerrar la card
-    map.on('click', () => setSelectedPlace(null));
+      // Rastrear interacción manual del usuario (desactiva auto-zoom de filtros)
+      map.on('dragstart', () => {
+        isUserInteractingRef.current = true;
+      });
+      map.on('zoomstart', (e: any) => {
+        if (e.originalEvent) isUserInteractingRef.current = true;
+      });
+      map.on('moveend', () => {
+        setTimeout(() => {
+          isUserInteractingRef.current = false;
+        }, 2000);
+      });
 
-    map.on('load', () => setMapReady(true));
+      // Click en el canvas (no en un pin): cerrar la card
+      map.on('click', () => setSelectedPlace(null));
 
-    mapRef.current = map;
+      map.on('load', () => setMapReady(true));
+
+      mapRef.current = map;
+    })();
 
     return () => {
+      cancelled = true;
       markerPoolRef.current.forEach((marker) => marker.remove());
       markerPoolRef.current.clear();
       userMarkerRef.current?.remove();
       userMarkerRef.current = null;
-      map.remove();
+      mapRef.current?.remove();
       mapRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -689,7 +703,7 @@ export default function MapPage() {
 
     const timer = setTimeout(() => {
       const currentMap = mapRef.current;
-      if (!currentMap) return;
+      if (!currentMap || !maplibregl) return;
 
       if (hasActiveFilters && filteredPlaces.length < allPlaces.length) {
         const bounds = new maplibregl.LngLatBounds();
@@ -863,7 +877,7 @@ export default function MapPage() {
   // Marcador de usuario (distinto a los pins de lugares)
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !mapReady) return;
+    if (!map || !mapReady || !maplibregl) return;
 
     if (userLocation) {
       if (!userMarkerRef.current) {
@@ -886,7 +900,7 @@ export default function MapPage() {
   // ===== RESTABLECER VISTA (según filtro geográfico activo) =====
   const resetView = useCallback(() => {
     const map = mapRef.current;
-    if (!map) return;
+    if (!map || !maplibregl) return;
 
     const hasGeoFilter = filters.community || filters.province || filters.city;
 
@@ -986,7 +1000,7 @@ export default function MapPage() {
       const cityPlaces = allPlaces.filter(
         (p) => p.city?.toLowerCase() === suggestion.city.toLowerCase() && hasValidCoords(p)
       );
-      if (cityPlaces.length === 0 || !mapRef.current) return;
+      if (cityPlaces.length === 0 || !mapRef.current || !maplibregl) return;
 
       const bounds = new maplibregl.LngLatBounds();
       cityPlaces.forEach((p) => bounds.extend([p.longitude, p.latitude]));
