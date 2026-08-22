@@ -1278,46 +1278,49 @@ export default function MapPage() {
 
         {/* MAPA */}
         <div className="flex-1 relative">
-          <div className="absolute top-3 left-3 max-w-[min(11rem,calc(100%-9rem))] bg-white/90 backdrop-blur-md rounded-full shadow-lg ring-1 ring-gray-900/5 px-3 py-1.5 z-10">
-            <p className="text-sm font-semibold text-gray-800 flex items-center gap-1.5">
-              <span className="text-primary font-bold tabular-nums">{loading ? '…' : filteredPlaces.length}</span>
-              {filteredPlaces.length === 1 ? 'lugar' : 'lugares'}
-              {filters.community && (
-                <span className="text-xs text-gray-500 font-normal truncate">· {filters.community}</span>
-              )}
-              {loading && (
-                <span className="inline-flex animate-spin rounded-full h-3 w-3 border-2 border-primary-200 border-t-primary" />
-              )}
-            </p>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => setIsLegendExpanded((v) => !v)}
-            className="absolute top-14 left-3 md:top-3 md:left-[11.5rem] z-10 flex bg-white/90 backdrop-blur-md rounded-full shadow-lg ring-1 ring-gray-900/5 w-11 h-11 items-center justify-center"
-            aria-label="Leyenda de tier"
-          >
-            <span className="text-lg" aria-hidden>💎</span>
-          </button>
-
-          {isLegendExpanded && (
-            <div className="absolute top-[6.75rem] left-3 md:top-16 z-30 bg-white/95 backdrop-blur-md shadow-lg rounded-2xl p-3 ring-1 ring-gray-900/5 w-56">
-              <p className="text-xs font-semibold text-gray-900 mb-2">Leyenda de calidad</p>
-              <div className="space-y-1.5">
-                {(Object.entries(QUALITY_TIERS) as [QualityTier, typeof QUALITY_TIERS[QualityTier]][])
-                  .filter(([tier]) => tier !== 'none')
-                  .map(([tier, config]) => (
-                    <div key={tier} className="flex items-start gap-2">
-                      <span className="text-base shrink-0">{config.icon}</span>
-                      <div className="min-w-0">
-                        <p className="font-semibold text-xs text-gray-900 leading-tight">{config.name}</p>
-                        <p className="text-[11px] text-gray-500 leading-tight">{config.description}</p>
-                      </div>
-                    </div>
-                  ))}
-              </div>
+          {/* Recuento arriba y diamante de leyenda justo debajo (móvil y escritorio) */}
+          <div className="absolute top-3 left-3 z-10 flex flex-col items-start gap-2">
+            <div className="max-w-[min(14rem,calc(100%-9rem))] bg-white/90 backdrop-blur-md rounded-full shadow-lg ring-1 ring-gray-900/5 px-3 py-1.5">
+              <p className="text-sm font-semibold text-gray-800 flex items-center gap-1.5">
+                <span className="text-primary font-bold tabular-nums">{loading ? '…' : filteredPlaces.length}</span>
+                {filteredPlaces.length === 1 ? 'lugar' : 'lugares'}
+                {filters.community && (
+                  <span className="text-xs text-gray-500 font-normal truncate">· {filters.community}</span>
+                )}
+                {loading && (
+                  <span className="inline-flex animate-spin rounded-full h-3 w-3 border-2 border-primary-200 border-t-primary" />
+                )}
+              </p>
             </div>
-          )}
+
+            <button
+              type="button"
+              onClick={() => setIsLegendExpanded((v) => !v)}
+              className="flex bg-white/90 backdrop-blur-md rounded-full shadow-lg ring-1 ring-gray-900/5 w-11 h-11 items-center justify-center"
+              aria-label="Leyenda de tier"
+            >
+              <span className="text-lg" aria-hidden>💎</span>
+            </button>
+
+            {isLegendExpanded && (
+              <div className="z-30 bg-white/95 backdrop-blur-md shadow-lg rounded-2xl p-3 ring-1 ring-gray-900/5 w-56">
+                <p className="text-xs font-semibold text-gray-900 mb-2">Leyenda de calidad</p>
+                <div className="space-y-1.5">
+                  {(Object.entries(QUALITY_TIERS) as [QualityTier, typeof QUALITY_TIERS[QualityTier]][])
+                    .filter(([tier]) => tier !== 'none')
+                    .map(([tier, config]) => (
+                      <div key={tier} className="flex items-start gap-2">
+                        <span className="text-base shrink-0">{config.icon}</span>
+                        <div className="min-w-0">
+                          <p className="font-semibold text-xs text-gray-900 leading-tight">{config.name}</p>
+                          <p className="text-[11px] text-gray-500 leading-tight">{config.description}</p>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            )}
+          </div>
 
           <div className="absolute top-3 left-3 right-14 md:top-4 md:left-1/2 md:right-auto md:-translate-x-1/2 md:w-80 z-30 pointer-events-none">
             <div className="flex justify-end md:block">
