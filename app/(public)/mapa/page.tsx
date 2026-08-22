@@ -803,65 +803,46 @@ export default function MapPage() {
     });
   }, [selectedPlace]);
 
-  // ===== AUTO-ZOOM CUANDO CAMBIAN LOS FILTROS =====
+  // Auto-zoom SOLO con filtros geográficos (comunidad/provincia/ciudad).
+  // Tier, categoría o reseñas no mueven la cámara: el usuario se queda donde estaba.
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !mapReady || filteredPlaces.length === 0) return;
-
-    // NO aplicar auto-zoom si viene con ?place=ID (desde chatbot o enlace directo)
     if (searchParams.get('place')) return;
-
-    // NO aplicar auto-zoom si el usuario está moviendo el mapa manualmente
     if (isUserInteractingRef.current) return;
-
-    // NO cortar el vuelo de entrada
     if (!introDone) return;
 
-    const hasActiveFilters =
-      filters.community ||
-      filters.province ||
-      filters.city ||
-      filters.category ||
-      filters.qualityTier?.length ||
-      debouncedSearchTerm ||
-      minReviews > 0 ||
-      maxReviews < 10000;
+    const hasGeographicFilters = Boolean(
+      filters.community || filters.province || filters.city
+    );
+    if (!hasGeographicFilters) return;
 
     const timer = setTimeout(() => {
       const currentMap = mapRef.current;
       if (!currentMap || !maplibregl) return;
 
-      if (hasActiveFilters && filteredPlaces.length < allPlaces.length) {
-        const bounds = new maplibregl.LngLatBounds();
-        let validCount = 0;
-        filteredPlaces.forEach((place) => {
-          if (hasValidCoords(place)) {
-            bounds.extend([place.longitude, place.latitude]);
-            validCount++;
-          }
-        });
-
-        if (validCount > 0) {
-          currentMap.fitBounds(bounds, {
-            padding: { top: 80, bottom: 100, left: 60, right: 60 },
-            maxZoom: 15,
-            animate: !prefersReducedMotionRef.current,
-          });
+      const bounds = new maplibregl.LngLatBounds();
+      let validCount = 0;
+      filteredPlaces.forEach((place) => {
+        if (hasValidCoords(place)) {
+          bounds.extend([place.longitude, place.latitude]);
+          validCount++;
         }
-      } else if (!hasActiveFilters && filteredPlaces.length === allPlaces.length) {
-        // Sin filtros: restaurar vista de España
-        const cameraOptions = {
-          center: DEFAULT_CENTER,
-          zoom: window.innerWidth < 768 ? DEFAULT_ZOOM_MOBILE : DEFAULT_ZOOM_DESKTOP,
-        };
-        if (prefersReducedMotionRef.current) currentMap.jumpTo(cameraOptions);
-        else currentMap.easeTo({ ...cameraOptions, duration: 600 });
+      });
+
+      if (validCount > 0) {
+        currentMap.fitBounds(bounds, {
+          padding: { top: 80, bottom: 100, left: 60, right: 60 },
+          maxZoom: 15,
+          animate: !prefersReducedMotionRef.current,
+        });
       }
     }, 300);
 
     return () => clearTimeout(timer);
+    // Solo reencuadrar al cambiar el recorte geográfico, no al filtrar por tier/categoría.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filteredPlaces, mapReady, introDone]);
+  }, [filters.community, filters.province, filters.city, mapReady, introDone]);
 
   // 🔗 Abrir lugar desde URL (ej: desde chatbot con ?place=ID)
   useEffect(() => {
