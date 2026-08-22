@@ -30,7 +30,7 @@ import BottomSheet from '@/components/mobile/BottomSheet';
 import LoginOverlay from '@/components/auth/LoginOverlay';
 import RoutePromoModal from '@/components/modals/RoutePromoModal';
 import type { PlaceWithTier, PlaceFilters, QualityTier, ReviewsRange } from '@/types/filters';
-import { calculateQualityTier, getTierMarkerColor, getTierInfo } from '@/lib/utils/tier-calculator';
+import { calculateQualityTier, getTierInfo } from '@/lib/utils/tier-calculator';
 import { trackEvent, EVENTS, CATEGORIES as ANALYTICS_CATEGORIES } from '@/lib/analytics/tracker';
 import { getPlaceUrl } from '@/lib/utils/url-helper';
 import { QUALITY_TIERS } from '@/types/filters';
@@ -62,16 +62,18 @@ const DEFAULT_CENTER: [number, number] = [-3.7038, 40.5]; // [lng, lat]
 const DEFAULT_ZOOM_DESKTOP = 5.3;
 const DEFAULT_ZOOM_MOBILE = 5.0;
 
-// Límites del mapa para península ibérica (mejor UX móvil)
+// Límites del mapa con margen generoso: en MapLibre maxBounds es estricto
+// (restringe el viewport completo), así que unos límites ajustados bloquean
+// el desplazamiento lateral. Margen amplio = paneo libre alrededor de España.
 const BOUNDS_PENINSULA: [[number, number], [number, number]] = [
-  [-9.5, 36.0], // suroeste [lng, lat]
-  [3.5, 43.8], // noreste
+  [-14.0, 32.0], // suroeste [lng, lat]
+  [8.0, 47.0], // noreste
 ];
 
 // Límites completos incluyendo Canarias y Baleares (desktop)
 const BOUNDS_FULL: [[number, number], [number, number]] = [
-  [-18.5, 26.0],
-  [4.5, 46.0],
+  [-28.0, 20.0],
+  [12.0, 50.0],
 ];
 
 // Estilo del basemap: MapTiler si hay clave, si no Carto Voyager (tiles vectoriales OSM, gratuito)
@@ -83,9 +85,8 @@ const MAP_STYLE = MAPTILER_KEY
 // Persistencia de filtros (solo selección manual; el GPS nunca escribe aquí)
 const FILTERS_STORAGE_KEY = 'mapaFilters_v1';
 
-// Propiedades de los puntos/clusters en Supercluster
+// Propiedades de los puntos en Supercluster
 type MapPointProps = { placeId: string; tier: QualityTier };
-type MapClusterProps = { tierCounts: Partial<Record<QualityTier, number>> };
 
 // Tamaño visual del cluster según count
 function getClusterSize(count: number): number {
@@ -95,20 +96,27 @@ function getClusterSize(count: number): number {
   return 45;
 }
 
-// Tier dominante de un cluster (en empate gana el mejor tier)
-const TIER_ORDER: QualityTier[] = ['diamond', 'platinum', 'gold', 'silver', 'bronze', 'none'];
-function getDominantTier(tierCounts: Partial<Record<QualityTier, number>>): QualityTier {
-  let best: QualityTier = 'bronze';
-  let bestCount = -1;
-  for (const tier of TIER_ORDER) {
-    const count = tierCounts[tier] || 0;
-    if (count > bestCount) {
-      bestCount = count;
-      best = tier;
-    }
-  }
-  return best;
-}
+// Azul corporativo Casi Cinco para los clusters
+const CLUSTER_COLOR = '#002297';
+
+// Colores e iconos de tier para los puntos individuales (diseño original de Casi Cinco)
+const TIER_POINT_COLORS: Record<QualityTier, string> = {
+  diamond: '#93c5fd',
+  platinum: '#e5e7eb',
+  gold: '#fbbf24',
+  silver: '#d1d5db',
+  bronze: '#fb923c',
+  none: '#ffffff',
+};
+
+const TIER_POINT_ICONS: Record<QualityTier, string> = {
+  diamond: '💎',
+  platinum: '🏆',
+  gold: '🥇',
+  silver: '🥈',
+  bronze: '🥉',
+  none: '⚪',
+};
 
 // Coordenadas válidas para España (incluye Canarias)
 function hasValidCoords(place: PlaceWithTier): boolean {
@@ -130,7 +138,7 @@ export default function MapPage() {
   // ===== REFS DEL MOTOR DE MAPA (MapLibre + Supercluster) =====
   const mapDivRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
-  const clusterIndexRef = useRef<Supercluster<MapPointProps, MapClusterProps> | null>(null);
+  const clusterIndexRef = useRef<Supercluster<MapPointProps> | null>(null);
   // Pool de markers en pantalla: si un id ya existe se reutiliza su DOM, si sale del viewport se elimina
   const markerPoolRef = useRef<Map<string, MapLibreMarker>>(new Map());
   const placesByIdRef = useRef<Map<string, PlaceWithTier>>(new Map());
@@ -446,17 +454,16 @@ export default function MapPage() {
 
   // ===== SUPERCLUSTER: PINTAR SOLO EL VIEWPORT REUTILIZANDO DOM =====
   const createClusterElement = useCallback(
-    (props: { cluster_id: number; point_count: number; tierCounts: Partial<Record<QualityTier, number>> }, lng: number, lat: number) => {
+    (props: { cluster_id: number; point_count: number }, lng: number, lat: number) => {
       const count = props.point_count;
       const size = getClusterSize(count);
-      const dominant = getDominantTier(props.tierCounts);
 
       const wrapper = document.createElement('div');
       const el = document.createElement('div');
       el.className = 'cc-cluster';
       el.style.width = `${size}px`;
       el.style.height = `${size}px`;
-      el.style.backgroundColor = getTierMarkerColor(dominant);
+      el.style.backgroundColor = CLUSTER_COLOR;
       el.style.fontSize = size < 30 ? '10px' : '12px';
       el.textContent = count >= 1000 ? `${Math.round(count / 100) / 10}k` : String(count);
       wrapper.appendChild(el);
@@ -492,7 +499,13 @@ export default function MapPage() {
     const wrapper = document.createElement('div');
     const el = document.createElement('div');
     el.className = 'cc-point';
-    el.style.backgroundColor = getTierMarkerColor(props.tier);
+    el.style.backgroundColor = TIER_POINT_COLORS[props.tier] || '#ffffff';
+
+    // Emoji del tier dentro del círculo (diseño original de Casi Cinco)
+    const icon = document.createElement('span');
+    icon.className = 'cc-point-icon';
+    icon.textContent = TIER_POINT_ICONS[props.tier] || '⚪';
+    el.appendChild(icon);
     wrapper.appendChild(el);
 
     // Hover con nombre SOLO en dispositivos con puntero fino (nunca en táctil)
@@ -634,19 +647,10 @@ export default function MapPage() {
   useEffect(() => {
     if (!mapReady) return;
 
-    const index = new Supercluster<MapPointProps, MapClusterProps>({
+    const index = new Supercluster<MapPointProps>({
       radius: 60, // 100 agrupa de más y obliga a zooms absurdos
       maxZoom: 12, // desde zoom 13 todo son puntos individuales
       minPoints: 3,
-      map: (props) => ({ tierCounts: { [props.tier]: 1 } }),
-      reduce: (accumulated, props) => {
-        const merged: Partial<Record<QualityTier, number>> = { ...accumulated.tierCounts };
-        for (const tier in props.tierCounts) {
-          merged[tier as QualityTier] =
-            (merged[tier as QualityTier] || 0) + (props.tierCounts[tier as QualityTier] || 0);
-        }
-        accumulated.tierCounts = merged;
-      },
     });
 
     const features = filteredPlaces.filter(hasValidCoords).map((place) => ({

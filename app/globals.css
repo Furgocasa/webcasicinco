@@ -278,24 +278,37 @@
   position: absolute;
 }
 
-/* Punto suelto: círculo pequeño con borde blanco, color = tier */
+/* Punto suelto: círculo con borde blanco, color de fondo + emoji del tier */
 .cc-point {
-  width: 16px;
-  height: 16px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
   border: 2px solid #fff;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
   cursor: pointer;
   position: absolute;
   transform: translate(-50%, -50%);
-  transition: width 0.15s ease, height 0.15s ease;
+  transition: width 0.15s ease, height 0.15s ease, font-size 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cc-point-icon {
+  font-size: 13px;
+  line-height: 1;
+  pointer-events: none;
 }
 
 .cc-point--selected {
-  width: 22px;
-  height: 22px;
+  width: 34px;
+  height: 34px;
   border-width: 3px;
   z-index: 5;
+}
+
+.cc-point--selected .cc-point-icon {
+  font-size: 17px;
 }
 
 /* Tooltip con el nombre: SOLO en dispositivos con hover real (nunca táctil) */
@@ -305,8 +318,12 @@
 
 @media (hover: hover) and (pointer: fine) {
   .cc-point:hover {
-    width: 20px;
-    height: 20px;
+    width: 30px;
+    height: 30px;
+  }
+
+  .cc-point:hover .cc-point-icon {
+    font-size: 15px;
   }
 
   .cc-point:hover .cc-point-label {
