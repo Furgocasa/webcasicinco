@@ -482,7 +482,7 @@ export default function MapPage() {
         if (prefersReducedMotionRef.current) {
           map.jumpTo({ center: [lng, lat], zoom: targetZoom });
         } else {
-          map.flyTo({ center: [lng, lat], zoom: targetZoom, speed: 1.6 });
+          map.flyTo({ center: [lng, lat], zoom: targetZoom, duration: 500 });
         }
       });
 
@@ -603,7 +603,8 @@ export default function MapPage() {
       // Controles nativos de MapLibre: zoom + attribution compacta.
       // La attribution va a la izquierda: a la derecha se solapa con el chat del Tío Viajero.
       map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-left');
-      map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
+      // Con brújula: la rotación táctil está activa y sin ella no hay forma de recuperar el norte.
+      map.addControl(new maplibregl.NavigationControl(), 'top-right');
 
       // Repintar viewport en cada movimiento (moveend cubre también zoomend)
       map.on('moveend', () => updateMarkersRef.current());
