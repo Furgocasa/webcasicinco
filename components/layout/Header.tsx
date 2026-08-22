@@ -127,7 +127,11 @@ export default function Header() {
                 {/* Admin link - Solo para admins */}
                 {isAdmin && (
                   <Link href="/admin/dashboard">
-                    <Button variant="outline" size="sm">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="bg-white text-brand-blue border-brand-blue hover:bg-blue-50"
+                    >
                       Admin
                     </Button>
                   </Link>
