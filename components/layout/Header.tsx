@@ -29,13 +29,19 @@ export default function Header() {
     };
   }, []);
 
-  const linkClass = isMapa
-    ? 'text-white/90 hover:text-white font-medium transition relative z-10 touch-manipulation'
-    : 'text-gray-700 hover:text-brand-blue transition relative z-10 touch-manipulation';
+  const navLinkClass = (href: string) => {
+    const active = pathname === href;
+    if (isMapa) {
+      return `text-white font-semibold hover:text-white/80 transition relative z-10 touch-manipulation ${
+        active ? 'border-b-2 border-white pb-1' : ''
+      }`;
+    }
+    return 'text-gray-700 hover:text-brand-blue font-medium transition relative z-10 touch-manipulation';
+  };
 
   return (
-    <header className={`${isMapa ? 'bg-primary' : 'bg-white shadow-sm'} sticky top-0 z-[999] pt-[env(safe-area-inset-top)]`}>
-      <nav className="container mx-auto px-4">
+    <header className={`${isMapa ? 'bg-primary text-white shadow-lg' : 'bg-white shadow-sm'} sticky top-0 z-[999] pt-[env(safe-area-inset-top)]`}>
+      <nav className={isMapa ? 'w-full px-3 md:px-4 lg:px-6' : 'container mx-auto px-4'}>
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link 
@@ -54,21 +60,21 @@ export default function Header() {
           <div className="hidden md:flex items-center space-x-8">
             <Link 
               href="/mapa" 
-              className={linkClass}
+              className={navLinkClass('/mapa')}
               style={{ touchAction: 'manipulation' }}
             >
               Mapa
             </Link>
             <Link 
               href="/ruta" 
-              className={linkClass}
+              className={navLinkClass('/ruta')}
               style={{ touchAction: 'manipulation' }}
             >
               Planificar Ruta
             </Link>
             <Link 
               href="/blog" 
-              className={linkClass}
+              className={navLinkClass('/blog')}
               style={{ touchAction: 'manipulation' }}
             >
               Blog
@@ -121,39 +127,24 @@ export default function Header() {
             {/* Auth Buttons - Desktop */}
             <div className="hidden md:flex items-center space-x-4">
             {loading ? (
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-brand-blue"></div>
+              <div className={`animate-spin rounded-full h-6 w-6 border-b-2 ${isMapa ? 'border-white' : 'border-brand-blue'}`}></div>
             ) : user ? (
               <div className="flex items-center space-x-3">
-                {/* Admin link - Solo para admins */}
-                {isAdmin && (
-                  <Link href="/admin/dashboard">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="bg-white text-brand-blue border-brand-blue hover:bg-blue-50"
-                    >
-                      Admin
-                    </Button>
-                  </Link>
-                )}
-
-                {/* Perfil link - Para TODOS los usuarios autenticados */}
-                <Link href="/perfil">
-                  <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
-                    Perfil
-                  </Button>
-                </Link>
-                
-                {/* User menu dropdown */}
+                {/* User menu dropdown - Todo el acceso (perfil y admin) va aquí dentro */}
                 <div className="relative" ref={userMenuRef}>
                   <button
                     onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                    className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors duration-200"
+                    className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors duration-200 ${
+                      isMapa ? 'bg-white text-brand-blue hover:bg-blue-50' : 'hover:bg-gray-50 text-gray-700'
+                    }`}
                   >
                     <div className="flex items-center justify-center w-8 h-8 bg-blue-100 rounded-full">
                       <User className="h-4 w-4 text-brand-blue" />
                     </div>
-                    <ChevronDown className={`h-4 w-4 text-gray-500 transition-transform duration-200 ${isUserMenuOpen ? 'rotate-180' : ''}`} />
+                    <span className="hidden lg:inline text-sm font-medium max-w-[140px] truncate">
+                      {(user.user_metadata as any)?.full_name || user.email?.split('@')[0]}
+                    </span>
+                    <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isUserMenuOpen ? 'rotate-180' : ''} ${isMapa ? 'text-brand-blue' : 'text-gray-500'}`} />
                   </button>
 
                   {/* Dropdown menu */}
@@ -161,12 +152,25 @@ export default function Header() {
                     <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
                       {/* User info */}
                       <div className="px-4 py-3 border-b border-gray-100">
-                        <p className="text-sm font-medium text-gray-900">Mi cuenta</p>
+                        <p className="text-sm font-medium text-gray-900">
+                          {(user.user_metadata as any)?.full_name || 'Mi cuenta'}
+                        </p>
                         <p className="text-xs text-gray-500 truncate">{user.email}</p>
                       </div>
 
                       {/* Menu items */}
                       <div className="py-1">
+                        {isAdmin && (
+                          <Link
+                            href="/admin"
+                            className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+                            onClick={() => setIsUserMenuOpen(false)}
+                          >
+                            <Settings className="h-4 w-4 mr-3" />
+                            Panel Admin
+                          </Link>
+                        )}
+
                         <Link
                           href="/perfil"
                           className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200"
@@ -175,24 +179,13 @@ export default function Header() {
                           <User className="h-4 w-4 mr-3" />
                           Mi Perfil
                         </Link>
-                        
-                        {isAdmin && (
-                          <Link
-                            href="/admin/configuracion"
-                            className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200"
-                            onClick={() => setIsUserMenuOpen(false)}
-                          >
-                            <Settings className="h-4 w-4 mr-3" />
-                            Configuración
-                          </Link>
-                        )}
-                        
+
                         <button
                           onClick={() => {
                             signOut();
                             setIsUserMenuOpen(false);
                           }}
-                          className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+                          className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors duration-200"
                         >
                           <LogOut className="h-4 w-4 mr-3" />
                           Cerrar sesión
@@ -205,10 +198,17 @@ export default function Header() {
             ) : (
               <>
                 <Link href="/login">
-                  <Button variant="ghost">Iniciar Sesión</Button>
+                  <Button
+                    variant={isMapa ? 'outline' : 'ghost'}
+                    className={isMapa ? 'bg-white/15 text-white border-white/30 hover:bg-white/25' : ''}
+                  >
+                    Iniciar Sesión
+                  </Button>
                 </Link>
                 <Link href="/registro">
-                  <Button>Registrarse</Button>
+                  <Button className={isMapa ? 'bg-white text-brand-blue hover:bg-blue-50' : ''}>
+                    Registrarse
+                  </Button>
                 </Link>
               </>
             )}
@@ -217,7 +217,9 @@ export default function Header() {
 
           {/* Mobile Menu Button - Solo móvil */}
           <button
-            className="md:hidden p-3 -mr-3 active:bg-gray-100 rounded-lg transition"
+            className={`md:hidden p-3 -mr-3 rounded-lg transition ${
+              isMapa ? 'text-white hover:bg-white/10 active:bg-white/20' : 'active:bg-gray-100'
+            }`}
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             aria-label="Menú"
           >
@@ -274,7 +276,7 @@ export default function Header() {
                     {/* Admin - Destacado si es admin */}
                     {isAdmin && (
                       <Link
-                        href="/admin/dashboard"
+                        href="/admin"
                         className="flex items-center gap-3 px-4 py-4 rounded-xl bg-brand-blue text-white hover:bg-brand-blue-dark transition shadow-lg"
                         onClick={() => setIsMenuOpen(false)}
                       >
