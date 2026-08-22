@@ -221,61 +221,49 @@ export default function ChatbotFloating() {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className={`fixed right-3 md:right-6 z-40 group ${
+          className={`fixed right-3 md:right-6 z-40 bg-gradient-to-r from-blue-600 to-gray-700 rounded-full p-1.5 md:p-2 shadow-2xl hover:scale-110 transition-transform ${
             isMapa
               ? 'bottom-[calc(4.75rem+env(safe-area-inset-bottom,0px))] md:bottom-6'
               : 'bottom-20 md:bottom-6'
           }`}
           title="Abrir Tío Viajero IA"
         >
-          {/* Avatar flotante estilo Tío Viajero - Más pequeño en móvil */}
-          <div className="relative">
-            {/* Imagen del Tío Viajero */}
-            <div className="w-14 h-14 md:w-20 md:h-20 rounded-full shadow-xl md:shadow-2xl transform transition-all duration-300 hover:scale-110 overflow-hidden bg-sky-100">
-              <img 
-                src="/images/tio-viajero.png" 
-                alt="Tío Viajero" 
-                className="w-full h-full object-cover"
-              />
-            </div>
-            {/* Indicador online - Más pequeño en móvil */}
-            <div className="absolute -bottom-1 -right-1 w-4 h-4 md:w-5 md:h-5 bg-green-500 rounded-full animate-pulse border-2 md:border-3 border-white shadow-lg"></div>
-          </div>
+          <img
+            src="/images/tio-viajero.png"
+            alt="Tío Viajero"
+            className="w-12 h-12 md:w-14 md:h-14 object-cover rounded-full border-2 border-white bg-sky-100"
+          />
+          <span className="absolute -top-1 -right-1 bg-blue-500 text-white text-[10px] md:text-xs font-bold px-1.5 md:px-2 py-0.5 rounded-full shadow-lg">
+            IA
+          </span>
         </button>
       )}
 
-      {/* Panel del chat - Entre navbar (64px) y bottom nav (60px) en móvil */}
+      {/* Panel del chat: a pantalla completa en móvil, como en Mapa Furgocasa */}
       {isOpen && (
-        <div className={`fixed right-2 md:right-6 left-2 md:left-auto z-40 md:w-96 md:h-[600px] bg-white rounded-2xl shadow-2xl border-2 border-gray-200 flex flex-col overflow-hidden ${
-          isMapa
-            ? 'top-[calc(5rem+env(safe-area-inset-top,0px))] bottom-[calc(5.5rem+env(safe-area-inset-bottom,0px))] md:top-auto md:bottom-6'
-            : 'top-20 bottom-24 md:top-auto md:bottom-6'
-        }`}>
+        <div className="fixed inset-0 md:inset-auto md:bottom-6 md:right-6 w-full md:w-96 h-full md:h-[600px] bg-white md:rounded-2xl shadow-2xl border-0 md:border border-gray-200 md:max-w-[calc(100vw-3rem)] md:max-h-[calc(100vh-3rem)] flex flex-col overflow-hidden z-40 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
           {/* Header - STICKY para siempre visible */}
-          <div className="sticky top-0 z-10 bg-gradient-to-r from-[#002297] to-blue-700 text-white p-3 md:p-4 flex items-center justify-between flex-shrink-0">
+          <div className="sticky top-0 z-10 bg-gradient-to-r from-blue-600 to-gray-700 text-white p-4 md:rounded-t-2xl flex items-center justify-between flex-shrink-0">
             <div className="flex items-center gap-3">
-              {/* Avatar estilo Tío Viajero */}
-              <div className="relative w-12 h-12 flex-shrink-0 rounded-full overflow-hidden bg-sky-100 border-2 border-white shadow-lg">
-                <img 
-                  src="/images/tio-viajero.png" 
-                  alt="Tío Viajero" 
-                  className="w-full h-full object-cover"
-                />
-              </div>
+              <img
+                src="/images/tio-viajero.png"
+                alt="Tío Viajero"
+                className="w-10 h-10 flex-shrink-0 object-cover rounded-full border-2 border-white bg-sky-100"
+              />
               <div>
                 <h3 className="font-bold flex items-center gap-2">
                   Tío Viajero IA
                   <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full">BETA</span>
                 </h3>
-                <p className="text-xs text-blue-100">Tu guía de viajes inteligente</p>
+                <p className="text-xs opacity-90">Tu guía de viajes inteligente</p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
               {/* Botón para limpiar conversación */}
               {messages.length > 0 && (
                 <button
                   onClick={() => setShowClearConfirm(true)}
-                  className="p-2 hover:bg-white/20 rounded-lg transition"
+                  className="text-white hover:bg-white/20 rounded-full w-8 h-8 flex items-center justify-center transition-colors"
                   title="Limpiar conversación"
                 >
                   <RotateCcw className="h-4 w-4" />
@@ -284,7 +272,7 @@ export default function ChatbotFloating() {
               {/* Botón cerrar */}
               <button
                 onClick={() => setIsOpen(false)}
-                className="p-2 hover:bg-white/20 rounded-lg transition"
+                className="text-white hover:bg-white/20 rounded-full w-8 h-8 flex items-center justify-center transition-colors"
                 title="Cerrar chat"
               >
                 <X className="h-5 w-5" />
@@ -394,33 +382,28 @@ export default function ChatbotFloating() {
             {messages.map((msg, index) => (
               <div
                 key={index}
-                className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start gap-2'}`}
               >
+                {msg.role === 'assistant' && (
+                  <img
+                    src="/images/tio-viajero.png"
+                    alt="Tío Viajero"
+                    className="w-8 h-8 object-cover rounded-full border-2 border-blue-500 bg-sky-100 flex-shrink-0 mt-1"
+                  />
+                )}
                 <div
-                  className={`max-w-[80%] rounded-2xl px-4 py-3 ${
+                  className={`max-w-[80%] rounded-2xl p-3 ${
                     msg.role === 'user'
-                      ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white'
-                      : 'bg-white border border-gray-200 text-gray-900'
+                      ? 'bg-gradient-to-r from-blue-600 to-gray-700 text-white'
+                      : 'bg-white text-gray-900 shadow-md border border-blue-100'
                   }`}
                 >
-                  {msg.role === 'assistant' && (
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="w-6 h-6 rounded-full overflow-hidden bg-sky-100 border border-[#002297]">
-                        <img 
-                          src="/images/tio-viajero.png" 
-                          alt="Tío Viajero" 
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <span className="text-xs font-semibold text-[#002297]">Tío Viajero</span>
-                    </div>
-                  )}
                   {msg.role === 'assistant' ? (
-                    <div className="text-sm whitespace-pre-line">
+                    <div className="text-sm leading-relaxed whitespace-pre-line">
                       {renderMessageWithLinks(msg.content)}
                     </div>
                   ) : (
-                    <p className="text-sm whitespace-pre-line">{msg.content}</p>
+                    <p className="text-sm leading-relaxed whitespace-pre-line">{msg.content}</p>
                   )}
                 </div>
               </div>
@@ -428,11 +411,17 @@ export default function ChatbotFloating() {
 
             {/* Loading */}
             {loading && (
-              <div className="flex justify-start">
-                <div className="bg-white border border-gray-200 rounded-2xl px-4 py-3">
-                  <div className="flex items-center gap-2">
-                    <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
-                    <span className="text-sm text-gray-600">Pensando...</span>
+              <div className="flex justify-start gap-2">
+                <img
+                  src="/images/tio-viajero.png"
+                  alt="Tío Viajero"
+                  className="w-8 h-8 object-cover rounded-full border-2 border-blue-500 bg-sky-100 flex-shrink-0"
+                />
+                <div className="bg-white rounded-2xl p-3 shadow-md">
+                  <div className="flex space-x-2">
+                    <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce"></div>
+                    <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                    <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                   </div>
                 </div>
               </div>
@@ -490,7 +479,7 @@ export default function ChatbotFloating() {
           </div>
 
           {/* Input - STICKY abajo, siempre visible */}
-          <div className="sticky bottom-0 p-3 md:p-4 bg-white border-t border-gray-200 flex-shrink-0">
+          <div className="sticky bottom-0 p-4 bg-white border-t border-gray-200 md:rounded-b-2xl flex-shrink-0">
             <div className="flex gap-2">
               <input
                 type="text"
@@ -498,19 +487,19 @@ export default function ChatbotFloating() {
                 onChange={(e) => setInput(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
                 placeholder="Escribe tu pregunta..."
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                className="flex-1 border border-gray-300 rounded-full px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
                 disabled={loading}
               />
-              <Button
+              <button
                 onClick={handleSend}
                 disabled={loading || !input.trim()}
-                size="sm"
-                className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
+                className="bg-gradient-to-r from-blue-600 to-gray-700 text-white rounded-full px-6 py-2 hover:from-blue-700 hover:to-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-medium text-sm shadow-md flex items-center gap-2"
               >
                 <Send className="h-4 w-4" />
-              </Button>
+                Enviar
+              </button>
             </div>
-            <p className="text-xs text-gray-500 mt-2">
+            <p className="text-xs text-gray-500 mt-2 text-center">
               Presiona Enter para enviar
             </p>
           </div>
