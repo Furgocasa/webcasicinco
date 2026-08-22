@@ -121,6 +121,34 @@ const TIER_POINT_ICONS: Record<QualityTier, string> = {
   none: '⚪',
 };
 
+function getReviewCount(place: { review_count?: number | null; reviews_count?: number | null }) {
+  return Number(place.review_count || place.reviews_count) || 0;
+}
+
+/** Misma línea de nota + reseñas en ficha del mapa y cards de la lista. */
+function PlaceRatingLine({
+  rating,
+  reviews,
+}: {
+  rating: number;
+  reviews?: number | null;
+}) {
+  const n = Number(reviews) || 0;
+  return (
+    <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1">
+        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+        <span className="font-bold text-sm text-gray-900">{rating}</span>
+      </div>
+      {n > 0 && (
+        <span className="font-bold text-sm text-gray-900">
+          {n.toLocaleString('es-ES')} reseñas
+        </span>
+      )}
+    </div>
+  );
+}
+
 // Coordenadas válidas para España (incluye Canarias)
 function hasValidCoords(place: PlaceWithTier): boolean {
   return (
@@ -519,11 +547,27 @@ export default function MapPage() {
     el.appendChild(icon);
     wrapper.appendChild(el);
 
-    // Hover con nombre SOLO en dispositivos con puntero fino (nunca en táctil)
+    // Hover con nombre, valoración y reseñas SOLO en dispositivos con puntero fino (nunca en táctil)
     if (hoverEnabledRef.current && place) {
       const label = document.createElement('span');
       label.className = 'cc-point-label';
-      label.textContent = place.name;
+
+      const nameSpan = document.createElement('span');
+      nameSpan.className = 'cc-point-label-name';
+      nameSpan.textContent = place.name;
+      label.appendChild(nameSpan);
+
+      if (place.rating) {
+        const ratingSpan = document.createElement('span');
+        ratingSpan.className = 'cc-point-label-rating';
+        const reviews = Number(place.review_count) || 0;
+        ratingSpan.textContent =
+          reviews > 0
+            ? `★ ${Number(place.rating).toFixed(1)} (${reviews.toLocaleString('es-ES')})`
+            : `★ ${Number(place.rating).toFixed(1)}`;
+        label.appendChild(ratingSpan);
+      }
+
       el.appendChild(label);
     }
 
@@ -623,6 +667,12 @@ export default function MapPage() {
       // Controles nativos de MapLibre: zoom + attribution compacta.
       // La attribution va a la izquierda: a la derecha se solapa con el chat del Tío Viajero.
       map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-left');
+      // MapLibre abre el © en escritorio y solo lo pliega al mover; lo contraemos ya.
+      const attrib = map.getContainer().querySelector('.maplibregl-ctrl-attrib');
+      if (attrib) {
+        attrib.classList.remove('maplibregl-compact-show');
+        attrib.removeAttribute('open');
+      }
       // Con brújula: la rotación táctil está activa y sin ella no hay forma de recuperar el norte.
       map.addControl(new maplibregl.NavigationControl(), 'top-right');
 
@@ -1278,49 +1328,47 @@ export default function MapPage() {
 
         {/* MAPA */}
         <div className="flex-1 relative">
-          {/* Recuento arriba y diamante de leyenda justo debajo (móvil y escritorio) */}
-          <div className="absolute top-3 left-3 z-10 flex flex-col items-start gap-2">
-            <div className="w-max whitespace-nowrap bg-white/90 backdrop-blur-md rounded-full shadow-lg ring-1 ring-gray-900/5 px-3 py-1.5">
-              <p className="text-sm font-semibold text-gray-800 flex items-center gap-1.5">
-                <span className="text-primary font-bold tabular-nums">{loading ? '…' : filteredPlaces.length}</span>
-                {filteredPlaces.length === 1 ? 'lugar' : 'lugares'}
-                {filters.community && (
-                  <span className="text-xs text-gray-500 font-normal truncate">· {filters.community}</span>
-                )}
-                {loading && (
-                  <span className="inline-flex animate-spin rounded-full h-3 w-3 border-2 border-primary-200 border-t-primary" />
-                )}
-              </p>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setIsLegendExpanded((v) => !v)}
-              className="flex bg-white/90 backdrop-blur-md rounded-full shadow-lg ring-1 ring-gray-900/5 w-11 h-11 items-center justify-center"
-              aria-label="Leyenda de tier"
-            >
-              <span className="text-lg" aria-hidden>💎</span>
-            </button>
-
-            {isLegendExpanded && (
-              <div className="z-30 bg-white/95 backdrop-blur-md shadow-lg rounded-2xl p-3 ring-1 ring-gray-900/5 w-56">
-                <p className="text-xs font-semibold text-gray-900 mb-2">Leyenda de calidad</p>
-                <div className="space-y-1.5">
-                  {(Object.entries(QUALITY_TIERS) as [QualityTier, typeof QUALITY_TIERS[QualityTier]][])
-                    .filter(([tier]) => tier !== 'none')
-                    .map(([tier, config]) => (
-                      <div key={tier} className="flex items-start gap-2">
-                        <span className="text-base shrink-0">{config.icon}</span>
-                        <div className="min-w-0">
-                          <p className="font-semibold text-xs text-gray-900 leading-tight">{config.name}</p>
-                          <p className="text-[11px] text-gray-500 leading-tight">{config.description}</p>
-                        </div>
-                      </div>
-                    ))}
-                </div>
-              </div>
-            )}
+          {/* Recuento, diamante y leyenda son independientes: abrir la leyenda no ensancha el badge */}
+          <div className="absolute top-3 left-3 z-10 w-max whitespace-nowrap bg-white/90 backdrop-blur-md rounded-full shadow-lg ring-1 ring-gray-900/5 px-3 py-1.5">
+            <p className="text-sm font-semibold text-gray-800 flex items-center gap-1.5">
+              <span className="text-primary font-bold tabular-nums">{loading ? '…' : filteredPlaces.length}</span>
+              {filteredPlaces.length === 1 ? 'lugar' : 'lugares'}
+              {filters.community && (
+                <span className="text-xs text-gray-500 font-normal truncate">· {filters.community}</span>
+              )}
+              {loading && (
+                <span className="inline-flex animate-spin rounded-full h-3 w-3 border-2 border-primary-200 border-t-primary" />
+              )}
+            </p>
           </div>
+
+          <button
+            type="button"
+            onClick={() => setIsLegendExpanded((v) => !v)}
+            className="absolute top-14 left-3 z-10 flex bg-white/90 backdrop-blur-md rounded-full shadow-lg ring-1 ring-gray-900/5 w-11 h-11 items-center justify-center"
+            aria-label="Leyenda de tier"
+          >
+            <span className="text-lg" aria-hidden>💎</span>
+          </button>
+
+          {isLegendExpanded && (
+            <div className="absolute top-[6.75rem] left-3 z-30 bg-white/95 backdrop-blur-md shadow-lg rounded-2xl p-3 ring-1 ring-gray-900/5 w-56">
+              <p className="text-xs font-semibold text-gray-900 mb-2">Leyenda de calidad</p>
+              <div className="space-y-1.5">
+                {(Object.entries(QUALITY_TIERS) as [QualityTier, typeof QUALITY_TIERS[QualityTier]][])
+                  .filter(([tier]) => tier !== 'none')
+                  .map(([tier, config]) => (
+                    <div key={tier} className="flex items-start gap-2">
+                      <span className="text-base shrink-0">{config.icon}</span>
+                      <div className="min-w-0">
+                        <p className="font-semibold text-xs text-gray-900 leading-tight">{config.name}</p>
+                        <p className="text-[11px] text-gray-500 leading-tight">{config.description}</p>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          )}
 
           <div className="absolute top-3 left-3 right-14 md:top-4 md:left-1/2 md:right-auto md:-translate-x-1/2 md:w-80 z-30 pointer-events-none">
             <div className="flex justify-end md:block">
@@ -1514,15 +1562,10 @@ export default function MapPage() {
                         <h4 className="font-semibold text-base text-gray-900 leading-tight mb-1">
                           {selectedPlace.name}
                         </h4>
-                        <div className="flex items-center gap-2">
-                          <div className="flex items-center gap-1">
-                            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                            <span className="font-bold text-sm">{selectedPlace.rating}</span>
-                          </div>
-                          <span className="text-xs text-gray-500">
-                            {selectedPlace.review_count || selectedPlace.reviews_count} reseñas
-                          </span>
-                        </div>
+                        <PlaceRatingLine
+                          rating={selectedPlace.rating}
+                          reviews={getReviewCount(selectedPlace)}
+                        />
                       </div>
                       <span className="text-2xl">{tierInfo.icon}</span>
                     </div>
@@ -1693,15 +1736,10 @@ export default function MapPage() {
                           <h4 className="font-semibold text-base text-gray-900 leading-tight mb-1">
                             {place.name}
                           </h4>
-                          <div className="flex items-center gap-2">
-                            <div className="flex items-center gap-1">
-                              <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                              <span className="font-bold text-sm">{place.rating}</span>
-                            </div>
-                            <span className="text-xs text-gray-500">
-                              {place.review_count} reseñas
-                            </span>
-                          </div>
+                          <PlaceRatingLine
+                            rating={place.rating}
+                            reviews={getReviewCount(place)}
+                          />
                         </div>
                         <span className="text-2xl">{tierInfo.icon}</span>
                       </div>
@@ -1997,15 +2035,10 @@ export default function MapPage() {
                       <h4 className="font-semibold text-base text-gray-900 leading-tight mb-1 line-clamp-1">
                         {place.name}
                       </h4>
-                      <div className="flex items-center gap-2">
-                        <div className="flex items-center gap-1">
-                          <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                          <span className="font-bold text-sm">{place.rating}</span>
-                        </div>
-                        <span className="text-xs text-gray-500">
-                          {place.review_count} reseñas
-                        </span>
-                      </div>
+                      <PlaceRatingLine
+                        rating={place.rating}
+                        reviews={getReviewCount(place)}
+                      />
                     </div>
                     <span className="text-2xl">{tierInfo.icon}</span>
                   </div>

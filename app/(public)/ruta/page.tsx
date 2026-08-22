@@ -52,6 +52,29 @@ type Place = {
   google_maps_url?: string;
 };
 
+function PlaceRatingLine({
+  rating,
+  reviews,
+}: {
+  rating: number;
+  reviews?: number | null;
+}) {
+  const n = Number(reviews) || 0;
+  return (
+    <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1">
+        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+        <span className="font-bold text-sm text-gray-900">{rating}</span>
+      </div>
+      {n > 0 && (
+        <span className="font-bold text-sm text-gray-900">
+          {n.toLocaleString('es-ES')} reseñas
+        </span>
+      )}
+    </div>
+  );
+}
+
 export default function RutaPage() {
   // ✅ OPTIMIZACIÓN: Usar contexto del mapa (ahorro 66% en navegaciones)
   const { isLoaded, loadError } = useMap();
@@ -774,7 +797,7 @@ export default function RutaPage() {
                       anchor: new google.maps.Point(18, 18),
                     }}
                     onClick={() => setSelectedPlace(place)}
-                    title={`${place.name} - ${tierInfo.name}`}
+                    title={`${place.name} · ★ ${place.rating}${place.review_count ? ` (${place.review_count.toLocaleString('es-ES')})` : ''}`}
                   />
                 );
               })}
@@ -861,15 +884,7 @@ export default function RutaPage() {
                         <h4 className="font-semibold text-base text-gray-900 leading-tight mb-1">
                           {selectedPlace.name}
                         </h4>
-                        <div className="flex items-center gap-2">
-                          <div className="flex items-center gap-1">
-                            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                            <span className="font-bold text-sm">{selectedPlace.rating}</span>
-                          </div>
-                          <span className="text-xs text-gray-500">
-                            {selectedPlace.review_count} reseñas
-                          </span>
-                        </div>
+                        <PlaceRatingLine rating={selectedPlace.rating} reviews={selectedPlace.review_count} />
                       </div>
                       <span className="text-2xl">{tierInfo.icon}</span>
                     </div>
@@ -1017,15 +1032,7 @@ export default function RutaPage() {
                           <h4 className="font-semibold text-base text-gray-900 leading-tight mb-1">
                             {place.name}
                           </h4>
-                          <div className="flex items-center gap-2">
-                            <div className="flex items-center gap-1">
-                              <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                              <span className="font-bold text-sm">{place.rating}</span>
-                            </div>
-                            <span className="text-xs text-gray-500">
-                              {place.review_count} reseñas
-                            </span>
-                          </div>
+                          <PlaceRatingLine rating={place.rating} reviews={place.review_count} />
                         </div>
                         <span className="text-2xl">{tierInfo.icon}</span>
                       </div>
@@ -1384,15 +1391,7 @@ export default function RutaPage() {
                         <h4 className="font-semibold text-base text-gray-900 leading-tight mb-1 line-clamp-1">
                           {place.name}
                         </h4>
-                        <div className="flex items-center gap-2">
-                          <div className="flex items-center gap-1">
-                            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                            <span className="font-bold text-sm">{place.rating}</span>
-                          </div>
-                          <span className="text-xs text-gray-500">
-                            {place.review_count} reseñas
-                          </span>
-                        </div>
+                        <PlaceRatingLine rating={place.rating} reviews={place.review_count} />
                       </div>
                       {/* Icono grande de tier al lado del nombre */}
                       <span className="text-2xl">{tierInfo.icon}</span>
