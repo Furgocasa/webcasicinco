@@ -34,7 +34,7 @@ export default function Header() {
     : 'text-gray-700 hover:text-brand-blue transition relative z-10 touch-manipulation';
 
   return (
-    <header className={`${isMapa ? 'bg-primary' : 'bg-white shadow-sm'} sticky top-0 z-[999]`}>
+    <header className={`${isMapa ? 'bg-primary' : 'bg-white shadow-sm'} sticky top-0 z-[999] pt-[env(safe-area-inset-top)]`}>
       <nav className="container mx-auto px-4">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
@@ -76,7 +76,7 @@ export default function Header() {
           </div>
 
           {/* Mobile Quick Nav - Iconos permanentes en navbar móvil */}
-          <div className="flex md:hidden items-center gap-0.5">
+          <div className={`${isMapa ? 'hidden' : 'flex'} md:hidden items-center gap-0.5`}>
             <Link 
               href="/mapa"
               className={`flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg transition-colors relative z-10 touch-manipulation min-w-[60px] ${isMapa ? 'hover:bg-white/10' : 'hover:bg-blue-50'}`}

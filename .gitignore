@@ -52,3 +52,11 @@ logs
 *.backup
 *.bak
 # Force redeploy
+
+# PWA (generados en el build)
+**/public/sw.js
+**/public/workbox-*.js
+**/public/sw.js.map
+**/public/workbox-*.js.map
+**/public/worker-*.js
+**/public/fallback-*.js

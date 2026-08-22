@@ -4,17 +4,21 @@ import { useUserAccess } from '@/lib/hooks/useUserAccess';
 import { Clock, X } from 'lucide-react';
 import { useState } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 export default function TrialBanner() {
   const { isInTrial, trialDaysRemaining, isAdmin, isFreeUser } = useUserAccess();
   const [isDismissed, setIsDismissed] = useState(false);
+  const pathname = usePathname();
+  const isMapa = pathname === '/mapa' || pathname?.startsWith('/mapa?');
 
   // No mostrar el banner si:
   // - Es admin
   // - Es usuario gratis
   // - No está en trial
   // - El banner fue cerrado manualmente
-  if (isAdmin || isFreeUser || !isInTrial || isDismissed) {
+  // - Está en el mapa (rompe el viewport a pantalla completa)
+  if (isMapa || isAdmin || isFreeUser || !isInTrial || isDismissed) {
     return null;
   }
 

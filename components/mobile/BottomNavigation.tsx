@@ -26,7 +26,7 @@ export default function BottomNavigation({
     }`;
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg border-t border-gray-200/80 z-40 pb-[env(safe-area-inset-bottom)]">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg border-t border-gray-200/80 shadow-[0_-4px_16px_rgba(0,0,0,0.06)] z-40 pb-[env(safe-area-inset-bottom)]">
       <div className="flex items-center justify-around h-14 px-3">
         <button onClick={() => onViewChange('map')} className={itemClass(activeView === 'map')}>
           <span className={iconWrap(activeView === 'map')}>

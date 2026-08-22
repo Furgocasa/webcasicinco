@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { MessageCircle, X, Send, Loader2, Bot, RotateCcw, Lock, MapPin } from 'lucide-react';
 import { Button } from './ui/Button';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { toast } from 'sonner';
 import Link from 'next/link';
@@ -16,6 +16,8 @@ interface Message {
 
 export default function ChatbotFloating() {
   const router = useRouter();
+  const pathname = usePathname();
+  const isMapa = pathname === '/mapa' || pathname?.startsWith('/mapa?');
   const { user, loading: authLoading } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -219,7 +221,11 @@ export default function ChatbotFloating() {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-20 md:bottom-6 right-3 md:right-6 z-40 group"
+          className={`fixed right-3 md:right-6 z-40 group ${
+            isMapa
+              ? 'bottom-[calc(4.75rem+env(safe-area-inset-bottom,0px))] md:bottom-6'
+              : 'bottom-20 md:bottom-6'
+          }`}
           title="Abrir Tío Viajero IA"
         >
           {/* Avatar flotante estilo Tío Viajero - Más pequeño en móvil */}
@@ -240,7 +246,11 @@ export default function ChatbotFloating() {
 
       {/* Panel del chat - Entre navbar (64px) y bottom nav (60px) en móvil */}
       {isOpen && (
-        <div className="fixed top-20 bottom-24 md:top-auto md:bottom-6 right-2 md:right-6 left-2 md:left-auto z-40 md:w-96 md:h-[600px] bg-white rounded-2xl shadow-2xl border-2 border-gray-200 flex flex-col overflow-hidden">
+        <div className={`fixed right-2 md:right-6 left-2 md:left-auto z-40 md:w-96 md:h-[600px] bg-white rounded-2xl shadow-2xl border-2 border-gray-200 flex flex-col overflow-hidden ${
+          isMapa
+            ? 'top-[calc(5rem+env(safe-area-inset-top,0px))] bottom-[calc(5.5rem+env(safe-area-inset-bottom,0px))] md:top-auto md:bottom-6'
+            : 'top-20 bottom-24 md:top-auto md:bottom-6'
+        }`}>
           {/* Header - STICKY para siempre visible */}
           <div className="sticky top-0 z-10 bg-gradient-to-r from-[#002297] to-blue-700 text-white p-3 md:p-4 flex items-center justify-between flex-shrink-0">
             <div className="flex items-center gap-3">

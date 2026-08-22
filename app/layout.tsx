@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import { Toaster } from 'sonner';
 import Header from '@/components/layout/Header';
@@ -92,6 +92,15 @@ export const metadata: Metadata = {
   manifest: '/manifest.json',
 };
 
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+  themeColor: '#002297',
+  viewportFit: 'cover',
+};
+
 export default function RootLayout({
   children,
 }: {
@@ -101,6 +110,9 @@ export default function RootLayout({
     <html lang="es" className={inter.variable}>
       <head>
         <GoogleAnalytics />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
       </head>
       <body className={inter.className}>
         <MapProvider>

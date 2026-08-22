@@ -1182,11 +1182,11 @@ export default function MapPage() {
   ].filter(Boolean).length;
 
   return (
-    <div className="flex flex-col h-[calc(100vh-64px)]">
+    <div className="flex flex-col h-[calc(100dvh-4rem-env(safe-area-inset-top,0px))] overflow-hidden">
       {/* Modal Promocional de Rutas */}
       <RoutePromoModal />
 
-      <div className="flex-1 flex overflow-hidden relative pb-16 md:pb-0">
+      <div className="flex-1 flex overflow-hidden relative pb-[calc(3.5rem+env(safe-area-inset-bottom,0px))] md:pb-0">
         {/* Overlay de Login para usuarios no autenticados */}
         {!authLoading && !user && <LoginOverlay feature="mapa" />}
 
@@ -1223,14 +1223,14 @@ export default function MapPage() {
           <button
             type="button"
             onClick={() => setIsLegendExpanded((v) => !v)}
-            className="absolute top-3 left-[11.5rem] z-10 bg-white/90 backdrop-blur-md rounded-full shadow-lg ring-1 ring-gray-900/5 w-11 h-11 flex items-center justify-center"
+            className="hidden md:flex absolute top-3 left-[11.5rem] z-10 bg-white/90 backdrop-blur-md rounded-full shadow-lg ring-1 ring-gray-900/5 w-11 h-11 items-center justify-center"
             aria-label="Leyenda de tier"
           >
             <span className="text-lg" aria-hidden>💎</span>
           </button>
 
           {isLegendExpanded && (
-            <div className="absolute top-16 left-3 z-30 bg-white/95 backdrop-blur-md shadow-lg rounded-2xl p-3 ring-1 ring-gray-900/5 w-56">
+            <div className="hidden md:block absolute top-16 left-3 z-30 bg-white/95 backdrop-blur-md shadow-lg rounded-2xl p-3 ring-1 ring-gray-900/5 w-56">
               <p className="text-xs font-semibold text-gray-900 mb-2">Leyenda de calidad</p>
               <div className="space-y-1.5">
                 {(Object.entries(QUALITY_TIERS) as [QualityTier, typeof QUALITY_TIERS[QualityTier]][])
