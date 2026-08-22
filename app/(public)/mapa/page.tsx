@@ -76,11 +76,11 @@ const BOUNDS_FULL: [[number, number], [number, number]] = [
   [12.0, 50.0], // noreste
 ];
 
-// Estilo del basemap: MapTiler si hay clave, si no Carto Voyager (tiles vectoriales OSM, gratuito)
-const MAPTILER_KEY = process.env.NEXT_PUBLIC_MAPTILER_KEY;
-const MAP_STYLE = MAPTILER_KEY
-  ? `https://api.maptiler.com/maps/streets-v2/style.json?key=${MAPTILER_KEY}&language=es`
-  : 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json';
+// Basemap: Carto Voyager (tiles vectoriales OSM). Elegido a propósito, no por
+// descarte: encima se aplica applyBrandTheme() y las etiquetas se pasan a
+// castellano con applyMapLanguage(). No condicionar a una clave de MapTiler:
+// hacerlo cambiaba el aspecto del mapa sin querer al tocar el entorno.
+const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json';
 
 // Persistencia de filtros (solo selección manual; el GPS nunca escribe aquí)
 const FILTERS_STORAGE_KEY = 'mapaFilters_v1';
