@@ -600,8 +600,9 @@ export default function MapPage() {
         fadeDuration: prefersReducedMotionRef.current ? 0 : 300,
       });
 
-      // Controles nativos de MapLibre: zoom + attribution compacta
-      map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-right');
+      // Controles nativos de MapLibre: zoom + attribution compacta.
+      // La attribution va a la izquierda: a la derecha se solapa con el chat del Tío Viajero.
+      map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-left');
       map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
 
       // Repintar viewport en cada movimiento (moveend cubre también zoomend)
@@ -1224,14 +1225,14 @@ export default function MapPage() {
           <button
             type="button"
             onClick={() => setIsLegendExpanded((v) => !v)}
-            className="hidden md:flex absolute top-3 left-[11.5rem] z-10 bg-white/90 backdrop-blur-md rounded-full shadow-lg ring-1 ring-gray-900/5 w-11 h-11 items-center justify-center"
+            className="absolute top-14 left-3 md:top-3 md:left-[11.5rem] z-10 flex bg-white/90 backdrop-blur-md rounded-full shadow-lg ring-1 ring-gray-900/5 w-11 h-11 items-center justify-center"
             aria-label="Leyenda de tier"
           >
             <span className="text-lg" aria-hidden>💎</span>
           </button>
 
           {isLegendExpanded && (
-            <div className="hidden md:block absolute top-16 left-3 z-30 bg-white/95 backdrop-blur-md shadow-lg rounded-2xl p-3 ring-1 ring-gray-900/5 w-56">
+            <div className="absolute top-[6.75rem] left-3 md:top-16 z-30 bg-white/95 backdrop-blur-md shadow-lg rounded-2xl p-3 ring-1 ring-gray-900/5 w-56">
               <p className="text-xs font-semibold text-gray-900 mb-2">Leyenda de calidad</p>
               <div className="space-y-1.5">
                 {(Object.entries(QUALITY_TIERS) as [QualityTier, typeof QUALITY_TIERS[QualityTier]][])
