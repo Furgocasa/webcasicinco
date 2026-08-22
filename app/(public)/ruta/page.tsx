@@ -67,7 +67,7 @@ function PlaceRatingLine({
         <span className="font-bold text-sm text-gray-900">{rating}</span>
       </div>
       {n > 0 && (
-        <span className="font-bold text-sm text-gray-900">
+        <span className="text-xs text-gray-500">
           {n.toLocaleString('es-ES')} reseñas
         </span>
       )}
