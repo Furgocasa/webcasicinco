@@ -7,6 +7,8 @@ import PaywallModal from '@/components/auth/PaywallModal';
 import ChatbotFloating from '@/components/ChatbotFloating';
 import PlacesPreloader from '@/components/PlacesPreloader';
 import GoogleAnalytics from '@/components/GoogleAnalytics';
+import { CookieConsentBar } from '@/components/CookieConsentBar';
+import Script from 'next/script';
 import PageTracker from '@/components/PageTracker';
 import PageViewTracker from '@/components/PageViewTracker';
 import { WelcomeModal } from '@/components/auth/WelcomeModal';
@@ -109,6 +111,27 @@ export default function RootLayout({
   return (
     <html lang="es" className={inter.variable}>
       <head>
+        <Script
+          id="gtag-consent-default"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){window.dataLayer.push(arguments);}
+              window.gtag = gtag;
+              var granted = false;
+              try { granted = localStorage.getItem('casicinco_cookie_consent') === 'granted'; } catch (e) {}
+              var v = granted ? 'granted' : 'denied';
+              gtag('consent', 'default', {
+                analytics_storage: v,
+                ad_storage: v,
+                ad_user_data: v,
+                ad_personalization: v,
+                wait_for_update: 500
+              });
+            `,
+          }}
+        />
         <GoogleAnalytics />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -127,6 +150,7 @@ export default function RootLayout({
           <ConditionalBackToTop />
           <ChatbotFloating />
           <WelcomeModal />
+          <CookieConsentBar />
           {/* PaywallModal desactivado - Solo bloqueo visual en páginas protegidas */}
           <Toaster position="top-right" richColors closeButton />
         </MapProvider>

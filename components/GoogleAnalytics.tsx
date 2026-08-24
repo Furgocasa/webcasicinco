@@ -1,10 +1,14 @@
 'use client';
 
 import Script from 'next/script';
+import { usePathname } from 'next/navigation';
 
 const GA_TRACKING_ID = 'G-YQKPN92JH8';
 
 export default function GoogleAnalytics() {
+  const pathname = usePathname();
+  if (pathname?.startsWith('/admin')) return null;
+
   return (
     <>
       <Script
