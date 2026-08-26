@@ -7,17 +7,18 @@ import { calculateQualityTier, getTierInfo } from '@/lib/utils/tier-calculator';
 import { toSlug } from '@/lib/utils/url-helper';
 
 type Props = {
-  params: { category: string; province: string; slug: string }
+  params: Promise<{ category: string; province: string; slug: string }>
 }
 
 // Metadata dinámica para SEO
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params
   const supabase = await createClient();
   
   const { data: place } = await supabase
     .from('places')
     .select('*')
-    .eq('slug', params.slug)
+    .eq('slug', slug)
     .eq('published', true)
     .single();
   
@@ -74,12 +75,13 @@ export async function generateStaticParams() {
 
 // Página principal
 export default async function PlaceDetailPage({ params }: Props) {
+  const { slug } = await params
   const supabase = await createClient();
   
   const { data: place, error } = await supabase
     .from('places')
     .select('*')
-    .eq('slug', params.slug)
+    .eq('slug', slug)
     .eq('published', true)
     .single();
   

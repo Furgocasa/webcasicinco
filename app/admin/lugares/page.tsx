@@ -1,9 +1,5 @@
 'use client';
 
-// Sin caché para admin
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
-
 import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { GoogleMap, useLoadScript, Marker, InfoWindow } from '@react-google-maps/api';
 import { MarkerClusterer } from '@googlemaps/markerclusterer';

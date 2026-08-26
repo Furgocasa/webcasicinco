@@ -1,9 +1,5 @@
 'use client';
 
-// Sin caché para admin - ver cambios al instante
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
-
 import { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
 import { 

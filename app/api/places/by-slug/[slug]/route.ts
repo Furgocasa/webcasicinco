@@ -3,16 +3,16 @@ import { createClient } from '@/lib/supabase/server';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
     const supabase = await createClient();
-    
-    // Buscar lugar por slug
+    const { slug } = await params
+
     const { data: place, error } = await supabase
       .from('places')
       .select('*')
-      .eq('slug', params.slug)
+      .eq('slug', slug)
       .or('published.eq.true,ai_description.not.is.null') // ✅ Mostrar publicados O con IA (incluso borradores)
       .single();
 

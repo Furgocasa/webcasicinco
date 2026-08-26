@@ -10,7 +10,7 @@ import { getPlacePhotoUrl } from '@/lib/utils/photo-helper';
 import { getPlaceUrl, toSlug } from '@/lib/utils/url-helper';
 
 type Props = {
-  params: { category: string }
+  params: Promise<{ category: string }>
 }
 
 const VALID_CATEGORIES = ['restaurante', 'bar', 'cafe', 'hotel'];
@@ -54,7 +54,7 @@ const CATEGORY_CONFIG: Record<string, {
 
 // 1. Metadata dinámica para SEO
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const category = params.category;
+  const { category } = await params;
   
   if (!VALID_CATEGORIES.includes(category)) {
     return {
@@ -90,7 +90,7 @@ export async function generateStaticParams() {
 
 // 3. Componente principal (Server Component)
 export default async function CategoryPage({ params }: Props) {
-  const { category } = params;
+  const { category } = await params;
   
   if (!VALID_CATEGORIES.includes(category)) {
     notFound();

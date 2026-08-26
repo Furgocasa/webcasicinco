@@ -11,7 +11,7 @@ import { calculateQualityTier, getTierInfo } from '@/lib/utils/tier-calculator';
 import { toSlug, fromSlug, getPlaceUrl, getProvinceSearchNames } from '@/lib/utils/url-helper';
 
 type Props = {
-  params: { category: string; province: string }
+  params: Promise<{ category: string; province: string }>
 }
 
 const VALID_CATEGORIES = ['restaurante', 'bar', 'cafe', 'hotel'];
@@ -55,7 +55,7 @@ const CATEGORY_CONFIG: Record<string, {
 
 // Metadata dinámica para SEO
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { category, province } = params;
+  const { category, province } = await params;
   
   if (!VALID_CATEGORIES.includes(category)) {
     return {
@@ -128,7 +128,7 @@ export async function generateStaticParams() {
 
 // Página principal
 export default async function CategoryProvincePage({ params }: Props) {
-  const { category, province } = params;
+  const { category, province } = await params;
   
   if (!VALID_CATEGORIES.includes(category)) {
     notFound();

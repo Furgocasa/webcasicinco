@@ -9,7 +9,7 @@ import { createClient as createAdminClient } from '@supabase/supabase-js';
  */
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
@@ -32,7 +32,7 @@ export async function PATCH(
       );
     }
 
-    const userId = params.id;
+    const { id: userId } = await params;
     const body = await request.json();
     const { subscriptionType } = body;
 

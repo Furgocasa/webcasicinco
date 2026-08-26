@@ -10,7 +10,7 @@ import { startFastIndexation } from '@/lib/indexation/indexer-fast';
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: { jobId: string } }
+  { params }: { params: Promise<{ jobId: string }> }
 ) {
   try {
     const supabase = await createClient();
@@ -33,7 +33,7 @@ export async function POST(
       );
     }
 
-    const { jobId } = params;
+    const { jobId } = await params;
 
     if (!jobId) {
       return NextResponse.json(

@@ -13,17 +13,18 @@ import {
 } from '@/lib/utils/blog-places';
 
 type Props = {
-  params: { slug: string }
+  params: Promise<{ slug: string }>
 }
 
 // ✅ 1. Metadata dinámica para SEO
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params
   const supabase = await createClient();
   
   const { data: post } = await supabase
     .from('blog_posts')
     .select('*')
-    .eq('slug', params.slug)
+    .eq('slug', slug)
     .eq('published', true)
     .lte('created_at', new Date().toISOString())
     .single();
@@ -85,7 +86,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
   
   // URL completa del artículo
-  const articleUrl = `${process.env.NEXT_PUBLIC_APP_URL}/blog/${params.slug}`;
+  const articleUrl = `${process.env.NEXT_PUBLIC_APP_URL}/blog/${slug}`;
   const siteName = 'Casi Cinco';
   
   return {
@@ -148,13 +149,14 @@ export async function generateStaticParams() {
 
 // ✅ 3. Componente principal (Server Component)
 export default async function BlogPostPage({ params }: Props) {
+  const { slug } = await params
   const supabase = await createClient();
   
   // Obtener el post con sus lugares
   const { data: post, error } = await supabase
     .from('blog_posts')
     .select('*')
-    .eq('slug', params.slug)
+    .eq('slug', slug)
     .eq('published', true)
     .lte('created_at', new Date().toISOString())
     .single();
@@ -239,7 +241,7 @@ export default async function BlogPostPage({ params }: Props) {
     },
     "mainEntityOfPage": {
       "@type": "WebPage",
-      "@id": `${baseUrl}/blog/${params.slug}`
+      "@id": `${baseUrl}/blog/${slug}`
     }
   };
 
@@ -303,7 +305,7 @@ export default async function BlogPostPage({ params }: Props) {
         "@type": "ListItem",
         "position": 3,
         "name": post.title,
-        "item": `${baseUrl}/blog/${params.slug}`
+        "item": `${baseUrl}/blog/${slug}`
       }
     ]
   };

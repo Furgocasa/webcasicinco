@@ -19,11 +19,11 @@ function getAdminClient() {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
-    const { id } = params;
+    const { id } = await params;
 
     const { data, error } = await supabase
       .from('places')
@@ -55,12 +55,12 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
     const adminSupabase = getAdminClient();
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
 
     // Verificar autenticación y rol admin
@@ -146,12 +146,12 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
     const adminSupabase = getAdminClient();
-    const { id } = params;
+    const { id } = await params;
 
     // Verificar autenticación y rol admin
     const { data: { user }, error: authError } = await supabase.auth.getUser();

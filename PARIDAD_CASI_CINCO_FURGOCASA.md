@@ -16,8 +16,8 @@
 | Qué mapea | Áreas de autocaravana y campings | Sitios de 4,7★ o más (restaurantes, bares, hoteles) |
 | Repositorio | `github.com/Furgocasa/furgocasamapa` (`main`) | `github.com/Furgocasa/webcasicinco` (`main`) |
 | Producción | https://www.mapafurgocasa.com | https://www.casicinco.com |
-| Despliegue | Vercel Furgocasa, automático al pushear a `main` | Migrando a Vercel Furgocasa (hoy aún Amplify) |
-| Carpeta local | `W - FURGOCASA\webmapafurgocasa\NEW MAPA FURGOCASA` | `W - FURGOCASA\webcasicinco\Casi_cinco_app` |
+| Despliegue | Vercel Furgocasa, automático al pushear a `main` | Vercel Furgocasa (`webcasicinco` → www.casicinco.com) |
+| Carpeta local | `W - FURGOCASA\webmapafurgocasa` | `W - FURGOCASA\webcasicinco` |
 | Stack | Next.js 14 + Supabase + Tailwind | Next.js + Supabase + Tailwind |
 | Datos | Proyecto Supabase propio | Proyecto Supabase propio, **distinto** |
 | Reglas de git del repo | commit + push a `main` siempre (`.cursor/rules/github.mdc`) | pedir confirmación antes de commit/push (`.cursorrules`) |
@@ -26,7 +26,7 @@
 los dos leen `NEXT_PUBLIC_MAPTILER_API_KEY` con la misma clave, y Casi Cinco cae a Carto Voyager si falta.
 
 > Detalle que despista: Furgocasa tiene un `amplify.yml` heredado, pero **despliega en Vercel**.
-> Casi Cinco sigue publicado hoy en Amplify; el remoto vivo es `Furgocasa/webcasicinco` y el destino de deploy es Vercel Furgocasa.
+> Casi Cinco está en Vercel FURGOCASA (`webcasicinco` → www.casicinco.com). El remoto vivo es `Furgocasa/webcasicinco`.
 
 ---
 

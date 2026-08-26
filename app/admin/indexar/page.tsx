@@ -1,9 +1,5 @@
 'use client';
 
-// Sin caché para admin - ver cambios al instante
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
-
 import { useState, useEffect, useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';

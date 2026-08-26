@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
@@ -26,6 +26,7 @@ export async function PATCH(
       );
     }
 
+    const { id } = await params
     const body = await request.json();
     const { published } = body;
 
@@ -36,7 +37,7 @@ export async function PATCH(
         published,
         updated_at: new Date().toISOString(),
       })
-      .eq('id', params.id)
+      .eq('id', id)
       .select()
       .single();
 

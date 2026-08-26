@@ -95,15 +95,6 @@ const nextConfig = {
       bodySizeLimit: '2mb',
     },
   },
-  // ⚠️ TEMPORAL: Exponer variables de entorno server-side explícitamente
-  // TODO: Investigar por qué Next.js no las lee automáticamente en AWS Amplify
-  env: {
-    OPENAI_API_KEY: process.env.OPENAI_API_KEY,
-    GOOGLE_PLACES_API_KEY: process.env.GOOGLE_PLACES_API_KEY,
-    SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
-    STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
-    STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
-  },
 };
 
 module.exports = withPWA(nextConfig);

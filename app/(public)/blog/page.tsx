@@ -36,10 +36,11 @@ function buildBlogPath(page: number, category: string): string {
 export async function generateMetadata({
   searchParams,
 }: {
-  searchParams: BlogSearchParams;
+  searchParams: Promise<BlogSearchParams>;
 }): Promise<Metadata> {
-  const category = parseCategory(searchParams.categoria);
-  const requestedPage = Math.max(1, parseInt(searchParams.page || '1', 10) || 1);
+  const resolved = await searchParams;
+  const category = parseCategory(resolved.categoria);
+  const requestedPage = Math.max(1, parseInt(resolved.page || '1', 10) || 1);
 
   const categoryTitles: Record<string, string> = {
     restaurante: 'Restaurantes',
@@ -83,11 +84,12 @@ export async function generateMetadata({
 export default async function BlogPage({
   searchParams,
 }: {
-  searchParams: BlogSearchParams;
+  searchParams: Promise<BlogSearchParams>;
 }) {
   const supabase = await createClient();
-  const category = parseCategory(searchParams.categoria);
-  const requestedPage = Math.max(1, parseInt(searchParams.page || '1', 10) || 1);
+  const resolved = await searchParams;
+  const category = parseCategory(resolved.categoria);
+  const requestedPage = Math.max(1, parseInt(resolved.page || '1', 10) || 1);
   const now = new Date().toISOString();
 
   // Conteo total para calcular páginas (con el mismo filtro)
