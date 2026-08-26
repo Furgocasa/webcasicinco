@@ -5,7 +5,7 @@
 > Para qué sirve: cuando se pide *"ponlo como en la otra"*, aquí está escrito **cuál es "la otra"**,
 > qué archivo hace ese trabajo en cada proyecto, qué ya se igualó y qué no se debe igualar nunca.
 
-Última actualización: **22 de agosto de 2026**.
+Última actualización: **26 de agosto de 2026**.
 
 ---
 
@@ -14,10 +14,10 @@
 |  | Mapa Furgocasa | Casi Cinco |
 |---|---|---|
 | Qué mapea | Áreas de autocaravana y campings | Sitios de 4,7★ o más (restaurantes, bares, hoteles) |
-| Repositorio | `github.com/Furgocasa/furgocasamapa` (`main`) | `github.com/ActtaxIA/Casi_cinco_app` (`main`) |
+| Repositorio | `github.com/Furgocasa/furgocasamapa` (`main`) | `github.com/Furgocasa/webcasicinco` (`main`) |
 | Producción | https://www.mapafurgocasa.com | https://www.casicinco.com |
-| Despliegue | Vercel, automático al pushear a `main` (2-3 min) | AWS Amplify, automático al pushear a `main` |
-| Carpeta local | `Eskala IA\6 - MAPA FURGOCASA\NEW MAPA FURGOCASA` | `Eskala IA\5 - CASI CINCO APP WEB\Casi_cinco_app` |
+| Despliegue | Vercel Furgocasa, automático al pushear a `main` | Migrando a Vercel Furgocasa (hoy aún Amplify) |
+| Carpeta local | `W - FURGOCASA\webmapafurgocasa\NEW MAPA FURGOCASA` | `W - FURGOCASA\webcasicinco\Casi_cinco_app` |
 | Stack | Next.js 14 + Supabase + Tailwind | Next.js + Supabase + Tailwind |
 | Datos | Proyecto Supabase propio | Proyecto Supabase propio, **distinto** |
 | Reglas de git del repo | commit + push a `main` siempre (`.cursor/rules/github.mdc`) | pedir confirmación antes de commit/push (`.cursorrules`) |
@@ -26,7 +26,7 @@
 los dos leen `NEXT_PUBLIC_MAPTILER_API_KEY` con la misma clave, y Casi Cinco cae a Carto Voyager si falta.
 
 > Detalle que despista: Furgocasa tiene un `amplify.yml` heredado, pero **despliega en Vercel**.
-> Casi Cinco es el que va por Amplify.
+> Casi Cinco sigue publicado hoy en Amplify; el remoto vivo es `Furgocasa/webcasicinco` y el destino de deploy es Vercel Furgocasa.
 
 ---
 

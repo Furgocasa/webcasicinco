@@ -1,5 +1,46 @@
 # 📝 Changelog - Casi Cinco
 
+## [23 Agosto 2026] - ✍️ Descripciones editoriales con GPT-5.6 Terra (tiers Diamante, Platino y Oro)
+
+### 🎯 PROBLEMA DETECTADO
+Auditoría de los 403 lugares Diamante publicados: todas las `ai_description` existían,
+pero eran copy genérico de IA, no texto editorial:
+- 69% empezaba por "Descubre...", 45% "ideal para", 41% "en el corazón de", 35% "sin duda"
+- 74% repetía ciudad y provincia iguales ("Barcelona, Barcelona")
+- 31% recitaba el rating y nº de reseñas (redundante: ya se muestra en la ficha)
+- 28% contenía markdown `**` visible en la web
+- ~50 cafeterías/specialty coffee con categoría `bar` descritas literalmente como "bar"
+- Casos graves: pub crawl descrito como hotel, pastelería descrita como restaurante
+
+### ✨ CAMBIOS
+- **`lib/ai/openai.ts` → `generatePlaceDescription`:**
+  - Prompt editorial nuevo: 110-150 palabras, mínimo 3 hechos concretos de reseñas,
+    identidad real del local por encima de la etiqueta de categoría, clichés/markdown/
+    exclamaciones/rating prohibidos, ciudad sin duplicar
+  - Soporte para modelos razonadores GPT-5.x: detección automática y uso de
+    `reasoning_effort: 'low'` + `max_completion_tokens` (en vez de `temperature`/`max_tokens`)
+- **`.env.local`:** `OPENAI_ENRICHMENT_MODEL=gpt-5.6-terra` (cambiable sin tocar código;
+  añadir también en AWS Amplify si la Fase 2 corre en producción)
+- **`scripts/regenerate-diamond-descriptions.ts` (nuevo):** regeneración por tiers con
+  `--dry-run`, `--limit`, `--min-rating`, `--min-reviews`, `--max-reviews`; concurrencia 4;
+  reintento automático si aparecen patrones prohibidos
+
+### 📊 EJECUTADO
+- **Diamante (403 lugares):** regenerados, 0 fallos — clichés a ~0, markdown 0, rating recitado 0
+- **Platino (415 lugares):** regenerados, 0 fallos — misma calidad
+- **Oro (730 lugares):** regenerados, 0 fallos — misma calidad
+- **Coste total:** ~15 $ (≈1 céntimo/lugar con gpt-5.6-terra, reasoning low)
+
+### ⚠️ FLECOS CONOCIDOS
+- "ideal para" resiste en ~19% de las fichas y "sin duda" en ~11 (no bloqueante)
+- Las quejas generales de reseñas pueden aparecer como matiz honesto (decisión de diseño)
+- `The Pubcrawl Company Madrid` sigue con categoría `hotel` en BD (el texto ya es honesto,
+  pero conviene decidir si debe estar listado)
+- `lib/indexation/enricher.ts` (flujo legacy) mantiene `gpt-4o-mini` en duro; el flujo
+  activo (`enricher-batch.ts` → `lib/ai/openai.ts`) sí usa el modelo nuevo
+
+---
+
 ## [30 Noviembre 2025] - 🚀 v1.0.0 STABLE - Primera Versión Oficial de Producción
 
 ### 🎉 LANZAMIENTO OFICIAL v1.0.0

@@ -34,7 +34,7 @@ const MODEL_FAST = 'gpt-3.5-turbo'; // Para chatbot más rápido
 
 /**
  * FUNCIÓN 1: Generar descripción única de un lugar
- * Convierte datos de Google Maps en una descripción atractiva y SEO
+ * Convierte datos de Google Maps en una descripción editorial de calidad guía
  */
 export async function generatePlaceDescription(place: {
   name: string;
@@ -46,50 +46,59 @@ export async function generatePlaceDescription(place: {
   price_level?: number;
   reviews?: string[];
 }): Promise<string> {
-  const prompt = `Eres un experto escritor de guías de viaje para "Casi Cinco", una plataforma que recomienda lugares con mínimo 4.7 estrellas en España.
+  // Si ciudad y provincia coinciden ("Barcelona, Barcelona"), mostrar solo una
+  const location =
+    place.city.trim().toLowerCase() === place.province.trim().toLowerCase()
+      ? place.city
+      : `${place.city} (${place.province})`;
 
-Crea una descripción única y atractiva para este lugar:
+  const prompt = `Escribe la descripción editorial de una ficha para "Casi Cinco", guía española que solo lista lugares con nota casi perfecta en Google. El lector ya ve en la ficha el nombre, la categoría, el rating, el número de reseñas y la ciudad: NO los recites.
 
-DATOS:
+DATOS VERIFICADOS (única fuente permitida, no inventes nada):
 - Nombre: ${place.name}
-- Categoría: ${place.category}
-- Ubicación: ${place.city}, ${place.province}
-- Rating: ${place.rating}★ (${place.review_count} reseñas)
+- Categoría en la web: ${place.category}
+- Ubicación: ${location}
 ${place.price_level ? `- Nivel de precio: ${place.price_level}/5` : ''}
+${place.reviews && place.reviews.length > 0 ? `- Información de reseñas reales:
+${place.reviews.slice(0, 5).join('\n')}` : ''}
 
-${place.reviews && place.reviews.length > 0 ? `FRAGMENTOS DE RESEÑAS:
-${place.reviews.slice(0, 3).join('\n')}` : ''}
+NORMAS EDITORIALES (obligatorias):
+1. Longitud: 110-150 palabras, máximo dos párrafos.
+2. Di lo que el lugar ES realmente: si el nombre y las reseñas indican pastelería, cafetería de especialidad, asador, coctelería, hostal..., usa esa palabra aunque la categoría de la web sea más genérica.
+3. Incluye al menos 3 hechos concretos sacados de los datos (platos, productos, detalles del local, del servicio o de la ubicación). Frases con información, no adjetivos encadenados.
+4. PROHIBIDO: empezar por "Descubre"; las palabras "encantador", "inolvidable", "experiencia única", "experiencia memorable", "en el corazón de", "sin duda", "ideal para", "perfecto para", "como en casa"; exclamaciones; emojis; formato markdown (nada de asteriscos); mencionar el rating o el número de reseñas; escribir la ciudad y la provincia juntas si son la misma.
+5. No menciones quejas puntuales ni incidencias aisladas. Solo si las reseñas coinciden en una pega general (precios altos, colas, local pequeño) puedes apuntarla con naturalidad como contexto útil.
+6. Tono: guía española con criterio propio, cercana pero sobria. Español de España.
 
-REQUISITOS:
-1. Longitud: 150-200 palabras
-2. Estilo: Cálido, cercano, profesional pero no formal
-3. Incluir: Por qué es especial, qué lo hace único
-4. Mencionar el rating de forma natural
-5. SEO-friendly pero sin parecer forzado
-6. En español de España
-7. NO uses emojis
-8. NO repitas información obvia
+Devuelve SOLO el texto de la descripción, sin títulos.`;
 
-Genera SOLO la descripción, sin títulos ni introducciones.`;
+  // Los modelos razonadores (GPT-5.x, o-series) no aceptan temperature ni max_tokens:
+  // usan reasoning_effort y max_completion_tokens
+  const isReasoningModel = /^(gpt-5|o\d)/.test(MODEL);
+  const modelParams = isReasoningModel
+    ? { reasoning_effort: 'low', max_completion_tokens: 2000 }
+    : { temperature: 0.8, max_tokens: 500 };
 
   try {
-    const completion = await getOpenAI().chat.completions.create({
+    const params = {
       model: MODEL,
       messages: [
         {
           role: 'system',
-          content: 'Eres un experto escritor de contenido para guías de viaje premium.',
+          content:
+            'Eres redactor de una guía de viajes española de nivel editorial. Escribes con criterio y datos concretos, nunca con clichés promocionales.',
         },
         {
           role: 'user',
           content: prompt,
         },
       ],
-      temperature: 0.8,
-      max_tokens: 500,
-    });
+      ...modelParams,
+    } as OpenAI.Chat.Completions.ChatCompletionCreateParamsNonStreaming;
 
-    return completion.choices[0].message.content || '';
+    const completion = await getOpenAI().chat.completions.create(params);
+
+    return (completion.choices[0].message.content || '').trim();
   } catch (error) {
     console.error('Error generando descripción:', error);
     throw new Error('No se pudo generar la descripción con IA');

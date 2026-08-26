@@ -166,10 +166,24 @@ Tomar los lugares con `needs_enrichment=true` y añadirles contenido generado po
         └─ Log: "🎨 Enriqueciendo: Nombre del Lugar"
 
      B. GENERAR DESCRIPCIÓN IA
-        ├─ Usa: OpenAI GPT-4
-        ├─ Prompt: Genera descripción SEO optimizada
-        ├─ Input: nombre, categoría, provincia, rating, reseñas
-        └─ Output: ~150 palabras
+        ├─ Usa: modelo definido en OPENAI_ENRICHMENT_MODEL (actual: gpt-5.6-terra; fallback: gpt-4o-mini)
+        ├─ Prompt: descripción EDITORIAL (ver "Normas editoriales" más abajo)
+        ├─ Input: nombre, categoría, ciudad/provincia, precio, reseñas
+        └─ Output: 110-150 palabras, máximo 2 párrafos
+
+        NORMAS EDITORIALES DEL PROMPT (lib/ai/openai.ts → generatePlaceDescription):
+        ├─ Dice lo que el lugar ES realmente (pastelería, cafetería de especialidad,
+        │  asador...) aunque la categoría web sea genérica (restaurante/bar/hotel)
+        ├─ Mínimo 3 hechos concretos sacados de las reseñas (platos, servicio, local)
+        ├─ PROHIBIDO: empezar por "Descubre", clichés ("encantador", "inolvidable",
+        │  "en el corazón de", "sin duda", "ideal para"...), exclamaciones, emojis,
+        │  markdown (**), recitar el rating/nº de reseñas, y "Ciudad, Provincia"
+        │  duplicado cuando coinciden (ej: "Barcelona, Barcelona")
+        └─ Puede apuntar una pega general si las reseñas coinciden (colas, precios)
+
+        NOTA TÉCNICA: los modelos razonadores (GPT-5.x, o-series) usan
+        reasoning_effort='low' + max_completion_tokens en lugar de
+        temperature + max_tokens. La detección es automática según el modelo.
 
      C. GENERAR RESUMEN DE RESEÑAS
         ├─ Toma: Hasta 5 reseñas recientes de Google
@@ -209,12 +223,37 @@ Tomar los lugares con `needs_enrichment=true` y añadirles contenido generado po
 ```
 
 ### **Resultado FASE 2:**
-- ✅ ai_description: Descripción SEO
+- ✅ ai_description: Descripción editorial (sin clichés, sin markdown, sin rating recitado)
 - ✅ ai_review_summary: Resumen de opiniones
 - ✅ ai_highlights: Puntos destacados
 - ✅ needs_enrichment: false
 - ✅ enrichment_status: 'completed'
 - ❌ TODAVÍA NO publicado (published=false)
+
+### **Regeneración de descripciones ya publicadas (por tiers):**
+
+Para reescribir descripciones antiguas sin repetir la Fase 2 completa existe
+`scripts/regenerate-diamond-descriptions.ts`. Usa como fuente de hechos el
+`ai_review_summary` y los `ai_highlights` ya guardados (no llama a Google,
+coste solo OpenAI ~1 céntimo/lugar con gpt-5.6-terra).
+
+```bash
+# Prueba sin guardar
+npx tsx scripts/regenerate-diamond-descriptions.ts --limit 3 --dry-run
+
+# Diamante (4.8+ y 1000+ reseñas) — ejecutado 22/08/2026: 403 lugares, 0 fallos
+npx tsx scripts/regenerate-diamond-descriptions.ts
+
+# Platino (4.8+ y 500-999 reseñas) — ejecutado 23/08/2026: 415 lugares, 0 fallos
+npx tsx scripts/regenerate-diamond-descriptions.ts --min-reviews 500 --max-reviews 1000
+
+# Oro (4.8+ y 200-499 reseñas) — ejecutado 23/08/2026: 730 lugares, 0 fallos
+npx tsx scripts/regenerate-diamond-descriptions.ts --min-reviews 200 --max-reviews 500
+```
+
+El script procesa 4 lugares en paralelo, reintenta una vez si el texto
+incluye patrones prohibidos (markdown, "Descubre" inicial, exclamaciones,
+rating) y solo guarda si la descripción supera las 60 palabras.
 
 ---
 

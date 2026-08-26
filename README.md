@@ -155,6 +155,7 @@ GOOGLE_SEARCH_ENGINE_ID=    # Opcional: Para búsqueda automática de redes soci
 
 # OpenAI
 OPENAI_API_KEY=
+OPENAI_ENRICHMENT_MODEL=    # Modelo para descripciones de lugares (ej: gpt-5.6-terra; fallback: gpt-4o-mini)
 
 # Stripe (opcional)
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
