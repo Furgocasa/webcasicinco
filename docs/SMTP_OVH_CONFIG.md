@@ -11,7 +11,7 @@
 - **Host**: ssl0.ovh.net
 - **Puerto**: 587 (STARTTLS) o 465 (SSL)
 - **Usuario**: info@casicinco.com (email completo)
-- **Contraseña**: your_smtp_password_here
+- **Contraseña**: la de `.env.local` (`SMTP_PASS`). No la escribas aquí.
 
 ### Alternativa (si no funciona ssl0.ovh.net):
 - **Host**: pro1.mail.ovh.net

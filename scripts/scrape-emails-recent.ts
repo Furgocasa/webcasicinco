@@ -1,15 +1,23 @@
 /**
- * Script para extraer emails de lugares agregados ayer y hoy
- * Solo procesa lugares creados en las últimas 48 horas
+ * Extrae emails de lugares agregados en las últimas 48 horas.
+ * Lee NEXT_PUBLIC_SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY de .env.local.
  */
+
+import dotenv from 'dotenv';
+dotenv.config({ path: '.env.local' });
+dotenv.config();
 
 import { createClient } from '@supabase/supabase-js';
 import axios from 'axios';
 import * as cheerio from 'cheerio';
 
-// Credenciales de AWS Amplify
-const SUPABASE_URL = 'https://zzycxijexoxrjpijslsb.supabase.co';
-const SUPABASE_KEY = 'your_supabase_anon_key_here';
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+if (!SUPABASE_URL || !SUPABASE_KEY) {
+  console.error('Faltan NEXT_PUBLIC_SUPABASE_URL o SUPABASE_SERVICE_ROLE_KEY en .env.local');
+  process.exit(1);
+}
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
