@@ -1,5 +1,15 @@
 # 📝 Changelog - Casi Cinco
 
+## [26 Agosto 2026] - 🚚 Repo Furgocasa + Vercel (fuera de Amplify)
+
+- Remoto vivo: `github.com/Furgocasa/webcasicinco` (`main`)
+- Hosting: **Vercel FURGOCASA** · www.casicinco.com (`casicinco.com` → 308 a www)
+- App Amplify `Casi_cinco_app` **borrada**
+- Scripts de migración de fotos: `../local/` (fuera de Git)
+- El repo viejo `ActtaxIA/Casi_cinco_app` queda histórico
+
+---
+
 ## [23 Agosto 2026] - ✍️ Descripciones editoriales con GPT-5.6 Terra (tiers Diamante, Platino y Oro)
 
 ### 🎯 PROBLEMA DETECTADO
@@ -20,7 +30,7 @@ pero eran copy genérico de IA, no texto editorial:
   - Soporte para modelos razonadores GPT-5.x: detección automática y uso de
     `reasoning_effort: 'low'` + `max_completion_tokens` (en vez de `temperature`/`max_tokens`)
 - **`.env.local`:** `OPENAI_ENRICHMENT_MODEL=gpt-5.6-terra` (cambiable sin tocar código;
-  añadir también en AWS Amplify si la Fase 2 corre en producción)
+  añadir también en Vercel FURGOCASA si la Fase 2 corre en producción)
 - **`scripts/regenerate-diamond-descriptions.ts` (nuevo):** regeneración por tiers con
   `--dry-run`, `--limit`, `--min-rating`, `--min-reviews`, `--max-reviews`; concurrencia 4;
   reintento automático si aparecen patrones prohibidos

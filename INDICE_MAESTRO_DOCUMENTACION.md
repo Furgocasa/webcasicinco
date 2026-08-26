@@ -136,14 +136,14 @@
 | Documento | Descripción | Cuándo usarlo |
 |-----------|-------------|---------------|
 | `CONFIGURACION_COMPLETA.md` | Setup inicial del proyecto | Primera vez |
-| `DEPLOY_AWS.md` | Deployment en AWS Amplify | Deploy |
-| `CONFIGURAR_DOMINIO.md` | Configurar casicinco.com | Setup producción |
+| `DEPLOY_AWS.md` | Histórico Amplify. Deploy vivo: Vercel FURGOCASA | Archivo |
+| `CONFIGURAR_DOMINIO.md` | Dominio: www.casicinco.com en Vercel | Setup producción |
 | `CONFIGURAR_STRIPE.md` | Configurar pagos mensuales/anuales | Setup Stripe |
 | `GOOGLE_OAUTH_SETUP.md` | Login con Google | Setup OAuth |
 | `INSTRUCCIONES_RESTRINGIR_API_KEYS.md` | **Seguridad API Keys** (CRÍTICO) | Setup Google APIs |
 | `INSTRUCCIONES_GOOGLE_SEARCH_CONSOLE.md` | Configurar GSC para SEO | Post-deploy |
 | `VERIFICAR_PRODUCCION.md` | Checklist post-deploy | Después de deploy |
-| `VERIFICAR_VARIABLES_AWS.md` | Variables de entorno en Amplify | Troubleshooting |
+| `VERIFICAR_VARIABLES_AWS.md` | Variables en Vercel FURGOCASA | Troubleshooting |
 
 **📌 Uso:**
 - **DevOps:** Leer todas las guías de DEPLOY y CONFIGURAR
@@ -190,7 +190,7 @@
 → `CONEXION_FRONTEND_BACKEND.md` (raíz)
 
 ### **"Voy a deployar a producción"**
-→ `docs/guides/DEPLOY_AWS.md` + `docs/guides/VERIFICAR_PRODUCCION.md`
+→ `docs/guides/VERIFICAR_VARIABLES_AWS.md` + `docs/guides/VERIFICAR_PRODUCCION.md`
 
 ### **"Necesito ejecutar SQL"**
 → `COMANDOS_UTILES.md` + `supabase/diagnostics/`
@@ -229,7 +229,7 @@
 
 ### **Bloqueadores para Producción:**
 🔴 **P0 - Crítico** (ver `docs/strategy/ACCIONES_INMEDIATAS_CRITICAS.md`):
-1. ⏳ Deploy a AWS Amplify
+1. ✅ Deploy en Vercel FURGOCASA (26 ago 2026)
 2. ⏳ SSR/SSG en páginas dinámicas
 3. ⏳ Schema.org implementado
 4. ⏳ Trial sin tarjeta

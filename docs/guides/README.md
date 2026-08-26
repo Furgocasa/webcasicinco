@@ -25,7 +25,7 @@ Esta carpeta contiene **guías prácticas** para setup, configuración y deploym
 ### ☁️ **Deployment**
 
 #### `DEPLOY_AWS.md`
-**Propósito:** Guía completa de deployment en AWS Amplify  
+**Propósito:** Histórico Amplify. Deploy vivo: Vercel FURGOCASA (`webcasicinco`).  
 **Incluye:**
 - Conectar repositorio GitHub
 - Build settings
@@ -54,7 +54,7 @@ Esta carpeta contiene **guías prácticas** para setup, configuración y deploym
 ---
 
 #### `VERIFICAR_VARIABLES_AWS.md`
-**Propósito:** Variables de entorno críticas en AWS Amplify  
+**Propósito:** Variables de entorno en Vercel FURGOCASA (nombre de archivo heredado)  
 **Incluye:**
 - 9 variables críticas (Supabase, Google, OpenAI, Stripe)
 - Troubleshooting de variables faltantes

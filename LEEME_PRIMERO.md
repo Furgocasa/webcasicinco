@@ -76,7 +76,7 @@ Tu guía rápida para:
 📄 docs/strategy/ACCIONES_INMEDIATAS_CRITICAS.md
 
 ⚠️ BLOQUEADORES CRÍTICOS (P0):
-  1. Deploy a AWS Amplify
+  1. Deploy a Vercel FURGOCASA (ya hecho, 26 ago 2026)
   2. Implementar SSR/SSG
   3. Añadir Schema.org
   4. Trial sin tarjeta
@@ -125,8 +125,8 @@ Masivo:
 
 ### **"Quiero configurar para producción"**
 ```
-1. docs/guides/DEPLOY_AWS.md - Deploy en AWS Amplify
-2. docs/guides/CONFIGURAR_DOMINIO.md - Configurar casicinco.com
+1. docs/guides/VERIFICAR_VARIABLES_AWS.md - Variables en Vercel FURGOCASA
+2. docs/guides/CONFIGURAR_DOMINIO.md - Dominio (ya en Vercel; el resto es histórico Amplify)
 3. docs/guides/VERIFICAR_PRODUCCION.md - Checklist post-deploy
 4. docs/guides/INSTRUCCIONES_GOOGLE_SEARCH_CONSOLE.md - SEO
 ```
@@ -170,7 +170,7 @@ Masivo:
 ### **Bloqueadores para Producción:**
 ```
 🔴 P0 - Crítico (ver docs/strategy/ACCIONES_INMEDIATAS_CRITICAS.md):
-  ⏳ Deploy a AWS Amplify
+  ✅ Deploy en Vercel FURGOCASA (26 ago 2026)
   ⏳ SSR/SSG en páginas dinámicas
   ⏳ Schema.org implementado
   ⏳ Trial sin tarjeta
@@ -403,8 +403,8 @@ Estado: published=true ✅ (VISIBLE AL PÚBLICO)
 - [ ] Todos coinciden ✅
 
 ### **¿Listo para producción?**
-- [ ] Deploy en AWS Amplify configurado
-- [ ] Variables de entorno en Amplify
+- [x] Deploy en Vercel FURGOCASA (www.casicinco.com)
+- [ ] Variables de entorno en Vercel (revisar si falta alguna)
 - [ ] Dominio casicinco.com configurado
 - [ ] Google Maps API keys restringidas
 - [ ] SSR/SSG implementado en páginas dinámicas
@@ -417,7 +417,7 @@ Estado: published=true ✅ (VISIBLE AL PÚBLICO)
 ## 🆘 **AYUDA RÁPIDA**
 
 ### **❌ Error "google is not defined"**
-→ Falta `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` en AWS Amplify  
+→ Falta `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` en Vercel  
 → Ver: `docs/guides/VERIFICAR_VARIABLES_AWS.md`
 
 ### **❌ Gasto alto en Google Photos API**
@@ -432,8 +432,8 @@ Estado: published=true ✅ (VISIBLE AL PÚBLICO)
 → Ya CORREGIDO con función `cancel_zombie_jobs()`  
 → Ejecuta: `SELECT cancel_zombie_jobs();` en Supabase
 
-### **❌ Build falla en Amplify**
-→ Ver logs específicos en AWS Amplify Console  
+### **❌ Build falla en Vercel**
+→ Ver logs en Vercel → `webcasicinco` → Deployments  
 → Verificar variables de entorno  
 → Guía: `docs/guides/VERIFICAR_PRODUCCION.md`
 
@@ -469,7 +469,7 @@ Estado: published=true ✅ (VISIBLE AL PÚBLICO)
 3. 🗺️ **Roadmap:** `docs/strategy/PROXIMAS_MEJORAS_PRIORIZADAS.md`
 
 ### **Guías de Setup:**
-1. 🚀 **Deploy:** `docs/guides/DEPLOY_AWS.md`
+1. 🚀 **Deploy / variables:** `docs/guides/VERIFICAR_VARIABLES_AWS.md`
 2. 🔧 **Config:** `docs/guides/CONFIGURACION_COMPLETA.md`
 3. ✅ **Verificar:** `docs/guides/VERIFICAR_PRODUCCION.md`
 
@@ -509,7 +509,7 @@ El sistema está **completamente funcional**:
 - 🔌 `CONEXION_FRONTEND_BACKEND.md` - Arquitectura
 - 🛠️ `COMANDOS_UTILES.md` - Comandos diarios
 - ⚠️ `docs/strategy/ACCIONES_INMEDIATAS_CRITICAS.md` - Bloqueadores P0
-- 🚀 `docs/guides/DEPLOY_AWS.md` - Deploy a producción
+- 🚀 `docs/guides/VERIFICAR_VARIABLES_AWS.md` - Variables y deploy (Vercel)
 
 ---
 

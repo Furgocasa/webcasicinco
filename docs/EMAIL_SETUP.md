@@ -89,12 +89,9 @@ SMTP_PASS=tu_ses_smtp_password
 - Verifica que el SMTP_USER tenga permisos de envío
 - Comprueba los logs del servidor
 
-## Testing en Producción (AWS Amplify)
+## Testing en Producción (Vercel FURGOCASA)
 
-Añade las variables de entorno en AWS Amplify:
-
-1. Ve a tu app en AWS Amplify Console
-2. App settings → Environment variables
-3. Añade las 4 variables SMTP
-4. Redeploy la app
+1. Vercel → `webcasicinco` → Settings → Environment Variables
+2. Añade las 4 variables SMTP
+3. Redeploy
 

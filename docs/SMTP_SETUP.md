@@ -43,9 +43,9 @@ SMTP_USER=info@casicinco.com
 SMTP_PASS=tu_contraseña_de_aplicación_aquí
 ```
 
-### Producción (AWS Amplify)
+### Producción (Vercel FURGOCASA)
 
-Ve a AWS Amplify Console → Tu App → Environment Variables y agrega:
+Vercel → `webcasicinco` → Settings → Environment Variables:
 
 ```
 SMTP_HOST=smtp.gmail.com

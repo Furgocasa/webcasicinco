@@ -18,7 +18,7 @@
 | Producción | https://www.mapafurgocasa.com | https://www.casicinco.com |
 | Despliegue | Vercel Furgocasa, automático al pushear a `main` | Vercel Furgocasa (`webcasicinco` → www.casicinco.com) |
 | Carpeta local | `W - FURGOCASA\webmapafurgocasa` | `W - FURGOCASA\webcasicinco` |
-| Stack | Next.js 14 + Supabase + Tailwind | Next.js + Supabase + Tailwind |
+| Stack | Next.js 15 + Supabase + Tailwind | Next.js 15 + Supabase + Tailwind |
 | Datos | Proyecto Supabase propio | Proyecto Supabase propio, **distinto** |
 | Reglas de git del repo | commit + push a `main` siempre (`.cursor/rules/github.mdc`) | pedir confirmación antes de commit/push (`.cursorrules`) |
 
@@ -127,8 +127,8 @@ Antes de copiar nada, abre el archivo de la columna de origen y léelo. No supon
    ver `.cursor/rules/mapas.mdc`.
 4. **Compila antes de subir** (`npm run build`). Si el TLS local falla al descargar fuentes,
    `NODE_TLS_REJECT_UNAUTHORIZED=0` **solo** para ese build local.
-5. **Cada repo tiene sus reglas de git**: en Furgocasa se commitea y pushea a `main`; en Casi Cinco
-   se pide confirmación antes de commitear.
+5. **Git:** los dos repos están en la org **Furgocasa** y despliegan en Vercel al pushear a `main`.
+   En Casi Cinco, confirma antes de commit/push si la regla del repo lo pide.
 6. **Cuidado con las sesiones en paralelo.** Antes de `git add`, `git status` y `git diff`: es normal
    encontrar cambios de otra sesión sin commitear. No los arrastres en tu commit sin decirlo.
 7. **Apunta el resultado aquí**, en el punto 4, con el hash. Es lo que hace que este documento sirva.

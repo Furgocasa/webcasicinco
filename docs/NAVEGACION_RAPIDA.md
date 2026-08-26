@@ -21,8 +21,8 @@
 
 ### **"Voy a hacer deploy a producción"**
 ```
-1. docs/guides/DEPLOY_AWS.md
-2. docs/guides/VERIFICAR_VARIABLES_AWS.md
+1. docs/guides/VERIFICAR_VARIABLES_AWS.md (Vercel FURGOCASA)
+2. docs/guides/VERIFICAR_PRODUCCION.md
 3. docs/guides/INSTRUCCIONES_RESTRINGIR_API_KEYS.md (🔴 CRÍTICO)
 4. docs/guides/VERIFICAR_PRODUCCION.md
 ```
@@ -140,8 +140,8 @@
 
 ### **🚀 DevOps**
 ```
-1. docs/guides/DEPLOY_AWS.md
-2. docs/guides/VERIFICAR_VARIABLES_AWS.md
+1. docs/guides/VERIFICAR_VARIABLES_AWS.md (Vercel FURGOCASA)
+2. docs/guides/VERIFICAR_PRODUCCION.md
 3. docs/guides/INSTRUCCIONES_RESTRINGIR_API_KEYS.md (🔴 CRÍTICO)
 4. docs/guides/VERIFICAR_PRODUCCION.md
 5. docs/guides/CONFIGURAR_DOMINIO.md

@@ -2,7 +2,7 @@
 
 **Fecha:** 21 Octubre 2025  
 **Tiempo estimado:** 30-40 minutos  
-**Entorno:** AWS Amplify (Producción) + Local (Desarrollo)
+**Entorno:** Vercel FURGOCASA (Producción) + Local (Desarrollo)
 
 ---
 

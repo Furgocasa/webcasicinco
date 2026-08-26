@@ -3,8 +3,9 @@
 > **Descubre establecimientos excepcionales con +4.7★ en Google Maps**
 
 [![Estado](https://img.shields.io/badge/Estado-v1.0%20STABLE-success)](https://www.casicinco.com)
-[![Deploy](https://img.shields.io/badge/Deploy-AWS%20Amplify-orange)](https://aws.amazon.com/amplify/)
-[![Framework](https://img.shields.io/badge/Framework-Next.js%2014-black)](https://nextjs.org/)
+[![Deploy](https://img.shields.io/badge/Deploy-Vercel%20Furgocasa-black)](https://vercel.com/furgocasa)
+[![Framework](https://img.shields.io/badge/Framework-Next.js%2015-black)](https://nextjs.org/)
+[![Repo](https://img.shields.io/badge/GitHub-Furgocasa%2Fwebcasicinco-blue)](https://github.com/Furgocasa/webcasicinco)
 
 ---
 
@@ -48,8 +49,8 @@ Este sistema es el **pilar de toda la aplicación**: mapa, chatbot IA, blog y re
 
 ```bash
 # Clonar repositorio
-git clone [repo-url]
-cd Casi5-App
+git clone https://github.com/Furgocasa/webcasicinco.git
+cd webcasicinco
 
 # Instalar dependencias
 npm install --legacy-peer-deps
@@ -71,7 +72,7 @@ npm run dev
 # Build de producción
 npm run build
 
-# O desplegar a AWS Amplify
+# Producción: Vercel FURGOCASA (proyecto webcasicinco → www.casicinco.com)
 git push origin main
 ```
 
@@ -93,7 +94,7 @@ git push origin main
 
 ### 🔧 Guías de Configuración:
 - [docs/guides/CONFIGURACION_COMPLETA.md](docs/guides/CONFIGURACION_COMPLETA.md) - Setup completo
-- [docs/guides/DEPLOY_AWS.md](docs/guides/DEPLOY_AWS.md) - Despliegue en AWS
+- [docs/guides/VERIFICAR_VARIABLES_AWS.md](docs/guides/VERIFICAR_VARIABLES_AWS.md) - Variables (Vercel FURGOCASA; el nombre del archivo es heredado)
 - [docs/guides/GOOGLE_OAUTH_SETUP.md](docs/guides/GOOGLE_OAUTH_SETUP.md) - OAuth con Google
 - [docs/guides/CONFIGURAR_STRIPE.md](docs/guides/CONFIGURAR_STRIPE.md) - Pagos Stripe
 

@@ -2,7 +2,7 @@
 
 **Fecha:** 12 de Octubre de 2025  
 **Versión:** 2.0.0 - BETA 2.0  
-**Repositorio:** https://github.com/ActtaxIA/Casi_cinco_app
+**Repositorio:** https://github.com/Furgocasa/webcasicinco
 
 ---
 
@@ -10,7 +10,7 @@
 
 ### 1. Repositorio Git 
 ✅ Repositorio inicializado  
-✅ Conectado a GitHub: `https://github.com/ActtaxIA/Casi_cinco_app.git`  
+✅ Conectado a GitHub: `https://github.com/Furgocasa/webcasicinco.git`  
 ✅ Rama principal: `main`  
 ✅ Primer commit realizado (130 archivos)  
 ✅ `.gitignore` configurado correctamente  
@@ -59,8 +59,8 @@ Esto asegura que `npm install` funcione siempre sin errores de peer dependencies
 
 ```powershell
 # 1. Clonar el repositorio
-git clone https://github.com/ActtaxIA/Casi_cinco_app.git
-cd Casi_cinco_app
+git clone https://github.com/Furgocasa/webcasicinco.git
+cd webcasicinco
 
 # 2. Ejecutar setup automático
 .\setup.ps1
@@ -277,7 +277,7 @@ git reset --hard HEAD~1
 
 **Desarrollador:** Narciso Pardo Buendía  
 **Email:** narciso.pardo@outlook.com  
-**Repositorio:** https://github.com/ActtaxIA/Casi_cinco_app
+**Repositorio:** https://github.com/Furgocasa/webcasicinco
 
 ---
 

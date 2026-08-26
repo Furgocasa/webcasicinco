@@ -28,8 +28,8 @@ SMTP_USER=info@casicinco.com
 SMTP_PASS=your_smtp_password_here
 ```
 
-### Producción (AWS Amplify)
-Ve a AWS Amplify Console → Tu App → Environment Variables y agrega:
+### Producción (Vercel FURGOCASA)
+Vercel → `webcasicinco` → Settings → Environment Variables:
 ```
 SMTP_HOST=ssl0.ovh.net
 SMTP_PORT=587

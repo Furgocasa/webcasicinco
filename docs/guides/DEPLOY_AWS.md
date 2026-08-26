@@ -1,5 +1,7 @@
 # 🚀 Guía de Despliegue en AWS Amplify
 
+> **Histórico.** Desde el 26 ago 2026 el deploy vivo es **Vercel FURGOCASA** (`webcasicinco` → www.casicinco.com). Repo: `Furgocasa/webcasicinco`. La app Amplify está borrada. Variables: `VERIFICAR_VARIABLES_AWS.md`. Este texto se deja por si hay que consultar el setup viejo.
+
 **Aplicación:** CasiCinco  
 **Región:** eu-north-1 (Estocolmo)  
 **Fecha:** 12 de Octubre de 2025

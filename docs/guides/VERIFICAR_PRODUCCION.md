@@ -1,10 +1,12 @@
 # ✅ Checklist de Verificación - Producción
 
-## 🔍 Verificar que todo funciona en https://main.d2nzzzmoajf631.amplifyapp.com
+## 🔍 Verificar que todo funciona en https://www.casicinco.com
+
+> Hosting vivo: **Vercel FURGOCASA** · `webcasicinco`. La URL Amplify de abajo ya no aplica.
 
 ### 1. Variables de Entorno CRÍTICAS
 
-Verifica en **AWS Amplify Console** → **App Settings** → **Environment variables**:
+Verifica en **Vercel** → FURGOCASA → `webcasicinco` → **Environment Variables**:
 
 #### Variables PÚBLICAS (deben tener NEXT_PUBLIC_):
 - [ ] `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` - **CRÍTICO para el mapa**

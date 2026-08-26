@@ -1,4 +1,8 @@
-# 🌐 Configurar Dominio casicinco.com en AWS Amplify
+# 🌐 Dominio casicinco.com
+
+> **Vivo (26 ago 2026):** Vercel FURGOCASA → `webcasicinco` → Settings → Domains.  
+> `www.casicinco.com` = Production. `casicinco.com` y `webcasicinco.vercel.app` redirigen 308 a www.  
+> Lo de abajo es el procedimiento **viejo de Amplify** (app ya borrada).
 
 ## Paso 1: Agregar el dominio en AWS Amplify
 

@@ -1,8 +1,8 @@
-# Configuración SMTP para AWS Amplify
+# Configuración SMTP (producción = Vercel)
 
-## ⚠️ IMPORTANTE: Configurar en AWS Amplify
+> **Amplify ya no existe** para esta web. Las variables van en **Vercel FURGOCASA** → `webcasicinco` → Environment Variables.
 
-Para que el formulario de contacto funcione en producción, debes agregar estas variables de entorno en AWS Amplify:
+Para que el formulario de contacto funcione en producción:
 
 ### Pasos:
 
