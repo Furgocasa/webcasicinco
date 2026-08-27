@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createClient as createAdminClient } from '@supabase/supabase-js';
-import { evaluateConversation } from '@/lib/ai/evaluation-agent';
+import { evaluateConversation, fetchPlacesForReview, formatPriorContext } from '@/lib/ai/evaluation-agent';
 
 /**
  * POST - Analizar conversaciones pendientes con IA
@@ -57,11 +57,22 @@ export async function POST(request: NextRequest) {
     // Analizar cada conversación
     for (const conv of conversations) {
       try {
+        const extras = await fetchPlacesForReview(
+          adminSupabase,
+          conv.detected_intent,
+          conv.bot_response || ''
+        );
         const analysis = await evaluateConversation(
           conv.user_message,
           conv.bot_response,
           conv.detected_intent,
-          conv.places_found
+          conv.places_found,
+          undefined,
+          {
+            priorContext: formatPriorContext(conv.conversation_context),
+            placesReales: extras.placesReales,
+            citedMissing: extras.citedMissing,
+          }
         );
 
         // Actualizar en BD
@@ -71,7 +82,11 @@ export async function POST(request: NextRequest) {
             ai_summary: analysis.summary,
             quality_assessment: analysis.quality,
             quality_reasoning: analysis.reasoning,
-            suggested_improvements: analysis.improvements,
+            suggested_improvements: analysis.improvements
+              ? `${analysis.improvements}${analysis.data_gap && analysis.data_gap !== 'none' ? ` | hueco: ${analysis.data_gap}` : ''}`
+              : analysis.data_gap && analysis.data_gap !== 'none'
+                ? `hueco: ${analysis.data_gap}`
+                : null,
             analyzed_at: new Date().toISOString()
           })
           .eq('id', conv.id);

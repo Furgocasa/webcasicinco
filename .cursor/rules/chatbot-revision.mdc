@@ -1,0 +1,23 @@
+---
+description: Tras revisar el Tío Viajero de Casi Cinco, clasificar en real y cerrar huecos (molde Andrea)
+alwaysApply: true
+---
+
+# Chatbot Casi Cinco: revisión → corrección
+
+Si el usuario pide revisar, evaluar o mirar las respuestas del Tío Viajero / chatbot / `/admin/conversaciones`:
+
+1. Ejecuta `npx tsx scripts/review-chatbot-messages.ts` (en Windows no uses `npm run` si hay flags). **Siempre en real**, sin `--dry-run`. Por defecto solo `quality_assessment` null. Reevaluar todo: `--all`. Límite: `--limit=50`. Una fila: `--id=<uuid>`.
+2. Escribe en `chatbot_analytics` (`quality_assessment`, `quality_reasoning`, `suggested_improvements`, `analyzed_at`). Informe: `scripts/INFORME-REVISION-MENSAJES.md`.
+3. Cada incorrecta/mejorable por **dato** entra en uno de estos cajones:
+
+| Cajón | Qué pasó | Qué hacer |
+|---|---|---|
+| `missing` | El lugar no está publicado en `places` | Alta/indexación, no hinchar el prompt |
+| `not_retrieved` | Está publicado pero la búsqueda no lo trajo | Filtro / intent / tiers en `app/api/chatbot/route.ts` |
+| `ignored` | Sí estaba en DATOS REALES y el bot no lo usó | Prompt del Tío Viajero |
+| Comportamiento (formato, enlaces, follow-up) | No es un hecho | Prompt |
+
+4. Huecos propuestos: `scripts/INCIDENCIAS-PENDIENTES.csv`. Valídalos; no inventes restaurantes.
+5. Corregir de verdad (búsqueda o prompt) hasta que esa causa no se repita. Un listado de fallos no cierra el ciclo.
+6. No inventar un local, rating o slug que no esté en `places` publicados. Umbral ≥4.7★ y 50+ reseñas (500+ en ranking nacional).

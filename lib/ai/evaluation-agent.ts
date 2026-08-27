@@ -6,9 +6,126 @@
  */
 
 import OpenAI from 'openai';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { gptChatExtras, resolveQualityModel } from './openai';
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+export type DataGap = 'none' | 'missing' | 'not_retrieved' | 'ignored';
+
+export type PlaceSnapshot = {
+  id: string;
+  name: string;
+  slug: string;
+  category: string;
+  subcategory?: string | null;
+  city: string;
+  province: string;
+  rating: number;
+  review_count: number;
+};
+
+export type ReviewExtras = {
+  priorContext?: string;
+  placesReales?: PlaceSnapshot[];
+  citedMissing?: string[];
+};
+
+const PLACE_SELECT =
+  'id, name, slug, category, subcategory, city, province, rating, review_count';
+
+export function extractCitedPlaceRefs(botResponse: string): { slugs: string[]; ids: string[] } {
+  const slugs = new Set<string>();
+  const ids = new Set<string>();
+  const slugRe = /\/(?:restaurante|hotel|bar|spa)\/[^/\s)"']+\/([^/\s)"']+)/gi;
+  let m: RegExpExecArray | null;
+  while ((m = slugRe.exec(botResponse))) {
+    if (m[1]) slugs.add(m[1]);
+  }
+  const idRe = /[?&]place=([0-9a-f-]{8,})/gi;
+  while ((m = idRe.exec(botResponse))) {
+    if (m[1]) ids.add(m[1]);
+  }
+  return { slugs: [...slugs], ids: [...ids] };
+}
+
+export function formatPriorContext(raw: unknown): string {
+  if (!raw) return '';
+  if (typeof raw === 'string') return raw.trim();
+  if (!Array.isArray(raw)) return '';
+  const lines: string[] = [];
+  for (const item of raw) {
+    if (!item || typeof item !== 'object') continue;
+    const role = (item as { role?: string }).role;
+    const content = String((item as { content?: string }).content || '').trim();
+    if (!content) continue;
+    const label = role === 'assistant' ? 'TioViajero' : 'Usuario';
+    lines.push(`${label}: ${content}`);
+  }
+  return lines.join('\n');
+}
+
+export async function fetchPlacesForReview(
+  supabase: SupabaseClient,
+  detectedIntent: Record<string, unknown> | null | undefined,
+  botResponse: string
+): Promise<{ placesReales: PlaceSnapshot[]; citedMissing: string[] }> {
+  const intent = detectedIntent || {};
+  const { slugs, ids } = extractCitedPlaceRefs(botResponse);
+  const cited: PlaceSnapshot[] = [];
+
+  if (slugs.length) {
+    const { data } = await supabase
+      .from('places')
+      .select(PLACE_SELECT)
+      .in('slug', slugs.slice(0, 12))
+      .eq('published', true);
+    cited.push(...((data || []) as PlaceSnapshot[]));
+  }
+  if (ids.length) {
+    const { data } = await supabase
+      .from('places')
+      .select(PLACE_SELECT)
+      .in('id', ids.slice(0, 12))
+      .eq('published', true);
+    cited.push(...((data || []) as PlaceSnapshot[]));
+  }
+
+  const foundKeys = new Set(cited.map((p) => p.slug || p.id));
+  const citedMissing = [...slugs, ...ids].filter((ref) => !foundKeys.has(ref) && !cited.some((p) => p.id === ref));
+
+  const candidates: PlaceSnapshot[] = [];
+  const category = typeof intent.category === 'string' ? intent.category : null;
+  const city = typeof intent.city === 'string' ? intent.city : null;
+  const province = typeof intent.province === 'string' ? intent.province : null;
+  if (category || city || province) {
+    let query = supabase
+      .from('places')
+      .select(PLACE_SELECT)
+      .eq('published', true)
+      .gte('review_count', 50)
+      .order('rating', { ascending: false })
+      .limit(8);
+    if (category) query = query.eq('category', category);
+    if (city && !intent.excludeCapital) query = query.ilike('city', city);
+    if (province) query = query.eq('province', province);
+    if (intent.excludeCapital && city) query = query.neq('city', city);
+    const { data } = await query;
+    candidates.push(...((data || []) as PlaceSnapshot[]));
+  }
+
+  const byId = new Map<string, PlaceSnapshot>();
+  for (const p of [...cited, ...candidates]) byId.set(p.id, p);
+  return { placesReales: [...byId.values()], citedMissing };
+}
+
+let evalOpenAI: OpenAI | null = null;
+function getEvalOpenAI(): OpenAI {
+  if (!evalOpenAI) {
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) throw new Error('OPENAI_API_KEY no configurada');
+    evalOpenAI = new OpenAI({ apiKey });
+  }
+  return evalOpenAI;
+}
 
 // Configuración del Agente Evaluador (configurable desde admin)
 export interface EvaluationAgentConfig {
@@ -273,6 +390,26 @@ NUNCA:
 ✗ Valorar solo el tono o amabilidad (lo que importa es PRECISIÓN)
 
 ═══════════════════════════════════════════════════════════════
+DATOS REALES + HILO (molde Andrea / Furgocasa)
+═══════════════════════════════════════════════════════════════
+
+En el mensaje de evaluación vendrán DATOS REALES de fichas publicadas en Casi Cinco. ESA es la fuente de verdad, no tu memoria de Google.
+
+- Inventar un local, rating, nº de reseñas, ciudad o slug que NO esté en DATOS REALES = INCORRECTA.
+- Citar un slug/id que aparece en CITADOS SIN FICHA = INCORRECTA (enlace inventado).
+- Rating y reseñas de la respuesta deben coincidir con DATOS REALES (±0.1 ★). Inventar 4.9 cuando la ficha tiene 4.7 = INCORRECTA.
+- El chat NO es una guía de viajes: solo lugares ≥4.7★ de la BD. Recomendar un sitio que no cumple el umbral = INCORRECTA.
+- Contexto conversacional: si hay CONTEXTO PREVIO y el último mensaje es un follow-up corto ("¿y hoteles?", "en la provincia?", "más baratos"), interprétalo en ese hilo. NO marques incorrecta por "asumir el tema".
+- NO mezcles temas no preguntados: si pidió mexicanos y la respuesta es fiel a mexicanos, no la bajes porque "podría haber añadido italianos".
+- data_gap: none | missing (el sitio no está publicado) | not_retrieved (está publicado pero la búsqueda no lo trajo) | ignored (sí estaba en DATOS REALES y el bot no lo usó o lo contradijo).
+- Si data_gap es missing o not_retrieved, propone UN hecho estable en data_title + data_body (nombre + ciudad + por qué debería estar). No propongas tono.
+
+Criterios (severos, listón del dueño):
+- correcta: la publicarias en casicinco.com. Datos fieles a DATOS REALES. Ubicación y categoría exactas. O pregunta justo lo que faltaba.
+- mejorable: datos bien, pero no es la respuesta perfecta (cantidad, enlaces, no explica el vacío).
+- incorrecta: datos malos, sitio inventado, ciudad/categoría errónea, o responde a una pregunta incompleta como si ya estuviera resuelta.
+
+═══════════════════════════════════════════════════════════════
 FORMATO DE RESPUESTA (SIEMPRE JSON)
 ═══════════════════════════════════════════════════════════════
 
@@ -281,6 +418,9 @@ FORMATO DE RESPUESTA (SIEMPRE JSON)
   "summary": "Resumen en 1 frase de qué pidió el usuario",
   "reasoning": "Evaluación detallada de 3-5 frases: qué hizo bien/mal, por qué se clasificó así, datos técnicos",
   "improvements": "Sugerencias específicas y técnicas (o null si correcta)",
+  "data_gap": "none" | "missing" | "not_retrieved" | "ignored",
+  "data_title": "título corto si hay hueco (opcional)",
+  "data_body": "hecho estable 3-8 frases si hay hueco (opcional)",
   "scores": {
     "location": 0-10,
     "category": 0-10,
@@ -290,19 +430,23 @@ FORMATO DE RESPUESTA (SIEMPRE JSON)
 }`;
 
 /**
- * Evaluar una conversación con el agente especializado
+ * Evaluar una conversación con el agente especializado (molde Andrea).
  */
 export async function evaluateConversation(
   userMessage: string,
   botResponse: string,
   detectedIntent: any,
   placesFound: number,
-  config?: Partial<EvaluationAgentConfig>
+  config?: Partial<EvaluationAgentConfig>,
+  extras?: ReviewExtras
 ): Promise<{
   quality: 'correcta' | 'mejorable' | 'incorrecta';
   summary: string;
   reasoning: string;
   improvements: string | null;
+  data_gap: DataGap;
+  data_title?: string;
+  data_body?: string;
   scores?: {
     location: number;
     category: number;
@@ -318,29 +462,62 @@ export async function evaluateConversation(
       quality: 'mejorable',
       summary: 'Evaluación desactivada',
       reasoning: 'El agente evaluador está desactivado',
-      improvements: null
+      improvements: null,
+      data_gap: 'none',
     };
   }
 
   const systemPrompt = evalConfig.systemPrompt || DEFAULT_EVALUATION_PROMPT;
+  const placesReales = extras?.placesReales ?? [];
+  const citedMissing = extras?.citedMissing ?? [];
+  const priorContext = extras?.priorContext?.trim() || '';
 
-  const userPrompt = `EVALÚA ESTA CONVERSACIÓN:
+  const userPrompt = `${
+    priorContext
+      ? `CONTEXTO PREVIO DE LA CONVERSACIÓN (memoria que tuvo el Tío Viajero al responder):
+${priorContext}
 
-PREGUNTA USUARIO:
+`
+      : ''
+  }ÚLTIMO MENSAJE DEL USUARIO (turno evaluado):
 "${userMessage}"
 
-RESPUESTA BOT:
+RESPUESTA DEL BOT:
 "${botResponse}"
 
 DATOS TÉCNICOS:
 - Intención detectada: ${JSON.stringify(detectedIntent, null, 2)}
-- Lugares encontrados y devueltos: ${placesFound}
+- Lugares encontrados y devueltos (conteo): ${placesFound}
+
+=== DATOS REALES DE FICHAS PUBLICADAS (FUENTE DE VERDAD) ===
+Si la respuesta cita un local, rating o ciudad que contradice esto, es INCORRECTA.
+${JSON.stringify(
+  placesReales.map((p) => ({
+    nombre: p.name,
+    slug: p.slug,
+    categoria: p.category,
+    subcategoria: p.subcategory,
+    ciudad: p.city,
+    provincia: p.province,
+    rating: p.rating,
+    reseñas: p.review_count,
+  })),
+  null,
+  2
+)}
+${
+  citedMissing.length
+    ? `
+CITADOS EN LA RESPUESTA SIN FICHA EN BD: ${citedMissing.join(', ')}
+`
+    : ''
+}=== FIN DATOS REALES ===
 
 AHORA EVALÚA según los criterios definidos y responde en JSON.`;
 
   try {
     const model = resolveQualityModel(evalConfig.model);
-    const response = await openai.chat.completions.create({
+    const response = await getEvalOpenAI().chat.completions.create({
       model,
       messages: [
         { role: 'system', content: systemPrompt },
@@ -348,23 +525,29 @@ AHORA EVALÚA según los criterios definidos y responde en JSON.`;
       ],
       ...gptChatExtras(model, {
         temperature: evalConfig.temperature,
-        maxTokens: Math.max(evalConfig.maxTokens, 1500),
+        maxTokens: Math.max(evalConfig.maxTokens, 2000),
         json: true,
+        reasoningEffort: 'low',
       }),
     } as OpenAI.Chat.ChatCompletionCreateParamsNonStreaming);
 
     const result = JSON.parse(response.choices[0].message.content || '{}');
     
-    // Validar quality
     if (!['correcta', 'mejorable', 'incorrecta'].includes(result.quality)) {
       result.quality = 'mejorable';
     }
+    const gap: DataGap = ['none', 'missing', 'not_retrieved', 'ignored'].includes(result.data_gap)
+      ? result.data_gap
+      : 'none';
 
     return {
       quality: result.quality,
       summary: result.summary || 'Sin resumen',
       reasoning: result.reasoning || 'Sin evaluación',
       improvements: result.improvements || null,
+      data_gap: gap,
+      data_title: result.data_title?.trim(),
+      data_body: result.data_body?.trim(),
       scores: result.scores || undefined
     };
 
@@ -374,7 +557,8 @@ AHORA EVALÚA según los criterios definidos y responde en JSON.`;
       quality: 'mejorable',
       summary: 'Error en evaluación',
       reasoning: 'No se pudo evaluar con IA: ' + (error as Error).message,
-      improvements: 'Revisar manualmente'
+      improvements: 'Revisar manualmente',
+      data_gap: 'none',
     };
   }
 }

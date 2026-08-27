@@ -46,13 +46,13 @@ export function resolveQualityModel(saved?: string | null): string {
 
 export function gptChatExtras(
   model: string,
-  opts: { temperature?: number; maxTokens?: number; json?: boolean } = {}
+  opts: { temperature?: number; maxTokens?: number; json?: boolean; reasoningEffort?: 'none' | 'low' | 'medium' } = {}
 ): Record<string, unknown> {
   const extras: Record<string, unknown> = {};
   if (opts.json) extras.response_format = { type: 'json_object' };
   if (isGpt5Family(model)) {
     extras.max_completion_tokens = Math.max(opts.maxTokens ?? 2000, 1500);
-    extras.reasoning_effort = 'none';
+    extras.reasoning_effort = opts.reasoningEffort ?? 'none';
   } else {
     if (opts.temperature != null) extras.temperature = opts.temperature;
     if (opts.maxTokens != null) extras.max_tokens = opts.maxTokens;
