@@ -28,9 +28,37 @@ function getOpenAI(): OpenAI {
   return openai;
 }
 
-// Modelos a usar (gpt-4o-mini: estable y económico para enriquecimiento)
+/** Texto de calidad (chat, blog, fichas). Configurable; no rebajar si ya es 5.6. */
+export const QUALITY_MODEL = 'gpt-5.6-terra';
+/** Clasificación / enriquecimiento corto. */
 const MODEL = process.env.OPENAI_ENRICHMENT_MODEL || 'gpt-4o-mini';
-const MODEL_FAST = 'gpt-3.5-turbo'; // Para chatbot más rápido
+const MODEL_FAST = 'gpt-4o-mini';
+
+export function isGpt5Family(model: string): boolean {
+  return /^gpt-5/i.test(model);
+}
+
+export function resolveQualityModel(saved?: string | null): string {
+  const m = saved?.trim();
+  if (m && /^gpt-5\.6/i.test(m)) return m;
+  return QUALITY_MODEL;
+}
+
+export function gptChatExtras(
+  model: string,
+  opts: { temperature?: number; maxTokens?: number; json?: boolean } = {}
+): Record<string, unknown> {
+  const extras: Record<string, unknown> = {};
+  if (opts.json) extras.response_format = { type: 'json_object' };
+  if (isGpt5Family(model)) {
+    extras.max_completion_tokens = Math.max(opts.maxTokens ?? 2000, 1500);
+    extras.reasoning_effort = 'none';
+  } else {
+    if (opts.temperature != null) extras.temperature = opts.temperature;
+    if (opts.maxTokens != null) extras.max_tokens = opts.maxTokens;
+  }
+  return extras;
+}
 
 /**
  * FUNCIÓN 1: Generar descripción única de un lugar
@@ -633,12 +661,15 @@ ${userMessage}
       { role: 'user', content: userContext },
     ];
 
+    const chatModel = resolveQualityModel(chatbotConfig.model);
     const completion = await getOpenAI().chat.completions.create({
-      model: chatbotConfig.model || MODEL_FAST,
+      model: chatModel,
       messages,
-      temperature: chatbotConfig.temperature !== undefined ? chatbotConfig.temperature : 0.7,
-      max_tokens: chatbotConfig.maxTokens || 400,
-    });
+      ...gptChatExtras(chatModel, {
+        temperature: chatbotConfig.temperature !== undefined ? chatbotConfig.temperature : 0.7,
+        maxTokens: Math.max(chatbotConfig.maxTokens || 0, 1500),
+      }),
+    } as OpenAI.Chat.ChatCompletionCreateParamsNonStreaming);
 
     return completion.choices[0].message.content || 'Lo siento, no pude procesar tu mensaje.';
   } catch (error) {
@@ -736,7 +767,7 @@ export function estimateContentGenerationCost(placeCount: number): {
 export { BLOG_FULL_HTML_MARKER } from '@/types/blog';
 
 /** Modelo recomendado para artículos de blog (configurable vía env) */
-const BLOG_MODEL = process.env.BLOG_AI_MODEL || 'gpt-4o';
+const BLOG_MODEL = process.env.BLOG_AI_MODEL?.trim() || QUALITY_MODEL;
 
 export const BLOG_SEO_SYSTEM_PROMPT = `##ROL
 Eres el redactor SEO de CASI CINCO (https://www.casicinco.com/blog). Escribes textos cortos y útiles que acompañan un Top 10 real de la base de datos (solo lugares +4.7★ en Google).
@@ -968,9 +999,8 @@ export async function generateBlogArticleDraft(input: BlogArticleInput): Promise
       { role: 'system', content: BLOG_SEO_SYSTEM_PROMPT },
       { role: 'user', content: userPrompt },
     ],
-    temperature: 0.7,
-    max_tokens: 8000,
-  });
+    ...gptChatExtras(BLOG_MODEL, { temperature: 0.7, maxTokens: 8000 }),
+  } as OpenAI.Chat.ChatCompletionCreateParamsNonStreaming);
 
   const draft = cleanHtmlOutput(draftResponse.choices[0].message.content || '');
 
@@ -983,9 +1013,8 @@ export async function generateBlogArticleDraft(input: BlogArticleInput): Promise
         content: `BORRADOR HTML:\n${draft}\n\n${dossier}\n\nEntrega SOLO el HTML final mejorado.`,
       },
     ],
-    temperature: 0.7,
-    max_tokens: 8000,
-  });
+    ...gptChatExtras(BLOG_MODEL, { temperature: 0.7, maxTokens: 8000 }),
+  } as OpenAI.Chat.ChatCompletionCreateParamsNonStreaming);
 
   return cleanHtmlOutput(refineResponse.choices[0].message.content || draft);
 }
@@ -1040,10 +1069,8 @@ HTML A REVISAR:
 ${html.substring(0, 12000)}`,
       },
     ],
-    temperature: 0.2,
-    max_tokens: 2000,
-    response_format: { type: 'json_object' },
-  });
+    ...gptChatExtras(BLOG_MODEL, { temperature: 0.2, maxTokens: 2000, json: true }),
+  } as OpenAI.Chat.ChatCompletionCreateParamsNonStreaming);
 
   try {
     const parsed = JSON.parse(response.choices[0].message.content || '{}');
@@ -1104,9 +1131,8 @@ ${html}
 Entrega SOLO el HTML corregido.`,
       },
     ],
-    temperature: 0.5,
-    max_tokens: 8000,
-  });
+    ...gptChatExtras(BLOG_MODEL, { temperature: 0.5, maxTokens: 8000 }),
+  } as OpenAI.Chat.ChatCompletionCreateParamsNonStreaming);
 
   return cleanHtmlOutput(response.choices[0].message.content || html);
 }

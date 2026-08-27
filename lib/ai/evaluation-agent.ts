@@ -6,6 +6,7 @@
  */
 
 import OpenAI from 'openai';
+import { gptChatExtras, resolveQualityModel } from './openai';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -21,9 +22,9 @@ export interface EvaluationAgentConfig {
 // Configuración por defecto
 const DEFAULT_EVALUATION_CONFIG: EvaluationAgentConfig = {
   enabled: true,
-  model: 'gpt-4o-mini',
-  temperature: 0.2, // MUY baja para máxima objetividad
-  maxTokens: 400,
+  model: 'gpt-5.6-terra',
+  temperature: 0.2,
+  maxTokens: 1500,
 };
 
 /**
@@ -338,16 +339,19 @@ DATOS TÉCNICOS:
 AHORA EVALÚA según los criterios definidos y responde en JSON.`;
 
   try {
+    const model = resolveQualityModel(evalConfig.model);
     const response = await openai.chat.completions.create({
-      model: evalConfig.model,
+      model,
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt }
       ],
-      temperature: evalConfig.temperature,
-      max_tokens: evalConfig.maxTokens,
-      response_format: { type: 'json_object' }
-    });
+      ...gptChatExtras(model, {
+        temperature: evalConfig.temperature,
+        maxTokens: Math.max(evalConfig.maxTokens, 1500),
+        json: true,
+      }),
+    } as OpenAI.Chat.ChatCompletionCreateParamsNonStreaming);
 
     const result = JSON.parse(response.choices[0].message.content || '{}');
     

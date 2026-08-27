@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { CookieSettingsButton } from '@/components/CookieConsentBar';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -118,6 +119,9 @@ export default function Footer() {
                 <Link href="/cookies" className="hover:text-white transition">
                   Cookies
                 </Link>
+              </li>
+              <li>
+                <CookieSettingsButton className="hover:text-white transition text-left bg-transparent p-0 border-0 text-sm cursor-pointer" />
               </li>
               <li>
                 <Link href="/contacto" className="hover:text-white transition">

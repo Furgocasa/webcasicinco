@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { ArrowLeft, Cookie } from 'lucide-react';
 import Footer from '@/components/layout/Footer';
+import { CookieSettingsButton } from '@/components/CookieConsentBar';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -103,7 +104,13 @@ export default function CookiesPage() {
 
               <h2 className="text-2xl font-bold text-gray-900 mb-4">Cómo Gestionar las Cookies</h2>
               <p className="text-gray-700 mb-4">
-                Puedes controlar y eliminar cookies desde la configuración de tu navegador:
+                Puedes cambiar tus preferencias en cualquier momento desde el pie de página o con este botón:
+              </p>
+              <div className="not-prose mb-6">
+                <CookieSettingsButton className="inline-flex items-center px-5 py-3 rounded-lg bg-[#002297] text-white font-semibold text-sm hover:bg-[#001a73]" />
+              </div>
+              <p className="text-gray-700 mb-4">
+                También puedes controlar y eliminar cookies desde la configuración de tu navegador:
               </p>
               <ul className="list-disc pl-6 text-gray-700 mb-6 space-y-2">
                 <li><strong>Chrome:</strong> Configuración → Privacidad y seguridad → Cookies</li>

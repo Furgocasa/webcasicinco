@@ -119,14 +119,21 @@ export default function RootLayout({
               window.dataLayer = window.dataLayer || [];
               function gtag(){window.dataLayer.push(arguments);}
               window.gtag = gtag;
-              var granted = false;
-              try { granted = localStorage.getItem('casicinco_cookie_consent') === 'granted'; } catch (e) {}
-              var v = granted ? 'granted' : 'denied';
+              var analyticsGranted = false;
+              try {
+                var prefsRaw = localStorage.getItem('casicinco_cookie_preferences');
+                if (prefsRaw) {
+                  analyticsGranted = !!JSON.parse(prefsRaw).analytics;
+                } else {
+                  analyticsGranted = localStorage.getItem('casicinco_cookie_consent') === 'granted';
+                }
+              } catch (e) {}
+              var v = analyticsGranted ? 'granted' : 'denied';
               gtag('consent', 'default', {
                 analytics_storage: v,
-                ad_storage: v,
-                ad_user_data: v,
-                ad_personalization: v,
+                ad_storage: 'denied',
+                ad_user_data: 'denied',
+                ad_personalization: 'denied',
                 wait_for_update: 500
               });
             `,

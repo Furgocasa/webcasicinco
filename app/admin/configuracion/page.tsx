@@ -25,9 +25,9 @@ export default function ConfiguracionPage() {
     reviewSummaryPrompt: '',
     
     // Configuración del Agente Chatbot
-    chatbotModel: 'gpt-4o-mini',
+    chatbotModel: 'gpt-5.6-terra',
     chatbotTemperature: 0.7,
-    chatbotMaxTokens: 400,
+    chatbotMaxTokens: 1500,
     chatbotSystemPrompt: '',
     chatbotUserPrompt: '',
     chatbotMaxHistoryMessages: 20,
@@ -110,9 +110,11 @@ Destaca los aspectos más mencionados.
 Sé objetivo y equilibrado.`,
 
       // Configuración del chatbot (desde la base de datos)
-      chatbotModel: savedChatbotConfig.model || 'gpt-4o-mini',
+      chatbotModel: savedChatbotConfig.model?.startsWith('gpt-5.6')
+        ? savedChatbotConfig.model
+        : 'gpt-5.6-terra',
       chatbotTemperature: savedChatbotConfig.temperature !== undefined ? savedChatbotConfig.temperature : 0.7,
-      chatbotMaxTokens: savedChatbotConfig.maxTokens || 400,
+      chatbotMaxTokens: Math.max(savedChatbotConfig.maxTokens || 0, 1500),
       chatbotMaxHistoryMessages: savedChatbotConfig.maxHistoryMessages || 20,
       chatbotEnabled: savedChatbotConfig.enabled !== false,
       
@@ -153,9 +155,9 @@ Responde en 100-200 palabras.`,
           supabaseAnonKey: '⚠️ Verificando...',
           descriptionPrompt: '',
           reviewSummaryPrompt: '',
-          chatbotModel: 'gpt-4o-mini',
+          chatbotModel: 'gpt-5.6-terra',
           chatbotTemperature: 0.7,
-          chatbotMaxTokens: 400,
+          chatbotMaxTokens: 1500,
           chatbotSystemPrompt: '',
           chatbotUserPrompt: '',
           chatbotMaxHistoryMessages: 20,
@@ -422,23 +424,14 @@ Responde en 100-200 palabras.`,
                 onChange={(e) => setConfig({ ...config, chatbotModel: e.target.value })}
                 className="w-full px-3 py-2 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500 text-sm"
               >
-                <optgroup label="Serie GPT-4o (Recomendado)">
-                  <option value="gpt-4o">GPT-4o (Más potente)</option>
-                  <option value="gpt-4o-mini">GPT-4o Mini (Recomendado)</option>
+                <optgroup label="Calidad (recomendado)">
+                  <option value="gpt-5.6-terra">GPT-5.6 Terra</option>
+                  <option value="gpt-5.6-sol">GPT-5.6 Sol</option>
+                  <option value="gpt-5.6-luna">GPT-5.6 Luna</option>
                 </optgroup>
-                <optgroup label="Serie GPT-4 Turbo">
-                  <option value="gpt-4-turbo">GPT-4 Turbo (Multimodal)</option>
-                  <option value="gpt-4-turbo-preview">GPT-4 Turbo Preview</option>
-                  <option value="gpt-4-0125-preview">GPT-4 0125 Preview</option>
-                  <option value="gpt-4-1106-preview">GPT-4 1106 Preview</option>
-                </optgroup>
-                <optgroup label="Serie GPT-4">
-                  <option value="gpt-4">GPT-4 (Original)</option>
-                  <option value="gpt-4-0613">GPT-4 0613</option>
-                </optgroup>
-                <optgroup label="Serie GPT-3.5">
-                  <option value="gpt-3.5-turbo">GPT-3.5 Turbo (Rápido y económico)</option>
-                  <option value="gpt-3.5-turbo-16k">GPT-3.5 Turbo 16K (Más contexto)</option>
+                <optgroup label="Anteriores">
+                  <option value="gpt-4o">GPT-4o</option>
+                  <option value="gpt-4o-mini">GPT-4o Mini</option>
                 </optgroup>
               </select>
               <p className="text-xs text-amber-700 mt-1">Modelo usado para generar respuestas</p>

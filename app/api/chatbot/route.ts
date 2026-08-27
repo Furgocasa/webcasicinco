@@ -363,18 +363,24 @@ const RATE_LIMIT = { maxRequests: 20, windowMs: 60000 }; // 20 mensajes por minu
 // Configuración por defecto
 const DEFAULT_CHATBOT_CONFIG = {
   enabled: true,
-  model: 'gpt-4o-mini',
+  model: 'gpt-5.6-terra',
   temperature: 0.25,
-  maxTokens: 320,
+  maxTokens: 1500,
   maxHistoryMessages: 12,
 };
+
+function resolveChatbotModel(saved?: string | null): string {
+  const m = saved?.trim();
+  if (m && /^gpt-5\.6/i.test(m)) return m;
+  return 'gpt-5.6-terra';
+}
 
 function validateChatbotConfig(config: any): any {
   return {
     enabled: typeof config?.enabled === 'boolean' ? config.enabled : true,
-    model: config?.model || 'gpt-4o-mini',
+    model: resolveChatbotModel(config?.model),
     temperature: Math.max(0, Math.min(2, config?.temperature || 0.25)),
-    maxTokens: Math.max(50, Math.min(1000, config?.maxTokens || 320)),
+    maxTokens: Math.max(1500, Math.min(4000, config?.maxTokens || 1500)),
     maxHistoryMessages: Math.max(2, Math.min(50, config?.maxHistoryMessages || 12)),
     systemPrompt: config?.systemPrompt,
   };
