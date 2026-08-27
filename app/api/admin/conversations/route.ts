@@ -118,3 +118,44 @@ export async function DELETE(request: NextRequest) {
   }
 }
 
+/**
+ * PATCH — calificar una respuesta única (no el hilo).
+ */
+export async function PATCH(request: NextRequest) {
+  try {
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user || user.user_metadata?.role !== 'admin') {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const id = String(body.id || '');
+    const quality = body.quality_assessment;
+    const valid = ['correcta', 'mejorable', 'incorrecta', null];
+    if (!id || (quality !== null && !['correcta', 'mejorable', 'incorrecta'].includes(quality))) {
+      return NextResponse.json({ error: 'Datos inválidos' }, { status: 400 });
+    }
+
+    const adminSupabase = createAdminClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
+    const { data, error } = await adminSupabase
+      .from('chatbot_analytics')
+      .update({
+        quality_assessment: quality,
+        quality_reasoning: typeof body.quality_reasoning === 'string' ? body.quality_reasoning : undefined,
+      })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ success: true, conversation: data });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+

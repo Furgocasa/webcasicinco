@@ -53,6 +53,17 @@ export default function ConversacionesPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [view, setView] = useState<'respuestas' | 'conversaciones'>('respuestas');
+  const [threads, setThreads] = useState<{
+    id: string;
+    label: string;
+    last_message_at: string;
+    first_user_message: string;
+    assistant_count: number;
+    unclassified_responses: number;
+    classified_responses: number;
+    quality_score: number | null;
+  }[]>([]);
 
   // Verificar que es admin
   useEffect(() => {
@@ -351,8 +362,29 @@ export default function ConversacionesPage() {
           📊 Análisis de Conversaciones del Chatbot
         </h1>
         <p className="text-gray-600">
-          Sistema de evaluación automática para mejorar continuamente el Tío Viajero IA
+          Se califican las <strong>respuestas</strong> (una a una). La nota de cada conversación es la media: correcta 10, mejorable 5, incorrecta 0.
         </p>
+        <div className="flex gap-2 mt-4">
+          <button
+            type="button"
+            onClick={() => setView('respuestas')}
+            className={`px-4 py-2 rounded-lg text-sm font-medium ${view === 'respuestas' ? 'bg-blue-600 text-white' : 'bg-white border border-gray-200 text-gray-600'}`}
+          >
+            Respuestas
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setView('conversaciones');
+              fetch('/api/admin/conversation-threads')
+                .then((r) => r.json())
+                .then((d) => { if (d.success) setThreads(d.threads || []); });
+            }}
+            className={`px-4 py-2 rounded-lg text-sm font-medium ${view === 'conversaciones' ? 'bg-blue-600 text-white' : 'bg-white border border-gray-200 text-gray-600'}`}
+          >
+            Conversaciones
+          </button>
+        </div>
       </div>
 
       {/* Estadísticas */}
@@ -401,6 +433,7 @@ export default function ConversacionesPage() {
       )}
 
       {/* Acciones y Filtros */}
+      {view === 'respuestas' && (
       <Card className="p-6 mb-6">
         <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
           <div className="flex flex-col md:flex-row gap-3 flex-1">
@@ -487,8 +520,50 @@ export default function ConversacionesPage() {
           </div>
         </div>
       </Card>
+      )}
+
+      {view === 'conversaciones' && (
+        <Card className="overflow-hidden mb-6">
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-4 py-3 text-left">Fecha</th>
+                <th className="px-4 py-3 text-left">Visitante</th>
+                <th className="px-4 py-3 text-left">Primer mensaje</th>
+                <th className="px-4 py-3 text-center">Resp.</th>
+                <th className="px-4 py-3 text-center">Nota</th>
+              </tr>
+            </thead>
+            <tbody>
+              {threads.map((t) => (
+                <tr key={t.id} className="border-t border-gray-100">
+                  <td className="px-4 py-3 whitespace-nowrap text-gray-600">
+                    {new Date(t.last_message_at).toLocaleString('es-ES')}
+                  </td>
+                  <td className="px-4 py-3">{t.label}</td>
+                  <td className="px-4 py-3 max-w-[240px] truncate">{t.first_user_message}</td>
+                  <td className="px-4 py-3 text-center">{t.assistant_count}</td>
+                  <td className="px-4 py-3 text-center">
+                    {t.quality_score === null ? (
+                      <span className="text-xs text-gray-400">Sin valorar{t.unclassified_responses ? ` (${t.unclassified_responses})` : ''}</span>
+                    ) : (
+                      <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${
+                        t.quality_score >= 7 ? 'bg-green-100 text-green-800' : t.quality_score >= 4 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'
+                      }`}>
+                        {t.quality_score.toFixed(1)}/10
+                        {t.unclassified_responses > 0 ? ` ·${t.unclassified_responses}` : ''}
+                      </span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </Card>
+      )}
 
       {/* Tabla de conversaciones */}
+      {view === 'respuestas' && (
       <Card className="overflow-hidden">
         {loading ? (
           <div className="p-12 text-center">
@@ -614,6 +689,7 @@ export default function ConversacionesPage() {
           </>
         )}
       </Card>
+      )}
 
       {/* Modal de detalle */}
       {selectedConv && (
@@ -639,6 +715,32 @@ export default function ConversacionesPage() {
                 <div className="flex items-center gap-2">
                   {getQualityBadge(selectedConv.quality_assessment)}
                 </div>
+              </div>
+              <div className="flex flex-wrap gap-2 mb-6">
+                {(['correcta', 'mejorable', 'incorrecta'] as const).map((q) => (
+                  <button
+                    key={q}
+                    type="button"
+                    className={`px-3 py-1 rounded-full text-xs font-medium border ${
+                      selectedConv.quality_assessment === q ? 'ring-2 ring-blue-400' : 'bg-white border-gray-200'
+                    }`}
+                    onClick={async () => {
+                      const res = await fetch('/api/admin/conversations', {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ id: selectedConv.id, quality_assessment: q }),
+                      });
+                      const data = await res.json();
+                      if (data.success) {
+                        setSelectedConv({ ...selectedConv, quality_assessment: q });
+                        loadConversations();
+                        loadStats();
+                      }
+                    }}
+                  >
+                    {q === 'correcta' ? 'Correcta' : q === 'mejorable' ? 'Mejorable' : 'Incorrecta'}
+                  </button>
+                ))}
               </div>
 
               {/* Usuario */}
