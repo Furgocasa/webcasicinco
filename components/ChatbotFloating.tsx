@@ -153,7 +153,7 @@ export default function ChatbotFloating() {
         if (error.code === error.PERMISSION_DENIED) setGeoBlocked(true);
         else setGeoSoftFail(true);
       },
-      { enableHighAccuracy: true, timeout: 20000, maximumAge: 300000 }
+      { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 }
     );
   };
 
@@ -369,11 +369,9 @@ export default function ChatbotFloating() {
             ) : !loadingHistory && !geoDeclined ? (
               <div className="bg-white rounded-lg p-3 border border-blue-200">
                 <p className="text-xs text-[#002297] leading-relaxed">
-                  {geoBlocked
-                    ? 'No he podido usar la ubicación. En el candado de la barra, permite la ubicación a esta web y pulsa otra vez. Si no, dime la ciudad.'
-                    : geoSoftFail
-                      ? 'No he podido localizarte ahora. Prueba otra vez o dime la ciudad.'
-                      : 'Es mucho mejor compartir tu ubicación: así el Tío Viajero te da sitios cerca de ti y no tiene que adivinar la ciudad. La puedes quitar cuando quieras. No es el «Ver ubicación» del mapa.'}
+                  {geoBlocked || geoSoftFail
+                    ? 'No se pudo obtener tu ubicación. Prueba otra vez o dime la ciudad.'
+                    : 'Es mucho mejor compartir tu ubicación: así el Tío Viajero te da sitios cerca de ti y no tiene que adivinar la ciudad. La puedes quitar cuando quieras. No es el «Ver ubicación» del mapa.'}
                 </p>
                 <div className="mt-2 flex flex-wrap gap-2">
                   <button

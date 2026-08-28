@@ -864,28 +864,13 @@ export default function MapPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allPlaces, mapReady]);
 
-  // ===== GEOLOCALIZACIÓN: CENTRA el mapa en el usuario, NO filtra el dataset =====
-  const activateGeolocation = useCallback((silent = false) => {
-    if (!navigator.geolocation) {
-      if (!silent) setGeolocationError('Este navegador no puede localizarte. Dime la ciudad en el buscador.');
-      return;
+  // ===== GPS al molde MapafurgoCasa: pide al entrar (sin timeout) y Ver ubicación es un watch =====
+  const startWatch = useCallback((center: boolean) => {
+    if (!navigator.geolocation) return;
+    if (geoWatchIdRef.current !== null) {
+      navigator.geolocation.clearWatch(geoWatchIdRef.current);
+      geoWatchIdRef.current = null;
     }
-
-    if (typeof window !== 'undefined' && window.location.protocol === 'http:' && !window.location.hostname.includes('localhost')) {
-      if (!silent) setGeolocationError('La ubicación pide HTTPS.');
-      return;
-    }
-
-    setGeolocationError(null);
-    const mobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
-    const options = {
-      enableHighAccuracy: true,
-      timeout: 20000,
-      maximumAge: 300000,
-    };
-
-    // watchPosition: la posición del usuario se mantiene actualizada
     const watchId = navigator.geolocation.watchPosition(
       (position) => {
         const location = {
@@ -894,10 +879,9 @@ export default function MapPage() {
         };
         setUserLocation(location);
         setIsGeolocationActive(true);
+        setGeolocationError(null);
         localStorage.setItem('geolocationActive', 'true');
-
-        // Centrar el mapa en el usuario SOLO la primera vez (no en cada actualización)
-        if (!hasCenteredOnUserRef.current && mapRef.current) {
+        if (center && !hasCenteredOnUserRef.current && mapRef.current) {
           hasCenteredOnUserRef.current = true;
           const cameraOptions = {
             center: [location.lng, location.lat] as [number, number],
@@ -905,40 +889,34 @@ export default function MapPage() {
           };
           if (prefersReducedMotionRef.current) mapRef.current.jumpTo(cameraOptions);
           else mapRef.current.easeTo({ ...cameraOptions, duration: 800 });
-
-          if (!silent) {
-            const accuracy = position.coords.accuracy;
-            if (accuracy > 5000) {
-              toast.warning(`Ubicación aproximada (±${Math.round(accuracy / 1000)} km).`);
-            }
-          }
         }
       },
       (error) => {
-        localStorage.setItem('geolocationActive', 'false');
+        console.error('Error GPS:', error);
+        setGeolocationError('No se pudo obtener tu ubicación');
         setIsGeolocationActive(false);
+        localStorage.setItem('geolocationActive', 'false');
         if (geoWatchIdRef.current !== null) {
           navigator.geolocation.clearWatch(geoWatchIdRef.current);
           geoWatchIdRef.current = null;
         }
-        // Al restaurar de localStorage no se grita: el candado cerrado no es un fallo del mapa.
-        if (silent) {
-          setGeolocationError(null);
-          return;
-        }
-        if (error.code === error.PERMISSION_DENIED) {
-          setGeolocationError('En el candado de la barra, permite la ubicación y pulsa otra vez.');
-        } else {
-          setGeolocationError('No he podido localizarte. Prueba otra vez.');
-        }
       },
-      options
+      { enableHighAccuracy: true, maximumAge: 0, timeout: 5000 }
     );
-
     geoWatchIdRef.current = watchId;
   }, []);
 
-  // Desactivar geolocalización
+  const activateGeolocation = useCallback(() => {
+    if (!navigator.geolocation) {
+      setGeolocationError('No se pudo obtener tu ubicación');
+      return;
+    }
+    setGeolocationError(null);
+    setIsGeolocationActive(true);
+    localStorage.setItem('geolocationActive', 'true');
+    startWatch(true);
+  }, [startWatch]);
+
   const deactivateGeolocation = useCallback(() => {
     if (geoWatchIdRef.current !== null) {
       navigator.geolocation.clearWatch(geoWatchIdRef.current);
@@ -949,37 +927,39 @@ export default function MapPage() {
     setIsGeolocationActive(false);
     setGeolocationError(null);
     localStorage.setItem('geolocationActive', 'false');
-
     setSortBy((current) => (current === 'proximity' ? 'reviews' : current));
   }, []);
 
-  // Restaurar GPS solo si el navegador ya lo tiene concedido. Si está en
-  // «preguntar» o «bloquear», no se llama: si no, al abrir /mapa sale el toast rojo.
+  // Al entrar: getCurrentPosition sin opciones (MapafurgoCasa). Si falla, silencio.
   useEffect(() => {
-    let cancelled = false;
-    const restore = async () => {
-      if (typeof window === 'undefined' || localStorage.getItem('geolocationActive') !== 'true') return;
-      try {
-        const perm = await navigator.permissions?.query({ name: 'geolocation' });
-        if (perm && perm.state !== 'granted') {
-          localStorage.setItem('geolocationActive', 'false');
-          return;
-        }
-      } catch {
-        // Safari u otros sin Permissions API: intentamos en silencio.
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        if (Math.abs(lat) < 0.5 && Math.abs(lng) < 0.5) return;
+        setUserLocation({ lat, lng });
+        setIsGeolocationActive(true);
+        localStorage.setItem('geolocationActive', 'true');
+      },
+      (error) => {
+        console.log('GPS no disponible:', error.message);
+        setIsGeolocationActive(false);
       }
-      if (!cancelled) activateGeolocation(true);
-    };
-    void restore();
+    );
     return () => {
-      cancelled = true;
       if (geoWatchIdRef.current !== null) {
         navigator.geolocation.clearWatch(geoWatchIdRef.current);
         geoWatchIdRef.current = null;
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (isGeolocationActive && mapReady && geoWatchIdRef.current === null && navigator.geolocation) {
+      startWatch(!hasCenteredOnUserRef.current);
+    }
+  }, [isGeolocationActive, mapReady, startWatch]);
 
   // Marcador de usuario (distinto a los pins de lugares)
   useEffect(() => {
@@ -1426,7 +1406,7 @@ export default function MapPage() {
 
           <button
             type="button"
-            onClick={isGeolocationActive ? deactivateGeolocation : () => activateGeolocation(false)}
+            onClick={isGeolocationActive ? deactivateGeolocation : activateGeolocation}
             className={`absolute left-3 bottom-[calc(8.25rem+env(safe-area-inset-bottom,0px))] md:left-1/2 md:-translate-x-1/2 md:bottom-20 p-3 md:px-4 md:py-2 rounded-full shadow-lg font-semibold transition-all z-30 flex items-center md:gap-2 ${
               isGeolocationActive ? 'bg-orange-500 text-white hover:bg-orange-600' : 'bg-white text-gray-700 hover:bg-gray-50'
             }`}
