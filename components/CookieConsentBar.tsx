@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { BarChart3, Cookie, Settings, Shield, X } from 'lucide-react';
+import { BarChart3, Cookie, Megaphone, Settings, Shield, X } from 'lucide-react';
 
 export const OPEN_COOKIE_SETTINGS = 'openCookieSettings';
 const KEY = 'casicinco_cookie_consent';
@@ -13,19 +13,21 @@ type Prefs = {
   necessary: true;
   analytics: boolean;
   functional: boolean;
+  marketing: boolean;
 };
 
-const ALL_ON: Prefs = { necessary: true, analytics: true, functional: true };
-const ONLY_NECESSARY: Prefs = { necessary: true, analytics: false, functional: false };
+const ALL_ON: Prefs = { necessary: true, analytics: true, functional: true, marketing: true };
+const ONLY_NECESSARY: Prefs = { necessary: true, analytics: false, functional: false, marketing: false };
 
 function updateGtag(prefs: Prefs) {
   if (typeof window === 'undefined' || !(window as any).gtag) return;
   const analytics = prefs.analytics ? 'granted' : 'denied';
+  const ads = prefs.marketing ? 'granted' : 'denied';
   (window as any).gtag('consent', 'update', {
     analytics_storage: analytics,
-    ad_storage: 'denied',
-    ad_user_data: 'denied',
-    ad_personalization: 'denied',
+    ad_storage: ads,
+    ad_user_data: ads,
+    ad_personalization: ads,
   });
 }
 
@@ -41,7 +43,12 @@ function readPrefs(): Prefs | null {
     const raw = localStorage.getItem(PREFS_KEY);
     if (raw) {
       const parsed = JSON.parse(raw) as Partial<Prefs>;
-      return { necessary: true, analytics: Boolean(parsed.analytics), functional: Boolean(parsed.functional) };
+      return {
+        necessary: true,
+        analytics: Boolean(parsed.analytics),
+        functional: Boolean(parsed.functional),
+        marketing: Boolean(parsed.marketing),
+      };
     }
     const legacy = localStorage.getItem(KEY);
     if (legacy === 'granted') return ALL_ON;
@@ -129,28 +136,37 @@ export function CookieConsentBar() {
             </button>
           </div>
           <div className="flex-1 overflow-y-auto p-6">
-            <p className="text-gray-600 mb-6">Elige qué tipos de cookies deseas aceptar. Las cookies necesarias no se pueden desactivar.</p>
-            <Category
-              icon={Shield}
-              title="Cookies necesarias"
-              description="Esenciales para el funcionamiento del sitio (sesión, seguridad, preferencia de cookies)."
-              enabled
-              required
-            />
-            <Category
-              icon={Settings}
-              title="Cookies funcionales"
-              description="Recuerdan filtros, vista del mapa y preferencias de uso."
-              enabled={prefs.functional}
-              onChange={(v) => setPrefs((p) => ({ ...p, functional: v }))}
-            />
-            <Category
-              icon={BarChart3}
-              title="Cookies analíticas"
-              description="Nos permiten contar visitas y mejorar Casi Cinco (Google Analytics)."
-              enabled={prefs.analytics}
-              onChange={(v) => setPrefs((p) => ({ ...p, analytics: v }))}
-            />
+            <p className="text-gray-600 mb-6">Elige qué tipos de cookies deseas aceptar. Las cookies necesarias no se pueden desactivar ya que son imprescindibles para el funcionamiento del sitio.</p>
+            <div className="space-y-4">
+              <Category
+                icon={Shield}
+                title="Cookies necesarias"
+                description="Estas cookies son esenciales para el funcionamiento del sitio web. Sin ellas, el sitio no funcionaría correctamente."
+                enabled
+                required
+              />
+              <Category
+                icon={BarChart3}
+                title="Cookies analíticas"
+                description="Nos permiten contar las visitas y analizar cómo los usuarios navegan por el sitio para mejorarlo."
+                enabled={prefs.analytics}
+                onChange={(v) => setPrefs((p) => ({ ...p, analytics: v }))}
+              />
+              <Category
+                icon={Settings}
+                title="Cookies funcionales"
+                description="Recuerdan filtros, vista del mapa y preferencias de uso."
+                enabled={prefs.functional}
+                onChange={(v) => setPrefs((p) => ({ ...p, functional: v }))}
+              />
+              <Category
+                icon={Megaphone}
+                title="Cookies de marketing"
+                description="Se utilizan para mostrarte anuncios relevantes y medir la efectividad de las campañas publicitarias."
+                enabled={prefs.marketing}
+                onChange={(v) => setPrefs((p) => ({ ...p, marketing: v }))}
+              />
+            </div>
             <p className="text-sm text-gray-500 mt-6">
               Más información en la{' '}
               <Link href="/cookies" className="text-[#002297] hover:underline" onClick={() => setView('hidden')}>
@@ -193,9 +209,6 @@ export function CookieConsentBar() {
             <button type="button" onClick={() => setView('settings')} className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg font-medium hover:bg-gray-200 text-sm">
               Configurar
             </button>
-            <button type="button" onClick={rejectAll} className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg font-medium hover:bg-gray-200 text-sm">
-              Rechazar
-            </button>
             <button type="button" onClick={acceptAll} className="px-4 py-2 bg-[#002297] text-white rounded-lg font-medium hover:bg-[#001a73] text-sm">
               Aceptar todas
             </button>
@@ -222,7 +235,7 @@ function Category({
   onChange?: (v: boolean) => void;
 }) {
   return (
-    <div className={`p-4 rounded-xl border-2 mb-4 ${enabled ? 'border-[#002297] bg-[#002297]/5' : 'border-gray-200 bg-gray-50'}`}>
+    <div className={`p-4 rounded-xl border-2 ${enabled ? 'border-[#002297] bg-[#002297]/5' : 'border-gray-200 bg-gray-50'}`}>
       <div className="flex items-start gap-4">
         <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${enabled ? 'bg-[#002297] text-white' : 'bg-gray-200 text-gray-500'}`} aria-hidden="true">
           <Icon className="h-5 w-5" />

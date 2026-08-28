@@ -81,6 +81,10 @@ export default function ChatbotFloating() {
                 link_type: href.includes('/mapa') ? 'map' : 'detail'
               });
               
+              // En móvil el panel cubre toda la pantalla: si no se cierra, parece que el enlace no ha hecho nada.
+              if (typeof window !== 'undefined' && !window.matchMedia('(min-width: 768px)').matches) {
+                setIsOpen(false)
+              }
               router.push(href);
             }
           }

@@ -76,6 +76,11 @@ export default function Footer() {
                   Precios
                 </Link>
               </li>
+              <li>
+                <Link href="/contacto" className="hover:text-white transition">
+                  Contacto
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -106,27 +111,22 @@ export default function Footer() {
             <h4 className="text-white font-semibold mb-4">Legal</h4>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link href="/privacidad" className="hover:text-white transition">
-                  Privacidad
+                <Link href="/terminos" className="hover:text-white transition">
+                  Aviso legal
                 </Link>
               </li>
               <li>
-                <Link href="/terminos" className="hover:text-white transition">
-                  Términos
+                <Link href="/privacidad" className="hover:text-white transition">
+                  Política de privacidad
                 </Link>
               </li>
               <li>
                 <Link href="/cookies" className="hover:text-white transition">
-                  Cookies
+                  Política de cookies
                 </Link>
               </li>
               <li>
                 <CookieSettingsButton className="hover:text-white transition text-left bg-transparent p-0 border-0 text-sm cursor-pointer" />
-              </li>
-              <li>
-                <Link href="/contacto" className="hover:text-white transition">
-                  Contacto
-                </Link>
               </li>
             </ul>
           </div>
@@ -176,9 +176,18 @@ export default function Footer() {
             >
               www.furgocasa.com
             </a>
-            {' '}- Hecho con ❤️ en España
           </p>
         </div>
+        <p className="mt-4 text-center text-gray-500 text-xs leading-relaxed">
+          <span className="block sm:inline">Hecho con <span className="text-red-500 inline-block animate-pulse">❤️</span> en Murcia</span>
+          <span className="hidden sm:inline"> · </span>
+          <span className="block sm:inline mt-1 sm:mt-0">
+            Web desarrollada por{' '}
+            <a href="https://www.eskaladigital.com" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white font-medium whitespace-nowrap">
+              ESKALA Agencia de Marketing Digital
+            </a>
+          </span>
+        </p>
       </div>
     </footer>
   );
