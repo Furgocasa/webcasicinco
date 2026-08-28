@@ -865,16 +865,14 @@ export default function MapPage() {
   }, [allPlaces, mapReady]);
 
   // ===== GEOLOCALIZACIÓN: CENTRA el mapa en el usuario, NO filtra el dataset =====
-  const activateGeolocation = useCallback(() => {
+  const activateGeolocation = useCallback((silent = false) => {
     if (!navigator.geolocation) {
-      setGeolocationError('Tu navegador no soporta geolocalización');
-      toast.error('Tu navegador no soporta geolocalización');
+      if (!silent) setGeolocationError('Este navegador no puede localizarte. Dime la ciudad en el buscador.');
       return;
     }
 
     if (typeof window !== 'undefined' && window.location.protocol === 'http:' && !window.location.hostname.includes('localhost')) {
-      setGeolocationError('La geolocalización requiere HTTPS');
-      toast.error('La geolocalización requiere una conexión segura (HTTPS)');
+      if (!silent) setGeolocationError('La ubicación pide HTTPS.');
       return;
     }
 
@@ -882,9 +880,9 @@ export default function MapPage() {
     const mobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
     const options = {
-      enableHighAccuracy: mobile,
-      timeout: mobile ? 10000 : 8000,
-      maximumAge: mobile ? 0 : 60000,
+      enableHighAccuracy: true,
+      timeout: 20000,
+      maximumAge: 300000,
     };
 
     // watchPosition: la posición del usuario se mantiene actualizada
@@ -908,42 +906,30 @@ export default function MapPage() {
           if (prefersReducedMotionRef.current) mapRef.current.jumpTo(cameraOptions);
           else mapRef.current.easeTo({ ...cameraOptions, duration: 800 });
 
-          const accuracy = position.coords.accuracy;
-          if (accuracy > 5000) {
-            toast.warning(`⚠️ Ubicación aproximada (±${Math.round(accuracy / 1000)}km). Para mayor precisión, usa un dispositivo móvil.`);
-          } else {
-            toast.success('✅ Ubicación activada correctamente');
+          if (!silent) {
+            const accuracy = position.coords.accuracy;
+            if (accuracy > 5000) {
+              toast.warning(`Ubicación aproximada (±${Math.round(accuracy / 1000)} km).`);
+            }
           }
         }
       },
       (error) => {
-        let errorMessage = 'No pudimos obtener tu ubicación';
-        let helpText = '';
-
-        switch (error.code) {
-          case error.PERMISSION_DENIED:
-            errorMessage = 'Permiso de ubicación denegado';
-            helpText = mobile
-              ? 'Safari/Chrome → Configuración del sitio → Permitir ubicación'
-              : 'Click en el candado 🔒 → Permisos del sitio → Ubicación → Permitir';
-            break;
-          case error.POSITION_UNAVAILABLE:
-            errorMessage = 'Ubicación no disponible';
-            helpText = 'Verifica que GPS/WiFi estén activos';
-            break;
-          case error.TIMEOUT:
-            errorMessage = 'Tiempo agotado';
-            helpText = 'Intenta de nuevo, asegúrate de tener buena señal';
-            break;
-        }
-
-        setGeolocationError(errorMessage + (helpText ? ` - ${helpText}` : ''));
-        toast.error(`❌ ${errorMessage}`);
         localStorage.setItem('geolocationActive', 'false');
         setIsGeolocationActive(false);
         if (geoWatchIdRef.current !== null) {
           navigator.geolocation.clearWatch(geoWatchIdRef.current);
           geoWatchIdRef.current = null;
+        }
+        // Al restaurar de localStorage no se grita: el candado cerrado no es un fallo del mapa.
+        if (silent) {
+          setGeolocationError(null);
+          return;
+        }
+        if (error.code === error.PERMISSION_DENIED) {
+          setGeolocationError('En el candado de la barra, permite la ubicación y pulsa otra vez.');
+        } else {
+          setGeolocationError('No he podido localizarte. Prueba otra vez.');
         }
       },
       options
@@ -967,12 +953,26 @@ export default function MapPage() {
     setSortBy((current) => (current === 'proximity' ? 'reviews' : current));
   }, []);
 
-  // ✅ Reactivar geolocalización si estaba activa (persistencia on/off en localStorage)
+  // Restaurar GPS solo si el navegador ya lo tiene concedido. Si está en
+  // «preguntar» o «bloquear», no se llama: si no, al abrir /mapa sale el toast rojo.
   useEffect(() => {
-    if (typeof window !== 'undefined' && localStorage.getItem('geolocationActive') === 'true') {
-      activateGeolocation();
-    }
+    let cancelled = false;
+    const restore = async () => {
+      if (typeof window === 'undefined' || localStorage.getItem('geolocationActive') !== 'true') return;
+      try {
+        const perm = await navigator.permissions?.query({ name: 'geolocation' });
+        if (perm && perm.state !== 'granted') {
+          localStorage.setItem('geolocationActive', 'false');
+          return;
+        }
+      } catch {
+        // Safari u otros sin Permissions API: intentamos en silencio.
+      }
+      if (!cancelled) activateGeolocation(true);
+    };
+    void restore();
     return () => {
+      cancelled = true;
       if (geoWatchIdRef.current !== null) {
         navigator.geolocation.clearWatch(geoWatchIdRef.current);
         geoWatchIdRef.current = null;
@@ -1426,7 +1426,7 @@ export default function MapPage() {
 
           <button
             type="button"
-            onClick={isGeolocationActive ? deactivateGeolocation : activateGeolocation}
+            onClick={isGeolocationActive ? deactivateGeolocation : () => activateGeolocation(false)}
             className={`absolute left-3 bottom-[calc(8.25rem+env(safe-area-inset-bottom,0px))] md:left-1/2 md:-translate-x-1/2 md:bottom-20 p-3 md:px-4 md:py-2 rounded-full shadow-lg font-semibold transition-all z-30 flex items-center md:gap-2 ${
               isGeolocationActive ? 'bg-orange-500 text-white hover:bg-orange-600' : 'bg-white text-gray-700 hover:bg-gray-50'
             }`}
@@ -1440,9 +1440,13 @@ export default function MapPage() {
           </button>
 
           {geolocationError && (
-            <div className="absolute left-3 z-30 bottom-[calc(12rem+env(safe-area-inset-bottom,0px))] md:left-1/2 md:-translate-x-1/2 md:bottom-32 bg-red-50 text-red-600 px-2 py-1 rounded-md shadow-md text-[11px] max-w-[180px] text-center">
-              {geolocationError.split(' - ')[0]}
-            </div>
+            <button
+              type="button"
+              onClick={() => setGeolocationError(null)}
+              className="absolute left-3 z-30 bottom-[calc(12rem+env(safe-area-inset-bottom,0px))] md:left-1/2 md:-translate-x-1/2 md:bottom-32 bg-amber-50 text-amber-900 px-2 py-1 rounded-md shadow-md text-[11px] max-w-[220px] text-center"
+            >
+              {geolocationError}
+            </button>
           )}
 
           <div className="h-full w-full relative">
