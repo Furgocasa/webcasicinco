@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { chatbotResponse } from '@/lib/ai/openai';
 import { createClient } from '@/lib/supabase/server';
-import { getCityAndProvinceFromCoords } from '@/lib/google/geocoding';
+import { geocodeAddress, getCityAndProvinceFromCoords } from '@/lib/google/geocoding';
 import { CITIES_BY_PROVINCE } from '@/lib/indexation/cities-database';
 
 // ---------------------------------------------
@@ -19,6 +19,7 @@ type SearchParams = {
   priceLevel?: number; // 🆕 Filtro por nivel de precio (1=barato, 2=medio, 3=caro)
   userCoords?: { lat: number; lng: number }; // 🆕 Coordenadas GPS para búsqueda por proximidad
   radiusKm?: number; // 🆕 Radio de búsqueda en km
+  useProximity?: boolean; // Solo entonces PostGIS; si no, city/provincia y opcionalmente distancia
 };
 
 const CATEGORY_SYNONYMS: Record<string, string[]> = {
@@ -70,6 +71,10 @@ function foldText(s: string): string {
   return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 }
 
+function escapeRegExp(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 function applyLocationTypos(msg: string): string {
   const pairs: Array<[RegExp, string]> = [
     [/\blameria\b/gi, 'almería'],
@@ -80,6 +85,9 @@ function applyLocationTypos(msg: string): string {
     [/\bport\s+valis\b/gi, 'port balís'],
     [/\bport\s+balis\b/gi, 'port balís'],
     [/\bllavaneras\b/gi, 'llavaneres'],
+    [/\bgerona\b/gi, 'girona'],
+    [/\bcartajena\b/gi, 'cartagena'],
+    [/\balcante\b/gi, 'alicante'],
   ];
   return pairs.reduce((out, [re, to]) => out.replace(re, to), msg);
 }
@@ -92,13 +100,61 @@ type TownIndexItem = {
   narrowTown?: boolean;
 };
 
-const EXTRA_TOWNS: Array<{ aliases: string[]; city: string; province: string }> = [
+const EXTRA_TOWNS: Array<{ aliases: string[]; city: string; province: string; lat?: number; lng?: number }> = [
   {
     aliases: ['port balís', 'sant andreu de llavaneres', 'llavaneres'],
     city: 'Sant Andreu de Llavaneres',
     province: 'Barcelona',
+    lat: 41.548,
+    lng: 2.483,
+  },
+  {
+    aliases: ['el palmar', 'palmar o lugar de don juan'],
+    city: 'El Palmar',
+    province: 'Murcia',
+    lat: 37.941,
+    lng: -1.163,
   },
 ];
+
+/** Topónimos que son dos sitios distintos: hay que preguntar cuál. */
+const AMBIGUOUS_PLACES: Array<{
+  needles: string[];
+  label: string;
+  options: Array<{ city: string; province: string; hint: string }>;
+}> = [
+  {
+    needles: ['la alberca', 'alberca'],
+    label: 'La Alberca',
+    options: [
+      { city: 'La Alberca', province: 'Salamanca', hint: 'el pueblo de Salamanca' },
+      { city: 'La Alberca', province: 'Murcia', hint: 'la pedanía de Murcia' },
+    ],
+  },
+];
+
+type AmbiguousMatch =
+  | { status: 'ask'; label: string; options: Array<{ city: string; province: string; hint: string }> }
+  | { status: 'resolved'; city: string; province: string; label: string };
+
+function matchAmbiguousPlace(msg: string): AmbiguousMatch | null {
+  const folded = foldText(msg);
+  for (const place of AMBIGUOUS_PLACES) {
+    const hitNeedle = place.needles.some((n) => {
+      const needle = foldText(n);
+      const re = new RegExp(`(?:^|[^a-zñ])${escapeRegExp(needle)}(?:$|[^a-zñ])`);
+      if (re.test(folded)) return true;
+      return folded.split(/[^a-zñ]+/).some((t) => t.length >= 5 && levenshtein(t, needle) <= 1);
+    });
+    if (!hitNeedle) continue;
+    const resolved = place.options.find((o) => folded.includes(foldText(o.province)));
+    if (resolved) {
+      return { status: 'resolved', city: resolved.city, province: resolved.province, label: place.label };
+    }
+    return { status: 'ask', label: place.label, options: place.options };
+  }
+  return null;
+}
 
 function buildTownIndex(): TownIndexItem[] {
   const items: TownIndexItem[] = [];
@@ -126,8 +182,38 @@ function buildTownIndex(): TownIndexItem[] {
 
 const TOWN_INDEX = buildTownIndex();
 
-function escapeRegExp(s: string): string {
-  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const LOCATION_STOPWORDS = new Set([
+  'cerca', 'sitio', 'sitios', 'lugar', 'lugares', 'mejor', 'mejores',
+  'donde', 'quiero', 'comer', 'hotel', 'hoteles', 'restaurante', 'restaurantes',
+  'bar', 'bares', 'algo', 'nada', 'este', 'esta', 'para', 'como', 'cual',
+  'aqui', 'alla', 'poco', 'mucho', 'todo', 'todos', 'santa', 'santo', 'san',
+  'los', 'las', 'del', 'una', 'uno', 'por', 'con', 'sin', 'mas', 'muy',
+  'zona', 'ciudad', 'pueblo', 'playa', 'costa', 'norte', 'sur', 'oeste',
+  'centro', 'capital', 'provincia', 'comunidad', 'espana', 'españa',
+]);
+
+function levenshtein(a: string, b: string): number {
+  if (a === b) return 0;
+  const m = a.length;
+  const n = b.length;
+  if (Math.abs(m - n) > 2) return 99;
+  const prev = new Array<number>(n + 1);
+  const curr = new Array<number>(n + 1);
+  for (let j = 0; j <= n; j++) prev[j] = j;
+  for (let i = 1; i <= m; i++) {
+    curr[0] = i;
+    for (let j = 1; j <= n; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      curr[j] = Math.min(prev[j] + 1, curr[j - 1] + 1, prev[j - 1] + cost);
+    }
+    for (let j = 0; j <= n; j++) prev[j] = curr[j];
+  }
+  return prev[n];
+}
+
+function locationFromItem(item: TownIndexItem): { city?: string; province?: string; narrowTown?: boolean } {
+  if (item.sameName) return { province: item.province };
+  return { city: item.city, province: item.province, narrowTown: item.narrowTown };
 }
 
 function findMentionedLocation(msg: string): { city?: string; province?: string; narrowTown?: boolean } {
@@ -136,10 +222,29 @@ function findMentionedLocation(msg: string): { city?: string; province?: string;
     if (item.needle.length < 4) continue;
     const re = new RegExp(`(?:^|[^a-zñ])${escapeRegExp(item.needle)}(?:$|[^a-zñ])`);
     if (!re.test(folded)) continue;
-    if (item.sameName) return { province: item.province };
-    return { city: item.city, province: item.province, narrowTown: item.narrowTown };
+    return locationFromItem(item);
   }
-  return {};
+
+  // Coincidencia parcial o errata: «palmar», «palma», «murca», «gerona»
+  const tokens = folded.split(/[^a-zñ]+/).filter((t) => t.length >= 4 && !LOCATION_STOPWORDS.has(t));
+  let best: { item: TownIndexItem; score: number } | null = null;
+  for (const token of tokens) {
+    for (const item of TOWN_INDEX) {
+      if (item.needle.length < 4) continue;
+      const words = item.needle.split(/\s+/).filter((w) => w.length >= 4);
+      const partial = words.includes(token) || (token.length >= 5 && item.needle.includes(token));
+      const maxDist = token.length >= 8 ? 2 : 1;
+      const dist = Math.min(
+        levenshtein(token, item.needle),
+        words.reduce((min, w) => Math.min(min, levenshtein(token, w)), 99)
+      );
+      const fuzzy = token.length >= 5 && dist <= maxDist;
+      if (!partial && !fuzzy) continue;
+      const score = item.needle.length * 10 - (partial ? 0 : dist);
+      if (!best || score > best.score) best = { item, score };
+    }
+  }
+  return best ? locationFromItem(best.item) : {};
 }
 
 function isGreetingOnly(message: string): boolean {
@@ -172,8 +277,11 @@ type ChatIntent = {
   userCoords?: { lat: number; lng: number };
   radiusKm?: number;
   skipSearch?: boolean;
-  searchKind?: 'greeting' | 'whereami' | 'incomplete' | 'needslocation';
+  searchKind?: 'greeting' | 'whereami' | 'incomplete' | 'needslocation' | 'ambiguous';
   narrowTown?: boolean;
+  wantsNearby?: boolean;
+  ambiguousLabel?: string;
+  ambiguousOptions?: string[];
 };
 
 function parseIntent(
@@ -252,6 +360,33 @@ function parseIntent(
     }
   }
 
+  const ambiguous = matchAmbiguousPlace(msg);
+  if (ambiguous?.status === 'ask') {
+    return {
+      category,
+      topN,
+      textSearch,
+      priceLevel,
+      skipSearch: true,
+      searchKind: 'ambiguous',
+      ambiguousLabel: ambiguous.label,
+      ambiguousOptions: ambiguous.options.map((o) => `${o.hint} (${o.province})`),
+    };
+  }
+  if (ambiguous?.status === 'resolved') {
+    return {
+      category,
+      city: ambiguous.city,
+      province: ambiguous.province,
+      topN,
+      textSearch,
+      usesLocation: false,
+      priceLevel,
+      narrowTown: true,
+      wantsNearby: /\b(cerca|alrededor|alrededores|inmediaciones|proximidad)\b/.test(msg),
+    };
+  }
+
   // Extraer región/provincia por palabra literal
   let region: string | undefined;
   for (const r of Object.keys(REGION_TO_PROVINCES)) {
@@ -298,6 +433,7 @@ function parseIntent(
     'mi ubicación', 'mi ubicacion', 'ubicación actual', 'ubicacion actual',
   ];
   const hasNearMe = proximityKeywords.some((keyword) => msg.includes(keyword));
+  const wantsNearby = /\b(cerca|alrededor|alrededores|inmediaciones|proximidad)\b/.test(msg);
   const hasExplicitLocation = Boolean(finalCity || province || region);
 
   // Ciudad/provincia dicha en el mensaje gana siempre al GPS
@@ -314,6 +450,7 @@ function parseIntent(
       usesLocation: false,
       priceLevel,
       narrowTown,
+      wantsNearby,
     };
   }
 
@@ -356,11 +493,39 @@ function refineIntent(
   }
 
   let next = { ...intent };
+
+  if (next.searchKind !== 'ambiguous') {
+    const folded = foldText(message);
+    const userMsgs = history.filter((h) => h.role === 'user').map((h) => h.content);
+    for (let i = userMsgs.length - 1; i >= 0; i--) {
+      const prevAmb = matchAmbiguousPlace(userMsgs[i]);
+      if (prevAmb?.status !== 'ask') continue;
+      const resolved = prevAmb.options.find(
+        (o) => folded.includes(foldText(o.province)) || folded.includes(foldText(o.hint))
+      );
+      if (resolved) {
+        next.city = resolved.city;
+        next.province = resolved.province;
+        next.narrowTown = true;
+        next.skipSearch = false;
+        next.searchKind = undefined;
+        next.ambiguousLabel = undefined;
+        next.ambiguousOptions = undefined;
+      }
+      break;
+    }
+  }
   const userMsgs = history.filter((h) => h.role === 'user').map((h) => h.content);
   for (let i = userMsgs.length - 1; i >= 0; i--) {
     const prev = parseIntent(userMsgs[i]);
     if (!next.category && prev.category) next.category = prev.category;
-    if (!next.city && !next.province && !next.usesLocation && (prev.city || prev.province)) {
+    if (
+      next.searchKind !== 'ambiguous' &&
+      !next.city &&
+      !next.province &&
+      !next.usesLocation &&
+      (prev.city || prev.province)
+    ) {
       next.city = prev.city;
       next.province = prev.province;
       next.narrowTown = prev.narrowTown;
@@ -387,13 +552,37 @@ function refineIntent(
       next.searchKind = 'needslocation';
     }
   }
+  if (/\b(cerca|alrededor|alrededores)\b/.test(message) && (next.city || next.province) && !next.usesLocation) {
+    next.wantsNearby = true;
+  }
 
   return next;
 }
 
+async function coordsForNamedPlace(city?: string, province?: string): Promise<{ lat: number; lng: number } | null> {
+  if (city) {
+    const extra = EXTRA_TOWNS.find(
+      (t) => foldText(t.city) === foldText(city) || t.aliases.some((a) => foldText(a) === foldText(city))
+    );
+    if (extra?.lat != null && extra.lng != null) return { lat: extra.lat, lng: extra.lng };
+    for (const data of Object.values(CITIES_BY_PROVINCE)) {
+      const hit = data.cities.find((c) => foldText(c.name) === foldText(city));
+      if (hit) return hit.coords;
+    }
+  }
+  const query = [city, province, 'España'].filter(Boolean).join(', ');
+  if (!query || query === 'España') return null;
+  try {
+    const geo = await geocodeAddress(query);
+    return geo.geometry.location;
+  } catch {
+    return null;
+  }
+}
+
 async function searchPlacesTool(supabase: any, params: SearchParams) {
-  // 🆕 Si hay coordenadas GPS, usar búsqueda por proximidad real con PostGIS
-  if (params.userCoords) {
+  // Radio real solo si lo pedimos (cerca de mí / cerca de un pueblo). No si hay ciudad dicha.
+  if (params.useProximity && params.userCoords) {
     console.log(`📍 Búsqueda por proximidad: lat=${params.userCoords.lat}, lng=${params.userCoords.lng}, radio=${params.radiusKm || 50}km`);
     
     const { data, error } = await supabase.rpc('search_places_by_proximity', {
@@ -423,7 +612,11 @@ async function searchPlacesTool(supabase: any, params: SearchParams) {
     .eq('published', true);
 
   if (params.category) query = query.eq('category', params.category);
-  if (params.city) query = query.ilike('city', params.city);
+  if (params.city) {
+    const safeCity = params.city.replace(/[%_,()]/g, ' ').trim();
+    // «El Palmar» debe pillar «El Palmar O Lugar De Don Juan» y la dirección
+    query = query.or(`city.ilike.%${safeCity}%,address.ilike.%${safeCity}%`);
+  }
   if (params.province) query = query.eq('province', params.province);
   if (params.provinces && params.provinces.length > 0) query = query.in('province', params.provinces);
   if (params.excludeCity) query = query.neq('city', params.excludeCity);
@@ -753,6 +946,21 @@ export async function POST(request: NextRequest) {
 
     if (intent.skipSearch) {
       console.log(`⏭️ Sin búsqueda de fichas (${intent.searchKind})`);
+    } else if (intent.wantsNearby && (intent.city || intent.province) && !intent.usesLocation) {
+      const townCoords = await coordsForNamedPlace(intent.city, intent.province);
+      if (townCoords) {
+        console.log(`📍 Cerca de ${intent.city || intent.province}: radio 15 km (no toda la provincia)`);
+        candidates = await searchPlacesTool(supabase, {
+          category: requestedCategory,
+          textSearch: intent.textSearch,
+          priceLevel: intent.priceLevel,
+          userCoords: townCoords,
+          radiusKm: 15,
+          useProximity: true,
+          limit: contextLimit,
+        });
+        searchNote = `Estos resultados son por radio de 15 km desde ${intent.city || intent.province}, no de toda la provincia. Di la distancia. No presentes Cartagena o Yecla como «cerca» de El Palmar.`;
+      }
     } else if (intent.userCoords && intent.usesLocation) {
       console.log(`🌍 Búsqueda por proximidad GPS activada`);
       candidates = await searchPlacesTool(supabase, {
@@ -761,6 +969,7 @@ export async function POST(request: NextRequest) {
         priceLevel: intent.priceLevel,
         userCoords: intent.userCoords,
         radiusKm: intent.radiusKm,
+        useProximity: true,
         limit: contextLimit,
       });
       console.log(`📍 Encontrados ${candidates.length} lugares por proximidad GPS`);
@@ -779,21 +988,41 @@ export async function POST(request: NextRequest) {
           limit: contextLimit,
         });
       }
-      let cityTried = false;
       if (candidates.length === 0 && intent.city && !intent.explicitProvince) {
-        cityTried = true;
         console.log(`🔍 Buscando por ciudad: ${intent.city}`);
         candidates = await searchPlacesTool(supabase, {
           category: requestedCategory,
           city: intent.city,
+          province: intent.province,
           textSearch: intent.textSearch,
           priceLevel: intent.priceLevel,
           userCoords: userCoordsForSearch,
           limit: contextLimit,
         });
         console.log(`📊 Encontrados por ciudad: ${candidates.length}`);
+        if (candidates.length) {
+          searchNote = `Estas fichas son de ${intent.city} (el nombre en BD puede ser más largo, p. ej. «El Palmar O Lugar De Don Juan»). Lístalas como ${intent.city}.`;
+        }
       }
-      if (candidates.length === 0 && intent.province && !intent.narrowTown) {
+      if (candidates.length === 0 && intent.city) {
+        const townCoords = await coordsForNamedPlace(intent.city, intent.province);
+        if (townCoords) {
+          console.log(`📍 Sin ficha exacta en ${intent.city}; radio 15 km`);
+          candidates = await searchPlacesTool(supabase, {
+            category: requestedCategory,
+            textSearch: intent.textSearch,
+            priceLevel: intent.priceLevel,
+            userCoords: townCoords,
+            radiusKm: 15,
+            useProximity: true,
+            limit: contextLimit,
+          });
+          const pueblo = intent.city;
+          searchNote = candidates.length
+            ? `No hay ficha exactamente en ${pueblo} o ya listaste las de ahí. Empieza: «No tengo en ${pueblo}, pero tengo algunos cerca.» Lista SOLO los del radio de 15 km, con distancia. Prohibido volcar toda la provincia.`
+            : `No hay fichas en ${pueblo} ni en 15 km. Dilo. No ofrezcas el resto de la provincia.`;
+        }
+      } else if (candidates.length === 0 && intent.province && !intent.narrowTown && !intent.wantsNearby) {
         console.log(`🔍 Buscando por provincia: ${intent.province}`);
         candidates = await searchPlacesTool(supabase, {
           category: requestedCategory,
@@ -804,13 +1033,9 @@ export async function POST(request: NextRequest) {
           limit: contextLimit,
         });
         console.log(`📊 Encontrados por provincia: ${candidates.length}`);
-        if (cityTried && intent.city) {
-          searchNote = `No hay fichas publicadas en ${intent.city}. Lo que sigue es de la provincia de ${intent.province}, no de ${intent.city}. Dilo claramente y pregunta si quiere ampliar.`;
-        } else if (candidates.length && !intent.city) {
+        if (candidates.length && !intent.city) {
           searchNote = `La consulta es de TODA la provincia de ${intent.province}, no solo la capital. Incluye municipios distintos si hay fichas. Si piden N y hay N o más en la lista, da exactamente N. No digas que no hay más.`;
         }
-      } else if (candidates.length === 0 && intent.narrowTown && intent.city) {
-        searchNote = `No hay fichas publicadas en ${intent.city}. Ofrece ampliar al Maresme (p. ej. Mataró) o a la provincia de ${intent.province}; no listes la capital como si fuera ${intent.city}.`;
       }
       if (candidates.length === 0 && provincesFromRegion) {
         candidates = await searchPlacesTool(supabase, {
@@ -874,7 +1099,9 @@ export async function POST(request: NextRequest) {
             ? 'TURNO: la petición está incompleta (p. ej. «mejores hoteles de»). Pregunta la ciudad o provincia. NO inventes un ranking.'
             : intent.searchKind === 'needslocation'
               ? 'TURNO: pide «cerca» pero no hay GPS ni ciudad. Pide la ciudad o que comparta ubicación. NO listes un ranking nacional.'
-              : undefined;
+              : intent.searchKind === 'ambiguous'
+                ? `TURNO: «${intent.ambiguousLabel}» es un topónimo ambiguo. Pregunta cuál: ${(intent.ambiguousOptions || []).join(' o ')}. NO busques ni afirmes que no hay fichas hasta que elija.`
+                : undefined;
 
     const response = await chatbotResponse(
       message,

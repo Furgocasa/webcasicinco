@@ -116,6 +116,7 @@ export function useAuth() {
       if (typeof window !== 'undefined') {
         localStorage.removeItem('supabase.auth.token');
         localStorage.removeItem('geolocationActive');
+        localStorage.removeItem('geolocationCoords');
       }
       
       // 4. Forzar refresh completo del router

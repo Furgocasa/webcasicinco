@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createAdminClient, createClient } from '@/lib/supabase/server';
 
 export const dynamic = 'force-dynamic';
 
@@ -94,30 +94,33 @@ export async function DELETE(request: NextRequest) {
       data: { user },
     } = await supabase.auth.getUser();
 
-    // ✅ SOFT DELETE MEJORADO: Marcar TODOS los mensajes como inactivos (no solo los activos)
-    // Esto soluciona el bug donde mensajes viejos reaparecían al recargar
-    let query = supabase
-      .from('chat_history')
-      .update({ 
-        is_active: false,
-        session_ended_at: new Date().toISOString()
-      });
-
-    if (user) {
-      query = query.eq('user_id', user.id);
-    } else if (session_id) {
-      query = query.eq('session_id', session_id);
-    } else {
+    if (!user && !session_id) {
       return NextResponse.json({
         success: false,
         error: 'No session',
       });
     }
 
-    // 🆕 CAMBIO CRÍTICO: NO filtrar por is_active = true
-    // Marcamos TODOS los mensajes del usuario/sesión como inactivos
+    // Service role: el RLS de chat_history permite SELECT/INSERT pero el UPDATE
+    // del usuario devolvía 0 filas (sin error) y al recargar volvían los mensajes.
+    // Las filas se quedan en BD para /admin/conversaciones.
+    const admin = createAdminClient();
+    let query = admin
+      .from('chat_history')
+      .update({
+        is_active: false,
+        session_ended_at: new Date().toISOString(),
+      })
+      .select('id');
 
-    const { error, count } = await query;
+    if (user) {
+      query = query.eq('user_id', user.id);
+    } else {
+      query = query.eq('session_id', session_id);
+    }
+
+    const { data, error } = await query;
+    const deletedCount = data?.length || 0;
 
     if (error) {
       console.error('Error marcando historial como obsoleto:', error);
@@ -127,12 +130,12 @@ export async function DELETE(request: NextRequest) {
       }, { status: 500 });
     }
 
-    console.log(`✅ ${count || 0} mensajes de conversación ${user ? `usuario ${user.email}` : `sesión ${session_id}`} marcados como obsoletos`);
+    console.log(`✅ ${deletedCount} mensajes de conversación ${user ? `usuario ${user.email}` : `sesión ${session_id}`} marcados como obsoletos`);
 
     return NextResponse.json({
       success: true,
       message: 'Conversación finalizada correctamente',
-      deletedCount: count || 0,
+      deletedCount,
     });
 
   } catch (error: any) {

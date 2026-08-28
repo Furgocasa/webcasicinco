@@ -29,3 +29,7 @@ Modo: **aplicado** (clasificaciones guardadas)
 
 **Notas:** La respuesta no inventa lugares ni datos y, ante cero fichas recuperadas, es honesta sobre la ausencia de resultados que cumplan el umbral de 4,7★ y 50+ reseñas. También pide aclarar la categoría, necesaria porque «algún sitio» puede referirse a restaurantes, hoteles, bares u otros tipos. Sin embargo, «La Alberca» es una ubicación ambigua y el bot no solicita explícitamente la provincia o comunidad antes de afirmar que no hay fichas en esa localidad; la intención técnica además no detectó ubicación. La respuesta sería más precisa si pidiera confirmar qué La Alberca busca el usuario, además del tipo de establecimiento.
 **Sugerencia:** Pedir una aclaración explícita de ubicación y categoría antes de cerrar la búsqueda: «¿Te refieres a La Alberca (Salamanca) u otra localidad? ¿Buscas restaurante, hotel, bar o spa?». Tras esa confirmación, aplicar el filtro exacto y, si sigue sin haber resultados, proponer ampliar a municipios cercanos de esa provincia.
+
+## Corrección La Alberca
+
+El auditor se quedó corto: «en La Alberca» no es correcta si no pregunta cuál. Hay dos (Salamanca y Murcia). Ahora el Tío pregunta; si ya eligió y no hay ficha en el pueblo, dice «No tengo en La Alberca, pero tengo algunos cerca» y lista la provincia.

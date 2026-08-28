@@ -26,7 +26,7 @@ import LoginOverlay from '@/components/auth/LoginOverlay';
 import { calculateQualityTier, getTierInfo } from '@/lib/utils/tier-calculator';
 import { getPlacePhotoUrl } from '@/lib/utils/photo-helper';
 import { getPlaceUrl } from '@/lib/utils/url-helper';
-import { CATEGORIES, PLACE_CATEGORIES } from '@/lib/utils/constants';
+import { CATEGORIES, PLACE_CATEGORIES, readSharedGps, subscribeSharedGps, writeSharedGps } from '@/lib/utils/constants';
 import { toast } from 'sonner';
 
 const mapContainerStyle = {
@@ -621,31 +621,42 @@ export default function RutaPage() {
     document.title = 'Planificar Ruta | Casi Cinco';
   }, []);
 
-  // Obtener ubicación del usuario al montar el componente
+  // GPS compartido con el mapa y el Tío Viajero
   useEffect(() => {
-    if (navigator.geolocation) {
-      // Opciones optimizadas para todos los dispositivos, especialmente iOS
-      const options = {
-        enableHighAccuracy: true,  // Máxima precisión (GPS)
-        timeout: 10000,            // 10 segundos timeout (iOS puede ser lento)
-        maximumAge: 300000         // Aceptar caché de hasta 5 minutos (más rápido)
-      };
-      
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setUserLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          });
-          console.log('✅ Ubicación obtenida para cálculo de distancias');
-        },
-        (error) => {
-          console.log('Geolocalización no disponible:', error.code, error.message);
-          // No mostrar error al usuario aquí (es opcional, no crítico)
-        },
-        options
-      );
+    const shared = readSharedGps();
+    if (shared) {
+      setUserLocation(shared);
+      setGpsActive(true);
     }
+
+    const stop = subscribeSharedGps((active, coords) => {
+      if (active && coords) {
+        setUserLocation(coords);
+        setGpsActive(true);
+        return;
+      }
+      if (!active) {
+        setGpsActive(false);
+        setUserLocation(null);
+      }
+    });
+
+    if (shared || !navigator.geolocation) return stop;
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setUserLocation({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        });
+        console.log('✅ Ubicación obtenida para cálculo de distancias');
+      },
+      (error) => {
+        console.log('Geolocalización no disponible:', error.code, error.message);
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 }
+    );
+    return stop;
   }, []);
 
   // Ordenar lugares según el criterio seleccionado
@@ -708,6 +719,8 @@ export default function RutaPage() {
   const toggleGps = () => {
     if (gpsActive) {
       setGpsActive(false);
+      setUserLocation(null);
+      writeSharedGps(false);
       return;
     }
     if (!navigator.geolocation) {
@@ -719,6 +732,7 @@ export default function RutaPage() {
         const pos = { lat: position.coords.latitude, lng: position.coords.longitude };
         setUserLocation(pos);
         setGpsActive(true);
+        writeSharedGps(true, pos);
         mapRef.current?.panTo(pos);
         mapRef.current?.setZoom(12);
       },

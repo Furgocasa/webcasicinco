@@ -653,7 +653,10 @@ ${userMessage}
 12. «Dónde estoy»: di la ciudad del GPS o la última que él dijo. No listes restaurantes.
 13. No tienes hora ni horarios en tiempo real. No niegues los locales ya citados.
 14. Si piden N y LUGARES DISPONIBLES tiene N o más, devuelve N. No afirmes que no hay más.
-15. Si la zona es una provincia, no te limites a la capital sin decirlo. Mezcla municipios o aclara que muestras solo la capital.`;
+15. Si la zona es una provincia, no te limites a la capital sin decirlo. Mezcla municipios o aclara que muestras solo la capital.
+16. Si un pueblo tiene dos sitios (p. ej. La Alberca en Salamanca y en Murcia) y no dijo cuál, pregunta: «¿La de Salamanca o la de Murcia?». No des por resuelta la ubicación.
+17. Si no hay fichas en ese pueblo pero sí cerca, empieza: «No tengo en [pueblo], pero tengo algunos cerca.» y lista SOLO el radio (km), nunca toda la provincia.
+18. «Cerca» = radio real desde el pueblo o el GPS. Murcia capital no es «cerca» de El Palmar si no entra en el radio. Cartagena/Yecla no son cerca de El Palmar.`;
 
   console.log(`🎯 System prompt: ${systemPrompt.length} chars`);
   console.log(`📍 User context incluye lugares: ${placesContext.length > 0}`);

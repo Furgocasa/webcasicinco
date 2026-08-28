@@ -1,11 +1,20 @@
 # 📝 Changelog - Casi Cinco
 
+## [28 Agosto 2026] - 📍 GPS compartido, limpiar chat y ubicaciones aproximadas
+
+- El GPS del mapa/ruta y el Tío Viajero son el mismo: si está activo, el chat no pide «Compartir». «Ahora no» solo oculta el aviso; no apaga el GPS
+- Limpiar conversación: soft delete real (las filas siguen en BD para admin). Al recargar ya no reaparecen
+- Ubicaciones con coincidencia parcial y erratas (palmar, murca, gerona, alberka…)
+
+---
+
 ## [28 Agosto 2026] - 🤖 Tío Viajero: intent geográfico y sin fallback nacional
 
 - El intent usa el catálogo de ciudades (`CITIES_BY_PROVINCE`) más typos (lameria, nijar, port valis, llavaneras) y hereda categoría/ciudad del hilo
 - Una búsqueda local o «cerca de mí» ya no se rellena con el ranking nacional
 - Saludo, «dónde estoy» y peticiones truncadas no relanzan la búsqueda anterior
 - Prompt (código + `app_config`): copiar rating y reseñas de las fichas de este turno
+- «La Alberca» sin provincia: pregunta Salamanca o Murcia. Si el pueblo no tiene ficha: «No tengo en X, pero tengo algunos cerca»
 
 ---
 

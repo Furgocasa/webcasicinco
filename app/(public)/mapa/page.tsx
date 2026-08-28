@@ -31,7 +31,7 @@ import { calculateQualityTier, getTierInfo } from '@/lib/utils/tier-calculator';
 import { trackEvent, EVENTS, CATEGORIES as ANALYTICS_CATEGORIES } from '@/lib/analytics/tracker';
 import { getPlaceUrl } from '@/lib/utils/url-helper';
 import { QUALITY_TIERS } from '@/types/filters';
-import { CATEGORIES } from '@/lib/utils/constants';
+import { CATEGORIES, subscribeSharedGps, writeSharedGps } from '@/lib/utils/constants';
 import { toast } from 'sonner';
 import { getPlacePhotoUrl } from '@/lib/utils/photo-helper';
 import { applyBrandTheme, applyMapLanguage } from '@/lib/map/brand-style';
@@ -880,7 +880,7 @@ export default function MapPage() {
         setUserLocation(location);
         setIsGeolocationActive(true);
         setGeolocationError(null);
-        localStorage.setItem('geolocationActive', 'true');
+        writeSharedGps(true, location);
         if (center && !hasCenteredOnUserRef.current && mapRef.current) {
           hasCenteredOnUserRef.current = true;
           const cameraOptions = {
@@ -895,7 +895,7 @@ export default function MapPage() {
         console.error('Error GPS:', error);
         setGeolocationError('No se pudo obtener tu ubicación');
         setIsGeolocationActive(false);
-        localStorage.setItem('geolocationActive', 'false');
+        writeSharedGps(false);
         if (geoWatchIdRef.current !== null) {
           navigator.geolocation.clearWatch(geoWatchIdRef.current);
           geoWatchIdRef.current = null;
@@ -913,7 +913,7 @@ export default function MapPage() {
     }
     setGeolocationError(null);
     setIsGeolocationActive(true);
-    localStorage.setItem('geolocationActive', 'true');
+    writeSharedGps(true);
     startWatch(true);
   }, [startWatch]);
 
@@ -926,7 +926,7 @@ export default function MapPage() {
     setUserLocation(null);
     setIsGeolocationActive(false);
     setGeolocationError(null);
-    localStorage.setItem('geolocationActive', 'false');
+    writeSharedGps(false);
     setSortBy((current) => (current === 'proximity' ? 'reviews' : current));
   }, []);
 
@@ -940,7 +940,7 @@ export default function MapPage() {
         if (Math.abs(lat) < 0.5 && Math.abs(lng) < 0.5) return;
         setUserLocation({ lat, lng });
         setIsGeolocationActive(true);
-        localStorage.setItem('geolocationActive', 'true');
+        writeSharedGps(true, { lat, lng });
       },
       (error) => {
         console.log('GPS no disponible:', error.message);
@@ -960,6 +960,25 @@ export default function MapPage() {
       startWatch(!hasCenteredOnUserRef.current);
     }
   }, [isGeolocationActive, mapReady, startWatch]);
+
+  // El Tío Viajero y /ruta comparten el mismo GPS
+  useEffect(() => {
+    return subscribeSharedGps((active, coords) => {
+      if (active) {
+        if (coords) setUserLocation(coords);
+        setIsGeolocationActive(true);
+        setGeolocationError(null);
+        return;
+      }
+      if (geoWatchIdRef.current !== null) {
+        navigator.geolocation.clearWatch(geoWatchIdRef.current);
+        geoWatchIdRef.current = null;
+      }
+      hasCenteredOnUserRef.current = false;
+      setUserLocation(null);
+      setIsGeolocationActive(false);
+    });
+  }, []);
 
   // Marcador de usuario (distinto a los pins de lugares)
   useEffect(() => {

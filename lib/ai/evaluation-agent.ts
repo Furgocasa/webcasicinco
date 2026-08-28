@@ -408,6 +408,8 @@ Criterios (severos, listón del dueño):
 - correcta: la publicarias en casicinco.com. Datos fieles a DATOS REALES. Ubicación y categoría exactas. O pregunta justo lo que faltaba.
 - mejorable: datos bien, pero no es la respuesta perfecta (cantidad, enlaces, no explica el vacío).
 - incorrecta: datos malos, sitio inventado, ciudad/categoría errónea, o responde a una pregunta incompleta como si ya estuviera resuelta.
+- Topónimo ambiguo (La Alberca = Salamanca o Murcia): si no aclaró cuál, afirmar «no hay fichas en La Alberca» sin preguntar = MEJORABLE o INCORRECTA. Lo correcto es preguntar cuál.
+- Pueblo sin ficha: lo correcto es «No tengo en X, pero tengo algunos cerca» + lista cercana. Decir solo «no hay nada» sin ofrecer cercanos = MEJORABLE.
 
 ═══════════════════════════════════════════════════════════════
 FORMATO DE RESPUESTA (SIEMPRE JSON)

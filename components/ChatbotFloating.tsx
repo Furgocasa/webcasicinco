@@ -8,6 +8,12 @@ import { useAuth } from '@/lib/hooks/useAuth';
 import { toast } from 'sonner';
 import Link from 'next/link';
 import { trackEvent, EVENTS, CATEGORIES as ANALYTICS_CATEGORIES } from '@/lib/analytics/tracker';
+import {
+  isSharedGpsActive,
+  readSharedGps,
+  subscribeSharedGps,
+  writeSharedGps,
+} from '@/lib/utils/constants';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -31,7 +37,7 @@ export default function ChatbotFloating() {
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [isEnabled, setIsEnabled] = useState(true); // Estado de habilitación del chatbot
   const [showClearConfirm, setShowClearConfirm] = useState(false); // Confirmación para limpiar chat
-  const [sessionId] = useState(() => {
+  const [sessionId, setSessionId] = useState(() => {
     // Generar ID de sesión único para usuarios no autenticados
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem('chat_session_id');
@@ -43,6 +49,7 @@ export default function ChatbotFloating() {
     return `session_${Date.now()}`;
   });
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const historyClearedRef = useRef(false);
   
   // 📍 Ubicación: la pide Roy/Tío en el chat, no al abrir (si el navegador ya la dio, no la usamos en silencio).
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
@@ -120,10 +127,31 @@ export default function ChatbotFloating() {
 
   // Cargar historial cuando se abre el chat
   useEffect(() => {
-    if (isOpen && messages.length === 0) {
+    if (isOpen && messages.length === 0 && !historyClearedRef.current) {
       loadChatHistory();
     }
   }, [isOpen]);
+
+  // El GPS del mapa/ruta es el mismo que usa el Tío Viajero
+  useEffect(() => {
+    const applyShared = (active: boolean, coords: { lat: number; lng: number } | null) => {
+      if (active && coords) {
+        setUserLocation(coords);
+        setGeoDeclined(false);
+        setGeoBlocked(false);
+        setGeoSoftFail(false);
+        return;
+      }
+      if (active) {
+        setGeoDeclined(false);
+        return;
+      }
+      setUserLocation(null);
+    };
+
+    applyShared(isSharedGpsActive(), readSharedGps());
+    return subscribeSharedGps(applyShared);
+  }, []);
 
   const shareLocation = () => {
     if (geoBusy) return;
@@ -146,6 +174,7 @@ export default function ChatbotFloating() {
           return;
         }
         setUserLocation({ lat, lng });
+        writeSharedGps(true, { lat, lng });
         setGeoDeclined(false);
         setGeoBlocked(false);
         setGeoSoftFail(false);
@@ -161,6 +190,7 @@ export default function ChatbotFloating() {
 
   const stopUsingLocation = () => {
     setUserLocation(null);
+    writeSharedGps(false);
     setGeoDeclined(true);
     setGeoBlocked(false);
     setGeoSoftFail(false);
@@ -385,7 +415,7 @@ export default function ChatbotFloating() {
                 <MapPin className="h-4 w-4 text-green-600 flex-shrink-0 mt-0.5" />
                 <div className="min-w-0">
                   <p className="text-xs text-green-700">
-                    El Tío Viajero está usando tu ubicación para «cerca de mí». No es el GPS del mapa.
+                    El Tío Viajero está usando tu ubicación del GPS (la misma que el mapa).
                   </p>
                   <button
                     type="button"
@@ -396,12 +426,17 @@ export default function ChatbotFloating() {
                   </button>
                 </div>
               </div>
+            ) : !loadingHistory && isSharedGpsActive() ? (
+              <div className="bg-green-50 rounded-lg p-3 border border-green-200 flex items-start gap-2">
+                <MapPin className="h-4 w-4 text-green-600 flex-shrink-0 mt-0.5" />
+                <p className="text-xs text-green-700">GPS activo. Localizando tu posición…</p>
+              </div>
             ) : !loadingHistory && !geoDeclined ? (
               <div className="bg-white rounded-lg p-3 border border-blue-200">
                 <p className="text-xs text-[#002297] leading-relaxed">
                   {geoBlocked || geoSoftFail
                     ? 'No se pudo obtener tu ubicación. Prueba otra vez o dime la ciudad.'
-                    : 'Es mucho mejor compartir tu ubicación: así el Tío Viajero te da sitios cerca de ti y no tiene que adivinar la ciudad. La puedes quitar cuando quieras. No es el «Ver ubicación» del mapa.'}
+                    : 'Es mucho mejor compartir tu ubicación: así el Tío Viajero te da sitios cerca de ti y no tiene que adivinar la ciudad. Es el mismo GPS que el botón del mapa.'}
                 </p>
                 <div className="mt-2 flex flex-wrap gap-2">
                   <button
@@ -576,12 +611,20 @@ export default function ChatbotFloating() {
                     <button
                       onClick={async () => {
                         try {
-                          // Borrar de la BD
-                          await fetch(`/api/chatbot/history?session_id=${sessionId}`, {
+                          const response = await fetch(`/api/chatbot/history?session_id=${sessionId}`, {
                             method: 'DELETE',
                           });
-                          
-                          // Limpiar estado local
+                          const data = await response.json();
+                          if (!response.ok || !data.success) {
+                            toast.error('Error al limpiar conversación');
+                            return;
+                          }
+
+                          // Soft delete: las filas siguen en BD, el usuario ya no las ve
+                          historyClearedRef.current = true;
+                          const newId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                          localStorage.setItem('chat_session_id', newId);
+                          setSessionId(newId);
                           setMessages([]);
                           setShowClearConfirm(false);
                           toast.success('Conversación limpiada');

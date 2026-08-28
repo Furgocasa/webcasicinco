@@ -166,3 +166,67 @@ export const SUCCESS_MESSAGES = {
   INDEXATION_PAUSED: 'Indexación pausada',
   INDEXATION_COMPLETED: 'Indexación completada exitosamente',
 } as const;
+
+// GPS compartido: el botón «GPS Activo» del mapa/ruta y el Tío Viajero
+export const GPS_ACTIVE_KEY = 'geolocationActive';
+export const GPS_COORDS_KEY = 'geolocationCoords';
+export const GPS_EVENT = 'casi-cinco-gps';
+
+export type SharedGps = { lat: number; lng: number };
+
+export function readSharedGps(): SharedGps | null {
+  if (typeof window === 'undefined') return null;
+  if (localStorage.getItem(GPS_ACTIVE_KEY) !== 'true') return null;
+  try {
+    const raw = localStorage.getItem(GPS_COORDS_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as SharedGps;
+    if (Number.isFinite(parsed.lat) && Number.isFinite(parsed.lng)) return parsed;
+  } catch {
+    // Coordenadas corruptas: se ignora
+  }
+  return null;
+}
+
+export function isSharedGpsActive(): boolean {
+  return typeof window !== 'undefined' && localStorage.getItem(GPS_ACTIVE_KEY) === 'true';
+}
+
+export function writeSharedGps(active: boolean, coords?: SharedGps | null) {
+  if (typeof window === 'undefined') return;
+  if (active) {
+    localStorage.setItem(GPS_ACTIVE_KEY, 'true');
+    if (coords && Number.isFinite(coords.lat) && Number.isFinite(coords.lng)) {
+      localStorage.setItem(GPS_COORDS_KEY, JSON.stringify({ lat: coords.lat, lng: coords.lng }));
+    }
+    const next = coords && Number.isFinite(coords.lat) ? coords : readSharedGps();
+    window.dispatchEvent(new CustomEvent(GPS_EVENT, { detail: { active: true, coords: next } }));
+  } else {
+    localStorage.setItem(GPS_ACTIVE_KEY, 'false');
+    localStorage.removeItem(GPS_COORDS_KEY);
+    window.dispatchEvent(new CustomEvent(GPS_EVENT, { detail: { active: false, coords: null } }));
+  }
+}
+
+export function subscribeSharedGps(
+  onChange: (active: boolean, coords: SharedGps | null) => void
+): () => void {
+  if (typeof window === 'undefined') return () => {};
+
+  const fromEvent = (event: Event) => {
+    const detail = (event as CustomEvent<{ active: boolean; coords: SharedGps | null }>).detail;
+    if (!detail) return;
+    onChange(detail.active, detail.coords);
+  };
+  const fromStorage = (event: StorageEvent) => {
+    if (event.key !== GPS_ACTIVE_KEY && event.key !== GPS_COORDS_KEY) return;
+    onChange(isSharedGpsActive(), readSharedGps());
+  };
+
+  window.addEventListener(GPS_EVENT, fromEvent);
+  window.addEventListener('storage', fromStorage);
+  return () => {
+    window.removeEventListener(GPS_EVENT, fromEvent);
+    window.removeEventListener('storage', fromStorage);
+  };
+}
