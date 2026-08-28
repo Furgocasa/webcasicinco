@@ -47,6 +47,7 @@ export default function ChatbotFloating() {
   const [locationCity, setLocationCity] = useState<string | null>(null);
   const [geoBusy, setGeoBusy] = useState(false);
   const [geoBlocked, setGeoBlocked] = useState(false);
+  const [geoSoftFail, setGeoSoftFail] = useState(false);
   const [geoDeclined, setGeoDeclined] = useState(false);
 
   const scrollToBottom = () => {
@@ -125,28 +126,34 @@ export default function ChatbotFloating() {
   const shareLocation = () => {
     if (geoBusy) return;
     if (typeof navigator === 'undefined' || !('geolocation' in navigator)) {
-      setGeoBlocked(true);
+      setGeoSoftFail(true);
       return;
     }
     setGeoBusy(true);
+    setGeoBlocked(false);
+    setGeoSoftFail(false);
+    // Mismas opciones que el mapa/ruta: caché 5 min. maximumAge:0 + 8s pintaba
+    // un timeout de Windows como «el navegador lo ha bloqueado».
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const lat = position.coords.latitude;
         const lng = position.coords.longitude;
         setGeoBusy(false);
-        if (Math.abs(lat) < 0.5 && Math.abs(lng) < 0.5) {
-          setGeoBlocked(true);
+        if (!Number.isFinite(lat) || !Number.isFinite(lng) || (Math.abs(lat) < 0.5 && Math.abs(lng) < 0.5)) {
+          setGeoSoftFail(true);
           return;
         }
         setUserLocation({ lat, lng });
         setGeoDeclined(false);
         setGeoBlocked(false);
+        setGeoSoftFail(false);
       },
-      () => {
+      (error) => {
         setGeoBusy(false);
-        setGeoBlocked(true);
+        if (error.code === error.PERMISSION_DENIED) setGeoBlocked(true);
+        else setGeoSoftFail(true);
       },
-      { enableHighAccuracy: false, timeout: 8000, maximumAge: 0 }
+      { enableHighAccuracy: true, timeout: 20000, maximumAge: 300000 }
     );
   };
 
@@ -154,6 +161,7 @@ export default function ChatbotFloating() {
     setUserLocation(null);
     setGeoDeclined(true);
     setGeoBlocked(false);
+    setGeoSoftFail(false);
   };
 
   const loadChatHistory = async () => {
@@ -358,16 +366,14 @@ export default function ChatbotFloating() {
                   </button>
                 </div>
               </div>
-            ) : !loadingHistory && geoBlocked ? (
-              <div className="bg-amber-50 rounded-lg p-3 border border-amber-200">
-                <p className="text-xs text-amber-900">
-                  El navegador ha bloqueado la ubicación. Si quieres sitios cerca, permítela en la barra de direcciones.
-                </p>
-              </div>
             ) : !loadingHistory && !geoDeclined ? (
               <div className="bg-white rounded-lg p-3 border border-blue-200">
                 <p className="text-xs text-[#002297] leading-relaxed">
-                  Es mucho mejor compartir tu ubicación: así el Tío Viajero te da sitios cerca de ti y no tiene que adivinar la ciudad. La puedes quitar cuando quieras. No es el «Ver ubicación» del mapa.
+                  {geoBlocked
+                    ? 'No he podido usar la ubicación. En el candado de la barra, permite la ubicación a esta web y pulsa otra vez. Si no, dime la ciudad.'
+                    : geoSoftFail
+                      ? 'No he podido localizarte ahora. Prueba otra vez o dime la ciudad.'
+                      : 'Es mucho mejor compartir tu ubicación: así el Tío Viajero te da sitios cerca de ti y no tiene que adivinar la ciudad. La puedes quitar cuando quieras. No es el «Ver ubicación» del mapa.'}
                 </p>
                 <div className="mt-2 flex flex-wrap gap-2">
                   <button
@@ -376,11 +382,15 @@ export default function ChatbotFloating() {
                     disabled={geoBusy}
                     className="rounded-full bg-[#002297] px-3 py-1 text-xs font-semibold text-white disabled:opacity-50"
                   >
-                    {geoBusy ? 'Localizando…' : 'Compartir'}
+                    {geoBusy ? 'Localizando…' : geoBlocked || geoSoftFail ? 'Probar otra vez' : 'Compartir'}
                   </button>
                   <button
                     type="button"
-                    onClick={() => setGeoDeclined(true)}
+                    onClick={() => {
+                      setGeoDeclined(true);
+                      setGeoBlocked(false);
+                      setGeoSoftFail(false);
+                    }}
                     className="rounded-full border border-blue-200 bg-white px-3 py-1 text-xs font-semibold text-[#002297]"
                   >
                     Ahora no
