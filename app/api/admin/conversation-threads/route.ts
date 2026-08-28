@@ -6,6 +6,18 @@ export const dynamic = 'force-dynamic';
 
 const SCORE: Record<string, number> = { correcta: 10, mejorable: 5, incorrecta: 0 };
 
+type ThreadGroup = {
+  key: string;
+  label: string;
+  last_at: string;
+  first_user_message: string;
+  assistant_count: number;
+  unclassified: number;
+  classified: number;
+  scoreSum: number;
+  ids: string[];
+};
+
 async function requireAdminUser() {
   const supabase = await createClient();
   const { data: { user }, error } = await supabase.auth.getUser();
@@ -32,38 +44,28 @@ export async function GET() {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  const groups = new Map<
-    string,
-    {
-      key: string;
-      label: string;
-      last_at: string;
-      first_user_message: string;
-      assistant_count: number;
-      unclassified: number;
-      classified: number;
-      scoreSum: number;
-      ids: string[];
-    }
-  >();
+  const groups = new Map<string, ThreadGroup>();
 
   for (const row of data || []) {
-    const key = row.user_email || row.session_id || row.id;
-    const entry = groups.get(key) || {
-      key,
-      label: row.user_email || `Sesión ${(row.session_id || row.id).slice(0, 8)}`,
-      last_at: row.created_at,
-      first_user_message: '',
-      assistant_count: 0,
-      unclassified: 0,
-      classified: 0,
-      scoreSum: 0,
-      ids: [],
-    };
+    const key = String(row.user_email || row.session_id || row.id);
+    let entry = groups.get(key);
+    if (!entry) {
+      entry = {
+        key,
+        label: row.user_email || `Sesión ${String(row.session_id || row.id).slice(0, 8)}`,
+        last_at: String(row.created_at),
+        first_user_message: '',
+        assistant_count: 0,
+        unclassified: 0,
+        classified: 0,
+        scoreSum: 0,
+        ids: [],
+      };
+    }
     if (!entry.first_user_message) entry.first_user_message = row.user_message || '';
     entry.assistant_count++;
-    entry.ids.push(row.id);
-    entry.last_at = row.created_at;
+    entry.ids.push(String(row.id));
+    entry.last_at = String(row.created_at);
     const q = row.quality_assessment as string | null;
     if (!q) entry.unclassified++;
     else if (q in SCORE) {
