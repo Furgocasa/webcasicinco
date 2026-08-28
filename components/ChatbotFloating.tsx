@@ -42,10 +42,12 @@ export default function ChatbotFloating() {
   });
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
-  // 📍 Estado de ubicación
+  // 📍 Ubicación: la pide Roy/Tío en el chat, no al abrir (si el navegador ya la dio, no la usamos en silencio).
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [locationCity, setLocationCity] = useState<string | null>(null);
-  const [locationDenied, setLocationDenied] = useState(false);
+  const [geoBusy, setGeoBusy] = useState(false);
+  const [geoBlocked, setGeoBlocked] = useState(false);
+  const [geoDeclined, setGeoDeclined] = useState(false);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -120,36 +122,39 @@ export default function ChatbotFloating() {
     }
   }, [isOpen]);
 
-  // 📍 Solicitar ubicación cuando se abre el chat
-  useEffect(() => {
-    if (isOpen && !userLocation && !locationDenied && 'geolocation' in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const location = {
-            lat: position.coords.latitude,
-            lng: position.coords.longitude
-          };
-          setUserLocation(location);
-          console.log('📍 Ubicación obtenida:', location);
-          
-          // Mostrar notificación amigable
-          toast.success('📍 Ubicación compartida', {
-            description: 'El Tío Viajero puede recomendarte lugares cerca de ti'
-          });
-        },
-        (error) => {
-          console.log('❌ Ubicación denegada o no disponible:', error.message);
-          setLocationDenied(true);
-          // No mostrar error, es opcional
-        },
-        {
-          enableHighAccuracy: false, // No necesitamos precisión extrema
-          timeout: 5000,
-          maximumAge: 300000 // Cache de 5 minutos
-        }
-      );
+  const shareLocation = () => {
+    if (geoBusy) return;
+    if (typeof navigator === 'undefined' || !('geolocation' in navigator)) {
+      setGeoBlocked(true);
+      return;
     }
-  }, [isOpen, userLocation, locationDenied]);
+    setGeoBusy(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        setGeoBusy(false);
+        if (Math.abs(lat) < 0.5 && Math.abs(lng) < 0.5) {
+          setGeoBlocked(true);
+          return;
+        }
+        setUserLocation({ lat, lng });
+        setGeoDeclined(false);
+        setGeoBlocked(false);
+      },
+      () => {
+        setGeoBusy(false);
+        setGeoBlocked(true);
+      },
+      { enableHighAccuracy: false, timeout: 8000, maximumAge: 0 }
+    );
+  };
+
+  const stopUsingLocation = () => {
+    setUserLocation(null);
+    setGeoDeclined(true);
+    setGeoBlocked(false);
+  };
 
   const loadChatHistory = async () => {
     setLoadingHistory(true);
@@ -337,15 +342,52 @@ export default function ChatbotFloating() {
               </div>
             )}
 
-            {/* Indicador de ubicación */}
-            {!loadingHistory && userLocation && (
-              <div className="bg-green-50 rounded-lg p-3 border border-green-200 flex items-center gap-2">
-                <MapPin className="h-4 w-4 text-green-600 flex-shrink-0" />
-                <p className="text-xs text-green-700">
-                  <strong>Ubicación compartida</strong> - Puedes preguntar por lugares "cerca de mí"
+            {!loadingHistory && userLocation ? (
+              <div className="bg-green-50 rounded-lg p-3 border border-green-200 flex items-start gap-2">
+                <MapPin className="h-4 w-4 text-green-600 flex-shrink-0 mt-0.5" />
+                <div className="min-w-0">
+                  <p className="text-xs text-green-700">
+                    El Tío Viajero está usando tu ubicación para «cerca de mí». No es el GPS del mapa.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={stopUsingLocation}
+                    className="mt-1 text-xs font-semibold text-[#002297] underline underline-offset-2"
+                  >
+                    Dejar de usarla
+                  </button>
+                </div>
+              </div>
+            ) : !loadingHistory && geoBlocked ? (
+              <div className="bg-amber-50 rounded-lg p-3 border border-amber-200">
+                <p className="text-xs text-amber-900">
+                  El navegador ha bloqueado la ubicación. Si quieres sitios cerca, permítela en la barra de direcciones.
                 </p>
               </div>
-            )}
+            ) : !loadingHistory && !geoDeclined ? (
+              <div className="bg-white rounded-lg p-3 border border-blue-200">
+                <p className="text-xs text-[#002297] leading-relaxed">
+                  Es mucho mejor compartir tu ubicación: así el Tío Viajero te da sitios cerca de ti y no tiene que adivinar la ciudad. La puedes quitar cuando quieras. No es el «Ver ubicación» del mapa.
+                </p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={shareLocation}
+                    disabled={geoBusy}
+                    className="rounded-full bg-[#002297] px-3 py-1 text-xs font-semibold text-white disabled:opacity-50"
+                  >
+                    {geoBusy ? 'Localizando…' : 'Compartir'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setGeoDeclined(true)}
+                    className="rounded-full border border-blue-200 bg-white px-3 py-1 text-xs font-semibold text-[#002297]"
+                  >
+                    Ahora no
+                  </button>
+                </div>
+              </div>
+            ) : null}
 
             {/* Mensaje de bienvenida */}
             {!loadingHistory && messages.length === 0 && (
