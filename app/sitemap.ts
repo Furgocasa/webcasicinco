@@ -1,6 +1,7 @@
 import { MetadataRoute } from 'next';
 import { createClient } from '@supabase/supabase-js';
 import { toSlug } from '@/lib/utils/url-helper';
+import { getPublicSiteUrl } from '@/lib/utils/constants';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -8,7 +9,7 @@ const supabase = createClient(
 );
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.casicinco.com';
+  const baseUrl = getPublicSiteUrl();
 
   // ✅ Obtener TODOS los lugares PUBLICADOS en lotes (sin límite)
   let allPlaces: any[] = [];

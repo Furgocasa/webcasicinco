@@ -1,22 +1,45 @@
 import { MetadataRoute } from 'next';
+import { getPublicSiteUrl } from '@/lib/utils/constants';
+
+/** Crawlers de asistentes de IA (GEO): molde Furgocasa / ACTTAX. */
+const AI_BOTS = [
+  'GPTBot',
+  'OAI-SearchBot',
+  'ChatGPT-User',
+  'ClaudeBot',
+  'Claude-SearchBot',
+  'Claude-User',
+  'Google-Extended',
+  'PerplexityBot',
+  'Perplexity-User',
+  'Applebot-Extended',
+  'meta-externalagent',
+];
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.casicinco.com';
+  const disallow = [
+    '/admin/',
+    '/api/',
+    '/perfil',
+    '/login',
+    '/registro',
+    '/_next/',
+    '/private/',
+  ];
 
   return {
-    rules: {
-      userAgent: '*',
-      allow: '/',
-      disallow: [
-        '/admin/',      // Panel de administración
-        '/api/',        // Endpoints API
-        '/perfil',      // Perfiles de usuario
-        '/login',       // Página de login
-        '/registro',    // Página de registro
-        '/_next/',      // Archivos internos de Next.js
-        '/private/',    // Rutas privadas
-      ],
-    },
-    sitemap: `${baseUrl}/sitemap.xml`,
+    rules: [
+      {
+        userAgent: '*',
+        allow: '/',
+        disallow,
+      },
+      ...AI_BOTS.map((userAgent) => ({
+        userAgent,
+        allow: '/',
+        disallow,
+      })),
+    ],
+    sitemap: `${getPublicSiteUrl()}/sitemap.xml`,
   };
 }

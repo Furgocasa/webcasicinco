@@ -137,6 +137,17 @@ export const URLS = {
   SUPABASE_STORAGE: process.env.NEXT_PUBLIC_SUPABASE_URL + '/storage/v1/object/public/',
 } as const;
 
+/** Canónico de producción. Nunca localhost en sitemap / robots / GSC. */
+export const PRODUCTION_URL = 'https://www.casicinco.com';
+
+export function getPublicSiteUrl(): string {
+  const env = process.env.NEXT_PUBLIC_APP_URL;
+  if (env && env.startsWith('https://') && !env.includes('localhost')) {
+    return env.replace(/\/$/, '');
+  }
+  return PRODUCTION_URL;
+}
+
 // Mensajes de error comunes
 export const ERROR_MESSAGES = {
   UNAUTHORIZED: 'No tienes permisos para realizar esta acción',

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { getPublicSiteUrl } from '@/lib/utils/constants';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -10,7 +11,7 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 3600; // 1 hora
 
 export async function GET() {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.casicinco.com';
+  const baseUrl = getPublicSiteUrl();
   const PLACES_PER_PAGE = 500;
 
   // Contar total de lugares con imágenes
