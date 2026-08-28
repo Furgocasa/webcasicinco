@@ -1,5 +1,11 @@
 # 📝 Changelog - Casi Cinco
 
+## [28 Agosto 2026] - 🗺️ Ciudad ≠ provincia, pueblos y desvío a /ruta
+
+- «Madrid», «Valencia», «Barcelona» o «Murcia» a secas buscan la **capital**, no toda la provincia (Torrejón/Gandia ya no salen como si fueran la ciudad).
+- Pueblo suelto o «entre Mula y Bullas»: radio real desde el pueblo o el punto medio, sin volcar la provincia.
+- «De Madrid a Barcelona, un diamante en la ruta» **no lista paradas**: deriva a [Planificar ruta](/ruta).
+
 ## [28 Agosto 2026] - 📍 GPS compartido, limpiar chat y ubicaciones aproximadas
 
 - El GPS del mapa/ruta y el Tío Viajero son el mismo: si está activo, el chat no pide «Compartir». «Ahora no» solo oculta el aviso; no apaga el GPS

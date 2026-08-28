@@ -1,35 +1,52 @@
 # Informe de revisión automática del Tío Viajero (Casi Cinco)
 
-Generado: 2026-08-28T17:49:30.213Z
+Generado: 2026-08-28T20:12:10.635Z
 Modo: **aplicado** (clasificaciones guardadas)
 
 ## Resumen
 
-- Correctas: 2
-- Mejorables: 2
+- Correctas: 9
+- Mejorables: 3
 - Incorrectas: 0
-- Total revisadas: 4
+- Total revisadas: 12
 
 ## Respuestas a mejorar o incorrectas
 
-### MEJORABLE — d0fba439…
+### MEJORABLE — cc41b2f4…
 
-**Pregunta:** me recomeindas un sitio en port valis gerona?
+**Pregunta:** ¿Y en Córdoba?
 
-**Respuesta:** No hay fichas publicadas que cumplan 4,7★ y 50+ reseñas en Port Balís, Girona. Port Balís está en el Maresme, provincia de Barcelona; si te refieres a esa zona, puedo ampliar la búsqueda a Llavaneres, Sant Andreu de Llavaneres o al resto de la provincia de Barcelona.
+**Respuesta:** Según los datos de los que disponemos y los cálculos de nuestro algoritmo, los 3 mejores lugares son:
 
-**Notas:** La respuesta detecta correctamente que probablemente se trata de Port Balís y aclara un dato geográfico relevante: Port Balís pertenece al Maresme, en la provincia de Barcelona, no a Girona. No inventa locales ni datos de fichas, y es honesta al no ofrecer resultados inexistentes. Sin embargo, afirma que no hay fichas en “Port Balís, Girona”, una combinación geográfica incorrecta, en vez de pedir confirmación explícita de si el usuario quería Port Balís (Barcelona) o un lugar distinto en Girona. Además, no aprovecha de forma totalmente clara el contexto previo de búsqueda de restaurantes, aunque la respuesta orienta adecuadamente la siguiente acción.
-**Sugerencia:** Formular la desambiguación antes de cerrar la búsqueda: “Port Balís está en Sant Andreu de Llavaneres, Barcelona; ¿te refieres a esa zona o a otro lugar de Girona?”. Solo tras la confirmación, buscar restaurantes en la ubicación correcta con el filtro de 4,7★ y 50+ reseñas. Evitar presentar como zona sin resultados una combinación de localidad y provincia que no corresponde geográficamente.
+1. **Patio del Posadero - Hotel Boutique — ⭐4.9 · 1411 reseñas — Córdoba, Córdoba — Hotel boutique en pleno centro histórico. — [Ver detalles](/hotel/córdoba/patio-del-posadero-hotel-boutique-cordoba) | [Ver en mapa](/mapa?place=43546792-63dd-43e3-8f52-7453514412cf)**
+2. **Hotel en Córdoba Casa de los azulejos — ⭐4.8 · 608 reseñas — Córdoba, Córdoba — Hotel céntrico en la calle Fernando Colón. …
 
-### MEJORABLE — d8d8fe65…
+**Notas:** La respuesta interpreta correctamente el seguimiento conversacional y cambia la ubicación de Granada a Córdoba, manteniendo la categoría hotel. Los tres establecimientos citados existen en los datos publicados, pertenecen a la categoría hotel, están en Córdoba capital y sus ratings, reseñas y slugs coinciden con la fuente de verdad. También incluye ambos enlaces requeridos y una presentación clara. Sin embargo, se encontraron 9 lugares y la respuesta presenta solo 3 como «los 3 mejores» sin que el usuario hubiera limitado la cantidad; aunque es una cantidad razonable para una petición plural, podría ofrecer una selección más completa o indicar que puede ampliar la lista.
+**Sugerencia:** Mantener los tres primeros resultados es válido como selección inicial, pero conviene añadir una frase de continuidad como «He encontrado más opciones; si quieres, te muestro el top 5 o el listado completo». También sería más preciso decir «los 3 mejores hoteles» en vez de «los 3 mejores lugares».
+**Hueco:** ignored · Hoteles adicionales publicados en Córdoba
 
-**Pregunta:** ¿Me recomiendas algún sitio en la alberca?
+### MEJORABLE — efabf2b6…
 
-**Respuesta:** No hay fichas publicadas que cumplan 4,7★ y 50+ reseñas en La Alberca. ¿Buscas restaurantes, hoteles, bares o algún otro tipo de sitio? Puedo ampliar la búsqueda a municipios cercanos o a la provincia que corresponda.
+**Pregunta:** Restaurantes oro en Bilbao
 
-**Notas:** La respuesta no inventa lugares ni datos y, ante cero fichas recuperadas, es honesta sobre la ausencia de resultados que cumplan el umbral de 4,7★ y 50+ reseñas. También pide aclarar la categoría, necesaria porque «algún sitio» puede referirse a restaurantes, hoteles, bares u otros tipos. Sin embargo, «La Alberca» es una ubicación ambigua y el bot no solicita explícitamente la provincia o comunidad antes de afirmar que no hay fichas en esa localidad; la intención técnica además no detectó ubicación. La respuesta sería más precisa si pidiera confirmar qué La Alberca busca el usuario, además del tipo de establecimiento.
-**Sugerencia:** Pedir una aclaración explícita de ubicación y categoría antes de cerrar la búsqueda: «¿Te refieres a La Alberca (Salamanca) u otra localidad? ¿Buscas restaurante, hotel, bar o spa?». Tras esa confirmación, aplicar el filtro exacto y, si sigue sin haber resultados, proponer ampliar a municipios cercanos de esa provincia.
+**Respuesta:** Según los datos de los que disponemos y los cálculos de nuestro algoritmo, los 3 mejores lugares son:
 
-## Corrección La Alberca
+1. **Gastronomía Bilbao — ⭐4.9 · 347 reseñas — Bilbao, Vizcaya — Restaurante tier Oro. — [Ver detalles](/restaurante/vizcaya/gastronomia-bilbao-bilbao) | [Ver en mapa](/mapa?place=500e682b-3bb7-4664-a3f3-9a2f9a64e73f)**
 
-El auditor se quedó corto: «en La Alberca» no es correcta si no pregunta cuál. Hay dos (Salamanca y Murcia). Ahora el Tío pregunta; si ya eligió y no hay ficha en el pueblo, dice «No tengo en La Alberca, pero tengo algunos cerca» y lista la provincia.
+2. **Restaurante La Viña De Henao Casa De Comidas — ⭐4.9 · 292 reseñas — Bilbao, Bizkaia — Restaurante tier Oro. — [Ver detalles](/restaurante/bizkaia/restaurante-la-vina-de-he…
+
+**Notas:** La respuesta filtra correctamente por ciudad (Bilbao), categoría (restaurante) y tier Oro: los tres locales citados tienen entre 200 y 499 reseñas y una valoración mínima de 4.8★, conforme a la taxonomía oficial. Los nombres, valoraciones, reseñas, ciudades y slugs coinciden con las fichas publicadas, y cada recomendación incluye ambos enlaces requeridos. Sin embargo, la intención detectada solicitaba un top 5 y la respuesta solo devuelve 3 sin explicar que son los únicos tres resultados que cumplen el tier Oro en Bilbao. No hay error crítico de ubicación, categoría ni datos, pero falta gestionar explícitamente la insuficiencia de cantidad.
+**Sugerencia:** Indicar de forma explícita que solo se han encontrado 3 restaurantes tier Oro en Bilbao que cumplen los criterios, por ejemplo: «He encontrado 3 restaurantes Oro en Bilbao; no hay cinco fichas publicadas que cumplan este tier». Mantener después la lista actual.
+
+### MEJORABLE — 23b7e048…
+
+**Pregunta:** Hoteles en Palma de Mallorca
+
+**Respuesta:** Estos son los hoteles disponibles en Palma de Mallorca:
+
+1. **Hotel MySeaHouse Flamingo — ⭐4.8 · 2541 reseñas — Palma, Baleares — Hotel junto a Platja de Palma. — [Ver detalles](/hotel/baleares/hotel-myseahouse-flamingo-palma) | [Ver en mapa](/mapa?place=3baf7ad9-2dd9-4e73-a904-ae140d465e98)**
+
+2. **Boutique Hotel Petit Montision — ⭐4.8 · 218 reseñas — Palma, Baleares — Hotel boutique en el centro de Palma. — [Ver detalles](/hotel/illes-balears/boutique-hotel-petit-montision-palma) | [Ver en map…
+
+**Notas:** La respuesta interpreta correctamente la petición como hoteles en Palma y no arrastra indebidamente el filtro previo de restaurantes tier Oro en Zaragoza. Los dos hoteles citados existen en los DATOS REALES, pertenecen a la categoría hotel, están en Palma y sus ratings y números de reseñas coinciden exactamente con las fichas publicadas. Incluye ambos enlaces requeridos para cada recomendación y ofrece una presentación legible. Sin embargo, la intención técnica indicaba topN: 5 y el sistema reporta 3 lugares encontrados/devueltos, mientras que la respuesta muestra solo 2 y no explica por qué no alcanza el número esperado; además, el formato de negrita engloba todo cada ítem.
+**Sugerencia:** Alinear la cantidad mostrada con los resultados realmente recuperados y, si solo hay dos fichas publicadas válidas, indicarlo explícitamente: «He encontrado 2 hoteles que cumplen los criterios en Palma». Revisar también el renderizado Markdown para aplicar negrita únicamente al nombre del hotel, no a toda la línea.

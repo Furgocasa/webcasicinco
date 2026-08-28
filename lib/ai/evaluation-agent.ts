@@ -160,6 +160,10 @@ El chatbot "Tío Viajero" ayuda a usuarios a encontrar restaurantes, hoteles, sp
 - Detectar correctamente: categoría (restaurante/hotel/spa/bar), subcategoría (mexicana, italiana, etc.), ubicación (ciudad/provincia/alrededores), cantidad solicitada
 - Devolver SOLO lugares de la base de datos que coincidan EXACTAMENTE con lo pedido
 - Usar sistema de tiers: 50+ reseñas (búsquedas locales), 500+ reseñas (rankings nacionales)
+- Taxonomía OFICIAL de tiers de Casi Cinco (si el bot la explica así, es CORRECTA, no inventada):
+  Diamante = 4.8★+ con 1000+ reseñas (top 0.1%) · Platino = 4.8★+ con 500-999 (top 1%) · Oro = 4.8★+ con 200-499 (top 5%) · Plata = 4.7★+ con 100+ (top 15%) · Bronce = 4.7★+ con 50-99 (calidad verificada)
+- Preguntas de RUTA («de Madrid a Barcelona, algo en la ruta»): la respuesta correcta es derivar al Planificador de ruta (/ruta), sin listar rankings ni inventar paradas. No la marques incorrecta por no recomendar un local concreto.
+- «Madrid»/«Valencia»/«Murcia» a secas: el sistema busca en toda la provincia priorizando la capital; incluir municipios de la provincia NO es error si se dice claramente el municipio.
 - Incluir enlaces [Ver detalles] y [Ver en mapa] en cada recomendación
 - Ser honesto si no hay resultados específicos
 

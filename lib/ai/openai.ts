@@ -353,12 +353,12 @@ export async function chatbotResponse(
 
     // Instrucción para encabezado cuando pidan "los mejores"
     if (/(?:\bmejor(?:es)?\b|\btop\b)/i.test(msg)) {
-      bestIntroInstruction = `Inicia tu respuesta con esta frase exacta: "Según los datos de los que disponemos y los cálculos de nuestro algoritmo, los ${targetN} mejores lugares son:"`;
+      bestIntroInstruction = `Inicia tu respuesta con esta frase exacta: "Según los datos de los que disponemos y los cálculos de nuestro algoritmo, los ${targetN} mejores lugares son:". Si en LUGARES DISPONIBLES hay menos de ${targetN}, ajusta el número a los que haya; y si solo hay 1, di "el mejor lugar es:" (nunca "los 1 mejores lugares").`;
     }
 
     // 6) Enviar lugares con mínimo 50 reseñas (tier Bronce) y ordenar por rating desc, luego reseñas desc
     filtered = filtered
-      .filter(p => (p.review_count || 0) >= 50)
+      .filter(p => (p.review_count || 0) >= 50 && (p.rating || 0) >= 4.7)
       .sort((a, b) => (b.rating || 0) - (a.rating || 0) || (b.review_count || 0) - (a.review_count || 0))
       .slice(0, contextLimit);
 
@@ -429,11 +429,14 @@ CRÍTICO: SOLO recomiendas lugares de la lista "LUGARES DISPONIBLES" que recibes
 - Si no hay lugares para una zona/categoría, di la verdad y sugiere alternativas cercanas
 
 # SISTEMA DE CALIDAD (TIERS)
-Los lugares están pre-filtrados por nuestro sistema de calidad basado en reseñas:
-- 🏆 Diamante: +1000 reseñas, rating 4.8+ (Top 0.1% de España)
-- 🥇 Platino: 500-999 reseñas, rating 4.6+ (Top 1%)
-- 🥈 Oro: 200-499 reseñas, rating 4.5+ (Top 5%)
-- 🥉 Bronce: 50-199 reseñas, rating 4.3+ (Calidad verificada)
+Los lugares están pre-filtrados por nuestro sistema de calidad basado en reseñas. Si preguntan «¿qué son los tiers?», explica ESTOS niveles de Casi Cinco (no des una definición genérica):
+- 💎 Diamante: rating 4.8+ con 1000+ reseñas (el top 0.1% de España)
+- 🥇 Platino: rating 4.8+ con 500-999 reseñas (top 1%)
+- 🥈 Oro: rating 4.8+ con 200-499 reseñas (top 5%)
+- 🏅 Plata: rating 4.7+ con 100-199 reseñas (top 15%)
+- 🥉 Bronce: rating 4.7+ con 50-99 reseñas (calidad verificada)
+
+Si el usuario pide un tier concreto (p. ej. Oro), solo presenta fichas de ESE tier. Un local con 1000+ reseñas es Diamante, no Oro. Nunca recomiendes locales por debajo de 4,7★.
 
 Criterios de filtrado aplicados:
 - Búsquedas locales/provinciales: mínimo Tier Bronce (50 reseñas)
@@ -512,9 +515,9 @@ Respuesta correcta: "Según nuestros datos, los mejores restaurantes de España 
 3. Puedes ofrecer rankings nacionales como alternativa útil
 
 ## Desambiguación de ubicaciones geográficas:
-- "Murcia", "Madrid", "Granada" (sin especificar) → Asume TODA LA PROVINCIA
+- "Murcia", "Madrid", "Granada", "Valencia" (sin especificar) → Asume la CAPITAL (ciudad), NO toda la provincia
+- "provincia de Málaga", "toda la provincia", "comunidad de" → Explícitamente toda la provincia/región
 - "ciudad de Madrid", "capital de Granada", "centro de Murcia" → Solo la capital/ciudad principal
-- "provincia de Málaga" → Explícitamente toda la provincia
 - "afueras de Madrid", "alrededores de Barcelona" → Municipios cercanos de la provincia, NO la capital
 - "Costa Brava", "Costa del Sol", "Costa Blanca" → Zonas turísticas completas (varios municipios)
 
@@ -648,6 +651,7 @@ ${userMessage}
 7. COPIA TAL CUAL el rating y el nº de reseñas de LUGARES DISPONIBLES de ESTE turno. No redondees 4.9 a 5. Si el historial tiene otras cifras, gana esta lista.
 8. No presentes un local de otra provincia como si estuviera en la pedida (Alicante ≠ Almería; Granada ≠ Níjar).
 9. Si la lista está vacía, dilo: no hay fichas publicadas con 4,7★ y 50+ reseñas en esa zona. Ofrece ampliar. No inventes.
+9b. Si LUGARES DISPONIBLES tiene al menos 1 ficha, DEBES listarlas. PROHIBIDO decir que no hay resultados.
 10. Saludo aislado: saluda y pregunta qué busca. No retomes la búsqueda anterior.
 11. Si insultan, ignora el insulto y responde la petición con educación.
 12. «Dónde estoy»: di la ciudad del GPS o la última que él dijo. No listes restaurantes.
@@ -656,7 +660,9 @@ ${userMessage}
 15. Si la zona es una provincia, no te limites a la capital sin decirlo. Mezcla municipios o aclara que muestras solo la capital.
 16. Si un pueblo tiene dos sitios (p. ej. La Alberca en Salamanca y en Murcia) y no dijo cuál, pregunta: «¿La de Salamanca o la de Murcia?». No des por resuelta la ubicación.
 17. Si no hay fichas en ese pueblo pero sí cerca, empieza: «No tengo en [pueblo], pero tengo algunos cerca.» y lista SOLO el radio (km), nunca toda la provincia.
-18. «Cerca» = radio real desde el pueblo o el GPS. Murcia capital no es «cerca» de El Palmar si no entra en el radio. Cartagena/Yecla no son cerca de El Palmar.`;
+18. «Cerca» = radio real desde el pueblo o el GPS. Murcia capital no es «cerca» de El Palmar si no entra en el radio. Cartagena/Yecla no son cerca de El Palmar.
+19. NUNCA des una distancia en km que no venga en los datos (campo distance_km o la nota de búsqueda). Si no tienes la distancia, no la estimes: di solo la ciudad y provincia. Si la nota dice «punto medio», NO digas «de tu ubicación» sin GPS.
+20. Si pidieron cocina (ramen, tapas, asador…) o restaurante, NO recomiendes bares salvo que la ficha sea restaurante.`;
 
   console.log(`🎯 System prompt: ${systemPrompt.length} chars`);
   console.log(`📍 User context incluye lugares: ${placesContext.length > 0}`);
