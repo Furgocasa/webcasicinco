@@ -24,6 +24,8 @@ import { Badge } from '@/components/ui/Badge';
 import { toast } from 'sonner';
 import * as XLSX from 'xlsx';
 
+const PAGE_SIZE_OPTIONS = [50, 100, 200, 500, 0] as const;
+
 interface UserData {
   id: string;
   email: string;
@@ -49,9 +51,9 @@ export default function UsuariosPage() {
   const [editingUser, setEditingUser] = useState<UserData | null>(null);
   const [newRole, setNewRole] = useState<'user' | 'admin'>('user');
   
-  // Paginación
+  // Paginación (0 = todos)
   const [currentPage, setCurrentPage] = useState(1);
-  const [usersPerPage] = useState(10);
+  const [usersPerPage, setUsersPerPage] = useState<number>(50);
   
   // Ordenamiento
   const [sortBy, setSortBy] = useState<'email' | 'created_at' | 'role' | 'status'>('created_at');
@@ -248,11 +250,20 @@ export default function UsuariosPage() {
       return sortOrder === 'asc' ? comparison : -comparison;
     });
 
-  // Paginación
-  const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
-  const indexOfLastUser = currentPage * usersPerPage;
-  const indexOfFirstUser = indexOfLastUser - usersPerPage;
-  const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
+  // Paginación (0 = todos)
+  const pageSize = usersPerPage === 0 ? Math.max(filteredUsers.length, 1) : usersPerPage;
+  const totalPages = usersPerPage === 0 ? 1 : Math.ceil(filteredUsers.length / pageSize);
+  const safePage = Math.min(currentPage, Math.max(totalPages, 1));
+  const indexOfLastUser = safePage * pageSize;
+  const indexOfFirstUser = indexOfLastUser - pageSize;
+  const currentUsers = usersPerPage === 0
+    ? filteredUsers
+    : filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
+
+  const handlePageSizeChange = (value: number) => {
+    setUsersPerPage(value);
+    setCurrentPage(1);
+  };
 
   // Cambiar de página
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
@@ -499,7 +510,10 @@ export default function UsuariosPage() {
                   type="text"
                   placeholder="Buscar por email o nombre..."
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    setCurrentPage(1);
+                  }}
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 />
               </div>
@@ -509,7 +523,10 @@ export default function UsuariosPage() {
             <div className="sm:w-48">
               <select
                 value={roleFilter}
-                onChange={(e) => setRoleFilter(e.target.value as any)}
+                onChange={(e) => {
+                  setRoleFilter(e.target.value as 'all' | 'admin' | 'user');
+                  setCurrentPage(1);
+                }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
               >
                 <option value="all">Todos los Roles</option>
@@ -517,6 +534,21 @@ export default function UsuariosPage() {
                 <option value="user">Solo Usuarios</option>
               </select>
             </div>
+
+            <label className="flex items-center gap-2 sm:w-auto text-sm text-gray-600">
+              <span className="whitespace-nowrap">Mostrar</span>
+              <select
+                value={usersPerPage}
+                onChange={(e) => handlePageSizeChange(Number(e.target.value))}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              >
+                {PAGE_SIZE_OPTIONS.map((size) => (
+                  <option key={size} value={size}>
+                    {size === 0 ? 'Todos' : size}
+                  </option>
+                ))}
+              </select>
+            </label>
           </div>
         </CardContent>
       </Card>
@@ -752,40 +784,61 @@ export default function UsuariosPage() {
                 </tbody>
               </table>
 
-              {/* Paginación */}
-              {totalPages > 1 && (
-                <div className="mt-6 flex items-center justify-between">
-                  <p className="text-sm text-gray-600">
-                    Mostrando {indexOfFirstUser + 1} a {Math.min(indexOfLastUser, filteredUsers.length)} de {filteredUsers.length} usuarios
-                  </p>
-                  <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => paginate(currentPage - 1)}
-                      disabled={currentPage === 1}
-                    >
-                      Anterior
-                    </Button>
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                      <Button
-                        key={page}
-                        size="sm"
-                        variant={currentPage === page ? 'primary' : 'outline'}
-                        onClick={() => paginate(page)}
+              {/* Paginación y tamaño de página */}
+              {filteredUsers.length > 0 && (
+                <div className="mt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <label className="flex items-center gap-2 text-sm text-gray-600">
+                      <span>Mostrar:</span>
+                      <select
+                        value={usersPerPage}
+                        onChange={(e) => handlePageSizeChange(Number(e.target.value))}
+                        className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
                       >
-                        {page}
-                      </Button>
-                    ))}
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => paginate(currentPage + 1)}
-                      disabled={currentPage === totalPages}
-                    >
-                      Siguiente
-                    </Button>
+                        {PAGE_SIZE_OPTIONS.map((size) => (
+                          <option key={size} value={size}>
+                            {size === 0 ? 'Todos' : size}
+                          </option>
+                        ))}
+                      </select>
+                      <span>por página</span>
+                    </label>
+                    <p className="text-sm text-gray-600">
+                      {usersPerPage === 0
+                        ? `Mostrando todos (${filteredUsers.length})`
+                        : `Mostrando ${filteredUsers.length === 0 ? 0 : indexOfFirstUser + 1} a ${Math.min(indexOfLastUser, filteredUsers.length)} de ${filteredUsers.length} usuarios`}
+                    </p>
                   </div>
+                  {totalPages > 1 && (
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => paginate(safePage - 1)}
+                        disabled={safePage === 1}
+                      >
+                        Anterior
+                      </Button>
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                        <Button
+                          key={page}
+                          size="sm"
+                          variant={safePage === page ? 'primary' : 'outline'}
+                          onClick={() => paginate(page)}
+                        >
+                          {page}
+                        </Button>
+                      ))}
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => paginate(safePage + 1)}
+                        disabled={safePage === totalPages}
+                      >
+                        Siguiente
+                      </Button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

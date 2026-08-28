@@ -40,15 +40,29 @@ export async function GET(request: NextRequest) {
       }
     );
 
-    // Obtener todos los usuarios directamente de auth.users
-    const { data: { users: authUsers }, error: usersError } = await supabaseAdmin.auth.admin.listUsers();
+    // listUsers pagina de 50 en 50; hay que recorrer todas las páginas
+    const authUsers: any[] = [];
+    const perPage = 200;
+    let page = 1;
+    while (true) {
+      const { data, error: usersError } = await supabaseAdmin.auth.admin.listUsers({
+        page,
+        perPage,
+      });
 
-    if (usersError) {
-      console.error('Error obteniendo usuarios:', usersError);
-      return NextResponse.json({
-        success: false,
-        error: 'Error al obtener lista de usuarios'
-      }, { status: 500 });
+      if (usersError) {
+        console.error('Error obteniendo usuarios:', usersError);
+        return NextResponse.json({
+          success: false,
+          error: 'Error al obtener lista de usuarios'
+        }, { status: 500 });
+      }
+
+      authUsers.push(...(data.users || []));
+      if (!data.users || data.users.length < perPage) {
+        break;
+      }
+      page += 1;
     }
 
     // Obtener info de suscripciones activas para cada usuario
