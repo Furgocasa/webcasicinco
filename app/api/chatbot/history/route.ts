@@ -43,13 +43,31 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Ordenar de más antiguo a más reciente para mostrar correctamente
+    let logs: Array<{ id: string; bot_response: string | null; voto_usuario: 'up' | 'down' | null }> = [];
+    if (user) {
+      const { data: analytics } = await supabase
+        .from('chatbot_analytics')
+        .select('id, bot_response, voto_usuario')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(20);
+      logs = analytics || [];
+    }
+
+    const used = new Set<string>();
     const messages = (data || [])
-      .reverse() // Invertir porque la query trae del más reciente al más antiguo
-      .map(msg => ({
-        role: msg.role,
-        content: msg.message,
-      }));
+      .reverse()
+      .map((msg) => {
+        if (msg.role !== 'assistant') return { role: msg.role, content: msg.message };
+        const match = logs.find((l) => !used.has(l.id) && l.bot_response === msg.message);
+        if (match) used.add(match.id);
+        return {
+          role: msg.role,
+          content: msg.message,
+          logId: match?.id,
+          voto: match?.voto_usuario ?? null,
+        };
+      });
 
     return NextResponse.json({
       success: true,

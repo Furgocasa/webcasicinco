@@ -107,6 +107,7 @@ export const EVENTS = {
   // Chatbot
   CHATBOT_MESSAGE_SEND: 'chatbot_message_send',
   CHATBOT_LINK_CLICK: 'chatbot_link_click',
+  CHATBOT_VOTO: 'chatbot_voto',
   
   // Rutas
   ROUTE_CALCULATE: 'route_calculate',

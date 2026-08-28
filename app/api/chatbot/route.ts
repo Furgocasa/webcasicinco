@@ -742,27 +742,33 @@ export async function POST(request: NextRequest) {
       is_active: true, // ✅ Nueva conversación = activa
     });
 
-    // 📊 Guardar en analytics para análisis posterior
+    let logId: string | null = null;
     try {
-      await supabase.from('chatbot_analytics').insert({
-        user_id: user?.id || null,
-        user_email: user?.email || null,
-        session_id: !user ? session_id : null,
-        user_message: message,
-        bot_response: response,
-        conversation_context: conversation_history.slice(-6), // Últimos 3 pares (6 mensajes)
-        detected_intent: intent,
-        places_found: candidates.length,
-        query_time_ms: queryTimeMs,
-      });
+      const { data: saved, error: analyticsError } = await supabase
+        .from('chatbot_analytics')
+        .insert({
+          user_id: user?.id || null,
+          user_email: user?.email || null,
+          session_id: !user ? session_id : null,
+          user_message: message,
+          bot_response: response,
+          conversation_context: conversation_history.slice(-6),
+          detected_intent: intent,
+          places_found: candidates.length,
+          query_time_ms: queryTimeMs,
+        })
+        .select('id')
+        .single();
+      if (analyticsError) console.error('Error guardando analytics:', analyticsError);
+      else logId = saved?.id || null;
     } catch (analyticsError) {
-      // No fallar si hay error en analytics
       console.error('Error guardando analytics:', analyticsError);
     }
 
     return NextResponse.json({
       success: true,
       message: response,
+      logId,
       timestamp: new Date().toISOString(),
     });
   } catch (error: any) {
@@ -771,5 +777,43 @@ export async function POST(request: NextRequest) {
       { error: error.message || 'Error procesando mensaje' },
       { status: 500 }
     );
+  }
+}
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+/** Voto del usuario sobre una respuesta ya entregada. */
+export async function PATCH(req: NextRequest) {
+  try {
+    const body = await req.json().catch(() => ({}));
+    const logId = typeof body.logId === 'string' ? body.logId.trim() : '';
+    const voto = body.voto === 'up' || body.voto === 'down' ? body.voto : body.voto === null ? null : undefined;
+
+    if (!UUID_RE.test(logId) || voto === undefined) {
+      return NextResponse.json({ error: 'logId y voto (up|down|null) son requeridos' }, { status: 400 });
+    }
+
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from('chatbot_analytics')
+      .update({
+        voto_usuario: voto,
+        votado_at: voto ? new Date().toISOString() : null,
+      })
+      .eq('id', logId)
+      .select('id, voto_usuario')
+      .maybeSingle();
+
+    if (error) {
+      console.error('No se pudo guardar voto del chatbot', error.message);
+      return NextResponse.json({ error: 'No se pudo guardar el voto' }, { status: 500 });
+    }
+    if (!data) {
+      return NextResponse.json({ error: 'Respuesta no encontrada' }, { status: 404 });
+    }
+
+    return NextResponse.json({ success: true, voto: data.voto_usuario });
+  } catch (e: any) {
+    return NextResponse.json({ error: e?.message || 'No se pudo guardar el voto' }, { status: 500 });
   }
 }

@@ -49,7 +49,7 @@ const GRUPOS: Grupo[] = [
     color: 'text-purple-600 border-purple-200 bg-purple-50',
     sections: [
       { title: 'Blog SEO', description: 'Crea y gestiona artículos del blog', icon: <FileText className={icon} />, href: '/admin/blog' },
-      { title: 'Conversaciones IA', description: 'Revisa las conversaciones del Tío Viajero', icon: <MessageSquare className={icon} />, href: '/admin/conversaciones' },
+      { title: 'Respuestas Tío Viajero', description: 'Revisa y evalúa respuestas del chatbot', icon: <MessageSquare className={icon} />, href: '/admin/conversaciones' },
       { title: 'Redes sociales', description: 'Genera y programa contenido social', icon: <Share2 className={icon} />, href: '/admin/redes-sociales' },
     ],
   },

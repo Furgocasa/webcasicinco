@@ -61,7 +61,7 @@ export const NAV: NavEntry[] = [
     icon: <Sparkles className={iconClass} />,
     items: [
       { label: 'Blog SEO', href: '/admin/blog', icon: <FileText className={iconClass} /> },
-      { label: 'Conversaciones IA', href: '/admin/conversaciones', icon: <MessageSquare className={iconClass} /> },
+      { label: 'Respuestas Tío Viajero', href: '/admin/conversaciones', icon: <MessageSquare className={iconClass} /> },
       { label: 'Redes sociales', href: '/admin/redes-sociales', icon: <Share2 className={iconClass} /> },
     ],
   },

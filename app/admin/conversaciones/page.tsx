@@ -1,838 +1,782 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Card } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
-import { Loader2, Search, RefreshCw, CheckCircle, AlertCircle, XCircle, Trash2, Eye, BarChart3, Download, FileSpreadsheet } from 'lucide-react';
-import { toast } from 'sonner';
-import { useAuth } from '@/lib/hooks/useAuth';
-import { useRouter } from 'next/navigation';
+import { useCallback, useEffect, useState, type ReactNode } from 'react';
+import Link from 'next/link';
+import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
 
-interface Conversation {
-  id: string;
-  user_email: string | null;
-  session_id: string | null;
-  user_message: string;
-  bot_response: string;
-  conversation_context: any;
-  detected_intent: any;
-  places_found: number;
-  query_time_ms: number;
-  ai_summary: string | null;
-  quality_assessment: 'correcta' | 'mejorable' | 'incorrecta' | null;
-  quality_reasoning: string | null;
-  suggested_improvements: string | null;
-  created_at: string;
-  analyzed_at: string | null;
+interface UsuarioLog {
+  nombre: string | null;
+  email: string | null;
 }
 
-interface Stats {
+interface RespuestaLog {
+  id: string;
+  created_at: string;
+  conversacion_id: string | null;
+  user_id: string | null;
+  usuario?: UsuarioLog | null;
+  locale: string | null;
+  pregunta: string | null;
+  respuesta: string | null;
+  funciones: Array<{ name: string; args: any }> | null;
+  tokens: number | null;
+  duracion_ms: number | null;
+  valoracion_ia: 'correcta' | 'mejorable' | 'incorrecta' | null;
+  motivo_ia: string | null;
+  sugerencia_ia: string | null;
+  voto_usuario: 'up' | 'down' | null;
+  ciudad?: string | null;
+  pais?: string | null;
+  ubicacion?: string | null;
+  places_found?: number;
+}
+
+const BADGE_IA: Record<string, { label: string; clase: string }> = {
+  correcta: { label: 'Correcta', clase: 'bg-green-50 text-green-700 ring-1 ring-inset ring-green-200' },
+  mejorable: { label: 'Mejorable', clase: 'bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-200' },
+  incorrecta: { label: 'Incorrecta', clase: 'bg-red-50 text-red-700 ring-1 ring-inset ring-red-200' },
+};
+
+type FiltroIA = 'todas' | 'correcta' | 'mejorable' | 'incorrecta' | 'sin_evaluar';
+type FiltroVoto = 'todas' | 'up' | 'down' | 'sin_voto';
+type Vista = 'respuestas' | 'conversaciones';
+
+interface ConversacionRow {
+  id: string;
+  created_at: string | null;
+  ultimo_mensaje_at: string | null;
+  titulo: string;
+  user_id: string | null;
+  agrupacion?: 'cuenta' | 'huella' | 'hilo' | 'rato';
+  usuario: UsuarioLog | null;
+  locale: string | null;
+  respuestas: number;
+  first_user_message: string;
+  correcta: number;
+  mejorable: number;
+  incorrecta: number;
+  sin_evaluar: number;
+  quality_score: number | null;
+  interaccion?: 'correcta' | 'mejorable' | 'con_errores' | 'sin_valorar';
+  ciudad?: string | null;
+  pais?: string | null;
+  ubicacion?: string | null;
+}
+
+interface HiloMensaje {
+  role: 'user' | 'assistant';
+  content: string | null;
+  created_at: string;
+  log?: RespuestaLog;
+}
+
+interface StatsIA {
+  correcta: number;
+  mejorable: number;
+  incorrecta: number;
+  sin_evaluar: number;
   total: number;
-  pending: number;
-  analyzed: number;
-  byQuality: {
-    correcta: number;
-    mejorable: number;
-    incorrecta: number;
+  voto_up: number;
+  voto_down: number;
+  sin_voto: number;
+}
+
+const CATEGORIAS_PIE: Array<{
+  key: Exclude<FiltroIA, 'todas'>;
+  name: string;
+  color: string;
+}> = [
+  { key: 'correcta', name: 'Correctas', color: '#16a34a' },
+  { key: 'mejorable', name: 'Mejorables', color: '#d97706' },
+  { key: 'incorrecta', name: 'Incorrectas', color: '#dc2626' },
+  { key: 'sin_evaluar', name: 'Sin revisar', color: '#9ca3af' },
+];
+
+const STATS_VACIOS: StatsIA = {
+  correcta: 0,
+  mejorable: 0,
+  incorrecta: 0,
+  sin_evaluar: 0,
+  total: 0,
+  voto_up: 0,
+  voto_down: 0,
+  sin_voto: 0,
+};
+
+function etiquetaVoto(voto: RespuestaLog['voto_usuario']) {
+  if (voto === 'up') return { label: '👍 Bien', clase: 'bg-green-50 text-green-700 ring-1 ring-inset ring-green-200' };
+  if (voto === 'down') return { label: '👎 Mal', clase: 'bg-red-50 text-red-700 ring-1 ring-inset ring-red-200' };
+  return { label: '—', clase: 'bg-gray-100 text-gray-500' };
+}
+
+const PAGE_SIZE = 25;
+
+function ChatMensajeTexto({ texto }: { texto: string }) {
+  const limpio = String(texto || '')
+    .replace(/!\[[^\]]*\]\([^)]+\)/g, '')
+    .replace(/(^|\n)\s*[-*]\s+/g, '$1• ');
+  const partes = limpio.split(/(\[[^\]]+\]\([^)]+\)|\*\*[^*]+?\*\*|https?:\/\/[^\s)]+)/g);
+  const nodes: ReactNode[] = [];
+  partes.forEach((parte, i) => {
+    const md = parte.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
+    if (md) {
+      const href = md[2];
+      if (href.startsWith('/')) {
+        nodes.push(<Link key={i} href={href} className="text-sky-700 hover:text-sky-900 underline font-medium">{md[1]}</Link>);
+      } else {
+        nodes.push(<a key={i} href={href} target="_blank" rel="noopener noreferrer" className="text-sky-700 hover:text-sky-900 underline font-medium">{md[1]}</a>);
+      }
+      return;
+    }
+    const bold = parte.match(/^\*\*([^*]+)\*\*$/);
+    if (bold) {
+      nodes.push(<strong key={i} className="font-semibold">{bold[1]}</strong>);
+      return;
+    }
+    if (/^https?:\/\//.test(parte)) {
+      nodes.push(<a key={i} href={parte} target="_blank" rel="noopener noreferrer" className="text-sky-700 hover:text-sky-900 underline font-medium">{parte}</a>);
+      return;
+    }
+    nodes.push(<span key={i}>{parte}</span>);
+  });
+  return <div className="whitespace-pre-wrap">{nodes}</div>;
+}
+
+function formatFecha(iso: string) {
+  const d = new Date(iso);
+  return {
+    dia: d.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }),
+    hora: d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
   };
-  avgQueryTimeMs: number;
+}
+
+function nombreUsuario(log: RespuestaLog) {
+  if (log.usuario?.nombre?.trim()) return log.usuario.nombre.trim();
+  if (log.usuario?.email) return log.usuario.email.split('@')[0];
+  if (log.user_id) return 'Usuario';
+  return 'Anónimo';
+}
+
+function etiquetaInteraccion(c: ConversacionRow) {
+  if (c.interaccion === 'correcta' || (c.quality_score === 10 && !c.incorrecta && !c.mejorable && (c.correcta || 0) > 0)) {
+    return { label: '100% correcta', clase: 'bg-green-50 text-green-700' };
+  }
+  if (c.interaccion === 'mejorable') return { label: 'Mejorable', clase: 'bg-amber-50 text-amber-700' };
+  if (c.interaccion === 'con_errores') return { label: 'Con errores', clase: 'bg-red-50 text-red-700' };
+  return { label: 'Sin valorar', clase: 'bg-gray-100 text-gray-500' };
+}
+
+function textoUbicacion(row: { ubicacion?: string | null; ciudad?: string | null; pais?: string | null }) {
+  if (row.ubicacion) return row.ubicacion;
+  const ciudad = (row.ciudad || '').trim();
+  const pais = (row.pais || '').trim();
+  if (ciudad && pais && ciudad !== pais) return `${ciudad}, ${pais}`;
+  if (ciudad || pais) return ciudad || pais;
+  return 'Ubicación desconocida';
 }
 
 export default function ConversacionesPage() {
-  const router = useRouter();
-  const { user, loading: authLoading } = useAuth();
-
-  const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [stats, setStats] = useState<Stats | null>(null);
+  const [vista, setVista] = useState<Vista>('respuestas');
+  const [logs, setLogs] = useState<RespuestaLog[]>([]);
+  const [conversaciones, setConversaciones] = useState<ConversacionRow[]>([]);
+  const [hilo, setHilo] = useState<HiloMensaje[] | null>(null);
+  const [hiloMeta, setHiloMeta] = useState<ConversacionRow | null>(null);
+  const [hiloId, setHiloId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [analyzing, setAnalyzing] = useState(false);
-  const [selectedConv, setSelectedConv] = useState<Conversation | null>(null);
+  const [filtroIA, setFiltroIA] = useState<FiltroIA>('todas');
+  const [filtroVoto, setFiltroVoto] = useState<FiltroVoto>('todas');
+  const [pagina, setPagina] = useState(0);
+  const [total, setTotal] = useState(0);
+  const [totalConversaciones, setTotalConversaciones] = useState(0);
+  const [stats, setStats] = useState<StatsIA>(STATS_VACIOS);
+  const [expandido, setExpandido] = useState<string | null>(null);
+  const [errorCarga, setErrorCarga] = useState<string | null>(null);
 
-  // Filtros
-  const [qualityFilter, setQualityFilter] = useState<string>('all');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [view, setView] = useState<'respuestas' | 'conversaciones'>('respuestas');
-  const [threads, setThreads] = useState<{
-    id: string;
-    label: string;
-    last_message_at: string;
-    first_user_message: string;
-    assistant_count: number;
-    unclassified_responses: number;
-    classified_responses: number;
-    quality_score: number | null;
-  }[]>([]);
-
-  // Verificar que es admin
-  useEffect(() => {
-    if (!authLoading && (!user || user.user_metadata?.role !== 'admin')) {
-      router.push('/');
-    }
-  }, [user, authLoading, router]);
-
-  // Cargar estadísticas
-  const loadStats = async () => {
-    try {
-      const response = await fetch('/api/admin/analyze-conversations');
-      const data = await response.json();
-      if (data.success) {
-        setStats(data.stats);
-      }
-    } catch (error) {
-      console.error('Error cargando estadísticas:', error);
-    }
-  };
-
-  // Cargar conversaciones
-  const loadConversations = async () => {
+  const cargar = useCallback(async () => {
     setLoading(true);
+    setErrorCarga(null);
     try {
-      const params = new URLSearchParams({
-        page: page.toString(),
-        limit: '20',
-      });
-
-      if (qualityFilter !== 'all') {
-        params.append('quality', qualityFilter);
+      const params = new URLSearchParams({ vista, filtroIA, filtroVoto, pagina: String(pagina) });
+      const res = await fetch(`/api/admin/conversations?${params}`, { cache: 'no-store' });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.details || json.error || 'Error cargando respuestas');
+      if (vista === 'conversaciones') {
+        setConversaciones(json.data || []);
+        setTotalConversaciones(json.totalConversaciones || json.total || 0);
+        setLogs([]);
+      } else {
+        setLogs(json.data || []);
+        setConversaciones([]);
       }
-
-      if (searchTerm) {
-        params.append('search', searchTerm);
-      }
-
-      const response = await fetch(`/api/admin/conversations?${params}`);
-      const data = await response.json();
-
-      if (data.success) {
-        setConversations(data.conversations);
-        setTotalPages(data.pagination.pages);
-      }
-    } catch (error) {
-      console.error('Error cargando conversaciones:', error);
-      toast.error('Error cargando conversaciones');
+      setTotal(json.total || 0);
+      setStats(json.stats || STATS_VACIOS);
+    } catch (e: any) {
+      setLogs([]);
+      setTotal(0);
+      setStats(STATS_VACIOS);
+      setErrorCarga(e?.message || 'Error cargando respuestas');
     } finally {
       setLoading(false);
     }
-  };
+  }, [vista, filtroIA, filtroVoto, pagina]);
 
-  // Analizar conversaciones pendientes
-  const analyzeConversations = async () => {
-    setAnalyzing(true);
-    try {
-      const response = await fetch('/api/admin/analyze-conversations', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ limit: 20 })
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        toast.success(`${data.analyzed} conversaciones analizadas`);
-        loadConversations();
-        loadStats();
-      } else {
-        toast.error('Error analizando conversaciones');
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      toast.error('Error en el análisis');
-    } finally {
-      setAnalyzing(false);
-    }
-  };
-
-  // Cargar al inicio
   useEffect(() => {
-    loadStats();
+    cargar();
+  }, [cargar]);
+
+  const cerrarPaneles = () => {
+    setExpandido(null);
+    setHiloId(null);
+    setHilo(null);
+    setHiloMeta(null);
+  };
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') cerrarPaneles();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
   }, []);
 
-  useEffect(() => {
-    loadConversations();
-  }, [page, qualityFilter]);
+  const abrirDetalle = (id: string) => {
+    setHiloId(null);
+    setHilo(null);
+    setHiloMeta(null);
+    setExpandido((prev) => (prev === id ? null : id));
+  };
 
-  // Buscar con delay
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (page === 1) {
-        loadConversations();
-      } else {
-        setPage(1);
-      }
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [searchTerm]);
-
-  // ================================================================
-  // FUNCIONES DE EXPORTACIÓN
-  // ================================================================
-
-  // Exportar a CSV
-  const exportToCSV = async () => {
+  const abrirHilo = async (id: string) => {
+    setExpandido(null);
+    setHiloId(id);
+    setHilo(null);
+    setHiloMeta(null);
     try {
-      toast.info('Exportando conversaciones a CSV...');
-      
-      // Obtener todas las conversaciones sin paginación
-      const params = new URLSearchParams({ limit: '10000' });
-      if (qualityFilter !== 'all') params.append('quality', qualityFilter);
-      if (searchTerm) params.append('search', searchTerm);
-      
-      const response = await fetch(`/api/admin/conversations?${params}`);
-      const data = await response.json();
-      
-      if (!data.success) {
-        throw new Error('Error obteniendo datos');
-      }
-
-      const allConversations = data.conversations;
-
-      // Crear CSV
-      const headers = [
-        'ID',
-        'Fecha',
-        'Usuario',
-        'Sesión',
-        'Pregunta',
-        'Respuesta',
-        'Calidad',
-        'Resumen IA',
-        'Razonamiento',
-        'Mejoras Sugeridas',
-        'Lugares Encontrados',
-        'Tiempo (ms)',
-        'Categoría Detectada',
-        'Ubicación Detectada',
-        'Fecha Análisis'
-      ];
-
-      const rows = allConversations.map((conv: Conversation) => {
-        const intent = conv.detected_intent || {};
-        return [
-          conv.id,
-          new Date(conv.created_at).toLocaleString('es-ES'),
-          conv.user_email || '',
-          conv.session_id?.slice(0, 16) || '',
-          `"${(conv.user_message || '').replace(/"/g, '""')}"`,
-          `"${(conv.bot_response || '').replace(/"/g, '""')}"`,
-          conv.quality_assessment || 'pendiente',
-          `"${(conv.ai_summary || '').replace(/"/g, '""')}"`,
-          `"${(conv.quality_reasoning || '').replace(/"/g, '""')}"`,
-          `"${(conv.suggested_improvements || '').replace(/"/g, '""')}"`,
-          conv.places_found,
-          conv.query_time_ms,
-          intent.category || '',
-          intent.location || '',
-          conv.analyzed_at ? new Date(conv.analyzed_at).toLocaleString('es-ES') : ''
-        ];
-      });
-
-      // Combinar headers y rows
-      const csvContent = [
-        headers.join(','),
-        ...rows.map((row: (string | number)[]) => row.join(','))
-      ].join('\n');
-
-      // Crear y descargar archivo
-      const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
-      const link = document.createElement('a');
-      const url = URL.createObjectURL(blob);
-      
-      link.setAttribute('href', url);
-      link.setAttribute('download', `conversaciones_${new Date().toISOString().split('T')[0]}.csv`);
-      link.style.visibility = 'hidden';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      toast.success(`${allConversations.length} conversaciones exportadas a CSV`);
-    } catch (error) {
-      console.error('Error exportando CSV:', error);
-      toast.error('Error al exportar CSV');
+      const res = await fetch(`/api/admin/conversations?vista=hilo&id=${encodeURIComponent(id)}`, { cache: 'no-store' });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'No se pudo cargar el hilo');
+      setHilo(json.hilo || []);
+      if (json.conversacion) setHiloMeta(json.conversacion);
+    } catch (e) {
+      console.error(e);
+      setHilo([]);
     }
   };
 
-  // Exportar a Excel (usando biblioteca xlsx)
-  const exportToExcel = async () => {
-    try {
-      toast.info('Exportando conversaciones a Excel...');
-      
-      // Obtener todas las conversaciones
-      const params = new URLSearchParams({ limit: '10000' });
-      if (qualityFilter !== 'all') params.append('quality', qualityFilter);
-      if (searchTerm) params.append('search', searchTerm);
-      
-      const response = await fetch(`/api/admin/conversations?${params}`);
-      const data = await response.json();
-      
-      if (!data.success) {
-        throw new Error('Error obteniendo datos');
-      }
+  const totalPaginas = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const logAbierto = expandido ? logs.find((l) => l.id === expandido) || null : null;
+  const totalGrafico = stats.total || 0;
+  const pieData = CATEGORIAS_PIE
+    .map((c) => ({ ...c, value: stats[c.key] || 0 }))
+    .filter((c) => c.value > 0);
 
-      const allConversations = data.conversations;
-
-      // Importar xlsx dinámicamente
-      const XLSX = await import('xlsx');
-
-      // Preparar datos para Excel
-      const excelData = allConversations.map((conv: Conversation) => {
-        const intent = conv.detected_intent || {};
-        return {
-          'ID': conv.id.slice(0, 8),
-          'Fecha': new Date(conv.created_at).toLocaleString('es-ES'),
-          'Usuario': conv.user_email || 'Anónimo',
-          'Sesión': conv.session_id?.slice(0, 16) || '',
-          'Pregunta': conv.user_message,
-          'Respuesta': conv.bot_response,
-          'Calidad': conv.quality_assessment || 'pendiente',
-          'Resumen IA': conv.ai_summary || '',
-          'Razonamiento': conv.quality_reasoning || '',
-          'Mejoras Sugeridas': conv.suggested_improvements || '',
-          'Lugares': conv.places_found,
-          'Tiempo (ms)': conv.query_time_ms,
-          'Categoría': intent.category || '',
-          'Ubicación': intent.location || '',
-          'Fecha Análisis': conv.analyzed_at ? new Date(conv.analyzed_at).toLocaleString('es-ES') : ''
-        };
-      });
-
-      // Crear workbook y worksheet
-      const ws = XLSX.utils.json_to_sheet(excelData);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, 'Conversaciones');
-
-      // Ajustar anchos de columna
-      const colWidths = [
-        { wch: 10 },  // ID
-        { wch: 18 },  // Fecha
-        { wch: 25 },  // Usuario
-        { wch: 18 },  // Sesión
-        { wch: 50 },  // Pregunta
-        { wch: 60 },  // Respuesta
-        { wch: 12 },  // Calidad
-        { wch: 40 },  // Resumen IA
-        { wch: 40 },  // Razonamiento
-        { wch: 40 },  // Mejoras
-        { wch: 8 },   // Lugares
-        { wch: 10 },  // Tiempo
-        { wch: 15 },  // Categoría
-        { wch: 20 },  // Ubicación
-        { wch: 18 }   // Fecha Análisis
-      ];
-      ws['!cols'] = colWidths;
-
-      // Descargar archivo
-      XLSX.writeFile(wb, `conversaciones_${new Date().toISOString().split('T')[0]}.xlsx`);
-
-      toast.success(`${allConversations.length} conversaciones exportadas a Excel`);
-    } catch (error) {
-      console.error('Error exportando Excel:', error);
-      toast.error('Error al exportar Excel');
-    }
-  };
-
-  if (authLoading || !user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-      </div>
-    );
-  }
-
-  const getQualityIcon = (quality: string | null) => {
-    if (!quality) return <AlertCircle className="h-5 w-5 text-gray-400" />;
-    if (quality === 'correcta') return <CheckCircle className="h-5 w-5 text-green-600" />;
-    if (quality === 'mejorable') return <AlertCircle className="h-5 w-5 text-yellow-600" />;
-    return <XCircle className="h-5 w-5 text-red-600" />;
-  };
-
-  const getQualityBadge = (quality: string | null) => {
-    if (!quality) return <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-600">Pendiente</span>;
-    if (quality === 'correcta') return <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-700 font-medium">✅ Correcta</span>;
-    if (quality === 'mejorable') return <span className="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-700 font-medium">⚠️ Mejorable</span>;
-    return <span className="px-2 py-1 text-xs rounded-full bg-red-100 text-red-700 font-medium">❌ Incorrecta</span>;
+  const seleccionarCategoria = (key: FiltroIA) => {
+    setFiltroIA((prev) => (prev === key ? 'todas' : key));
+    setPagina(0);
+    setExpandido(null);
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          📊 Análisis de Conversaciones del Chatbot
-        </h1>
-        <p className="text-gray-600">
-          Se califican las <strong>respuestas</strong> (una a una). La nota de cada conversación es la media: correcta 10, mejorable 5, incorrecta 0.
-        </p>
-        <div className="flex gap-2 mt-4">
-          <button
-            type="button"
-            onClick={() => setView('respuestas')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium ${view === 'respuestas' ? 'bg-blue-600 text-white' : 'bg-white border border-gray-200 text-gray-600'}`}
-          >
-            Respuestas
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setView('conversaciones');
-              fetch('/api/admin/conversation-threads')
-                .then((r) => r.json())
-                .then((d) => { if (d.success) setThreads(d.threads || []); });
-            }}
-            className={`px-4 py-2 rounded-lg text-sm font-medium ${view === 'conversaciones' ? 'bg-blue-600 text-white' : 'bg-white border border-gray-200 text-gray-600'}`}
-          >
-            Conversaciones
-          </button>
+    <div>
+      <div className="mb-6">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Respuestas del Tío Viajero</h1>
+            <p className="text-gray-500 text-sm mt-1">
+              {vista === 'conversaciones'
+                ? 'Mismo usuario en el mismo rato. La nota es de toda la interacción; las respuestas sueltas se siguen corrigiendo en la otra pestaña.'
+                : 'Cada pregunta-respuesta por separado. Incluye anónimos.'}
+            </p>
+          </div>
+          <div className="flex rounded-lg border border-gray-200 overflow-hidden">
+            <button
+              type="button"
+              onClick={() => { setVista('respuestas'); setPagina(0); setExpandido(null); setHiloId(null); }}
+              className={`px-4 py-2 text-sm font-medium ${vista === 'respuestas' ? 'bg-sky-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
+            >
+              Respuestas
+            </button>
+            <button
+              type="button"
+              onClick={() => { setVista('conversaciones'); setPagina(0); setExpandido(null); }}
+              className={`px-4 py-2 text-sm font-medium ${vista === 'conversaciones' ? 'bg-sky-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
+            >
+              Conversaciones
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Estadísticas */}
-      {stats && (
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
-          <Card className="p-4">
-            <div className="text-sm text-gray-600 mb-1">Total</div>
-            <div className="text-2xl font-bold text-gray-900">{stats.total}</div>
-          </Card>
-
-          <Card className="p-4 border-green-200 bg-green-50">
-            <div className="text-sm text-gray-600 mb-1">✅ Correctas</div>
-            <div className="text-2xl font-bold text-green-700">
-              {stats.byQuality.correcta}
-              <span className="text-sm font-normal ml-2">
-                ({stats.analyzed > 0 ? Math.round((stats.byQuality.correcta / stats.analyzed) * 100) : 0}%)
-              </span>
-            </div>
-          </Card>
-
-          <Card className="p-4 border-yellow-200 bg-yellow-50">
-            <div className="text-sm text-gray-600 mb-1">⚠️ Mejorables</div>
-            <div className="text-2xl font-bold text-yellow-700">
-              {stats.byQuality.mejorable}
-              <span className="text-sm font-normal ml-2">
-                ({stats.analyzed > 0 ? Math.round((stats.byQuality.mejorable / stats.analyzed) * 100) : 0}%)
-              </span>
-            </div>
-          </Card>
-
-          <Card className="p-4 border-red-200 bg-red-50">
-            <div className="text-sm text-gray-600 mb-1">❌ Incorrectas</div>
-            <div className="text-2xl font-bold text-red-700">
-              {stats.byQuality.incorrecta}
-              <span className="text-sm font-normal ml-2">
-                ({stats.analyzed > 0 ? Math.round((stats.byQuality.incorrecta / stats.analyzed) * 100) : 0}%)
-              </span>
-            </div>
-          </Card>
-
-          <Card className="p-4 border-blue-200 bg-blue-50">
-            <div className="text-sm text-gray-600 mb-1">⏱️ Tiempo medio</div>
-            <div className="text-2xl font-bold text-blue-700">{stats.avgQueryTimeMs}ms</div>
-          </Card>
+      <div className="bg-white rounded-lg shadow mb-6 overflow-hidden">
+        <div className="px-5 py-3 border-b border-gray-100">
+          <h2 className="text-sm font-semibold text-gray-900">Distribución por categorización</h2>
+          <p className="text-xs text-gray-500 mt-0.5">
+            {totalGrafico} respuestas. Pulsa un quesito para filtrar la tabla.
+          </p>
         </div>
-      )}
-
-      {/* Acciones y Filtros */}
-      {view === 'respuestas' && (
-      <Card className="p-6 mb-6">
-        <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
-          <div className="flex flex-col md:flex-row gap-3 flex-1">
-            {/* Filtro de calidad */}
-            <select
-              value={qualityFilter}
-              onChange={(e) => setQualityFilter(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="all">Todas las calidades</option>
-              <option value="pending">⏳ Pendientes análisis</option>
-              <option value="correcta">✅ Correctas</option>
-              <option value="mejorable">⚠️ Mejorables</option>
-              <option value="incorrecta">❌ Incorrectas</option>
-            </select>
-
-            {/* Búsqueda */}
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Buscar en mensajes o usuarios..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-          </div>
-
-          {/* Botones de acción */}
-          <div className="flex flex-wrap gap-2">
-            <Button
-              onClick={loadConversations}
-              variant="outline"
-              size="sm"
-              disabled={loading}
-            >
-              <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-              Recargar
-            </Button>
-
-            <Button
-              onClick={exportToCSV}
-              variant="outline"
-              size="sm"
-              disabled={loading}
-              className="border-green-600 text-green-600 hover:bg-green-50"
-            >
-              <Download className="h-4 w-4 mr-2" />
-              Exportar CSV
-            </Button>
-
-            <Button
-              onClick={exportToExcel}
-              variant="outline"
-              size="sm"
-              disabled={loading}
-              className="border-emerald-600 text-emerald-600 hover:bg-emerald-50"
-            >
-              <FileSpreadsheet className="h-4 w-4 mr-2" />
-              Exportar Excel
-            </Button>
-
-            {stats && stats.pending > 0 && (
-              <Button
-                onClick={analyzeConversations}
-                size="sm"
-                disabled={analyzing}
-                className="bg-gradient-to-r from-purple-600 to-indigo-600"
-              >
-                {analyzing ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Analizando...
-                  </>
-                ) : (
-                  <>
-                    <BarChart3 className="h-4 w-4 mr-2" />
-                    Analizar Pendientes ({stats.pending})
-                  </>
-                )}
-              </Button>
-            )}
-          </div>
-        </div>
-      </Card>
-      )}
-
-      {view === 'conversaciones' && (
-        <Card className="overflow-hidden mb-6">
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-4 py-3 text-left">Fecha</th>
-                <th className="px-4 py-3 text-left">Visitante</th>
-                <th className="px-4 py-3 text-left">Primer mensaje</th>
-                <th className="px-4 py-3 text-center">Resp.</th>
-                <th className="px-4 py-3 text-center">Nota</th>
-              </tr>
-            </thead>
-            <tbody>
-              {threads.map((t) => (
-                <tr key={t.id} className="border-t border-gray-100">
-                  <td className="px-4 py-3 whitespace-nowrap text-gray-600">
-                    {new Date(t.last_message_at).toLocaleString('es-ES')}
-                  </td>
-                  <td className="px-4 py-3">{t.label}</td>
-                  <td className="px-4 py-3 max-w-[240px] truncate">{t.first_user_message}</td>
-                  <td className="px-4 py-3 text-center">{t.assistant_count}</td>
-                  <td className="px-4 py-3 text-center">
-                    {t.quality_score === null ? (
-                      <span className="text-xs text-gray-400">Sin valorar{t.unclassified_responses ? ` (${t.unclassified_responses})` : ''}</span>
-                    ) : (
-                      <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${
-                        t.quality_score >= 7 ? 'bg-green-100 text-green-800' : t.quality_score >= 4 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'
-                      }`}>
-                        {t.quality_score.toFixed(1)}/10
-                        {t.unclassified_responses > 0 ? ` ·${t.unclassified_responses}` : ''}
-                      </span>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </Card>
-      )}
-
-      {/* Tabla de conversaciones */}
-      {view === 'respuestas' && (
-      <Card className="overflow-hidden">
-        {loading ? (
-          <div className="p-12 text-center">
-            <Loader2 className="h-8 w-8 animate-spin text-blue-600 mx-auto mb-3" />
-            <p className="text-gray-600">Cargando conversaciones...</p>
-          </div>
-        ) : conversations.length === 0 ? (
-          <div className="p-12 text-center">
-            <p className="text-gray-600">No hay conversaciones que mostrar</p>
-          </div>
+        {totalGrafico === 0 ? (
+          <p className="text-sm text-gray-400 text-center py-10">Sin datos todavía</p>
         ) : (
-          <>
+          <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] items-center gap-2 p-4">
+            <div className="h-[280px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart margin={{ top: 8, right: 8, bottom: 28, left: 8 }}>
+                  <Pie
+                    data={pieData}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="44%"
+                    outerRadius={88}
+                    paddingAngle={2}
+                    stroke="#fff"
+                    strokeWidth={2}
+                    label={({ percent }: any) => `${Math.round((percent || 0) * 100)}%`}
+                    labelLine={false}
+                    fontSize={12}
+                    onClick={(_, index) => {
+                      const item = pieData[index];
+                      if (item) seleccionarCategoria(item.key);
+                    }}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    {pieData.map((slice) => (
+                      <Cell
+                        key={slice.key}
+                        fill={slice.color}
+                        opacity={filtroIA === 'todas' || filtroIA === slice.key ? 1 : 0.35}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    formatter={(value: number, name: string) => {
+                      const pct = totalGrafico ? Math.round((value / totalGrafico) * 100) : 0;
+                      return [`${value} (${pct}%)`, name];
+                    }}
+                  />
+                  <Legend verticalAlign="bottom" iconType="circle" wrapperStyle={{ fontSize: 12, paddingTop: 16 }} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              {CATEGORIAS_PIE.map((c) => {
+                const valor = stats[c.key] || 0;
+                const pct = totalGrafico ? Math.round((valor / totalGrafico) * 100) : 0;
+                const activo = filtroIA === c.key;
+                return (
+                  <button
+                    key={c.key}
+                    type="button"
+                    onClick={() => seleccionarCategoria(c.key)}
+                    className={`text-left rounded-lg border px-3 py-3 transition-colors ${
+                      activo ? 'border-gray-900 bg-gray-50' : 'border-gray-100 hover:border-gray-200'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: c.color }} />
+                      <span className="text-xs font-medium text-gray-600">{c.name}</span>
+                    </div>
+                    <div className="text-xl font-semibold text-gray-900 tabular-nums">{pct}%</div>
+                    <div className="text-xs text-gray-500">{valor} respuestas</div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="flex items-center gap-2 mb-4 flex-wrap">
+        <span className="text-xs font-semibold text-gray-500 uppercase">Estado</span>
+        {([
+          ['todas', 'Todas'],
+          ['sin_evaluar', 'Sin revisar'],
+          ['correcta', 'Correctas'],
+          ['mejorable', 'Mejorables'],
+          ['incorrecta', 'Incorrectas'],
+        ] as const).map(([valor, etiqueta]) => (
+          <button
+            key={valor}
+            onClick={() => { setFiltroIA(valor); setPagina(0); setExpandido(null); }}
+            className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+              filtroIA === valor ? 'bg-gray-900 text-white' : 'bg-white border border-gray-200 text-gray-600 hover:border-gray-400'
+            }`}
+          >
+            {etiqueta}
+          </button>
+        ))}
+        <span className="ml-auto text-sm text-gray-500">
+          {vista === 'conversaciones' ? `${totalConversaciones} conversaciones` : `${total} respuestas`}
+        </span>
+      </div>
+
+      <div className="flex items-center gap-2 mb-4 flex-wrap">
+        <span className="text-xs font-semibold text-gray-500 uppercase">Voto usuario</span>
+        {([
+          ['todas', `Todos (${stats.voto_up + stats.voto_down + stats.sin_voto || stats.total})`],
+          ['up', `👍 ${stats.voto_up}`],
+          ['down', `👎 ${stats.voto_down}`],
+          ['sin_voto', `Sin voto (${stats.sin_voto})`],
+        ] as const).map(([valor, etiqueta]) => (
+          <button
+            key={valor}
+            onClick={() => { setFiltroVoto(valor); setPagina(0); setExpandido(null); }}
+            className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+              filtroVoto === valor ? 'bg-gray-900 text-white' : 'bg-white border border-gray-200 text-gray-600 hover:border-gray-400'
+            }`}
+          >
+            {etiqueta}
+          </button>
+        ))}
+      </div>
+
+      {loading ? (
+        <div className="flex justify-center py-16">
+          <div className="animate-spin rounded-full h-10 w-10 border-[3px] border-sky-200 border-t-sky-600" />
+        </div>
+      ) : errorCarga ? (
+        <div className="bg-white rounded-lg shadow p-12 text-center text-red-600">
+          No se pudieron cargar las respuestas.
+          <p className="text-xs mt-2 text-gray-500">{errorCarga}</p>
+        </div>
+      ) : (vista === 'conversaciones' ? conversaciones.length === 0 : logs.length === 0) ? (
+        <div className="bg-white rounded-lg shadow p-12 text-center text-gray-500">
+          {vista === 'conversaciones' ? 'No hay interacciones con este filtro.' : 'No hay respuestas con este filtro.'}
+        </div>
+      ) : vista === 'conversaciones' ? (
+        <>
+          <div className="bg-white rounded-lg shadow overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50 border-b border-gray-200">
+              <table className="w-full table-fixed divide-y divide-gray-200">
+                <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Calidad
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Usuario
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Pregunta
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Resumen IA
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Resultados
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Fecha
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Acciones
-                    </th>
+                    <th className="px-2.5 py-2.5 text-left text-xs font-medium text-gray-500 uppercase w-[12%]">Fecha</th>
+                    <th className="px-2.5 py-2.5 text-left text-xs font-medium text-gray-500 uppercase w-[12%]">Usuario</th>
+                    <th className="px-2.5 py-2.5 text-left text-xs font-medium text-gray-500 uppercase w-[16%]">Ubicación</th>
+                    <th className="px-2.5 py-2.5 text-left text-xs font-medium text-gray-500 uppercase w-[30%]">Primer mensaje</th>
+                    <th className="px-2.5 py-2.5 text-center text-xs font-medium text-gray-500 uppercase w-[10%]">Preg.</th>
+                    <th className="px-2.5 py-2.5 text-left text-xs font-medium text-gray-500 uppercase w-[16%]">Nota interacción</th>
+                    <th className="px-2.5 py-2.5 text-left text-xs font-medium text-gray-500 uppercase w-[10%]">Idioma</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {conversations.map((conv) => (
-                    <tr key={conv.id} className="hover:bg-gray-50 transition">
-                      <td className="px-4 py-4">
-                        <div className="flex items-center gap-2">
-                          {getQualityIcon(conv.quality_assessment)}
-                          {getQualityBadge(conv.quality_assessment)}
-                        </div>
-                      </td>
-                      <td className="px-4 py-4">
-                        <div className="text-sm">
-                          {conv.user_email ? (
-                            <span className="font-medium text-gray-900">{conv.user_email}</span>
-                          ) : (
-                            <span className="text-gray-500 text-xs">Sesión: {conv.session_id?.slice(0, 8)}...</span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="px-4 py-4 max-w-xs">
-                        <div className="text-sm text-gray-900 truncate">
-                          {conv.user_message}
-                        </div>
-                      </td>
-                      <td className="px-4 py-4 max-w-xs">
-                        <div className="text-sm text-gray-600 truncate">
-                          {conv.ai_summary || '-'}
-                        </div>
-                      </td>
-                      <td className="px-4 py-4">
-                        <div className="flex flex-col gap-1">
-                          <span className="text-sm text-gray-900">{conv.places_found} lugares</span>
-                          <span className="text-xs text-gray-500">{conv.query_time_ms}ms</span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-4">
-                        <div className="text-sm text-gray-600">
-                          {new Date(conv.created_at).toLocaleDateString('es-ES', {
-                            day: '2-digit',
-                            month: '2-digit',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
-                        </div>
-                      </td>
-                      <td className="px-4 py-4">
-                        <Button
-                          onClick={() => setSelectedConv(conv)}
-                          variant="outline"
-                          size="sm"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {conversaciones.map((c) => {
+                    const fecha = formatFecha(c.ultimo_mensaje_at || c.created_at || new Date().toISOString());
+                    const nombre = c.usuario?.nombre || c.usuario?.email?.split('@')[0] || (c.user_id ? 'Usuario' : 'Anónimo');
+                    const sub = c.usuario?.email
+                      || (c.agrupacion === 'rato' && c.respuestas > 1 ? `${c.respuestas} preguntas del mismo rato` : '');
+                    const nota = etiquetaInteraccion(c);
+                    return (
+                      <tr
+                        key={c.id}
+                        onClick={() => abrirHilo(c.id)}
+                        className={`cursor-pointer hover:bg-gray-50 ${hiloId === c.id ? 'bg-sky-50/60' : ''}`}
+                      >
+                        <td className="px-2.5 py-2 align-top">
+                          <div className="text-sm font-medium text-gray-900">{fecha.dia}</div>
+                          <div className="text-xs text-gray-500">{fecha.hora}</div>
+                        </td>
+                        <td className="px-2.5 py-2 align-top overflow-hidden">
+                          <div className="text-sm font-medium text-gray-900 truncate">{nombre}</div>
+                          {sub ? <div className="text-xs text-gray-500 truncate">{sub}</div> : null}
+                        </td>
+                        <td className="px-2.5 py-2 align-top overflow-hidden">
+                          <p className={`text-sm truncate ${textoUbicacion(c) === 'Ubicación desconocida' ? 'text-gray-400' : 'text-gray-800'}`}>
+                            {textoUbicacion(c)}
+                          </p>
+                        </td>
+                        <td className="px-2.5 py-2 align-top overflow-hidden">
+                          <p className="text-sm text-gray-900 line-clamp-2">{c.first_user_message || c.titulo || '—'}</p>
+                        </td>
+                        <td className="px-2.5 py-2 text-center text-sm text-gray-700 tabular-nums">{c.respuestas}</td>
+                        <td className="px-2.5 py-2 align-top">
+                          <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-semibold ${nota.clase}`}>
+                            {c.quality_score == null ? nota.label : `${c.quality_score.toFixed(1)}/10 · ${nota.label}`}
+                          </span>
+                          <div className="text-[10px] text-gray-400 mt-0.5">
+                            {c.correcta} correctas · {c.mejorable} mejorables · {c.incorrecta} incorrectas
+                            {c.sin_evaluar > 0 ? ` · ${c.sin_evaluar} sin revisar` : ''}
+                          </div>
+                        </td>
+                        <td className="px-2.5 py-2 text-xs uppercase text-gray-500">{c.locale || '—'}</td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
-
-            {/* Paginación */}
-            <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
-              <div className="text-sm text-gray-600">
-                Página {page} de {totalPages}
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  onClick={() => setPage(p => Math.max(1, p - 1))}
-                  disabled={page === 1}
-                  variant="outline"
-                  size="sm"
-                >
-                  ← Anterior
-                </Button>
-                <Button
-                  onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                  disabled={page === totalPages}
-                  variant="outline"
-                  size="sm"
-                >
-                  Siguiente →
-                </Button>
-              </div>
+          </div>
+          {totalPaginas > 1 && (
+            <div className="flex items-center justify-center gap-3 pt-4">
+              <button
+                onClick={() => { setPagina((p) => Math.max(0, p - 1)); setHiloId(null); }}
+                disabled={pagina === 0}
+                className="px-3 py-1.5 rounded-lg text-sm bg-white border border-gray-200 disabled:opacity-40"
+              >
+                Anterior
+              </button>
+              <span className="text-sm text-gray-500">Página {pagina + 1} de {totalPaginas}</span>
+              <button
+                onClick={() => { setPagina((p) => Math.min(totalPaginas - 1, p + 1)); setHiloId(null); }}
+                disabled={pagina >= totalPaginas - 1}
+                className="px-3 py-1.5 rounded-lg text-sm bg-white border border-gray-200 disabled:opacity-40"
+              >
+                Siguiente
+              </button>
             </div>
-          </>
-        )}
-      </Card>
+          )}
+        </>
+      ) : (
+        <>
+          <div className="bg-white rounded-lg shadow overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full table-fixed divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-2.5 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[8%]">Fecha</th>
+                    <th className="px-2.5 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[11%]">Usuario</th>
+                    <th className="px-2.5 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[13%]">Ubicación</th>
+                    <th className="px-2.5 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[8%]">Tipo</th>
+                    <th className="px-2.5 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[20%]">Mensaje del usuario</th>
+                    <th className="px-2.5 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[19%]">Respuesta</th>
+                    <th className="px-2.5 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[11%]">Categorización</th>
+                    <th className="px-2.5 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">Voto</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {logs.map((log) => {
+                    const fecha = formatFecha(log.created_at);
+                    const abierto = expandido === log.id;
+                    const categoria = log.valoracion_ia ? BADGE_IA[log.valoracion_ia] : null;
+                    const voto = etiquetaVoto(log.voto_usuario);
+                    return (
+                      <tr
+                        key={log.id}
+                        onClick={() => abrirDetalle(log.id)}
+                        className={`cursor-pointer hover:bg-gray-50 ${abierto ? 'bg-sky-50/60' : ''}`}
+                      >
+                        <td className="px-2.5 py-2 align-top overflow-hidden">
+                          <div className="text-sm font-medium text-gray-900">{fecha.dia}</div>
+                          <div className="text-xs text-gray-500">{fecha.hora}</div>
+                        </td>
+                        <td className="px-2.5 py-2 align-top overflow-hidden">
+                          <div className="text-sm font-medium text-gray-900 truncate" title={nombreUsuario(log)}>
+                            {nombreUsuario(log)}
+                          </div>
+                          {log.usuario?.email && (
+                            <div className="text-xs text-gray-500 truncate" title={log.usuario.email}>
+                              {log.usuario.email}
+                            </div>
+                          )}
+                        </td>
+                        <td className="px-2.5 py-2 align-top overflow-hidden">
+                          <p
+                            className={`text-sm truncate ${textoUbicacion(log) === 'Ubicación desconocida' ? 'text-gray-400' : 'text-gray-800'}`}
+                            title={textoUbicacion(log)}
+                          >
+                            {textoUbicacion(log)}
+                          </p>
+                        </td>
+                        <td className="px-2.5 py-2 align-top overflow-hidden">
+                          <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
+                            log.user_id ? 'bg-sky-50 text-sky-700' : 'bg-gray-100 text-gray-600'
+                          }`}>
+                            {log.user_id ? 'Registrado' : 'Anónimo'}
+                          </span>
+                        </td>
+                        <td className="px-2.5 py-2 align-top overflow-hidden">
+                          <p className="text-sm text-gray-900 line-clamp-2" title={log.pregunta || ''}>
+                            {log.pregunta || '—'}
+                          </p>
+                        </td>
+                        <td className="px-2.5 py-2 align-top overflow-hidden">
+                          <p className="text-sm text-gray-600 line-clamp-2" title={log.respuesta || ''}>
+                            {log.respuesta || '—'}
+                          </p>
+                        </td>
+                        <td className="px-2.5 py-2 align-top overflow-hidden">
+                          {categoria ? (
+                            <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${categoria.clase}`}>
+                              {categoria.label}
+                            </span>
+                          ) : (
+                            <span className="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-500">
+                              Sin revisar
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-2.5 py-2 align-top overflow-hidden">
+                          <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${voto.clase}`}>
+                            {voto.label}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {totalPaginas > 1 && (
+            <div className="flex items-center justify-center gap-3 pt-4">
+              <button
+                onClick={() => { setPagina((p) => Math.max(0, p - 1)); setExpandido(null); }}
+                disabled={pagina === 0}
+                className="px-3 py-1.5 rounded-lg text-sm bg-white border border-gray-200 disabled:opacity-40"
+              >
+                Anterior
+              </button>
+              <span className="text-sm text-gray-500">Página {pagina + 1} de {totalPaginas}</span>
+              <button
+                onClick={() => { setPagina((p) => Math.min(totalPaginas - 1, p + 1)); setExpandido(null); }}
+                disabled={pagina >= totalPaginas - 1}
+                className="px-3 py-1.5 rounded-lg text-sm bg-white border border-gray-200 disabled:opacity-40"
+              >
+                Siguiente
+              </button>
+            </div>
+          )}
+        </>
       )}
 
-      {/* Modal de detalle */}
-      {selectedConv && (
-        <div 
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50"
-          onClick={() => setSelectedConv(null)}
-        >
-          <Card 
-            className="w-full max-w-4xl max-h-[90vh] overflow-y-auto"
+      {(hiloId || logAbierto) && (
+        <div className="fixed inset-0 z-40 flex justify-end bg-black/30" onClick={cerrarPaneles}>
+          <div
+            className="w-full max-w-2xl h-full bg-white shadow-xl overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="p-6">
-              {/* Header */}
-              <div className="flex items-start justify-between mb-6">
-                <div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-1">
-                    Conversación #{selectedConv.id.slice(0, 8)}
-                  </h3>
-                  <p className="text-sm text-gray-600">
-                    {new Date(selectedConv.created_at).toLocaleString('es-ES')}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  {getQualityBadge(selectedConv.quality_assessment)}
-                </div>
-              </div>
-              <div className="flex flex-wrap gap-2 mb-6">
-                {(['correcta', 'mejorable', 'incorrecta'] as const).map((q) => (
-                  <button
-                    key={q}
-                    type="button"
-                    className={`px-3 py-1 rounded-full text-xs font-medium border ${
-                      selectedConv.quality_assessment === q ? 'ring-2 ring-blue-400' : 'bg-white border-gray-200'
-                    }`}
-                    onClick={async () => {
-                      const res = await fetch('/api/admin/conversations', {
-                        method: 'PATCH',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ id: selectedConv.id, quality_assessment: q }),
-                      });
-                      const data = await res.json();
-                      if (data.success) {
-                        setSelectedConv({ ...selectedConv, quality_assessment: q });
-                        loadConversations();
-                        loadStats();
-                      }
-                    }}
-                  >
-                    {q === 'correcta' ? 'Correcta' : q === 'mejorable' ? 'Mejorable' : 'Incorrecta'}
-                  </button>
-                ))}
-              </div>
-
-              {/* Usuario */}
-              <div className="mb-6">
-                <div className="text-xs font-medium text-gray-500 mb-1">USUARIO</div>
-                <div className="text-sm text-gray-900">
-                  {selectedConv.user_email || `Sesión: ${selectedConv.session_id}`}
-                </div>
-              </div>
-
-              {/* Pregunta */}
-              <div className="mb-6">
-                <div className="text-xs font-medium text-gray-500 mb-2">💬 PREGUNTA</div>
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <p className="text-gray-900">{selectedConv.user_message}</p>
-                </div>
-              </div>
-
-              {/* Respuesta */}
-              <div className="mb-6">
-                <div className="text-xs font-medium text-gray-500 mb-2">🤖 RESPUESTA</div>
-                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                  <p className="text-gray-900 whitespace-pre-line">{selectedConv.bot_response}</p>
-                </div>
-              </div>
-
-              {/* Intención detectada */}
-              <div className="mb-6">
-                <div className="text-xs font-medium text-gray-500 mb-2">🔍 INTENCIÓN DETECTADA</div>
-                <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4">
-                  <pre className="text-xs text-gray-800 overflow-x-auto">
-                    {JSON.stringify(selectedConv.detected_intent, null, 2)}
-                  </pre>
-                </div>
-              </div>
-
-              {/* Metadata */}
-              <div className="grid grid-cols-2 gap-4 mb-6">
-                <div>
-                  <div className="text-xs font-medium text-gray-500 mb-1">Lugares encontrados</div>
-                  <div className="text-lg font-semibold text-gray-900">{selectedConv.places_found}</div>
-                </div>
-                <div>
-                  <div className="text-xs font-medium text-gray-500 mb-1">Tiempo de respuesta</div>
-                  <div className="text-lg font-semibold text-gray-900">{selectedConv.query_time_ms}ms</div>
-                </div>
-              </div>
-
-              {/* Análisis IA */}
-              {selectedConv.quality_assessment && (
-                <div className="mb-6">
-                  <div className="text-xs font-medium text-gray-500 mb-2">🎯 ANÁLISIS IA</div>
-                  <div className={`border rounded-lg p-4 ${
-                    selectedConv.quality_assessment === 'correcta' ? 'bg-green-50 border-green-200' :
-                    selectedConv.quality_assessment === 'mejorable' ? 'bg-yellow-50 border-yellow-200' :
-                    'bg-red-50 border-red-200'
-                  }`}>
-                    {selectedConv.ai_summary && (
-                      <div className="mb-3">
-                        <div className="text-xs font-medium text-gray-700 mb-1">Resumen:</div>
-                        <p className="text-sm text-gray-900">{selectedConv.ai_summary}</p>
-                      </div>
-                    )}
-
-                    {selectedConv.quality_reasoning && (
-                      <div className="mb-3">
-                        <div className="text-xs font-medium text-gray-700 mb-1">Razonamiento:</div>
-                        <p className="text-sm text-gray-900 whitespace-pre-line">{selectedConv.quality_reasoning}</p>
-                      </div>
-                    )}
-
-                    {selectedConv.suggested_improvements && (
-                      <div>
-                        <div className="text-xs font-medium text-gray-700 mb-1">Mejoras sugeridas:</div>
-                        <p className="text-sm text-gray-900 whitespace-pre-line">{selectedConv.suggested_improvements}</p>
-                      </div>
-                    )}
+            {hiloId ? (
+              <>
+                <div className="sticky top-0 bg-white border-b border-gray-100 px-5 py-3 flex items-center justify-between">
+                  <div>
+                    <h3 className="text-sm font-semibold text-gray-900">Interacción</h3>
+                    <p className="text-xs text-gray-500">
+                      {hiloMeta
+                        ? `${hiloMeta.respuestas || hilo?.filter((m) => m.role === 'assistant').length || 0} preguntas · ${
+                            hiloMeta.quality_score == null
+                              ? 'sin valorar'
+                              : `${hiloMeta.quality_score.toFixed(1)}/10 · ${etiquetaInteraccion(hiloMeta).label}`
+                          }`
+                        : 'Hilo del mismo usuario en el mismo rato'}
+                    </p>
                   </div>
+                  <button type="button" onClick={cerrarPaneles} className="text-sm text-gray-500 hover:text-gray-800">
+                    Cerrar
+                  </button>
                 </div>
-              )}
-
-              {/* Botón cerrar */}
-              <div className="flex justify-end">
-                <Button onClick={() => setSelectedConv(null)} variant="outline">
-                  Cerrar
-                </Button>
-              </div>
-            </div>
-          </Card>
+                <div className="p-4 space-y-3">
+                  {hilo == null ? (
+                    <div className="flex justify-center py-10">
+                      <div className="animate-spin rounded-full h-8 w-8 border-[3px] border-sky-200 border-t-sky-600" />
+                    </div>
+                  ) : hilo.length === 0 ? (
+                    <p className="text-sm text-gray-500 text-center py-10">Este hilo no tiene mensajes guardados.</p>
+                  ) : (
+                    hilo.map((m, i) => {
+                      const esUser = m.role === 'user';
+                      const categoria = m.log?.valoracion_ia ? BADGE_IA[m.log.valoracion_ia] : null;
+                      return (
+                        <div key={`${m.role}-${i}-${m.created_at}`} className={`flex ${esUser ? 'justify-end' : 'justify-start'}`}>
+                          <div className={`max-w-[88%] rounded-lg px-3 py-2 text-sm ${
+                            esUser ? 'bg-sky-50 text-gray-900' : 'bg-gray-100 text-gray-800 border border-gray-200'
+                          }`}>
+                            <p className="text-[10px] uppercase tracking-wide text-gray-400 mb-1">
+                              {esUser ? 'Usuario' : 'Tío Viajero'}
+                            </p>
+                            <ChatMensajeTexto texto={m.content || '—'} />
+                            {!esUser && categoria && (
+                              <div className="mt-2">
+                                <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${categoria.clase}`}>
+                                  {categoria.label}
+                                </span>
+                              </div>
+                            )}
+                            {!esUser && m.log?.motivo_ia && (
+                              <p className="mt-1 text-xs text-gray-500">{m.log.motivo_ia}</p>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              </>
+            ) : logAbierto ? (
+              <>
+                <div className="sticky top-0 bg-white border-b border-gray-100 px-5 py-3 flex items-center justify-between">
+                  <div>
+                    <h3 className="text-sm font-semibold text-gray-900">Respuesta</h3>
+                    <p className="text-xs text-gray-500">
+                      {nombreUsuario(logAbierto)} · {textoUbicacion(logAbierto)} · {formatFecha(logAbierto.created_at).dia} {formatFecha(logAbierto.created_at).hora}
+                    </p>
+                  </div>
+                  <button type="button" onClick={cerrarPaneles} className="text-sm text-gray-500 hover:text-gray-800">
+                    Cerrar
+                  </button>
+                </div>
+                <div className="p-5 space-y-4">
+                  <div>
+                    <p className="text-xs font-semibold text-gray-500 uppercase mb-1">Mensaje del usuario</p>
+                    <div className="text-sm text-gray-900 bg-sky-50 rounded-lg border border-sky-100 p-3">
+                      <ChatMensajeTexto texto={logAbierto.pregunta || '—'} />
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-gray-500 uppercase mb-1">Respuesta</p>
+                    <div className="text-sm text-gray-900 bg-white rounded-lg border border-gray-200 p-3">
+                      <ChatMensajeTexto texto={logAbierto.respuesta || '—'} />
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500">
+                    {logAbierto.conversacion_id && (
+                      <button
+                        type="button"
+                        onClick={() => abrirHilo(logAbierto.conversacion_id!)}
+                        className="text-sky-700 font-medium hover:underline"
+                      >
+                        Ver hilo
+                      </button>
+                    )}
+                    {logAbierto.locale && <span className="uppercase font-semibold">{logAbierto.locale}</span>}
+                    {typeof logAbierto.places_found === 'number' && <span>{logAbierto.places_found} lugares</span>}
+                    <span>{logAbierto.duracion_ms ? `${(logAbierto.duracion_ms / 1000).toFixed(1)} s` : '—'}</span>
+                  </div>
+                  {logAbierto.funciones && logAbierto.funciones.length > 0 && (
+                    <pre className="text-xs bg-gray-900 text-green-300 rounded-lg p-3 overflow-x-auto">
+                      {JSON.stringify(logAbierto.funciones, null, 2)}
+                    </pre>
+                  )}
+                  {logAbierto.valoracion_ia && (
+                    <div className={`rounded-lg p-3 border ${
+                      logAbierto.valoracion_ia === 'correcta' ? 'bg-green-50 border-green-200'
+                        : logAbierto.valoracion_ia === 'mejorable' ? 'bg-amber-50 border-amber-200'
+                          : 'bg-red-50 border-red-200'
+                    }`}>
+                      <p className="text-xs font-semibold text-gray-600 uppercase mb-1">
+                        Revisor IA: {BADGE_IA[logAbierto.valoracion_ia].label}
+                      </p>
+                      {logAbierto.motivo_ia && <p className="text-sm text-gray-800"><strong>Motivo:</strong> {logAbierto.motivo_ia}</p>}
+                      {logAbierto.sugerencia_ia && <p className="text-sm text-gray-800 mt-1"><strong>Sugerencia:</strong> {logAbierto.sugerencia_ia}</p>}
+                      {logAbierto.voto_usuario && (
+                        <p className="text-sm text-gray-800 mt-1">
+                          <strong>Voto usuario:</strong>{' '}
+                          {logAbierto.voto_usuario === 'up' ? '👍 le gustó' : '👎 no le gustó'}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                  {!logAbierto.valoracion_ia && logAbierto.voto_usuario && (
+                    <p className="text-sm text-gray-700">
+                      Voto del usuario: {logAbierto.voto_usuario === 'up' ? '👍 le gustó' : '👎 no le gustó'}
+                    </p>
+                  )}
+                </div>
+              </>
+            ) : null}
+          </div>
         </div>
       )}
     </div>
   );
 }
-

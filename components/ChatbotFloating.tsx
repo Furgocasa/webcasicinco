@@ -12,6 +12,8 @@ import { trackEvent, EVENTS, CATEGORIES as ANALYTICS_CATEGORIES } from '@/lib/an
 interface Message {
   role: 'user' | 'assistant';
   content: string;
+  logId?: string;
+  voto?: 'up' | 'down' | null;
 }
 
 export default function ChatbotFloating() {
@@ -213,7 +215,12 @@ export default function ChatbotFloating() {
       const data = await response.json();
 
       if (data.success) {
-        setMessages([...newMessages, { role: 'assistant', content: data.message }]);
+        setMessages([...newMessages, {
+          role: 'assistant',
+          content: data.message,
+          logId: data.logId || undefined,
+          voto: null,
+        }]);
       } else {
         setMessages([...newMessages, { 
           role: 'assistant', 
@@ -227,6 +234,29 @@ export default function ChatbotFloating() {
       }]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const votarRespuesta = async (index: number, voto: 'up' | 'down') => {
+    const msg = messages[index];
+    if (!msg?.logId || msg.role !== 'assistant') return;
+    const siguiente = msg.voto === voto ? null : voto;
+    setMessages((prev) => prev.map((m, i) => (i === index ? { ...m, voto: siguiente } : m)));
+    trackEvent(EVENTS.CHATBOT_VOTO, ANALYTICS_CATEGORIES.CHATBOT, {
+      voto: siguiente || 'quitar',
+      log_id: msg.logId,
+    });
+    try {
+      const res = await fetch('/api/chatbot', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ logId: msg.logId, voto: siguiente }),
+      });
+      if (!res.ok) {
+        setMessages((prev) => prev.map((m, i) => (i === index ? { ...m, voto: msg.voto ?? null } : m)));
+      }
+    } catch {
+      setMessages((prev) => prev.map((m, i) => (i === index ? { ...m, voto: msg.voto ?? null } : m)));
     }
   };
 
@@ -448,19 +478,54 @@ export default function ChatbotFloating() {
                     className="w-8 h-8 object-cover rounded-full border-2 border-blue-500 bg-sky-100 flex-shrink-0 mt-1"
                   />
                 )}
-                <div
-                  className={`max-w-[80%] rounded-2xl p-3 ${
-                    msg.role === 'user'
-                      ? 'bg-gradient-to-r from-blue-600 to-gray-700 text-white'
-                      : 'bg-white text-gray-900 shadow-md border border-blue-100'
-                  }`}
-                >
-                  {msg.role === 'assistant' ? (
-                    <div className="text-sm leading-relaxed whitespace-pre-line">
-                      {renderMessageWithLinks(msg.content)}
+                <div className="max-w-[80%] min-w-0">
+                  <div
+                    className={`rounded-2xl p-3 ${
+                      msg.role === 'user'
+                        ? 'bg-gradient-to-r from-blue-600 to-gray-700 text-white'
+                        : 'bg-white text-gray-900 shadow-md border border-blue-100'
+                    }`}
+                  >
+                    {msg.role === 'assistant' ? (
+                      <div className="text-sm leading-relaxed whitespace-pre-line">
+                        {renderMessageWithLinks(msg.content)}
+                      </div>
+                    ) : (
+                      <p className="text-sm leading-relaxed whitespace-pre-line">{msg.content}</p>
+                    )}
+                  </div>
+                  {msg.role === 'assistant' && msg.logId && (
+                    <div className="mt-1.5 flex items-center gap-2 px-1">
+                      <span className="text-[11px] text-gray-500">¿Qué te ha parecido esta respuesta?</span>
+                      <button
+                        type="button"
+                        onClick={() => votarRespuesta(index, 'up')}
+                        aria-pressed={msg.voto === 'up'}
+                        aria-label="Bien"
+                        title="Bien"
+                        className={`rounded-full px-2 py-0.5 text-sm leading-none transition-colors ${
+                          msg.voto === 'up'
+                            ? 'bg-green-100 text-green-700 ring-1 ring-green-300'
+                            : 'text-gray-400 hover:bg-gray-100 hover:text-gray-700'
+                        }`}
+                      >
+                        👍
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => votarRespuesta(index, 'down')}
+                        aria-pressed={msg.voto === 'down'}
+                        aria-label="Mal"
+                        title="Mal"
+                        className={`rounded-full px-2 py-0.5 text-sm leading-none transition-colors ${
+                          msg.voto === 'down'
+                            ? 'bg-red-100 text-red-700 ring-1 ring-red-300'
+                            : 'text-gray-400 hover:bg-gray-100 hover:text-gray-700'
+                        }`}
+                      >
+                        👎
+                      </button>
                     </div>
-                  ) : (
-                    <p className="text-sm leading-relaxed whitespace-pre-line">{msg.content}</p>
                   )}
                 </div>
               </div>
