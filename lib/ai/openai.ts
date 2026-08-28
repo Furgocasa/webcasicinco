@@ -262,6 +262,8 @@ export async function chatbotResponse(
     isAdmin?: boolean;
     chatbotConfig?: any;
     userLocation?: { city: string; province: string; region: string };
+    searchNote?: string;
+    turnHint?: string;
   }
 ): Promise<string> {
   // Preparar contexto de lugares relevantes (filtrado por intención + ubicación)
@@ -360,15 +362,7 @@ export async function chatbotResponse(
       .sort((a, b) => (b.rating || 0) - (a.rating || 0) || (b.review_count || 0) - (a.review_count || 0))
       .slice(0, contextLimit);
 
-    // 7) Fallback a mejores de España en esa categoría
-    if (filtered.length === 0) {
-      let fallback = [...context.places];
-      if (requestedCategory) fallback = fallback.filter(p => (p.category || '').toLowerCase() === requestedCategory);
-      filtered = fallback
-        .filter(p => (p.review_count || 0) >= 500)
-        .sort((a, b) => (b.rating || 0) - (a.rating || 0) || (b.review_count || 0) - (a.review_count || 0))
-        .slice(0, contextLimit);
-    }
+    // Si la ruta no trajo fichas locales, no rellenar con un ranking nacional.
 
     if (filtered.length > 0) {
       placesContext = `\n\nLUGARES DISPONIBLES (filtrados por intención y ubicación, ordenados por calidad; recomienda ${targetN}):\n` +
@@ -566,12 +560,15 @@ Actualmente no tengo [categoría] indexados en [ubicación pedida].
 
 ❌ NUNCA HAGAS ESTO:
 - Inventar nombres de lugares que no estén en la lista proporcionada
+- Cambiar el rating o el nº de reseñas (copia los de LUGARES DISPONIBLES de este turno; 4.9 no es 5)
 - Dar URLs de sitios web externos (solo enlaces internos: /detalles y /mapa)
 - Decir "no tengo acceso a", "no puedo acceder" cuando SÍ tienes los datos (dirección, teléfono)
 - Omitir los enlaces [Ver detalles] y [Ver en mapa] (siempre ambos)
 - Mencionar lugares que no estén en la lista LUGARES DISPONIBLES
 - Mencionar limitaciones técnicas de IA ("como modelo de lenguaje", "no puedo", etc.)
 - Recomendar lugares de una provincia diferente sin explicarlo claramente
+- Tratar un saludo como una nueva búsqueda
+- Presentar Alicante como cerca de Almería, o Granada como cerca de Níjar
 
 ✅ SIEMPRE DEBES:
 - Usar exclusivamente datos de la lista LUGARES DISPONIBLES proporcionada
@@ -631,6 +628,8 @@ La IA debe usar su criterio para interpretar estas expresiones de forma natural.
 🎯 LUGARES DISPONIBLES PARA ESTA CONSULTA
 ═══════════════════════════════════════
 ${placesContext || '⚠️ No hay lugares disponibles que coincidan con los criterios de búsqueda.'}
+${context?.searchNote ? `\nNOTA DE BÚSQUEDA (obligatoria): ${context.searchNote}` : ''}
+${context?.turnHint ? `\n${context.turnHint}` : ''}
 
 ═══════════════════════════════════════
 💬 PREGUNTA DEL USUARIO
@@ -645,7 +644,16 @@ ${userMessage}
 3. Filtra y ordena los lugares según la intención detectada
 4. Responde en el formato especificado con ambos enlaces siempre incluidos
 5. Menciona distancias si usas geolocalización
-6. Recomienda los mejores lugares según la consulta (ajusta cantidad según contexto)`;
+6. Recomienda los mejores lugares según la consulta (ajusta cantidad según contexto)
+7. COPIA TAL CUAL el rating y el nº de reseñas de LUGARES DISPONIBLES de ESTE turno. No redondees 4.9 a 5. Si el historial tiene otras cifras, gana esta lista.
+8. No presentes un local de otra provincia como si estuviera en la pedida (Alicante ≠ Almería; Granada ≠ Níjar).
+9. Si la lista está vacía, dilo: no hay fichas publicadas con 4,7★ y 50+ reseñas en esa zona. Ofrece ampliar. No inventes.
+10. Saludo aislado: saluda y pregunta qué busca. No retomes la búsqueda anterior.
+11. Si insultan, ignora el insulto y responde la petición con educación.
+12. «Dónde estoy»: di la ciudad del GPS o la última que él dijo. No listes restaurantes.
+13. No tienes hora ni horarios en tiempo real. No niegues los locales ya citados.
+14. Si piden N y LUGARES DISPONIBLES tiene N o más, devuelve N. No afirmes que no hay más.
+15. Si la zona es una provincia, no te limites a la capital sin decirlo. Mezcla municipios o aclara que muestras solo la capital.`;
 
   console.log(`🎯 System prompt: ${systemPrompt.length} chars`);
   console.log(`📍 User context incluye lugares: ${placesContext.length > 0}`);

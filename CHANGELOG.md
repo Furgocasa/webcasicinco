@@ -1,5 +1,14 @@
 # 📝 Changelog - Casi Cinco
 
+## [28 Agosto 2026] - 🤖 Tío Viajero: intent geográfico y sin fallback nacional
+
+- El intent usa el catálogo de ciudades (`CITIES_BY_PROVINCE`) más typos (lameria, nijar, port valis, llavaneras) y hereda categoría/ciudad del hilo
+- Una búsqueda local o «cerca de mí» ya no se rellena con el ranking nacional
+- Saludo, «dónde estoy» y peticiones truncadas no relanzan la búsqueda anterior
+- Prompt (código + `app_config`): copiar rating y reseñas de las fichas de este turno
+
+---
+
 ## [26 Agosto 2026] - 🚚 Repo Furgocasa + Vercel (fuera de Amplify)
 
 - Remoto vivo: `github.com/Furgocasa/webcasicinco` (`main`)

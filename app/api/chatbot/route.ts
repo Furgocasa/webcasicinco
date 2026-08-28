@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { chatbotResponse } from '@/lib/ai/openai';
 import { createClient } from '@/lib/supabase/server';
 import { getCityAndProvinceFromCoords } from '@/lib/google/geocoding';
+import { CITIES_BY_PROVINCE } from '@/lib/indexation/cities-database';
 
 // ---------------------------------------------
 // Tools del agente (búsqueda en BD)
@@ -65,20 +66,122 @@ function detectCategory(message: string): string | undefined {
   return undefined;
 }
 
+function foldText(s: string): string {
+  return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+}
+
+function applyLocationTypos(msg: string): string {
+  const pairs: Array<[RegExp, string]> = [
+    [/\blameria\b/gi, 'almería'],
+    [/\balmeria\b/gi, 'almería'],
+    [/\bgranda\b/gi, 'granada'],
+    [/\bnijar\b/gi, 'níjar'],
+    [/\brestautrates\b/gi, 'restaurantes'],
+    [/\bport\s+valis\b/gi, 'port balís'],
+    [/\bport\s+balis\b/gi, 'port balís'],
+    [/\bllavaneras\b/gi, 'llavaneres'],
+  ];
+  return pairs.reduce((out, [re, to]) => out.replace(re, to), msg);
+}
+
+type TownIndexItem = {
+  needle: string;
+  city?: string;
+  province: string;
+  sameName: boolean;
+  narrowTown?: boolean;
+};
+
+const EXTRA_TOWNS: Array<{ aliases: string[]; city: string; province: string }> = [
+  {
+    aliases: ['port balís', 'sant andreu de llavaneres', 'llavaneres'],
+    city: 'Sant Andreu de Llavaneres',
+    province: 'Barcelona',
+  },
+];
+
+function buildTownIndex(): TownIndexItem[] {
+  const items: TownIndexItem[] = [];
+  for (const data of Object.values(CITIES_BY_PROVINCE)) {
+    items.push({ needle: foldText(data.name), province: data.name, sameName: true });
+    for (const c of data.cities) {
+      const sameName = foldText(c.name) === foldText(data.name);
+      if (sameName) continue;
+      items.push({ needle: foldText(c.name), city: c.name, province: data.name, sameName: false });
+    }
+  }
+  for (const town of EXTRA_TOWNS) {
+    for (const alias of town.aliases) {
+      items.push({
+        needle: foldText(alias),
+        city: town.city,
+        province: town.province,
+        sameName: false,
+        narrowTown: true,
+      });
+    }
+  }
+  return items.sort((a, b) => b.needle.length - a.needle.length);
+}
+
+const TOWN_INDEX = buildTownIndex();
+
+function escapeRegExp(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function findMentionedLocation(msg: string): { city?: string; province?: string; narrowTown?: boolean } {
+  const folded = foldText(msg);
+  for (const item of TOWN_INDEX) {
+    if (item.needle.length < 4) continue;
+    const re = new RegExp(`(?:^|[^a-zñ])${escapeRegExp(item.needle)}(?:$|[^a-zñ])`);
+    if (!re.test(folded)) continue;
+    if (item.sameName) return { province: item.province };
+    return { city: item.city, province: item.province, narrowTown: item.narrowTown };
+  }
+  return {};
+}
+
+function isGreetingOnly(message: string): boolean {
+  return /^(¡?hola!?|buenas|hey|hi|hello|buenos\s+d[ií]as|buenas\s+tardes|buenas\s+noches)[\s!¡.?]*$/i.test(
+    message.trim()
+  );
+}
+
+function isWhereAmI(message: string): boolean {
+  return /\b(d[oó]nde estoy|cu[aá]l es mi ubicaci[oó]n|sabes (en )?qu[eé] localidad estoy|caul es mi ubicacion)\b/i.test(
+    message
+  );
+}
+
+function isIncompleteLocationAsk(message: string): boolean {
+  return /\bmejores?\s+\w+\s+de\s*$/i.test(message.trim());
+}
+
+type ChatIntent = {
+  category?: string;
+  city?: string;
+  province?: string;
+  region?: string;
+  topN?: number;
+  excludeCapital?: boolean;
+  explicitProvince?: boolean;
+  textSearch?: string;
+  usesLocation?: boolean;
+  priceLevel?: number;
+  userCoords?: { lat: number; lng: number };
+  radiusKm?: number;
+  skipSearch?: boolean;
+  searchKind?: 'greeting' | 'whereami' | 'incomplete' | 'needslocation';
+  narrowTown?: boolean;
+};
+
 function parseIntent(
   message: string,
   detectedLocation?: { city: string; province: string; region: string },
   userCoords?: { lat: number; lng: number } // 🆕 Coordenadas GPS directas
-): {
-  category?: string; city?: string; province?: string; region?: string;
-  topN?: number; excludeCapital?: boolean; explicitProvince?: boolean;
-  textSearch?: string; // 🆕 Para búsqueda de subcategorías
-  usesLocation?: boolean; // 📍 Indica si se usó ubicación del usuario
-  priceLevel?: number; // 🆕 Nivel de precio detectado
-  userCoords?: { lat: number; lng: number }; // 🆕 Coordenadas GPS para búsqueda por proximidad
-  radiusKm?: number; // 🆕 Radio de búsqueda en km
-} {
-  const msg = message.toLowerCase();
+): ChatIntent {
+  const msg = applyLocationTypos(message.toLowerCase());
   const category = detectCategory(msg);
   
   // 🆕 Detectar términos de búsqueda textual para subcategorías de cocina
@@ -155,101 +258,137 @@ function parseIntent(
     if (msg.includes(r)) { region = r; break; }
   }
 
-  // "provincia de X" captura
   const provDe = msg.match(/provincia\s+de\s+([a-záéíóúñ]+)\b/);
   let explicitProvince: boolean | undefined;
   let province: string | undefined;
+  let city: string | undefined;
   if (provDe?.[1]) {
-    const p = provDe[1];
-    province = p.charAt(0).toUpperCase() + p.slice(1);
+    const mentioned = findMentionedLocation(provDe[1]);
+    province = mentioned.province || (provDe[1].charAt(0).toUpperCase() + provDe[1].slice(1));
     explicitProvince = true;
   }
 
-  // Heurística básica para provincia/ciudad: coincidencia literal con capitalizadas comunes
-  const PROVINCES = ['Madrid','Barcelona','Valencia','Alicante','Castellón','Sevilla','Cádiz','Huelva','Córdoba','Málaga','Granada','Jaén','Almería','Murcia','Toledo','Segovia','Guadalajara','Ávila'];
-  const CITIES = ['València','Valencia','Sevilla','Málaga','Cádiz','Córdoba','Granada','Huelva','Jaén','Almería','Madrid','Murcia','Alicante','Castellón','Toledo','Segovia','Guadalajara','Ávila'];
-  
-  // 🆕 Casos ambiguos donde ciudad = provincia = CCAA
-  const AMBIGUOUS_LOCATIONS = ['Madrid', 'Murcia', 'Valencia', 'Alicante', 'Barcelona', 'Sevilla', 'Málaga', 'Córdoba', 'Granada'];
-  
-  if (!province) province = PROVINCES.find(p => msg.includes(p.toLowerCase()));
-  let city = CITIES.find(c => msg.includes(c.toLowerCase()));
+  const mentioned = findMentionedLocation(msg);
+  if (!province) province = mentioned.province;
+  city = mentioned.city;
+  const narrowTown = mentioned.narrowTown;
 
-  // 🆕 DESAMBIGUACIÓN: Si es un lugar ambiguo y NO especifica "ciudad de X", asumir PROVINCIA
-  // Palabras que indican que habla de la CIUDAD específicamente:
   const cityKeywords = /\b(ciudad de|capital de|centro de|downtown|casco|barrio)\b/i;
   const provinceKeywords = /\b(provincia de|toda|resto de|fuera de la capital|alrededores de)\b/i;
-  
-  if (city && province && city.toLowerCase() === province.toLowerCase() && AMBIGUOUS_LOCATIONS.includes(city)) {
-    // Caso ambiguo detectado
+
+  // Mismo nombre ciudad/provincia (Girona, Murcia…): por defecto toda la provincia
+  if (province && !city && CITIES_BY_PROVINCE[province]) {
     if (cityKeywords.test(msg)) {
-      // Usuario dijo explícitamente "ciudad de Murcia" → buscar solo ciudad
-      province = undefined; // No buscar por provincia
-    } else if (provinceKeywords.test(msg)) {
-      // Usuario dijo "provincia de Murcia" o "toda Murcia" → buscar provincia
-      city = undefined; // No buscar por ciudad
-    } else {
-      // 🎯 AMBIGUO sin palabras clave → DEFAULT: PROVINCIA (más común)
-      // Usuario suele querer ver opciones de toda la provincia, no solo capital
+      city = province;
+      province = undefined;
+    } else if (provinceKeywords.test(msg) || explicitProvince) {
       city = undefined;
     }
   }
 
-  // Detectar "afueras", "alrededores", "cerca de pero no en"
-  const excludeCapital = /fuera de la capital|resto de la provincia|sin capital|pueblos|municipios|afueras de|alrededores de|cercan[ií]as de|cerca de (?!.*\ben\b)|extrarradio|fuera de la ciudad|provincia de \w+ pero no en|cerca pero no en/.test(msg);
+  // "cerca de" es proximidad a un sitio, no "fuera de la capital"
+  const excludeCapital = /fuera de la capital|resto de la provincia|sin capital|pueblos|municipios|afueras de|alrededores de|extrarradio|fuera de la ciudad|provincia de \w+ pero no en|cerca pero no en/.test(msg);
   const finalCity = explicitProvince ? undefined : city;
 
-  // 📍 Detectar palabras clave de proximidad para usar ubicación
   const proximityKeywords = [
-    'cerca', 'aquí', 'aqui', 'por aquí', 'por aqui', 'en mi zona', 
-    'cerca de mí', 'cerca de mi', 'alrededor', 'cercano', 'cercanos',
+    'cerca de mí', 'cerca de mi', 'cerca de mi ubicación', 'cerca de mi ubicacion',
+    'aquí', 'aqui', 'por aquí', 'por aqui', 'en mi zona',
+    'alrededor', 'cercano', 'cercanos',
     'por donde estoy', 'en esta zona', 'en la zona', 'por la zona',
-    'donde estoy', 'dónde estoy', 'mi ubicación', 'mi ubicacion',
-    'ubicación actual', 'ubicacion actual'
+    'mi ubicación', 'mi ubicacion', 'ubicación actual', 'ubicacion actual',
   ];
-  
-  const hasProximityKeyword = proximityKeywords.some(keyword => msg.includes(keyword));
-  let usesLocation = false;
-  const isFallbackGPS = Boolean(
-    detectedLocation &&
-    !detectedLocation.city &&
-    !detectedLocation.province &&
-    !detectedLocation.region
-  );
+  const hasNearMe = proximityKeywords.some((keyword) => msg.includes(keyword));
+  const hasExplicitLocation = Boolean(finalCity || province || region);
 
-  // 🆕 REGLA CRÍTICA: PRIORIDADES DE UBICACIÓN
-  // PRIORIDAD 1: Si menciona explícitamente una ciudad/provincia → Usa ESA ubicación (ignora GPS)
-  const hasExplicitLocation = Boolean(city || province || region);
-  
-  // PRIORIDAD 2: Si NO menciona ciudad/provincia PERO tiene GPS → Usa su ubicación GPS
-  // (pregunta genérica tipo "hoteles", "restaurantes" sin especificar dónde)
-  const shouldUseGPS = !hasExplicitLocation && detectedLocation && userCoords;
-  
-  // Si debe usar GPS (por proximidad explícita O por pregunta genérica con GPS disponible)
-  if (shouldUseGPS || (hasProximityKeyword && detectedLocation && userCoords)) {
-    usesLocation = true;
-    
-    // Radio dinámico: si dice "cerca" → 10km, si es genérico → 50km
-    const radiusKm = hasProximityKeyword ? 10 : 50;
-    
+  // Ciudad/provincia dicha en el mensaje gana siempre al GPS
+  if (hasExplicitLocation) {
     return {
       category,
-      city: detectedLocation.city || undefined,
-      province: detectedLocation.province || undefined,
-      region: detectedLocation.region || undefined,
+      city: finalCity,
+      province,
+      region,
       topN,
       excludeCapital,
       explicitProvince,
       textSearch,
-      usesLocation,
+      usesLocation: false,
       priceLevel,
-      userCoords,      // Pasar coordenadas GPS para búsqueda por distancia real
-      radiusKm         // Radio dinámico según tipo de pregunta
+      narrowTown,
     };
   }
 
-  // Si llegamos aquí: tiene ciudad/provincia explícita O no tiene GPS
-  return { category, city: finalCity, province, region, topN, excludeCapital, explicitProvince, textSearch, usesLocation, priceLevel };
+  // "cerca de mí" o pregunta genérica con GPS → radio real
+  if (userCoords && (hasNearMe || Boolean(detectedLocation))) {
+    const radiusKm = hasNearMe ? 10 : 50;
+    return {
+      category,
+      city: detectedLocation?.city || undefined,
+      province: detectedLocation?.province || undefined,
+      region: detectedLocation?.region || undefined,
+      topN,
+      excludeCapital,
+      explicitProvince,
+      textSearch,
+      usesLocation: true,
+      priceLevel,
+      userCoords,
+      radiusKm,
+    };
+  }
+
+  return { category, city: finalCity, province, region, topN, excludeCapital, explicitProvince, textSearch, usesLocation: false, priceLevel };
+}
+
+function refineIntent(
+  intent: ChatIntent,
+  message: string,
+  history: { role: string; content: string }[],
+  hasGps: boolean
+): ChatIntent {
+  if (isGreetingOnly(message)) {
+    return { skipSearch: true, searchKind: 'greeting' };
+  }
+  if (isWhereAmI(message) && !intent.category) {
+    return { ...intent, skipSearch: true, searchKind: 'whereami' };
+  }
+  if (isIncompleteLocationAsk(message) && !intent.city && !intent.province) {
+    return { skipSearch: true, searchKind: 'incomplete', category: intent.category };
+  }
+
+  let next = { ...intent };
+  const userMsgs = history.filter((h) => h.role === 'user').map((h) => h.content);
+  for (let i = userMsgs.length - 1; i >= 0; i--) {
+    const prev = parseIntent(userMsgs[i]);
+    if (!next.category && prev.category) next.category = prev.category;
+    if (!next.city && !next.province && !next.usesLocation && (prev.city || prev.province)) {
+      next.city = prev.city;
+      next.province = prev.province;
+      next.narrowTown = prev.narrowTown;
+    }
+    if (next.category && (next.city || next.province || next.usesLocation || hasGps)) break;
+  }
+
+  // "cerca de mí" sin GPS: usar la última ciudad del hilo
+  if (!next.usesLocation && !next.city && !next.province && !hasGps) {
+    const nearMe = /cerca de m[ií]|mi ubicaci[oó]n|por donde estoy|\bcerca\b/i.test(message);
+    if (nearMe) {
+      for (let i = userMsgs.length - 1; i >= 0; i--) {
+        const prev = parseIntent(userMsgs[i]);
+        if (prev.city || prev.province) {
+          next.city = prev.city;
+          next.province = prev.province;
+          next.narrowTown = prev.narrowTown;
+          break;
+        }
+      }
+    }
+    if (!next.city && !next.province && nearMe) {
+      next.skipSearch = true;
+      next.searchKind = 'needslocation';
+    }
+  }
+
+  return next;
 }
 
 async function searchPlacesTool(supabase: any, params: SearchParams) {
@@ -577,11 +716,19 @@ export async function POST(request: NextRequest) {
     // ---------------------------------------------
     // Agente: detectar intención y ejecutar tool
     // ---------------------------------------------
-    const intent = parseIntent(message, detectedLocation, location); // 🆕 Pasar coordenadas GPS
+    const intent = refineIntent(
+      parseIntent(message, detectedLocation, location),
+      message,
+      conversation_history,
+      Boolean(location?.lat && location?.lng)
+    );
     console.log('🎯 Intent parseado:', JSON.stringify(intent, null, 2));
     const requestedCategory = intent.category;
     const targetN = intent.topN || 5;
     const contextLimit = Math.min(targetN * 3, 100);
+    const askedNational = /\bespa[nñ]a\b|\bnacional\b|todo el pa[ií]s/.test(foldText(message));
+    const askedNear = /\bcerca\b|mi ubicaci[oó]n|por donde estoy|en mi zona|aqu[ií]\b/i.test(message);
+    const askedLocal = Boolean(intent.city || intent.province || intent.region || intent.usesLocation || askedNear);
 
     let provincesFromRegion: string[] | undefined;
     if (intent.region) provincesFromRegion = REGION_TO_PROVINCES[intent.region];
@@ -595,12 +742,18 @@ export async function POST(request: NextRequest) {
     // 6. Cercano 
     // 7. Ranking nacional
     let candidates: any[] = [];
+    let searchNote: string | undefined;
     const capitalToExclude = intent.excludeCapital && intent.province
       ? (CAPITAL_BY_PROVINCE[intent.province] || intent.province)
       : undefined;
 
-    // 🆕 PRIORIDAD 1: Búsqueda por proximidad GPS real
-    if (intent.userCoords && intent.usesLocation) {
+    const userCoordsForSearch = location && location.lat && location.lng
+      ? { lat: location.lat, lng: location.lng }
+      : undefined;
+
+    if (intent.skipSearch) {
+      console.log(`⏭️ Sin búsqueda de fichas (${intent.searchKind})`);
+    } else if (intent.userCoords && intent.usesLocation) {
       console.log(`🌍 Búsqueda por proximidad GPS activada`);
       candidates = await searchPlacesTool(supabase, {
         category: requestedCategory,
@@ -611,82 +764,83 @@ export async function POST(request: NextRequest) {
         limit: contextLimit,
       });
       console.log(`📍 Encontrados ${candidates.length} lugares por proximidad GPS`);
-    }
-
-    // 🆕 Coordenadas GPS del usuario para calcular distancias en TODAS las búsquedas
-    const userCoordsForSearch = location && location.lat && location.lng 
-      ? { lat: location.lat, lng: location.lng } 
-      : undefined;
-
-    // Si no hay búsqueda por GPS o no encontró nada, usar búsquedas textuales
-    // PERO siempre pasar userCoords para que calcule distancias
-    if (candidates.length === 0 && (intent.explicitProvince || (intent.province && intent.excludeCapital))) {
-      candidates = await searchPlacesTool(supabase, {
-        category: requestedCategory,
-        province: intent.province,
-        excludeCity: capitalToExclude,
-        textSearch: intent.textSearch,
-        priceLevel: intent.priceLevel,
-        userCoords: userCoordsForSearch, // 🆕 Siempre pasar coords para calcular distancia
-        limit: contextLimit,
-      });
-    }
-    if (candidates.length === 0 && intent.city && !intent.explicitProvince) {
-      console.log(`🔍 Buscando por ciudad: ${intent.city}`);
-      candidates = await searchPlacesTool(supabase, {
-        category: requestedCategory,
-        city: intent.city,
-        textSearch: intent.textSearch,
-        priceLevel: intent.priceLevel,
-        userCoords: userCoordsForSearch, // 🆕 Siempre pasar coords
-        limit: contextLimit,
-      });
-      console.log(`📊 Encontrados por ciudad: ${candidates.length}`);
-    }
-    if (candidates.length === 0 && intent.province) {
-      console.log(`🔍 Buscando por provincia: ${intent.province}`);
-      candidates = await searchPlacesTool(supabase, {
-        category: requestedCategory,
-        province: intent.province,
-        textSearch: intent.textSearch,
-        priceLevel: intent.priceLevel,
-        userCoords: userCoordsForSearch, // 🆕 Siempre pasar coords
-        limit: contextLimit,
-      });
-      console.log(`📊 Encontrados por provincia: ${candidates.length}`);
-    }
-    if (candidates.length === 0 && provincesFromRegion) {
-      candidates = await searchPlacesTool(supabase, {
-        category: requestedCategory,
-        provinces: provincesFromRegion,
-        textSearch: intent.textSearch,
-        priceLevel: intent.priceLevel,
-        userCoords: userCoordsForSearch, // 🆕 Siempre pasar coords
-        limit: contextLimit,
-      });
-    }
-    if (candidates.length === 0 && intent.province) {
-      const near = NEARBY_BY_PROVINCE[intent.province.toLowerCase()];
-      if (near?.length) {
+      if (candidates.length === 0) {
+        searchNote = `No hay fichas publicadas en un radio de ${intent.radiusKm || 50} km. No ofrezcas locales a cientos de kilómetros. Di que no hay resultados cercanos y pregunta si quiere ampliar.`;
+      }
+    } else {
+      if (intent.explicitProvince || (intent.province && intent.excludeCapital)) {
         candidates = await searchPlacesTool(supabase, {
           category: requestedCategory,
-          provinces: near,
+          province: intent.province,
+          excludeCity: capitalToExclude,
           textSearch: intent.textSearch,
           priceLevel: intent.priceLevel,
-          userCoords: userCoordsForSearch, // 🆕 Siempre pasar coords
+          userCoords: userCoordsForSearch,
           limit: contextLimit,
         });
       }
-    }
-    if (candidates.length === 0 && requestedCategory) {
-      candidates = await searchPlacesTool(supabase, {
-        category: requestedCategory,
-        textSearch: intent.textSearch,
-        priceLevel: intent.priceLevel,
-        userCoords: userCoordsForSearch, // 🆕 Siempre pasar coords
-        limit: contextLimit,
-        isNationalRanking: true,  // Fallback nacional: mínimo 500 reseñas
-      });
+      let cityTried = false;
+      if (candidates.length === 0 && intent.city && !intent.explicitProvince) {
+        cityTried = true;
+        console.log(`🔍 Buscando por ciudad: ${intent.city}`);
+        candidates = await searchPlacesTool(supabase, {
+          category: requestedCategory,
+          city: intent.city,
+          textSearch: intent.textSearch,
+          priceLevel: intent.priceLevel,
+          userCoords: userCoordsForSearch,
+          limit: contextLimit,
+        });
+        console.log(`📊 Encontrados por ciudad: ${candidates.length}`);
+      }
+      if (candidates.length === 0 && intent.province && !intent.narrowTown) {
+        console.log(`🔍 Buscando por provincia: ${intent.province}`);
+        candidates = await searchPlacesTool(supabase, {
+          category: requestedCategory,
+          province: intent.province,
+          textSearch: intent.textSearch,
+          priceLevel: intent.priceLevel,
+          userCoords: userCoordsForSearch,
+          limit: contextLimit,
+        });
+        console.log(`📊 Encontrados por provincia: ${candidates.length}`);
+        if (cityTried && intent.city) {
+          searchNote = `No hay fichas publicadas en ${intent.city}. Lo que sigue es de la provincia de ${intent.province}, no de ${intent.city}. Dilo claramente y pregunta si quiere ampliar.`;
+        } else if (candidates.length && !intent.city) {
+          searchNote = `La consulta es de TODA la provincia de ${intent.province}, no solo la capital. Incluye municipios distintos si hay fichas. Si piden N y hay N o más en la lista, da exactamente N. No digas que no hay más.`;
+        }
+      } else if (candidates.length === 0 && intent.narrowTown && intent.city) {
+        searchNote = `No hay fichas publicadas en ${intent.city}. Ofrece ampliar al Maresme (p. ej. Mataró) o a la provincia de ${intent.province}; no listes la capital como si fuera ${intent.city}.`;
+      }
+      if (candidates.length === 0 && provincesFromRegion) {
+        candidates = await searchPlacesTool(supabase, {
+          category: requestedCategory,
+          provinces: provincesFromRegion,
+          textSearch: intent.textSearch,
+          priceLevel: intent.priceLevel,
+          userCoords: userCoordsForSearch,
+          limit: contextLimit,
+        });
+      }
+      // Ranking nacional solo si lo pidió o no hay zona. Nunca tapar un vacío local.
+      if (candidates.length === 0 && requestedCategory && (askedNational || !askedLocal)) {
+        candidates = await searchPlacesTool(supabase, {
+          category: requestedCategory,
+          textSearch: intent.textSearch,
+          priceLevel: intent.priceLevel,
+          userCoords: userCoordsForSearch,
+          limit: contextLimit,
+          isNationalRanking: true,
+        });
+      } else if (candidates.length === 0 && askedLocal) {
+        const near = intent.province
+          ? NEARBY_BY_PROVINCE[intent.province.toLowerCase()]
+          : undefined;
+        const nearTxt = near?.length
+          ? ` Si el usuario acepta ampliar, puedes proponer ${near.join(', ')}.`
+          : '';
+        searchNote = searchNote || `No hay fichas publicadas que cumplan 4,7★ y 50+ reseñas en la zona pedida. Dilo y ofrece ampliar a municipios cercanos o a la provincia.${nearTxt} No inventes locales ni traigas otra comunidad.`;
+      }
     }
 
     // Log de resultados de búsqueda
@@ -711,6 +865,17 @@ export async function POST(request: NextRequest) {
 
     // Usar candidates como contexto específico para esta pregunta
     const startTime = Date.now();
+    const turnHint =
+      intent.searchKind === 'greeting'
+        ? 'TURNO: saludo aislado. Saluda en una línea y pregunta si busca restaurante, hotel o bar. NO listes lugares ni retomes la búsqueda anterior.'
+        : intent.searchKind === 'whereami'
+          ? 'TURNO: pregunta de ubicación. Di la ciudad/provincia del GPS o la última que el usuario mencionó. NO listes restaurantes.'
+          : intent.searchKind === 'incomplete'
+            ? 'TURNO: la petición está incompleta (p. ej. «mejores hoteles de»). Pregunta la ciudad o provincia. NO inventes un ranking.'
+            : intent.searchKind === 'needslocation'
+              ? 'TURNO: pide «cerca» pero no hay GPS ni ciudad. Pide la ciudad o que comparta ubicación. NO listes un ranking nacional.'
+              : undefined;
+
     const response = await chatbotResponse(
       message,
       conversation_history || [],
@@ -720,6 +885,8 @@ export async function POST(request: NextRequest) {
         provinces: provincesFromCandidates,  // 🆕 Provincias de los candidatos
         cities: citiesFromCandidates,        // 🆕 Ciudades de los candidatos
         categoryStats: categoryStatsFromCandidates, // 🆕 Stats de los candidatos
+        searchNote,
+        turnHint,
       }
     );
     const queryTimeMs = Date.now() - startTime;
