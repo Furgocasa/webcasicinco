@@ -786,6 +786,8 @@ function refineIntent(
     next.category = 'restaurante';
   } else if (/\b(y )?(solo )?bares?\b/i.test(message) && !/\brestaurante|\bhotel/i.test(message)) {
     next.category = 'bar';
+  } else if (/\b(y )?(solo )?spas?\b/i.test(message) && !/\brestaurante|\bhotel|\bbar/i.test(message)) {
+    next.category = 'spa';
   }
 
   if (next.searchKind !== 'ambiguous') {
@@ -810,6 +812,20 @@ function refineIntent(
     }
   }
   const userMsgs = history.filter((h) => h.role === 'user').map((h) => h.content);
+  const trimmed = message.trim();
+  const locationOnly =
+    Boolean(next.city || next.province) &&
+    !next.category &&
+    next.priceLevel == null &&
+    !next.textSearch &&
+    !next.tierName;
+  const followUp =
+    /^(y |¿y |and |más |mas )/i.test(trimmed) ||
+    /más barat|mas barat|más cer|mas cer|mejor valor|cerca/i.test(trimmed) ||
+    locationOnly;
+  // Ciudad SOLA, sin «y» ni filtro: búsqueda nueva (no heredar cocina/precio/tier).
+  const bareCityReset = locationOnly && !/^(y |¿y |and )/i.test(trimmed);
+
   for (let i = userMsgs.length - 1; i >= 0; i--) {
     const prev = parseIntent(userMsgs[i]);
     if (!next.category && prev.category) next.category = prev.category;
@@ -824,6 +840,18 @@ function refineIntent(
       next.city = prev.city;
       next.province = prev.province;
       next.narrowTown = prev.narrowTown;
+    }
+    if (followUp && !bareCityReset) {
+      if (!next.textSearch && prev.textSearch) {
+        next.textSearch = prev.textSearch;
+        next.textSearchTerm = prev.textSearchTerm;
+      }
+      if (next.priceLevel == null && prev.priceLevel != null) next.priceLevel = prev.priceLevel;
+      if (!next.tierName && prev.tierName) {
+        next.tierName = prev.tierName;
+        next.minRating = prev.minRating;
+        next.minReviews = prev.minReviews;
+      }
     }
     if (next.category && (next.city || next.province || next.usesLocation || hasGps)) break;
   }

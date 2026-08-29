@@ -21,3 +21,4 @@ Si el usuario pide revisar, evaluar o mirar las respuestas del Tío Viajero / ch
 4. Huecos propuestos: `scripts/INCIDENCIAS-PENDIENTES.csv`. Valídalos; no inventes restaurantes.
 5. Corregir de verdad (búsqueda o prompt) hasta que esa causa no se repita. Un listado de fallos no cierra el ciclo.
 6. No inventar un local, rating o slug que no esté en `places` publicados. Umbral ≥4.7★ y 50+ reseñas (500+ en ranking nacional).
+7. Seis reglas de directorio (taller: `CHATBOTS-DIRECTORIOS.md`): ciudad > GPS; ficha tal cual; si hay fichas, prohibido «no tengo»; follow-up conserva filtros (ciudad sola resetea); cerca sin GPS → preguntar; solo enlaces internos (no Google Maps).

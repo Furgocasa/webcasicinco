@@ -564,7 +564,7 @@ Actualmente no tengo [categoría] indexados en [ubicación pedida].
 ❌ NUNCA HAGAS ESTO:
 - Inventar nombres de lugares que no estén en la lista proporcionada
 - Cambiar el rating o el nº de reseñas (copia los de LUGARES DISPONIBLES de este turno; 4.9 no es 5)
-- Dar URLs de sitios web externos (solo enlaces internos: /detalles y /mapa)
+- Dar URLs de sitios web externos (solo enlaces internos: /detalles y /mapa). Prohibido Google Maps.
 - Decir "no tengo acceso a", "no puedo acceder" cuando SÍ tienes los datos (dirección, teléfono)
 - Omitir los enlaces [Ver detalles] y [Ver en mapa] (siempre ambos)
 - Mencionar lugares que no estén en la lista LUGARES DISPONIBLES
@@ -595,6 +595,20 @@ Puedes y DEBES usar tu conocimiento general de España para:
 - Interpretar referencias culturales ("Camino de Santiago", "Ruta de la Plata", etc.)
 
 PERO RECUERDA: Los NOMBRES ESPECÍFICOS de restaurantes, hoteles, spas y bares SOLO de la lista proporcionada.`;
+
+  const directoryRules = `
+
+# SEIS REGLAS DE DIRECTORIO (obligatorias; mismas que Roy y MapafurgoCasa)
+1. Ciudad o pueblo dicho en el mensaje gana al GPS.
+2. Pega la ficha tal cual: nombre, ⭐rating y nº de reseñas de LUGARES DISPONIBLES de ESTE turno. No redondees 4.9 a 5. No inventes un local.
+3. Si LUGARES DISPONIBLES tiene al menos 1 ficha, PROHIBIDO decir que no hay resultados.
+4. Follow-up («¿y hoteles?», «más baratos», «¿y en Madrid?») conserva categoría, precio, tier, cocina y sitio. Una ciudad SOLA, sin «y» ni filtro, es búsqueda nueva.
+5. «Cerca» sin GPS y sin ciudad en el hilo → pide ciudad o ubicación. No inventes dónde está. No listes un ranking nacional.
+6. Solo enlaces internos: [Ver detalles] y [Ver en mapa]. PROHIBIDO Google Maps, maps.google, goo.gl/maps.`;
+
+  const systemPromptWithRules = systemPrompt.includes('SEIS REGLAS DE DIRECTORIO')
+    ? systemPrompt
+    : `${systemPrompt}${directoryRules}`;
 
   const roleContext = context?.isAdmin 
     ? '\n\nMODO ADMIN: Puedes ayudar con gestión e indexación.' 
@@ -664,7 +678,7 @@ ${userMessage}
 19. NUNCA des una distancia en km que no venga en los datos (campo distance_km o la nota de búsqueda). Si no tienes la distancia, no la estimes: di solo la ciudad y provincia. Si la nota dice «punto medio», NO digas «de tu ubicación» sin GPS.
 20. Si pidieron cocina (ramen, tapas, asador…) o restaurante, NO recomiendes bares salvo que la ficha sea restaurante.`;
 
-  console.log(`🎯 System prompt: ${systemPrompt.length} chars`);
+  console.log(`🎯 System prompt: ${systemPromptWithRules.length} chars`);
   console.log(`📍 User context incluye lugares: ${placesContext.length > 0}`);
   console.log(`📊 Lugares en contexto: ${(placesContext.match(/\d+\./g) || []).length}`);
   if (context?.userLocation) {
@@ -673,7 +687,7 @@ ${userMessage}
 
   try {
     const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
-      { role: 'system', content: systemPrompt + roleContext },
+      { role: 'system', content: systemPromptWithRules + roleContext },
       ...conversationHistory,
       { role: 'user', content: userContext },
     ];
